@@ -9,4 +9,5 @@ A learning project in Modern C++, including:
 - OO (lite) design
 - As many pure functions as I can reasonably fit
 
-Credit to Bob Nystrom for the book Game Programming Patterns.
+Credit to Bob Nystrom for the book Game Programming Patterns,
+and to the folks on <em>The Spriter's Resource</em> for the sprites.
