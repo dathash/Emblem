@@ -5,15 +5,13 @@
 
 /*
     TODO
-    Commands Do Things.
-    Xbox Controller.
-
+    Dijkstra's
+    Commands Do Things
 
 	NEXT
-	State Machine tied in
+    Xbox Controller
 
 	Unit Movement
-		Dijkstra's
 
 	Enemy Turn
 		Basic AI
@@ -105,17 +103,17 @@ struct Texture
         this->sdlTexture = sdlTexture_in;
         this->width = width_in;
         this->height = height_in;
-        printf("Texture Constructed!\n");
+        //printf("Texture Constructed!\n");
     }
 
     Texture()
     {
-        printf("Texture Constructed! (DEFAULT)\n");
+        //printf("Texture Constructed! (DEFAULT)\n");
     }
 
     ~Texture()
     {
-        printf("Texture Destructed!\n");
+        //printf("Texture Destructed!\n");
     }
 
     void PrintTextureState()
@@ -136,21 +134,21 @@ struct SpriteSheet
 
     SpriteSheet()
     {
-        printf("SpriteSheet Constructed! (Default)\n");
+        //printf("SpriteSheet Constructed! (Default)\n");
     }
 
     SpriteSheet(shared_ptr<Texture> texture_in, int size_in)
     {
-        printf("SpriteSheet Constructed!\n");
         this->texture = texture_in;
         this->size = size_in;
         this->col = 0;
         this->row = 0;
+        //printf("SpriteSheet Constructed!\n");
     }
 
     ~SpriteSheet()
     {
-        printf("SpriteSheet Destructed!\n");
+        //printf("SpriteSheet Destructed!\n");
     }
 
     void PrintSpriteState()
@@ -172,7 +170,7 @@ struct Unit
 
     Unit(int id_in, bool isAlly_in, shared_ptr<Texture> texture_in)
     {
-        printf("Unit Constructed!\n");
+        //printf("Unit Constructed!\n");
         this->id = id_in;
         this->isAlly = isAlly_in;
         this->sheet = make_shared<SpriteSheet>(texture_in, 32);
@@ -180,7 +178,7 @@ struct Unit
 
     ~Unit()
     {
-        printf("Unit Destructed!\n");
+        //printf("Unit Destructed!\n");
     }
 };
 
@@ -209,6 +207,8 @@ struct Cursor
     int col = 1;
     int row = 1;
     std::shared_ptr<Unit> selected = nullptr;
+    int selectedCol = -1;
+    int selectedRow = -1;
 
     void PrintCursorState()
     {
@@ -230,7 +230,7 @@ static TTF_Font *GlobalFont = nullptr;
 
 
 // ===================== function signatures ==============================
-void Render(const Tilemap &map, const Cursor &cursor, const Texture &text);
+void Render(const Tilemap &map, const Cursor &cursor, const Texture &debugMessageOne, const Texture &debugMessageTwo, const Texture &debugMessageThree);
 void RenderText(const Texture &texture, int x, int y);
 
 shared_ptr<Texture> LoadTextureImage(std::string path);
@@ -264,6 +264,10 @@ int main(int argc, char *argv[])
     map.tiles[3][5].occupant = unit;
     map.tiles[3][5].occupied = true;
 
+    shared_ptr<Unit> enemy = make_shared<Unit>(1, false, LoadTextureImage("flavia_final.png"));
+    map.tiles[6][4].occupant = enemy;
+    map.tiles[6][4].occupied = true;
+
     handler.BindUp(make_shared<MoveCursorCommand>(&cursor, 0, -1, map));
     handler.BindDown(make_shared<MoveCursorCommand>(&cursor, 0, 1, map));
     handler.BindLeft(make_shared<MoveCursorCommand>(&cursor, -1, 0, map));
@@ -271,7 +275,9 @@ int main(int argc, char *argv[])
     handler.BindA(make_shared<OpenMenuCommand>());
     handler.BindB(make_shared<NullCommand>());
 
-    unique_ptr<Texture> text = LoadTextureText("The quick brown fox jumps over the lazy dog!", {0, 0, 0, 255});
+    unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
+    unique_ptr<Texture> debugMessageTwo = LoadTextureText("placeholder2", {0, 100, 0, 255});
+    unique_ptr<Texture> debugMessageThree = LoadTextureText("placeholder3", {0, 0, 250, 255});
 
     GlobalRunning = true;
     while(GlobalRunning)
@@ -282,10 +288,12 @@ int main(int argc, char *argv[])
         if(newCommand)
         {
             commandQueue.push(newCommand);
-            printf("Pushed a new Command onto the Queue!\n");
-            printf("Queue Size: %lu\n", commandQueue.size());
+            //printf("Pushed a new Command onto the Queue!\n");
+            //printf("Queue Size: %lu\n", commandQueue.size());
         }
 
+        // NOTE: This can be tied to anything. 
+        //       Say, an animation finishing, or a thread returning.
         if(!commandQueue.empty())
         {
             commandQueue.front().get()->Execute();
@@ -293,20 +301,32 @@ int main(int argc, char *argv[])
             handler.UpdateCommands(&cursor, &map);
         }
 
+        Render(map, cursor, *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
-        Render(map, cursor, *text);
 
+// ============================ debug messages ===============================================
         endTime = SDL_GetPerformanceCounter();
         real32 ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency()) * 1000.0f;
 
         // Debug Messages
-        //char buffer[256];
-        //sprintf(buffer, "MS: %.02f | etc", ElapsedMS);
-        //text = LoadTextureText(string(buffer), {0, 0, 0, 255});
+        char buffer[256];
 
         //cursor.PrintCursorState();
         //input.PrintInputState();
         //unit->sheet.PrintSpriteState();
+
+		sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
+			   cursor.col, cursor.row, map.tiles[cursor.col][cursor.row].type,
+               map.tiles[cursor.col][cursor.row].occupied,
+               (void *)map.tiles[cursor.col][cursor.row].occupant.get());
+        debugMessageOne = LoadTextureText(string(buffer), {250, 0, 0, 255});
+
+		sprintf(buffer, "Mode: %d", GlobalInterfaceState);
+        debugMessageTwo = LoadTextureText(string(buffer), {0, 100, 0, 255});
+
+        sprintf(buffer, "MS: %.02f, FPS: %d", ElapsedMS, (int)(1.0f / ElapsedMS * 1000.0f));
+        debugMessageThree = LoadTextureText(string(buffer), {0, 0, 250, 255});
+
 
         if(ElapsedMS < TargetMillisecondsPerFrame)
         {
@@ -314,6 +334,7 @@ int main(int argc, char *argv[])
         }
         startTime = SDL_GetPerformanceCounter();
         frameNumber++;
+// ============================ ^ DEBUG ^ ================================================
     }
     Close();
     return 0;
@@ -356,7 +377,10 @@ RenderText(const Texture &texture, int x, int y)
 
 // Renders the scene from the given game state.
 void
-Render(const Tilemap &map, const Cursor &cursor, const Texture &text)
+Render(const Tilemap &map, const Cursor &cursor, 
+       const Texture &debugMessageOne, 
+       const Texture &debugMessageTwo, 
+       const Texture &debugMessageThree)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, 200, 200, 0, 255);
@@ -397,7 +421,9 @@ Render(const Tilemap &map, const Cursor &cursor, const Texture &text)
     SDL_Color cursorColor = {0, 150, 0, 100};
     RenderTile(cursor.col, cursor.row, cursorColor);
 
-    RenderText(text, 0, TILE_SIZE * MAP_SIZE);
+    RenderText(debugMessageOne, 0, TILE_SIZE * MAP_SIZE);
+    RenderText(debugMessageTwo, 0, TILE_SIZE * MAP_SIZE + debugMessageOne.height);
+    RenderText(debugMessageThree, 0, TILE_SIZE * MAP_SIZE + debugMessageOne.height + debugMessageTwo.height);
 
     SDL_RenderPresent(GlobalRenderer);
 }
@@ -545,7 +571,7 @@ Initialize()
 // Frees up allocated memory.
 void Close()
 {
-    //SDL_DestroyTexture(ALL TEXTURES HERE);
+    //SDL_DestroyTexture(ALL TEXTURES);
 
     TTF_CloseFont(GlobalFont);
     SDL_DestroyRenderer(GlobalRenderer);
