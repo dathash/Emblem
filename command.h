@@ -5,11 +5,7 @@
 
 /*
     TODO
-    Specify the following cases of our FSM once things are further along.
-
-    case(UNIT_MENU, UNIT_ATTACK, UNIT_HEAL, UNIT_TRADE, UNIT_ITEM, COMBAT,
-            GAME_MENU_ROOT, GAME_MENU_OPTIONS, GAME_MENU_SAVE, 
-            GAME_MENU_UNITS):
+    Specify the other cases of our FSM once things are further along.
  */
 
 #ifndef COMMAND_H
@@ -20,22 +16,33 @@ enum InterfaceState
     NEUTRAL_OVER_GROUND,
     NEUTRAL_OVER_ENEMY,
     NEUTRAL_OVER_UNIT,
+
     SELECTED_OVER_GROUND,
     SELECTED_OVER_INACCESSIBLE,
     SELECTED_OVER_ALLY,
     SELECTED_OVER_ENEMY,
-    UNIT_MENU,
-    UNIT_INFO,
-    ENEMY_INFO,
-    UNIT_ATTACK,
-    UNIT_HEAL,
-    COMBAT,
-    UNIT_TRADE,
-    UNIT_ITEM,
+
+    TARGETING_OVER_GROUND,
+    TARGETING_OVER_UNTARGETABLE,
+    TARGETING_OVER_ALLY,
+    TARGETING_OVER_ENEMY,
+
     GAME_MENU_ROOT,
     GAME_MENU_OPTIONS,
     GAME_MENU_SAVE,
     GAME_MENU_UNITS,
+
+    UNIT_MENU_ROOT,
+    UNIT_MENU_INFO,
+    UNIT_MENU_ATTACK,
+    UNIT_MENU_HEAL,
+    UNIT_MENU_TRADE,
+    UNIT_MENU_ITEM,
+
+    ENEMY_INFO,
+
+    COMBAT,
+
     NO_OP,
 };
 
@@ -66,10 +73,10 @@ public:
 };
 
 // ============================ neutral mode commands ========================
-class MoveCursorCommand : public Command
+class MoveCommand : public Command
 {
 public:
-    MoveCursorCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    MoveCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
     : cursor(cursor_in),
       col(col_in),
       row(row_in),
@@ -91,7 +98,6 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            char buffer[256];
 
             if(!hoverTile->occupied)
             {
@@ -118,6 +124,7 @@ private:
     const Tilemap &map;
 };
 
+
 class SelectUnitCommand : public Command
 {
 public:
@@ -125,7 +132,6 @@ public:
     : cursor(cursor_in),
       map(map_in)
     {}
-
 
     virtual void Execute()
     {
@@ -135,12 +141,10 @@ public:
         cursor->selectedRow = cursor->row;
 
         // Find tiles that a unit can access.
-        map->accessible = AccessibleFrom(*map, cursor->selectedCol, cursor->selectedRow, 3);
+        map->accessible = AccessibleFrom(*map, cursor->selectedCol, cursor->selectedRow, cursor->selected->mov);
 
         printf("COMMAND | Select Unit %d at <%d, %d>\n", 
                cursor->selected->id, cursor->col, cursor->row);
-        printf(" <> INTERFACE | ally: %d, mov: %d, etc. <> \n",
-               cursor->selected->isAlly, cursor->selected->mov);
     }
 
 private:
@@ -175,36 +179,201 @@ private:
 };
 
 
-class MoveUpCheckedCommand : public Command
+class MoveSCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Move Up (Checked)!\n"); }
-    // Check if Cursor is over accessible ground. Change State accordingly.
-    // Check if Cursor over ground or target. Change state accordingly.
+    MoveSCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      col(col_in),
+      row(row_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        int newCol = cursor->col + col;
+        int newRow = cursor->row + row;
+        printf("COMMAND | Move Cursor (Checked) from <%d, %d> to <%d, %d>\n", 
+            cursor->col, cursor->row, newCol, newRow);
+
+        if(IsValidBoundsPosition(newCol, newRow))
+        {
+            // move cursor
+            cursor->col = newCol;
+            cursor->row = newRow;
+
+            // change state
+            const Tile *hoverTile = &map.tiles[newCol][newRow];
+            char buffer[256];
+
+            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.accessible.get()))
+            {
+                if(!hoverTile->occupied || hoverTile->occupant->id == cursor->selected->id)
+                {
+                    GlobalInterfaceState = SELECTED_OVER_GROUND;
+                }
+                else
+                {
+                    if(hoverTile->occupant->isAlly)
+                    {
+                        GlobalInterfaceState = SELECTED_OVER_ALLY;
+                    }
+                    else
+                    {
+                        GlobalInterfaceState = SELECTED_OVER_ENEMY;
+                    }
+                }
+            }
+            else
+            {
+                GlobalInterfaceState = SELECTED_OVER_INACCESSIBLE;
+            }
+        }
+    }
+
+private:
+    Cursor *cursor; 
+    int col;
+    int row;
+    const Tilemap &map;
 };
 
-class MoveDownCheckedCommand : public Command
+class PlaceUnitCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Move Down (Checked)!\n"); }
-    // Check if Cursor is over accessible ground. Change State accordingly.
-    // Check if Cursor over ground or target. Change state accordingly.
+    PlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        printf("COMMAND | Place Unit!\n");
+        
+        map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
+        map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
+        map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
+        map->tiles[cursor->col][cursor->row].occupied = true;
+
+        cursor->selectedCol = cursor->col;
+        cursor->selectedRow = cursor->row;
+
+        GlobalInterfaceState = UNIT_MENU_ROOT;
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
 };
 
-class MoveLeftCheckedCommand : public Command
+
+class DeactivateUnitCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Move Left (Checked)!\n"); }
-    // Check if Cursor is over accessible ground. Change State accordingly.
-    // Check if Cursor over ground or target. Change state accordingly.
+    DeactivateUnitCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
+
+    virtual void Execute()
+    {
+        printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
+               cursor->selected->id, cursor->col, cursor->row);
+
+        cursor->selected = nullptr;
+
+        cursor->selectedCol = -1;
+        cursor->selectedRow = -1;
+
+        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+        // Make unit very sleepy
+    }
+
+private:
+    Cursor *cursor; 
 };
 
-class MoveRightCheckedCommand : public Command
+
+// ============================== finding target ===========================================
+class SelectTargetForAttackCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Move Right (Checked)!\n"); }
-    // Check if Cursor is over accessible ground. Change State accordingly.
-    // Check if Cursor over ground or target. Change state accordingly.
+    SelectTargetForAttackCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        // Find tiles that a unit can access.
+        map->interactible = InteractibleFrom(*map, cursor->selectedCol, cursor->selectedRow, 
+                                         cursor->selected->minRange, cursor->selected->maxRange);
+
+        printf("COMMAND | Finding targets for Unit %d at <%d, %d>\n", 
+               cursor->selected->id, cursor->col, cursor->row);
+        GlobalInterfaceState = TARGETING_OVER_GROUND;
+    }
+
+private:
+    Cursor *cursor;
+    Tilemap *map;
+};
+
+class MoveTCommand : public Command
+{
+public:
+    MoveTCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      col(col_in),
+      row(row_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        int newCol = cursor->col + col;
+        int newRow = cursor->row + row;
+        printf("COMMAND | Move Cursor (Targeting) from <%d, %d> to <%d, %d>\n", 
+            cursor->col, cursor->row, newCol, newRow);
+
+        if(IsValidBoundsPosition(newCol, newRow))
+        {
+            // move cursor
+            cursor->col = newCol;
+            cursor->row = newRow;
+
+            // change state
+            const Tile *hoverTile = &map.tiles[newCol][newRow];
+
+            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.interactible.get()))
+            {
+                if(!hoverTile->occupied || hoverTile->occupant->id == cursor->selected->id)
+                {
+                    GlobalInterfaceState = TARGETING_OVER_GROUND;
+                }
+                else
+                {
+                    if(hoverTile->occupant->isAlly)
+                    {
+                        GlobalInterfaceState = TARGETING_OVER_ALLY;
+                    }
+                    else
+                    {
+                        GlobalInterfaceState = TARGETING_OVER_ENEMY;
+                    }
+                }
+            }
+            else
+            {
+                GlobalInterfaceState = TARGETING_OVER_UNTARGETABLE;
+            }
+        }
+    }
+
+private:
+    Cursor *cursor; 
+    int col;
+    int row;
+    const Tilemap &map;
 };
 
 class AttackEnemyCommand : public Command
@@ -253,13 +422,6 @@ class InitiateCombatCommand : public Command
 public:
     virtual void Execute() { printf("Initiate Combat!\n"); }
     // Change state to Combat State.
-};
-
-class PlaceUnitCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Place Unit!\n"); }
-    // Change state to Selected Unit Actions State.
 };
 
 class SelectedItemsCommand : public Command
@@ -324,6 +486,8 @@ public:
 
         printf("COMMAND | Select Enemy %d at <%d, %d>\n", 
             cursor->selected->id, cursor->col, cursor->row);
+        printf(" <> INTERFACE | ally: %d, mov: %d, etc. <> \n",
+               cursor->selected->isAlly, cursor->selected->mov);
     }
 
 private:
@@ -361,18 +525,42 @@ public:
     // Change state a little bit? Or just go to next page.
 };
 
-// ======================= player menu commands ==============================
+// ======================= game menu commands =========================================
 
-class OpenMenuCommand : public Command
+class OpenGameMenuCommand : public Command
 {
 public:
     virtual void Execute()
     { 
-        printf("COMMAND | Open Menu!\n");
+        printf("COMMAND | Open Game Menu!\n");
+        printf(" <> INTERFACE | options: 0, field: 0, save: 0, end turn: 0 <>\n");
+        GlobalInterfaceState = GAME_MENU_ROOT;
     }
 };
 
-// MORE MENU COMMANDS GO HERE
+class UpdateGameMenuCommand : public Command
+{
+public:
+    virtual void Execute()
+    { 
+        printf("COMMAND | Update Game Menu!\n");
+        printf(" <> INTERFACE | options: 0, field: 0, save: 0, end turn: 0 <>\n");
+    }
+};
+// TODO MORE GAME MENU COMMANDS GO HERE
+
+
+// ============================ unit menu commands ==================================
+class UpdateUnitMenuCommand : public Command
+{
+public:
+    virtual void Execute()
+    { 
+        printf("COMMAND | Update Unit Menu!\n");
+        printf(" <> INTERFACE | attack: 0, heal: 0, talk: 0, items: 0, \n <> trade: 0, wait: 0 <>\n");
+    }
+};
+// TODO MORE UNIT MENU COMMANDS GO HERE
 
 
 
@@ -448,76 +636,161 @@ public:
         {
             case(NEUTRAL_OVER_GROUND):
             {
-                BindUp(make_shared<MoveCursorCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCursorCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCursorCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCursorCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<OpenMenuCommand>());
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_ENEMY):
             {
-                BindUp(make_shared<MoveCursorCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCursorCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCursorCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCursorCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<SelectEnemyCommand>(cursor, *map));
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_UNIT):
             {
-                BindUp(make_shared<MoveCursorCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCursorCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCursorCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCursorCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(SELECTED_OVER_GROUND):
             {
-                BindUp(make_shared<MoveUpCheckedCommand>());
-                BindDown(make_shared<MoveDownCheckedCommand>());
-                BindLeft(make_shared<MoveLeftCheckedCommand>());
-                BindRight(make_shared<MoveRightCheckedCommand>());
-                BindA(make_shared<PlaceUnitCommand>());
+                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<PlaceUnitCommand>(cursor, map));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 
             case(SELECTED_OVER_INACCESSIBLE):
             {
-                BindUp(make_shared<MoveUpCheckedCommand>());
-                BindDown(make_shared<MoveDownCheckedCommand>());
-                BindLeft(make_shared<MoveLeftCheckedCommand>());
-                BindRight(make_shared<MoveRightCheckedCommand>());
+                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 
             case(SELECTED_OVER_ALLY):
             {
-                BindUp(make_shared<MoveUpCheckedCommand>());
-                BindDown(make_shared<MoveDownCheckedCommand>());
-                BindLeft(make_shared<MoveLeftCheckedCommand>());
-                BindRight(make_shared<MoveRightCheckedCommand>());
+                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<HealAllyCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 
-
             case(SELECTED_OVER_ENEMY):
             {
-                BindUp(make_shared<MoveUpCheckedCommand>());
-                BindDown(make_shared<MoveDownCheckedCommand>());
-                BindLeft(make_shared<MoveLeftCheckedCommand>());
-                BindRight(make_shared<MoveRightCheckedCommand>());
+                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<AttackEnemyCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 
-            case(UNIT_INFO):
+
+            case(TARGETING_OVER_GROUND):
+            {
+                BindUp(make_shared<MoveTCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveTCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(TARGETING_OVER_UNTARGETABLE):
+            {
+                BindUp(make_shared<MoveTCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveTCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(TARGETING_OVER_ALLY):
+            {
+                BindUp(make_shared<MoveTCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveTCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(TARGETING_OVER_ENEMY):
+            {
+                BindUp(make_shared<MoveTCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveTCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+
+
+            case(GAME_MENU_ROOT):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(GAME_MENU_OPTIONS):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(GAME_MENU_SAVE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(GAME_MENU_UNITS):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+
+
+            case(UNIT_MENU_ROOT):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<SelectTargetForAttackCommand>(cursor, map));
+                BindB(make_shared<DeactivateUnitCommand>(cursor));
+            } break;
+            case(UNIT_MENU_INFO):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
@@ -526,7 +799,42 @@ public:
                 BindA(make_shared<BackOutOfUnitInfoCommand>());
                 BindB(make_shared<BackOutOfUnitInfoCommand>());
             } break;
-
+            case(UNIT_MENU_TRADE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(UNIT_MENU_ITEM):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(UNIT_MENU_ATTACK):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
+            case(UNIT_MENU_HEAL):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+            } break;
 
             case(ENEMY_INFO):
             {
@@ -538,12 +846,14 @@ public:
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
             } break;
 
-
-            // TODO: Specify once Menus are further along.
-            case(UNIT_MENU, UNIT_ATTACK, UNIT_HEAL, UNIT_TRADE, UNIT_ITEM, COMBAT,
-                    GAME_MENU_ROOT, GAME_MENU_OPTIONS, GAME_MENU_SAVE, 
-                    GAME_MENU_UNITS):
+            case(COMBAT):
             {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
             } break;
 
 
@@ -560,7 +870,10 @@ public:
 
             default:
             {
-                assert(!"Invalid Cursor State!\n");
+                printf("Invalid Interface State! %d\n",
+                       GlobalInterfaceState);
+
+                assert(!"Unimplemented?\n");
             } break;
         }
     }

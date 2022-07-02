@@ -21,6 +21,22 @@ IsValidBoundsPosition(int col, int row)
 }
 
 
+// returns true if a given pair is in a vector of pairs.
+bool
+VectorHasElement(const pair<int, int> &pair_in, const vector<pair<int, int>> &vector_in)
+{
+    bool has = false;
+    for(pair<int, int> p : vector_in)
+    {
+        if(pair_in == p)
+        {
+            has = true;
+        }
+    }
+    return has;
+}
+
+
 // returns a vector of pairs representing accessible squares for a given unit.
 shared_ptr<vector<pair<int, int>>>
 AccessibleFrom(const Tilemap &map, int col, int row, int max)
@@ -70,39 +86,57 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max)
     return make_shared<vector<pair<int, int>>>(accessible);
 }
 
-//std::vector<Vector2>
-//Unit::FindAttackableFrom()
-//{   
-    //std::vector<Vector2> Result;
-    //int DirectionsRow[] = { -1,  0,  1,  0 };
-    //int DirectionsCol[] = {  0,  1,  0, -1 };
+// returns a vector of pairs representing accessible squares for a given unit.
+shared_ptr<vector<pair<int, int>>>
+InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
+{
+    vector<pair<int, int>> interactible;
+    int costs[MAP_SIZE][MAP_SIZE];
 
-    //std::queue<Vector2> Q;
-    //int Left[MAP_MAX][MAP_MAX] = {};
-    //Q.push(Position);
-    //Left[Position.x][Position.y] = Range;
+    // initialize all elements to high value.
+    for(int i = 0; i < MAP_SIZE; ++i)
+        for(int j = 0; j < MAP_SIZE; ++j)
+            costs[i][j] = 100;
+
+    int directionsRow[] = { -1,  0,  1,  0 };
+    int directionsCol[] = {  0,  1,  0, -1 };
+
+    queue<pair<int, int>> unexplored;
+    unexplored.push(make_pair(col, row));
+    costs[col][row] = 0;
     
-    //while(!Q.empty())
-    //{ 
-        //Vector2 Cell = Q.front();
-        //Q.pop();
-        
-        //Result.push_back(Cell);
+    while(!unexplored.empty())
+    { 
+        pair<int, int> current = unexplored.front();
+        unexplored.pop();
 
-        //for(int i = 0; i < 4; i++) {
-            //int Col = Cell.x + DirectionsCol[i];
-            //int Row = Cell.y + DirectionsRow[i];
-            //if(InBounds(Row, Col))
-            //{
-                //Left[Col][Row] = Left[Cell.x][Cell.y] - 1;
-                //if(Left[Col][Row] >= 0)
-                //{
-                    //Q.push({Col, Row});
-                //}
-            //}
-        //}
-    //}
-    //return Result;
-//}
+        interactible.push_back(current);
+
+        // Add adjacent tiles to the list!
+        for(int i = 0; i < 4; ++i)
+        {
+            int newCol = current.first + directionsCol[i];
+            int newRow = current.second + directionsRow[i];
+            if(IsValidBoundsPosition(newCol, newRow))
+            {
+                const Tile *tileToExplore = &map.tiles[newCol][newRow];
+                int newCost = costs[current.first][current.second] + 1;
+                if(newCost < costs[newCol][newRow])
+                {
+                    costs[newCol][newRow] = newCost;
+                    if(costs[newCol][newRow] <= max)
+                    {
+                        unexplored.push(make_pair(newCol, newRow));
+                    }
+                }
+            }
+        }
+    }
+
+    interactible.erase(remove_if(interactible.begin(), interactible.end(),
+            [&costs, min](pair<int, int> p) { return costs[p.first][p.second] < min; }),
+            interactible.end());
+    return make_shared<vector<pair<int, int>>>(interactible);
+}
 
 #endif

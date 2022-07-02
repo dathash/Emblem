@@ -6,15 +6,10 @@
 /*
     TODO
     Commands Do More Things
-    Tiles have properties 
-        (That remain together and don't rely on eachother.)
-    Unit Movement
+	Exhaustion
 
     NEXT
-    Interaction
-        Attack
-        Heal
-        Talk
+    Undo
 
     Enemy Turn
         Basic AI
@@ -30,9 +25,21 @@
         Combat Scene
         Key Repeat
 
-    Menu
+    Tiles have properties 
+        (That remain together and don't rely on eachother)
+
+    Menus
+		Unit Actions Menu
+		Game Menu
+
+	User Interface
+		Show Unit/Enemy details
+		Show Tile details
+
     Music (MiniAudio)
-    Undo
+
+	NICE
+	Smooth Interaction Syntax (Just click on enemy to attack them)
  */
 
 
@@ -175,15 +182,20 @@ struct Unit
     int id = 0;
     bool isAlly = false;
     int mov = 0;
+	int minRange = 1;
+	int maxRange = 1;
     shared_ptr<SpriteSheet> sheet = nullptr;
 
     Unit(int id_in, bool isAlly_in, int mov_in, 
+		 int minRange_in, int maxRange_in, 
          shared_ptr<Texture> texture_in)
     {
         //printf("Unit Constructed!\n");
         this->id = id_in;
         this->isAlly = isAlly_in;
         this->mov = mov_in;
+		this->minRange = minRange_in;
+		this->maxRange = maxRange_in;
         this->sheet = make_shared<SpriteSheet>(texture_in, 32);
     }
 
@@ -213,6 +225,7 @@ struct Tilemap
 {
     Tile tiles[MAP_SIZE][MAP_SIZE] = {};
     shared_ptr<vector<pair<int, int>>> accessible = nullptr;
+    shared_ptr<vector<pair<int, int>>> interactible = nullptr;
 };
 
 struct Cursor
@@ -288,19 +301,23 @@ int main(int argc, char *argv[])
     Tilemap map = {};
     Cursor cursor;
 
-    shared_ptr<Unit> unit = make_shared<Unit>(0, true, 3, LoadTextureImage("lucina_final.png"));
-    map.tiles[3][5].occupant = unit;
+    shared_ptr<Unit> lucina = make_shared<Unit>(0, true, 3, 2, 2, LoadTextureImage("lucina_final.png"));
+    map.tiles[3][5].occupant = lucina;
     map.tiles[3][5].occupied = true;
 
-    shared_ptr<Unit> enemy = make_shared<Unit>(1, false, 3, LoadTextureImage("flavia_final.png"));
-    map.tiles[6][4].occupant = enemy;
+	shared_ptr<Unit> donnel = make_shared<Unit>(1, true, 6, 1, 1, LoadTextureImage("donnel_final.png"));
+    map.tiles[4][5].occupant = donnel;
+    map.tiles[4][5].occupied = true;
+
+    shared_ptr<Unit> flavia = make_shared<Unit>(2, false, 3, 1, 1, LoadTextureImage("flavia_final.png"));
+    map.tiles[6][4].occupant = flavia;
     map.tiles[6][4].occupied = true;
 
-    handler.BindUp(make_shared<MoveCursorCommand>(&cursor, 0, -1, map));
-    handler.BindDown(make_shared<MoveCursorCommand>(&cursor, 0, 1, map));
-    handler.BindLeft(make_shared<MoveCursorCommand>(&cursor, -1, 0, map));
-    handler.BindRight(make_shared<MoveCursorCommand>(&cursor, 1, 0, map));
-    handler.BindA(make_shared<OpenMenuCommand>());
+    handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, map));
+    handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, map));
+    handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, map));
+    handler.BindRight(make_shared<MoveCommand>(&cursor, 1, 0, map));
+    handler.BindA(make_shared<OpenGameMenuCommand>());
     handler.BindB(make_shared<NullCommand>());
 
     unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
@@ -332,7 +349,7 @@ int main(int argc, char *argv[])
         Render(map, cursor, *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
 
-// ============================ debug messages ===============================================
+// =========================== v debug messages v ============================================
         endTime = SDL_GetPerformanceCounter();
         real32 ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency()) * 1000.0f;
 
@@ -362,7 +379,7 @@ int main(int argc, char *argv[])
         }
         startTime = SDL_GetPerformanceCounter();
         frameNumber++;
-// ============================ ^ DEBUG ^ ================================================
+// ============================ ^ debug messages ^ ================================================
     }
     Close();
     return 0;
@@ -455,6 +472,18 @@ Render(const Tilemap &map, const Cursor &cursor,
         for(pair<int, int> cell : *map.accessible.get())
         {
             RenderTile(cell.first, cell.second, accessibleColor);
+        }
+    }
+
+    if(GlobalInterfaceState == TARGETING_OVER_GROUND ||
+       GlobalInterfaceState == TARGETING_OVER_UNTARGETABLE ||
+       GlobalInterfaceState == TARGETING_OVER_ALLY ||
+       GlobalInterfaceState == TARGETING_OVER_ENEMY)
+    {
+        SDL_Color attackableColor = {0, 150, 0, 100};
+        for(pair<int, int> cell : *map.interactible.get())
+        {
+            RenderTile(cell.first, cell.second, attackableColor);
         }
     }
 
