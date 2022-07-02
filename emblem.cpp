@@ -6,43 +6,42 @@
 /*
     TODO
 	Hook in interactions
+		Trade
+		Talk
+		Items
 
     NEXT
-	Replay!
-
+	Combat
+		Effects actually occur
+    Menus
+		Unit Actions Menu
+		Game Menu
+	User Interface
+		Show Unit/Enemy details
+		Show Tile details
     Level System
         Loading
         Editing
         Saving
         Transitions
-
     Animation
 		Synchronization
         Sprite Animation
         Combat Scene
         Key Repeat
-
-    Menus
-		Unit Actions Menu
-		Game Menu
-
-	User Interface
-		Show Unit/Enemy details
-		Show Tile details
-
     Music (MiniAudio)
-
-	EH
-    Tiles have properties 
-        (That remain together and don't rely on eachother)
-
-	Turns
-    	Enemy Turn
-        Basic AI
 
 	NICE
 	Smooth Interaction Syntax (Just click on enemy to attack them)
 	Leave characters that have moved and be able to use them to act later
+	Replay!
+
+	EH
+    Tiles have properties 
+        (That remain together and don't rely on eachother)
+	Turns
+    	Enemy Turn
+        Basic AI
  */
 
 
@@ -186,9 +185,13 @@ struct Unit
     bool isAlly = false;
 	bool isExhausted = false;
     int mov = 0;
+	int hp = 10;
+	int attack = 3;
+	int heal = 2;
 	int minRange = 1;
 	int maxRange = 1;
     shared_ptr<SpriteSheet> sheet = nullptr;
+
 
     Unit(int id_in, bool isAlly_in, int mov_in, 
 		 int minRange_in, int maxRange_in, 
@@ -237,8 +240,11 @@ struct Cursor
     int col = 1;
     int row = 1;
     std::shared_ptr<Unit> selected = nullptr;
+    std::shared_ptr<Unit> targeted = nullptr;
     int selectedCol = -1;
     int selectedRow = -1;
+    int targeterCol = -1;
+    int targeterRow = -1;
 
     void PrintCursorState()
     {

@@ -27,6 +27,10 @@ enum InterfaceState
     TARGETING_OVER_ALLY,
     TARGETING_OVER_ENEMY,
 
+    PREVIEW_HEALING,
+    PREVIEW_ATTACK,
+    COMBAT,
+
     GAME_MENU_ROOT,
     GAME_MENU_OPTIONS,
     GAME_MENU_SAVE,
@@ -34,14 +38,11 @@ enum InterfaceState
 
     UNIT_MENU_ROOT,
     UNIT_MENU_INFO,
-    UNIT_MENU_ATTACK,
-    UNIT_MENU_HEAL,
     UNIT_MENU_TRADE,
     UNIT_MENU_ITEM,
+    //UNIT_MENU_TALK,
 
     ENEMY_MENU_ROOT,
-
-    COMBAT,
 
     NO_OP,
 };
@@ -335,8 +336,10 @@ public:
 
     virtual void Execute()
     {
-        // Find tiles that a unit can access.
-        map->interactible = InteractibleFrom(*map, cursor->selectedCol, cursor->selectedRow, 
+        cursor->targeterCol = cursor->col;
+        cursor->targeterRow = cursor->row;
+        // Find tiles that a unit can interact with.
+        map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
                                              cursor->selected->minRange, cursor->selected->maxRange);
 
         printf("COMMAND | Finding targets for Unit %d at <%d, %d>\n", 
@@ -419,8 +422,8 @@ public:
         printf("COMMAND | Detarget\n");
         map->interactible = nullptr;
 
-        cursor->col = cursor->selectedCol;
-        cursor->row = cursor->selectedRow;
+        cursor->col = cursor->targeterCol;
+        cursor->row = cursor->targeterRow;
 
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
@@ -430,32 +433,110 @@ private:
     Tilemap *map;
 };
 
-class AttackEnemyCommand : public Command
+class InitiateAttackCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Attack Enemy!\n"); }
-    // Change state to Attack Preview State.
+    InitiateAttackCommand(Cursor *cursor_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
+
+        printf("COMMAND | Initiate Attack on Unit %d at <%d, %d>\n",
+                cursor->targeted->id, cursor->col, cursor->row);
+
+        GlobalInterfaceState = PREVIEW_ATTACK;
+    }
+
+private:
+    Cursor *cursor;
+    const Tilemap &map;
 };
 
-class HealAllyCommand : public Command
+class InitiateHealCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Heal Ally!\n"); }
-    // Change state to Healing Preview State.
+    InitiateHealCommand(Cursor *cursor_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
+
+        printf("COMMAND | Initiate Healing on Unit %d at <%d, %d>\n",
+                cursor->targeted->id, cursor->col, cursor->row);
+
+        GlobalInterfaceState = PREVIEW_HEALING;
+    }
+
+private:
+    Cursor *cursor;
+    const Tilemap &map;
+};
+
+class AttackCommand : public Command
+{
+public:
+    virtual void Execute()
+    {
+        printf("COMMAND | Attack Enemy!\n");
+        GlobalInterfaceState = COMBAT;
+    }
+};
+
+class HealCommand : public Command
+{
+public:
+    virtual void Execute()
+    {
+        printf("COMMAND | Heal Ally!\n");
+        GlobalInterfaceState = COMBAT;
+    }
+};
+
+class BackDownFromAttackingCommand : public Command
+{
+public:
+    BackDownFromAttackingCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
+
+    virtual void Execute()
+    {
+        printf("COMMAND | Backed down from attacking enemy.\n");
+
+        cursor->targeted = nullptr;
+
+        GlobalInterfaceState = TARGETING_OVER_ENEMY;
+    }
+
+private:
+    Cursor *cursor;
 };
 
 class BackDownFromHealingCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Backed down from Healing Ally!\n"); }
-    // Change state to Selected Over Enemy State.
-};
+    BackDownFromHealingCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
 
-class InitiateHealingCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Initiate Healing!\n"); }
-    // Change state to Combat State.
+    virtual void Execute()
+    {
+        printf("Command | Backed down from healing ally.\n");
+
+        cursor->targeted = nullptr;
+
+        GlobalInterfaceState = TARGETING_OVER_ALLY;
+    }
+
+private:
+    Cursor *cursor;
 };
 
 class ChangeWeaponBeforeCombatCommand : public Command
@@ -464,19 +545,7 @@ public:
     virtual void Execute() { printf("Change Weapon!\n"); }
 };
 
-class BackDownFromCombatCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Don't Attack Enemy!\n"); }
-    // Change state to Selected Over Enemy State.
-};
 
-class InitiateCombatCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Initiate Combat!\n"); }
-    // Change state to Combat State.
-};
 
 class SelectedItemsCommand : public Command
 {
@@ -754,7 +823,7 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<HealAllyCommand>());
+                BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 
@@ -764,7 +833,7 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<AttackEnemyCommand>());
+                BindA(make_shared<NullCommand>()); // TODO: Move and Attack?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 
@@ -793,7 +862,7 @@ public:
                 BindDown(make_shared<MoveTCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
+                BindA(make_shared<InitiateHealCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
             case(TARGETING_OVER_ENEMY):
@@ -802,8 +871,28 @@ public:
                 BindDown(make_shared<MoveTCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
+                BindA(make_shared<InitiateAttackCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
+            } break;
+
+
+            case(PREVIEW_ATTACK):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<AttackCommand>());
+                BindB(make_shared<BackDownFromAttackingCommand>(cursor));
+            } break;
+            case(PREVIEW_HEALING):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<HealCommand>());
+                BindB(make_shared<BackDownFromHealingCommand>(cursor));
             } break;
 
 
@@ -873,24 +962,6 @@ public:
                 BindB(make_shared<NullCommand>());
             } break;
             case(UNIT_MENU_ITEM):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
-            } break;
-            case(UNIT_MENU_ATTACK):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
-            } break;
-            case(UNIT_MENU_HEAL):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
