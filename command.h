@@ -39,7 +39,7 @@ enum InterfaceState
     UNIT_MENU_TRADE,
     UNIT_MENU_ITEM,
 
-    ENEMY_INFO,
+    ENEMY_MENU_ROOT,
 
     COMBAT,
 
@@ -99,7 +99,7 @@ public:
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
 
-            if(!hoverTile->occupied)
+            if(!hoverTile->occupied || hoverTile->occupant->isExhausted)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_GROUND;
             }
@@ -248,17 +248,48 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Place Unit!\n");
+        printf("COMMAND | Place Unit %d at <%d, %d>\n",
+               cursor->selected->id, cursor->col, cursor->row);
         
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
         map->tiles[cursor->col][cursor->row].occupied = true;
 
-        cursor->selectedCol = cursor->col;
-        cursor->selectedRow = cursor->row;
+        //cursor->selectedCol = cursor->col;
+        //cursor->selectedRow = cursor->row;
 
         GlobalInterfaceState = UNIT_MENU_ROOT;
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+};
+
+
+class UndoPlaceUnitCommand : public Command
+{
+public:
+    UndoPlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        printf("COMMAND | Put Unit %d back at <%d, %d>\n",
+               cursor->selected->id, cursor->selectedCol, cursor->selectedRow);
+        
+        map->tiles[cursor->col][cursor->row].occupant = nullptr;
+        map->tiles[cursor->col][cursor->row].occupied = false;
+        map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
+        map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = true;
+
+        cursor->col = cursor->selectedCol;
+        cursor->row = cursor->selectedRow;
+
+        GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
 private:
@@ -279,13 +310,13 @@ public:
         printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
                cursor->selected->id, cursor->col, cursor->row);
 
+        cursor->selected->isExhausted = true;
         cursor->selected = nullptr;
 
         cursor->selectedCol = -1;
         cursor->selectedRow = -1;
 
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-        // Make unit very sleepy
     }
 
 private:
@@ -306,7 +337,7 @@ public:
     {
         // Find tiles that a unit can access.
         map->interactible = InteractibleFrom(*map, cursor->selectedCol, cursor->selectedRow, 
-                                         cursor->selected->minRange, cursor->selected->maxRange);
+                                             cursor->selected->minRange, cursor->selected->maxRange);
 
         printf("COMMAND | Finding targets for Unit %d at <%d, %d>\n", 
                cursor->selected->id, cursor->col, cursor->row);
@@ -374,6 +405,29 @@ private:
     int col;
     int row;
     const Tilemap &map;
+};
+
+class DetargetCommand : public Command
+{
+public:
+    DetargetCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+    map(map_in)
+    {}
+    virtual void Execute()
+    { 
+        printf("COMMAND | Detarget\n");
+        map->interactible = nullptr;
+
+        cursor->col = cursor->selectedCol;
+        cursor->row = cursor->selectedRow;
+
+        GlobalInterfaceState = UNIT_MENU_ROOT;
+    }
+
+private:
+    Cursor *cursor;
+    Tilemap *map;
 };
 
 class AttackEnemyCommand : public Command
@@ -479,7 +533,7 @@ public:
 
     virtual void Execute()
     {
-        GlobalInterfaceState = ENEMY_INFO;
+        GlobalInterfaceState = ENEMY_MENU_ROOT;
         cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
@@ -532,9 +586,19 @@ class OpenGameMenuCommand : public Command
 public:
     virtual void Execute()
     { 
-        printf("COMMAND | Open Game Menu!\n");
+        printf("COMMAND | Open Game Menu\n");
         printf(" <> INTERFACE | options: 0, field: 0, save: 0, end turn: 0 <>\n");
         GlobalInterfaceState = GAME_MENU_ROOT;
+    }
+};
+
+class ExitGameMenuCommand : public Command
+{
+public:
+    virtual void Execute()
+    { 
+        printf("COMMAND | Exit Game Menu\n");
+        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 };
 
@@ -712,7 +776,7 @@ public:
                 BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
             case(TARGETING_OVER_UNTARGETABLE):
             {
@@ -721,7 +785,7 @@ public:
                 BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
             case(TARGETING_OVER_ALLY):
             {
@@ -730,7 +794,7 @@ public:
                 BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
             case(TARGETING_OVER_ENEMY):
             {
@@ -739,7 +803,7 @@ public:
                 BindLeft(make_shared<MoveTCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveTCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
 
@@ -750,7 +814,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<ExitGameMenuCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
             {
@@ -783,12 +847,12 @@ public:
 
             case(UNIT_MENU_ROOT):
             {
-                BindUp(make_shared<NullCommand>());
+                BindUp(make_shared<DeactivateUnitCommand>(cursor));
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<SelectTargetForAttackCommand>(cursor, map));
-                BindB(make_shared<DeactivateUnitCommand>(cursor));
+                BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
             case(UNIT_MENU_INFO):
             {
@@ -836,13 +900,13 @@ public:
                 BindB(make_shared<NullCommand>());
             } break;
 
-            case(ENEMY_INFO):
+            case(ENEMY_MENU_ROOT):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<DeselectEnemyCommand>(cursor));
+                BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
             } break;
 

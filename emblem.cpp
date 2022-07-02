@@ -5,14 +5,10 @@
 
 /*
     TODO
-    Commands Do More Things
-	Exhaustion
+	Hook in interactions
 
     NEXT
-    Undo
-
-    Enemy Turn
-        Basic AI
+	Replay!
 
     Level System
         Loading
@@ -21,12 +17,10 @@
         Transitions
 
     Animation
+		Synchronization
         Sprite Animation
         Combat Scene
         Key Repeat
-
-    Tiles have properties 
-        (That remain together and don't rely on eachother)
 
     Menus
 		Unit Actions Menu
@@ -38,8 +32,17 @@
 
     Music (MiniAudio)
 
+	EH
+    Tiles have properties 
+        (That remain together and don't rely on eachother)
+
+	Turns
+    	Enemy Turn
+        Basic AI
+
 	NICE
 	Smooth Interaction Syntax (Just click on enemy to attack them)
+	Leave characters that have moved and be able to use them to act later
  */
 
 
@@ -181,6 +184,7 @@ struct Unit
 {
     int id = 0;
     bool isAlly = false;
+	bool isExhausted = false;
     int mov = 0;
 	int minRange = 1;
 	int maxRange = 1;
@@ -456,8 +460,12 @@ Render(const Tilemap &map, const Cursor &cursor,
 
             RenderTile(col, row, tileColor);
 
-            if(tileToRender->occupant)
+            if(tileToRender->occupied)
             {
+				if(tileToRender->occupant->isExhausted)
+				{
+					SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 50, 0, 0);
+				}
                 RenderSprite(col, row, *tileToRender->occupant->sheet);
             }
         }
@@ -480,7 +488,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == TARGETING_OVER_ALLY ||
        GlobalInterfaceState == TARGETING_OVER_ENEMY)
     {
-        SDL_Color attackableColor = {0, 150, 0, 100};
+        SDL_Color attackableColor = {150, 0, 0, 100};
         for(pair<int, int> cell : *map.interactible.get())
         {
             RenderTile(cell.first, cell.second, attackableColor);
