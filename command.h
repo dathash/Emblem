@@ -42,16 +42,6 @@ enum InterfaceState
 static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
 
 
-// ============================= Where to put this? ============================
-// Returns true if the position is in-bounds.
-bool
-IsValidBoundsPosition(int col, int row)
-{
-    return (col >= 0 && col < MAP_SIZE
-         && row >= 0 && row < MAP_SIZE);
-}
-
-
 
 // =============================== commands ====================================
 // inherited class, contains virtual methods.
@@ -131,7 +121,7 @@ private:
 class SelectUnitCommand : public Command
 {
 public:
-    SelectUnitCommand(Cursor *cursor_in, const Tilemap &map_in)
+    SelectUnitCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
       map(map_in)
     {}
@@ -140,19 +130,22 @@ public:
     virtual void Execute()
     {
         GlobalInterfaceState = SELECTED_OVER_GROUND;
-        cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
+        cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
 
-        // TODO: Select Unit's Available Squares. Set that somewhere.
+        // Find tiles that a unit can access.
+        map->accessible = AccessibleFrom(*map, cursor->selectedCol, cursor->selectedRow, 3);
 
         printf("COMMAND | Select Unit %d at <%d, %d>\n", 
-            cursor->selected->id, cursor->col, cursor->row);
+               cursor->selected->id, cursor->col, cursor->row);
+        printf(" <> INTERFACE | ally: %d, mov: %d, etc. <> \n",
+               cursor->selected->isAlly, cursor->selected->mov);
     }
 
 private:
     Cursor *cursor;
-    const Tilemap &map;
+    Tilemap *map;
 };
 
 
@@ -262,10 +255,10 @@ public:
     // Change state to Combat State.
 };
 
-class MoveUnitCommand : public Command
+class PlaceUnitCommand : public Command
 {
 public:
-    virtual void Execute() { printf("Move Unit!\n"); }
+    virtual void Execute() { printf("Place Unit!\n"); }
     // Change state to Selected Unit Actions State.
 };
 
@@ -479,7 +472,7 @@ public:
                 BindDown(make_shared<MoveCursorCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveCursorCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveCursorCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<SelectUnitCommand>(cursor, *map));
+                BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
             } break;
 
@@ -489,7 +482,7 @@ public:
                 BindDown(make_shared<MoveDownCheckedCommand>());
                 BindLeft(make_shared<MoveLeftCheckedCommand>());
                 BindRight(make_shared<MoveRightCheckedCommand>());
-                BindA(make_shared<MoveUnitCommand>());
+                BindA(make_shared<PlaceUnitCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
             } break;
 

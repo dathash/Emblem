@@ -5,42 +5,49 @@
 
 /*
     TODO
-    Dijkstra's
-    Commands Do Things
+    Commands Do More Things
+    Tiles have properties 
+        (That remain together and don't rely on eachother.)
+    Unit Movement
 
-	NEXT
-    Xbox Controller
+    NEXT
+    Interaction
+        Attack
+        Heal
+        Talk
 
-	Unit Movement
+    Enemy Turn
+        Basic AI
 
-	Enemy Turn
-		Basic AI
+    Level System
+        Loading
+        Editing
+        Saving
+        Transitions
 
-	Level System
-		Loading
-		Win Condition
+    Animation
+        Sprite Animation
+        Combat Scene
+        Key Repeat
 
-	Animation
-		Sprite Animation
-		Combat Scene
-		Key Repeat
-
-	Menu
-	Music (MiniAudio)
-	Undo
+    Menu
+    Music (MiniAudio)
+    Undo
  */
 
 
 // ========================= constants =====================================
 
-// Rendering
+// low level
+#define JOYSTICK_DEAD_ZONE 8000
+
+// rendering
 #define TILE_SIZE 100
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 900
 
-// Backend
+// backend
 #define MAP_SIZE 8
-
 
 
 // ========================== includes =====================================
@@ -50,6 +57,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include <queue>
 #include <assert.h>
 
@@ -164,15 +172,18 @@ struct SpriteSheet
 
 struct Unit
 {
-    int id;
-	bool isAlly;
-    shared_ptr<SpriteSheet> sheet;
+    int id = 0;
+    bool isAlly = false;
+    int mov = 0;
+    shared_ptr<SpriteSheet> sheet = nullptr;
 
-    Unit(int id_in, bool isAlly_in, shared_ptr<Texture> texture_in)
+    Unit(int id_in, bool isAlly_in, int mov_in, 
+         shared_ptr<Texture> texture_in)
     {
         //printf("Unit Constructed!\n");
         this->id = id_in;
         this->isAlly = isAlly_in;
+        this->mov = mov_in;
         this->sheet = make_shared<SpriteSheet>(texture_in, 32);
     }
 
@@ -192,14 +203,16 @@ enum TileTypes
 
 struct Tile
 {
-    int type;
-    bool occupied;
-    std::shared_ptr<Unit> occupant;
+    int type = 0;
+    int penalty = 1;
+    bool occupied = false;
+    std::shared_ptr<Unit> occupant = nullptr;
 };
 
 struct Tilemap
 {
     Tile tiles[MAP_SIZE][MAP_SIZE] = {};
+    shared_ptr<vector<pair<int, int>>> accessible = nullptr;
 };
 
 struct Cursor
@@ -219,12 +232,14 @@ struct Cursor
     }
 };
 
+#include "grid.h"
 #include "command.h"
 
 // ============================= globals ===================================
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static bool GlobalRunning = false;
+static bool GlobalGamepadMode = false;
 static TTF_Font *GlobalFont = nullptr;
 
 
@@ -248,6 +263,19 @@ int main(int argc, char *argv[])
     if(!Initialize())
         assert(!"Initialization Failed\n");
 
+    SDL_Joystick *gamePad = NULL;
+    if(SDL_NumJoysticks() < 1)
+    {
+        printf("Keyboard Mode!\n");
+    }
+    else
+    {
+        GlobalGamepadMode = true;
+        gamePad = SDL_JoystickOpen(0);
+        assert(gamePad);
+        printf("Joystick mode!\n");
+    }
+
     InputState input = {};
     InputHandler handler;
     queue<shared_ptr<Command>> commandQueue = {};
@@ -260,11 +288,11 @@ int main(int argc, char *argv[])
     Tilemap map = {};
     Cursor cursor;
 
-    shared_ptr<Unit> unit = make_shared<Unit>(0, true, LoadTextureImage("lucina_final.png"));
+    shared_ptr<Unit> unit = make_shared<Unit>(0, true, 3, LoadTextureImage("lucina_final.png"));
     map.tiles[3][5].occupant = unit;
     map.tiles[3][5].occupied = true;
 
-    shared_ptr<Unit> enemy = make_shared<Unit>(1, false, LoadTextureImage("flavia_final.png"));
+    shared_ptr<Unit> enemy = make_shared<Unit>(1, false, 3, LoadTextureImage("flavia_final.png"));
     map.tiles[6][4].occupant = enemy;
     map.tiles[6][4].occupied = true;
 
@@ -315,13 +343,13 @@ int main(int argc, char *argv[])
         //input.PrintInputState();
         //unit->sheet.PrintSpriteState();
 
-		sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
-			   cursor.col, cursor.row, map.tiles[cursor.col][cursor.row].type,
+        sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
+               cursor.col, cursor.row, map.tiles[cursor.col][cursor.row].type,
                map.tiles[cursor.col][cursor.row].occupied,
                (void *)map.tiles[cursor.col][cursor.row].occupant.get());
         debugMessageOne = LoadTextureText(string(buffer), {250, 0, 0, 255});
 
-		sprintf(buffer, "Mode: %d", GlobalInterfaceState);
+        sprintf(buffer, "Mode: %d", GlobalInterfaceState);
         debugMessageTwo = LoadTextureText(string(buffer), {0, 100, 0, 255});
 
         sprintf(buffer, "MS: %.02f, FPS: %d", ElapsedMS, (int)(1.0f / ElapsedMS * 1000.0f));
@@ -375,6 +403,7 @@ RenderText(const Texture &texture, int x, int y)
     SDL_RenderCopy(GlobalRenderer, texture.sdlTexture, NULL, &destination);
 }
 
+
 // Renders the scene from the given game state.
 void
 Render(const Tilemap &map, const Cursor &cursor, 
@@ -417,6 +446,18 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
+    if(GlobalInterfaceState == SELECTED_OVER_GROUND ||
+       GlobalInterfaceState == SELECTED_OVER_INACCESSIBLE ||
+       GlobalInterfaceState == SELECTED_OVER_ALLY ||
+       GlobalInterfaceState == SELECTED_OVER_ENEMY)
+    {
+        SDL_Color accessibleColor = {0, 150, 0, 100};
+        for(pair<int, int> cell : *map.accessible.get())
+        {
+            RenderTile(cell.first, cell.second, accessibleColor);
+        }
+    }
+
     // Render Cursor
     SDL_Color cursorColor = {0, 150, 0, 100};
     RenderTile(cursor.col, cursor.row, cursorColor);
@@ -430,27 +471,27 @@ Render(const Tilemap &map, const Cursor &cursor,
 
 
 
-// =================================== Game Logic =================================================
+// =================================== game logic =================================================
 
 
 // Mutates the given Cursor to move it.
 void
 MoveCursor(Cursor *cursor, int colDelta, int rowDelta)
 {
-	int newCol = cursor->col + colDelta;
-	int newRow = cursor->row + rowDelta;
-	if(IsValidBoundsPosition(newCol, newRow))
-	{
-		cursor->col = newCol;
-		cursor->row = newRow;
-	}
+    int newCol = cursor->col + colDelta;
+    int newRow = cursor->row + rowDelta;
+    if(IsValidBoundsPosition(newCol, newRow))
+    {
+        cursor->col = newCol;
+        cursor->row = newRow;
+    }
 }
 
 // Mutates a tile's type at the cursor's position.
 void
 ChangeTileType(const Cursor &cursor, Tilemap *map, int type)
 {
-	map->tiles[cursor.col][cursor.row].type = type;
+    map->tiles[cursor.col][cursor.row].type = type;
 }
 
 
@@ -458,7 +499,7 @@ ChangeTileType(const Cursor &cursor, Tilemap *map, int type)
 void
 Select(const Tilemap &map, Cursor *cursor)
 {
-	cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
+    cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
 }
 
 
@@ -466,11 +507,11 @@ Select(const Tilemap &map, Cursor *cursor)
 void
 Deselect(Cursor *cursor)
 {
-	cursor->selected = nullptr;
+    cursor->selected = nullptr;
 }
 
 
-// ============================== Loading Data =================================
+// ============================== loading data =================================
 // Loads a Texture displaying the given text in the given color.
 unique_ptr<Texture>
 LoadTextureText(std::string text, SDL_Color color)
@@ -515,7 +556,7 @@ LoadTextureImage(std::string path)
 bool
 Initialize()
 {
-    if(SDL_Init(SDL_INIT_VIDEO) == 0)
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == 0)
     {
         GlobalWindow = SDL_CreateWindow("Emblem",
                                         700,
@@ -571,7 +612,11 @@ Initialize()
 // Frees up allocated memory.
 void Close()
 {
+
     //SDL_DestroyTexture(ALL TEXTURES);
+
+    //Close game controller
+    //SDL_JoystickClose(gGameController);
 
     TTF_CloseFont(GlobalFont);
     SDL_DestroyRenderer(GlobalRenderer);
@@ -593,7 +638,7 @@ HandleEvents(InputState *input)
         {
             GlobalRunning = false;
         }
-        else if(Event.type == SDL_KEYDOWN && Event.key.repeat == 0)
+        else if(Event.type == SDL_KEYDOWN)
         {
             switch(Event.key.keysym.sym)
             {
@@ -675,6 +720,80 @@ HandleEvents(InputState *input)
                 {
                 } break;
             }
+        }
+        else if(Event.type == SDL_JOYAXISMOTION)
+        {
+            if(Event.jaxis.which == 0)
+            {
+                if(Event.jaxis.axis == 0)
+                {
+                    if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
+                    {
+                        input->left = true;
+                    }
+                    else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
+                    {
+                        input->right = true;
+                    }
+                    else
+                    {
+                        input->left = false;
+                        input->right = false;
+                    }
+                }
+
+                if(Event.jaxis.axis == 1)
+                {
+                    if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
+                    {
+                        input->up = true;
+                    }
+                    else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
+                    {
+                        input->down = true;
+                    }
+                    else
+                    {
+                        input->up = false;
+                        input->down = false;
+                    }
+                }
+            }
+        }
+        else if(Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
+        {
+            if(Event.jbutton.button == 0)
+            {
+                if(Event.type == SDL_JOYBUTTONDOWN)
+                {
+                    input->a = true;
+                }
+                else if(Event.type == SDL_JOYBUTTONUP)
+                {
+                    input->a = false;
+                }
+            }
+            if(Event.jbutton.button == 1)
+            {
+                if(Event.type == SDL_JOYBUTTONDOWN)
+                {
+                    input->b = true;
+                }
+                else if(Event.type == SDL_JOYBUTTONUP)
+                {
+                    input->b = false;
+                }
+            }
+        }
+        else if(Event.type == SDL_JOYDEVICEADDED)
+        {
+            printf("Gamepad connected!\n");
+            GlobalGamepadMode = true;
+        }
+        else if(Event.type == SDL_JOYDEVICEREMOVED)
+        {
+            printf("Gamepad removed!\n");
+            GlobalGamepadMode = false;
         }
     }
 }
