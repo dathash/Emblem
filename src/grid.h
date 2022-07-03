@@ -3,11 +3,6 @@
 // File: Grid Functions
 // Date: July 2022
 
-/*
-   TODO
-   InteractibleFrom
- */
-
 #ifndef GRID_H
 #define GRID_H
 

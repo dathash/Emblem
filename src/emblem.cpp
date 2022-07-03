@@ -5,42 +5,42 @@
 
 /*
     TODO
-	Hook in interactions
-		Trade
-		Talk
-		Items
+    User Interface
+        Show Unit/Enemy details
+        Show Tile details
+    Switch to GameController API
 
     NEXT
-	Combat
-		Effects actually occur
+    Combat
+        Effects actually occur
     Menus
-		Unit Actions Menu
-		Game Menu
-	User Interface
-		Show Unit/Enemy details
-		Show Tile details
+        Unit Actions Menu
+        Game Menu
     Level System
         Loading
         Editing
         Saving
         Transitions
     Animation
-		Synchronization
+        Synchronization
         Sprite Animation
         Combat Scene
         Key Repeat
     Music (MiniAudio)
 
-	NICE
-	Smooth Interaction Syntax (Just click on enemy to attack them)
-	Leave characters that have moved and be able to use them to act later
-	Replay!
+    NICE
+    Smooth Interaction Syntax (Just click on enemy to attack them)
+    Leave characters that have moved and be able to use them to act later
+    Replay!
+    Hook in interactions
+        Talk
+        Items
 
-	EH
+    LATER
     Tiles have properties 
         (That remain together and don't rely on eachother)
-	Turns
-    	Enemy Turn
+    Turns
+        Enemy Turn
         Basic AI
  */
 
@@ -54,6 +54,9 @@
 #define TILE_SIZE 100
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 900
+
+#define MENU_WIDTH 300
+#define MENU_ROW_HEIGHT 100
 
 // backend
 #define MAP_SIZE 8
@@ -183,26 +186,26 @@ struct Unit
 {
     int id = 0;
     bool isAlly = false;
-	bool isExhausted = false;
+    bool isExhausted = false;
     int mov = 0;
-	int hp = 10;
-	int attack = 3;
-	int heal = 2;
-	int minRange = 1;
-	int maxRange = 1;
+    int hp = 10;
+    int attack = 3;
+    int heal = 2;
+    int minRange = 1;
+    int maxRange = 1;
     shared_ptr<SpriteSheet> sheet = nullptr;
 
 
     Unit(int id_in, bool isAlly_in, int mov_in, 
-		 int minRange_in, int maxRange_in, 
+         int minRange_in, int maxRange_in, 
          shared_ptr<Texture> texture_in)
     {
         //printf("Unit Constructed!\n");
         this->id = id_in;
         this->isAlly = isAlly_in;
         this->mov = mov_in;
-		this->minRange = minRange_in;
-		this->maxRange = maxRange_in;
+        this->minRange = minRange_in;
+        this->maxRange = maxRange_in;
         this->sheet = make_shared<SpriteSheet>(texture_in, 32);
     }
 
@@ -235,6 +238,14 @@ struct Tilemap
     shared_ptr<vector<pair<int, int>>> interactible = nullptr;
 };
 
+enum TargetMode
+{
+    NONE_TARGET,
+    ATTACK_TARGET,
+    HEAL_TARGET,
+    TRADE_TARGET,
+};
+
 struct Cursor
 {
     int col = 1;
@@ -245,6 +256,7 @@ struct Cursor
     int selectedRow = -1;
     int targeterCol = -1;
     int targeterRow = -1;
+    TargetMode targetMode = NONE_TARGET;
 
     void PrintCursorState()
     {
@@ -255,6 +267,13 @@ struct Cursor
     }
 };
 
+struct Menu
+{
+    u8 rows = 4;
+    u8 current = 0;
+    // TODO: Should a menu contain Command *'s?
+};
+
 #include "grid.h"
 #include "command.h"
 
@@ -263,14 +282,13 @@ static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static bool GlobalRunning = false;
 static bool GlobalGamepadMode = false;
+static bool GlobalGuiMode = false;
 static TTF_Font *GlobalFont = nullptr;
 
 
+#include "render.h"
 
 // ===================== function signatures ==============================
-void Render(const Tilemap &map, const Cursor &cursor, const Texture &debugMessageOne, const Texture &debugMessageTwo, const Texture &debugMessageThree);
-void RenderText(const Texture &texture, int x, int y);
-
 shared_ptr<Texture> LoadTextureImage(std::string path);
 unique_ptr<Texture> LoadTextureText(std::string text, SDL_Color color);
 
@@ -311,15 +329,15 @@ int main(int argc, char *argv[])
     Tilemap map = {};
     Cursor cursor;
 
-    shared_ptr<Unit> lucina = make_shared<Unit>(0, true, 3, 2, 2, LoadTextureImage("lucina_final.png"));
+    shared_ptr<Unit> lucina = make_shared<Unit>(0, true, 3, 2, 2, LoadTextureImage("../assets/sprites/lucina_final.png"));
     map.tiles[3][5].occupant = lucina;
     map.tiles[3][5].occupied = true;
 
-	shared_ptr<Unit> donnel = make_shared<Unit>(1, true, 6, 1, 1, LoadTextureImage("donnel_final.png"));
+    shared_ptr<Unit> donnel = make_shared<Unit>(1, true, 6, 1, 1, LoadTextureImage("../assets/sprites/donnel_final.png"));
     map.tiles[4][5].occupant = donnel;
     map.tiles[4][5].occupied = true;
 
-    shared_ptr<Unit> flavia = make_shared<Unit>(2, false, 3, 1, 1, LoadTextureImage("flavia_final.png"));
+    shared_ptr<Unit> flavia = make_shared<Unit>(2, false, 3, 1, 1, LoadTextureImage("../assets/sprites/flavia_final.png"));
     map.tiles[6][4].occupant = flavia;
     map.tiles[6][4].occupied = true;
 
@@ -399,161 +417,6 @@ int main(int argc, char *argv[])
 
 // ================================ Helper Functions ======================================================
 
-
-// ================================ Rendering ==========================================
-// Renders an individual tile to the screen, given its game coords and color.
-void
-RenderTile(int col, int row, const SDL_Color &color)
-{
-    SDL_Rect Rect = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-
-    SDL_SetRenderDrawColor(GlobalRenderer, color.r, color.g, color.b, color.a);
-    SDL_RenderFillRect(GlobalRenderer, &Rect);
-    SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(GlobalRenderer, &Rect);
-}
-
-// Renders a sprite to the screen, given its game coords and spritesheet.
-void
-RenderSprite(int col, int row, const SpriteSheet &sheet)
-{
-    SDL_Rect destination = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-    SDL_Rect source = {sheet.col * sheet.size, sheet.row * sheet.size, sheet.size, sheet.size};
-
-    SDL_RenderCopy(GlobalRenderer, sheet.texture->sdlTexture, &source, &destination);
-}
-
-void
-RenderText(const Texture &texture, int x, int y)
-{
-    SDL_Rect destination = {x, y, texture.width, texture.height};
-    SDL_RenderCopy(GlobalRenderer, texture.sdlTexture, NULL, &destination);
-}
-
-
-// Renders the scene from the given game state.
-void
-Render(const Tilemap &map, const Cursor &cursor, 
-       const Texture &debugMessageOne, 
-       const Texture &debugMessageTwo, 
-       const Texture &debugMessageThree)
-{
-    SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(GlobalRenderer, 200, 200, 0, 255);
-    SDL_RenderClear(GlobalRenderer);
-
-    // Render Map
-    for(int col = 0; col < MAP_SIZE; ++col)
-    {
-        for(int row = 0; row < MAP_SIZE; ++row)
-        {
-            SDL_Color tileColor = {};
-            const Tile *tileToRender = &map.tiles[col][row];
-            switch(tileToRender->type)
-            {
-                case(FLOOR):
-                {
-                    tileColor = {255, 255, 255, 255};
-                } break;
-                case(WALL):
-                {
-                    tileColor = {50, 50, 50, 255};
-                } break;
-
-                default:
-                {} break;
-            }
-
-            RenderTile(col, row, tileColor);
-
-            if(tileToRender->occupied)
-            {
-				if(tileToRender->occupant->isExhausted)
-				{
-					SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 50, 0, 0);
-				}
-                RenderSprite(col, row, *tileToRender->occupant->sheet);
-            }
-        }
-    }
-
-    if(GlobalInterfaceState == SELECTED_OVER_GROUND ||
-       GlobalInterfaceState == SELECTED_OVER_INACCESSIBLE ||
-       GlobalInterfaceState == SELECTED_OVER_ALLY ||
-       GlobalInterfaceState == SELECTED_OVER_ENEMY)
-    {
-        SDL_Color accessibleColor = {0, 150, 0, 100};
-        for(pair<int, int> cell : *map.accessible.get())
-        {
-            RenderTile(cell.first, cell.second, accessibleColor);
-        }
-    }
-
-    if(GlobalInterfaceState == TARGETING_OVER_GROUND ||
-       GlobalInterfaceState == TARGETING_OVER_UNTARGETABLE ||
-       GlobalInterfaceState == TARGETING_OVER_ALLY ||
-       GlobalInterfaceState == TARGETING_OVER_ENEMY)
-    {
-        SDL_Color attackableColor = {150, 0, 0, 100};
-        for(pair<int, int> cell : *map.interactible.get())
-        {
-            RenderTile(cell.first, cell.second, attackableColor);
-        }
-    }
-
-    // Render Cursor
-    SDL_Color cursorColor = {0, 150, 0, 100};
-    RenderTile(cursor.col, cursor.row, cursorColor);
-
-    RenderText(debugMessageOne, 0, TILE_SIZE * MAP_SIZE);
-    RenderText(debugMessageTwo, 0, TILE_SIZE * MAP_SIZE + debugMessageOne.height);
-    RenderText(debugMessageThree, 0, TILE_SIZE * MAP_SIZE + debugMessageOne.height + debugMessageTwo.height);
-
-    SDL_RenderPresent(GlobalRenderer);
-}
-
-
-
-// =================================== game logic =================================================
-
-
-// Mutates the given Cursor to move it.
-void
-MoveCursor(Cursor *cursor, int colDelta, int rowDelta)
-{
-    int newCol = cursor->col + colDelta;
-    int newRow = cursor->row + rowDelta;
-    if(IsValidBoundsPosition(newCol, newRow))
-    {
-        cursor->col = newCol;
-        cursor->row = newRow;
-    }
-}
-
-// Mutates a tile's type at the cursor's position.
-void
-ChangeTileType(const Cursor &cursor, Tilemap *map, int type)
-{
-    map->tiles[cursor.col][cursor.row].type = type;
-}
-
-
-// Selects a given tile.
-void
-Select(const Tilemap &map, Cursor *cursor)
-{
-    cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
-}
-
-
-// Deselects the currently selected tile.
-void
-Deselect(Cursor *cursor)
-{
-    cursor->selected = nullptr;
-}
-
-
 // ============================== loading data =================================
 // Loads a Texture displaying the given text in the given color.
 unique_ptr<Texture>
@@ -589,37 +452,64 @@ LoadTextureImage(std::string path)
     assert(texture);
     SDL_FreeSurface(surface);
 
-    return make_shared<Texture>(texture, width, height);;
+    return make_shared<Texture>(texture, width, height);
 }
 
 
 // ================================== SDL Functions ================================================
 
-// Initializes SDL Objects.
+// Initializes SDL and Dear ImGui
 bool
 Initialize()
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == 0)
     {
+        SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
+														SDL_WINDOW_RESIZABLE | 
+                                                        //SDL_WINDOW_ALLOW_HIGHDPI |
+                                                        SDL_WINDOW_SHOWN
+														);
         GlobalWindow = SDL_CreateWindow("Emblem",
-                                        700,
+                                        700, // Placement for debugging
                                         200,
                                         SCREEN_WIDTH,
                                         SCREEN_HEIGHT,
-                                        SDL_WINDOW_SHOWN);
+                                        windowFlags);
         if(GlobalWindow)
         {
-            GlobalRenderer = SDL_CreateRenderer(GlobalWindow, -1, SDL_RENDERER_ACCELERATED);
+            GlobalRenderer = SDL_CreateRenderer(GlobalWindow, -1, 
+                    SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
             if(GlobalRenderer)
             {
                 if(TTF_Init() != -1)
                 {
-                    GlobalFont = TTF_OpenFont("verdanab.ttf", 28);
+                    GlobalFont = TTF_OpenFont("../assets/fonts/verdanab.ttf", 28);
                     if(GlobalFont)
                     {
                         int imgFlags = IMG_INIT_PNG;
                         if(IMG_Init(imgFlags) & imgFlags)
                         {
+                            // Setup Dear ImGui context
+                            IMGUI_CHECKVERSION();
+                            ImGui::CreateContext();
+                            ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+     						// Enable Keyboard Control
+                            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+						    // Enable Gamepad Controls
+                            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+							printf("%d\n", io.WantCaptureKeyboard);
+							io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
+
+                            // Setup Dear ImGui style
+                            ImGui::StyleColorsDark();
+
+                            // Setup Platform/Renderer backends
+                            ImGui_ImplSDL2_InitForSDLRenderer(GlobalWindow, GlobalRenderer);
+                            ImGui_ImplSDLRenderer_Init(GlobalRenderer);
+
                             return true;
                         }
                         assert(!"ERROR: IMG\n");
@@ -655,11 +545,14 @@ Initialize()
 // Frees up allocated memory.
 void Close()
 {
-
     //SDL_DestroyTexture(ALL TEXTURES);
 
     //Close game controller
     //SDL_JoystickClose(gGameController);
+
+    ImGui_ImplSDLRenderer_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 
     TTF_CloseFont(GlobalFont);
     SDL_DestroyRenderer(GlobalRenderer);
@@ -677,166 +570,172 @@ HandleEvents(InputState *input)
     SDL_Event Event;
     while(SDL_PollEvent(&Event))
     {
-        if(Event.type == SDL_QUIT)
-        {
-            GlobalRunning = false;
-        }
-        else if(Event.type == SDL_KEYDOWN)
-        {
-            switch(Event.key.keysym.sym)
-            {
-                case SDLK_ESCAPE:
-                {
-                    GlobalRunning = false;
-                } break;
+		if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_TAB)
+		{
+			GlobalGuiMode = !GlobalGuiMode;
+		}
+		if(Event.type == SDL_QUIT || Event.key.keysym.sym == SDLK_ESCAPE)
+		{
+			GlobalRunning = false;
+		}
+		if(GlobalGuiMode)
+		{
+			ImGui_ImplSDL2_ProcessEvent(&Event);
+		}
+		else
+		{
+			if(Event.type == SDL_KEYDOWN)
+			{
+				switch(Event.key.keysym.sym)
+				{
+					case SDLK_SPACE:
+					{
+						input->a = true;
+					} break;
 
-                case SDLK_SPACE:
-                {
-                    input->a = true;
-                } break;
+					case SDLK_LSHIFT:
+					{
+						input->b = true;
+					} break;
 
-                case SDLK_LSHIFT:
-                {
-                    input->b = true;
-                } break;
+					case SDLK_w:
+					{
+						input->up = true;
+					} break;
 
-                case SDLK_w:
-                {
-                    input->up = true;
-                } break;
+					case SDLK_s:
+					{
+						input->down = true;
+					} break;
 
-                case SDLK_s:
-                {
-                    input->down = true;
-                } break;
+					case SDLK_a:
+					{
+						input->left = true;
+					} break;
 
-                case SDLK_a:
-                {
-                    input->left = true;
-                } break;
+					case SDLK_d:
+					{
+						input->right = true;
+					} break;
 
-                case SDLK_d:
-                {
-                    input->right = true;
-                } break;
+					default:
+					{
+					} break;
+				}
+			}
+			else if(Event.type == SDL_KEYUP)
+			{
+				switch(Event.key.keysym.sym)
+				{
+					case SDLK_w:
+					{
+						input->up = false;
+					} break;
 
-                default:
-                {
-                } break;
-            }
-        }
-        else if(Event.type == SDL_KEYUP)
-        {
-            switch(Event.key.keysym.sym)
-            {
-                case SDLK_w:
-                {
-                    input->up = false;
-                } break;
+					case SDLK_s:
+					{
+						input->down = false;
+					} break;
 
-                case SDLK_s:
-                {
-                    input->down = false;
-                } break;
+					case SDLK_a:
+					{
+						input->left = false;
+					} break;
 
-                case SDLK_a:
-                {
-                    input->left = false;
-                } break;
+					case SDLK_d:
+					{
+						input->right = false;
+					} break;
 
-                case SDLK_d:
-                {
-                    input->right = false;
-                } break;
+					case SDLK_SPACE:
+					{
+						input->a = false;
+					} break;
 
-                case SDLK_SPACE:
-                {
-                    input->a = false;
-                } break;
+					case SDLK_LSHIFT:
+					{
+						input->b = false;
+					} break;
 
-                case SDLK_LSHIFT:
-                {
-                    input->b = false;
-                } break;
+					default:
+					{
+					} break;
+				}
+			}
+			else if(Event.type == SDL_JOYAXISMOTION)
+			{
+				if(Event.jaxis.which == 0)
+				{
+					if(Event.jaxis.axis == 0)
+					{
+						if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
+						{
+							input->left = true;
+						}
+						else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
+						{
+							input->right = true;
+						}
+						else
+						{
+							input->left = false;
+							input->right = false;
+						}
+					}
 
-                default:
-                {
-                } break;
-            }
-        }
-        else if(Event.type == SDL_JOYAXISMOTION)
-        {
-            if(Event.jaxis.which == 0)
-            {
-                if(Event.jaxis.axis == 0)
-                {
-                    if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
-                    {
-                        input->left = true;
-                    }
-                    else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
-                    {
-                        input->right = true;
-                    }
-                    else
-                    {
-                        input->left = false;
-                        input->right = false;
-                    }
-                }
-
-                if(Event.jaxis.axis == 1)
-                {
-                    if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
-                    {
-                        input->up = true;
-                    }
-                    else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
-                    {
-                        input->down = true;
-                    }
-                    else
-                    {
-                        input->up = false;
-                        input->down = false;
-                    }
-                }
-            }
-        }
-        else if(Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
-        {
-            if(Event.jbutton.button == 0)
-            {
-                if(Event.type == SDL_JOYBUTTONDOWN)
-                {
-                    input->a = true;
-                }
-                else if(Event.type == SDL_JOYBUTTONUP)
-                {
-                    input->a = false;
-                }
-            }
-            if(Event.jbutton.button == 1)
-            {
-                if(Event.type == SDL_JOYBUTTONDOWN)
-                {
-                    input->b = true;
-                }
-                else if(Event.type == SDL_JOYBUTTONUP)
-                {
-                    input->b = false;
-                }
-            }
-        }
-        else if(Event.type == SDL_JOYDEVICEADDED)
-        {
-            printf("Gamepad connected!\n");
-            GlobalGamepadMode = true;
-        }
-        else if(Event.type == SDL_JOYDEVICEREMOVED)
-        {
-            printf("Gamepad removed!\n");
-            GlobalGamepadMode = false;
-        }
+					if(Event.jaxis.axis == 1)
+					{
+						if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
+						{
+							input->up = true;
+						}
+						else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
+						{
+							input->down = true;
+						}
+						else
+						{
+							input->up = false;
+							input->down = false;
+						}
+					}
+				}
+			}
+			else if(Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
+			{
+				if(Event.jbutton.button == 0)
+				{
+					if(Event.type == SDL_JOYBUTTONDOWN)
+					{
+						input->a = true;
+					}
+					else if(Event.type == SDL_JOYBUTTONUP)
+					{
+						input->a = false;
+					}
+				}
+				if(Event.jbutton.button == 1)
+				{
+					if(Event.type == SDL_JOYBUTTONDOWN)
+					{
+						input->b = true;
+					}
+					else if(Event.type == SDL_JOYBUTTONUP)
+					{
+						input->b = false;
+					}
+				}
+			}
+			else if(Event.type == SDL_JOYDEVICEADDED)
+			{
+				printf("Gamepad connected!\n");
+				GlobalGamepadMode = true;
+			}
+			else if(Event.type == SDL_JOYDEVICEREMOVED)
+			{
+				printf("Gamepad removed!\n");
+				GlobalGamepadMode = false;
+			}
+		}
     }
 }

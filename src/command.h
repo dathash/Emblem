@@ -3,11 +3,6 @@
 // File: Commands
 // Date: July 2022
 
-/*
-    TODO
-    Specify the other cases of our FSM once things are further along.
- */
-
 #ifndef COMMAND_H
 #define COMMAND_H
 
@@ -326,12 +321,13 @@ private:
 
 
 // ============================== finding target ===========================================
-class SelectTargetForAttackCommand : public Command
+class InitiateTargetingCommand : public Command
 {
 public:
-    SelectTargetForAttackCommand(Cursor *cursor_in, Tilemap *map_in)
+    InitiateTargetingCommand(Cursor *cursor_in, Tilemap *map_in, TargetMode targetMode_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+	  targetMode(targetMode_in)
     {}
 
     virtual void Execute()
@@ -339,17 +335,37 @@ public:
         cursor->targeterCol = cursor->col;
         cursor->targeterRow = cursor->row;
         // Find tiles that a unit can interact with.
-        map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
-                                             cursor->selected->minRange, cursor->selected->maxRange);
+		cursor->targetMode = targetMode;
+		switch(targetMode)
+		{
+			case(ATTACK_TARGET):
+			{
+				map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+												 cursor->selected->minRange, cursor->selected->maxRange);
+			} break;
+			case(HEAL_TARGET):
+			{
+				map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 1, 1);
+			} break;
+			case(TRADE_TARGET):
+			{
+				map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 1, 1);
+			} break;
+			default:
+			{
+				assert(!"No targetting goal stated.\n");
+			} break;
+		}
 
-        printf("COMMAND | Finding targets for Unit %d at <%d, %d>\n", 
-               cursor->selected->id, cursor->col, cursor->row);
+        printf("COMMAND | Finding targets (Mode %d) for Unit %d at <%d, %d>\n", 
+               targetMode, cursor->selected->id, cursor->col, cursor->row);
         GlobalInterfaceState = TARGETING_OVER_GROUND;
     }
 
 private:
     Cursor *cursor;
     Tilemap *map;
+	TargetMode targetMode;
 };
 
 class MoveTCommand : public Command
@@ -761,7 +777,7 @@ public:
     }
 
     // updates what the user can do with their buttons.
-    // contains some state, which is the minimum amount.
+	// contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map)
     {
@@ -937,10 +953,10 @@ public:
             case(UNIT_MENU_ROOT):
             {
                 BindUp(make_shared<DeactivateUnitCommand>(cursor));
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
+                BindDown(make_shared<InitiateTargetingCommand>(cursor, map, HEAL_TARGET));
+                BindLeft(make_shared<InitiateTargetingCommand>(cursor, map, TRADE_TARGET));
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<SelectTargetForAttackCommand>(cursor, map));
+                BindA(make_shared<InitiateTargetingCommand>(cursor, map, ATTACK_TARGET));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
             case(UNIT_MENU_INFO):
