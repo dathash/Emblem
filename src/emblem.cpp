@@ -5,14 +5,17 @@
 
 /*
     TODO
+    Animation
+        Synchronization
+        Combat Scene
+        Key Repeat
+
+    NEXT
+    Fix Trading
     User Interface
         Show Unit/Enemy details
         Show Tile details
-    Switch to GameController API
-
-    NEXT
-    Combat
-        Effects actually occur
+    Combat Effects actually occur
     Menus
         Unit Actions Menu
         Game Menu
@@ -21,11 +24,6 @@
         Editing
         Saving
         Transitions
-    Animation
-        Synchronization
-        Sprite Animation
-        Combat Scene
-        Key Repeat
     Music (MiniAudio)
 
     NICE
@@ -37,6 +35,7 @@
         Items
 
     LATER
+    Switch to GameController API
     Tiles have properties 
         (That remain together and don't rely on eachother)
     Turns
@@ -50,6 +49,8 @@
 // low level
 #define JOYSTICK_DEAD_ZONE 8000
 
+#define TIME_STEP 33.33333
+
 // rendering
 #define TILE_SIZE 100
 #define SCREEN_WIDTH 1280
@@ -60,6 +61,12 @@
 
 // backend
 #define MAP_SIZE 8
+
+
+
+// TODO MOVE THIS
+static bool GlobalTweening = false;
+static bool ReadyForCommand = false;
 
 
 // ========================== includes =====================================
@@ -112,6 +119,7 @@ struct InputState
     }
 };
 
+
 struct Texture
 {
     SDL_Texture *sdlTexture;
@@ -148,21 +156,58 @@ struct Texture
 struct SpriteSheet
 {
     shared_ptr<Texture> texture;
-    int size;
-    int col;
-    int row;
+    int size    = 32;
+    int tracks  = 0;
+    int frames  = 0;
+    int track   = 0;
+    int frame   = 0;
+    int speed   = 1; // inverse. 1 is faster than 10.
+    int counter = 0;
+
+    int colPixelOffset = 0;
+    int rowPixelOffset = 0;
+
+    // called each frame
+    void Update()
+    {
+        counter++;
+        if(counter % speed == 0)
+        {
+            int newFrame = frame + 1;
+            if(newFrame >= frames)
+            {
+                this->frame = 0;
+            }
+            else
+            {
+                this->frame = newFrame;
+            }
+        }
+    }
+
+    // switches the sprite to the next animation track
+    void ChangeTrack(int track_in)
+    {
+        if(track_in >= tracks || track_in < 0)
+        {
+            assert(!"SpriteSheet | ChooseTrack | Invalid Animation Track!\n");
+        }
+        this->track = track_in;
+    }
 
     SpriteSheet()
     {
         //printf("SpriteSheet Constructed! (Default)\n");
     }
 
-    SpriteSheet(shared_ptr<Texture> texture_in, int size_in)
+    SpriteSheet(shared_ptr<Texture> texture_in, int size_in, int speed_in)
     {
         this->texture = texture_in;
         this->size = size_in;
-        this->col = 0;
-        this->row = 0;
+        this->speed = speed_in;
+
+        this->tracks = texture_in->height / size_in;
+        this->frames = texture_in->width / size_in;
         //printf("SpriteSheet Constructed!\n");
     }
 
@@ -176,8 +221,79 @@ struct SpriteSheet
         printf("====== Sprite ======\n");
         texture->PrintTextureState();
         printf("size: %d\n", size);
-        printf("col : %d\n", col);
-        printf("row : %d\n", row);
+        printf("t's : %d\n", tracks);
+        printf("f's : %d\n", frames);
+        printf("trak: %d\n", track);
+        printf("fram: %d\n", frame);
+        printf("spd : %d\n", speed);
+        printf("cnt : %d\n", counter);
+    }
+};
+
+struct Tween
+{
+    int start;
+    int end;
+    int duration;
+    int currentTime = 0;
+    bool active = false;
+	bool resetting = false;
+
+    int *value;
+
+    Tween(int start_in, int end_in, int duration_in, int *value_in, bool resetting_in)
+    : start(start_in),
+      end(end_in),
+      duration(duration_in),
+      value(value_in),
+	  resetting(resetting_in)
+    {}
+
+    void Activate()
+    {
+        active = true;
+		GlobalTweening = true;
+    }
+
+    void Deactivate()
+    {
+        active = false;
+        GlobalTweening = false;
+		ReadyForCommand = true;
+		if(resetting)
+		{
+			*value = start;
+		}
+    }
+
+    void Reset()
+    {
+        currentTime = 0;
+        active = true;
+    }
+
+    void Update()
+    {
+		++this->currentTime;
+		if(currentTime < duration)
+		{
+			*value = Position();
+		}
+		else
+		{
+			Deactivate();
+		}
+    }
+
+    int Lerp(int a, int b, float amount)
+    {
+        return (int)((1.0f - amount) * a + amount * b);
+    }
+
+    int Position()
+    {
+        float amount = (float)currentTime / (float)duration;
+        return Lerp(start, end, amount);
     }
 };
 
@@ -190,14 +306,18 @@ struct Unit
     int mov = 0;
     int hp = 10;
     int attack = 3;
-    int heal = 2;
+    int healing = 2;
     int minRange = 1;
     int maxRange = 1;
     shared_ptr<SpriteSheet> sheet = nullptr;
 
+    void Update()
+    {
+        sheet->Update();
+    }
 
-    Unit(int id_in, bool isAlly_in, int mov_in, 
-         int minRange_in, int maxRange_in, 
+    Unit(int id_in, bool isAlly_in, int mov_in,
+         int minRange_in, int maxRange_in,
          shared_ptr<Texture> texture_in)
     {
         //printf("Unit Constructed!\n");
@@ -206,7 +326,7 @@ struct Unit
         this->mov = mov_in;
         this->minRange = minRange_in;
         this->maxRange = maxRange_in;
-        this->sheet = make_shared<SpriteSheet>(texture_in, 32);
+        this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
     }
 
     ~Unit()
@@ -221,8 +341,6 @@ enum TileTypes
     FLOOR,
     WALL
 };
-
-
 struct Tile
 {
     int type = 0;
@@ -230,7 +348,6 @@ struct Tile
     bool occupied = false;
     std::shared_ptr<Unit> occupant = nullptr;
 };
-
 struct Tilemap
 {
     Tile tiles[MAP_SIZE][MAP_SIZE] = {};
@@ -238,13 +355,6 @@ struct Tilemap
     shared_ptr<vector<pair<int, int>>> interactible = nullptr;
 };
 
-enum TargetMode
-{
-    NONE_TARGET,
-    ATTACK_TARGET,
-    HEAL_TARGET,
-    TRADE_TARGET,
-};
 
 struct Cursor
 {
@@ -252,11 +362,22 @@ struct Cursor
     int row = 1;
     std::shared_ptr<Unit> selected = nullptr;
     std::shared_ptr<Unit> targeted = nullptr;
-    int selectedCol = -1;
+    int selectedCol = -1; // Where the cursor was before placing a unit
     int selectedRow = -1;
-    int targeterCol = -1;
+    int targeterCol = -1; // Where the cursor was before choosing a target
     int targeterRow = -1;
-    TargetMode targetMode = NONE_TARGET;
+
+    shared_ptr<SpriteSheet> sheet;
+
+    Cursor(shared_ptr<Texture> texture_in)
+    {
+        this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
+    }
+
+    void Update()
+    {
+        sheet->Update();
+    }
 
     void PrintCursorState()
     {
@@ -283,6 +404,7 @@ static SDL_Renderer *GlobalRenderer = nullptr;
 static bool GlobalRunning = false;
 static bool GlobalGamepadMode = false;
 static bool GlobalGuiMode = false;
+
 static TTF_Font *GlobalFont = nullptr;
 
 
@@ -319,16 +441,23 @@ int main(int argc, char *argv[])
 
     InputState input = {};
     InputHandler handler;
+
     queue<shared_ptr<Command>> commandQueue = {};
+	shared_ptr<Tween> currentTween = nullptr;
 
     real32 TargetMillisecondsPerFrame = 16.666f;
     u64 startTime = SDL_GetPerformanceCounter();
-    u64 endTime;
+    u64 endTime = 0;
     u64 frameNumber = 0;
+    real32 ElapsedMS = 0.0f;
 
     Tilemap map = {};
-    Cursor cursor;
+    map.tiles[4][4].type = WALL;
+    map.tiles[4][4].penalty = 10;
 
+    Cursor cursor(LoadTextureImage("../assets/sprites/cursor.png"));;
+
+    // Initialize Units
     shared_ptr<Unit> lucina = make_shared<Unit>(0, true, 3, 2, 2, LoadTextureImage("../assets/sprites/lucina_final.png"));
     map.tiles[3][5].occupant = lucina;
     map.tiles[3][5].occupied = true;
@@ -341,6 +470,7 @@ int main(int argc, char *argv[])
     map.tiles[6][4].occupant = flavia;
     map.tiles[6][4].occupied = true;
 
+    // Initial InputHandler commands
     handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, map));
     handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, map));
     handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, map));
@@ -356,30 +486,61 @@ int main(int argc, char *argv[])
     while(GlobalRunning)
     {
         HandleEvents(&input);
-        shared_ptr<Command> newCommand = handler.HandleInput(&input);
 
-        if(newCommand)
-        {
-            commandQueue.push(newCommand);
-            //printf("Pushed a new Command onto the Queue!\n");
-            //printf("Queue Size: %lu\n", commandQueue.size());
-        }
+// ====================== Where the action Happens ===============
+		if(GlobalTweening)
+		{
+            currentTween->Update();
+		}
+		else
+		{
+			shared_ptr<Command> newCommand = handler.HandleInput(&input);
+			if(newCommand)
+			{
+				commandQueue.push(newCommand);
+			}
 
-        // NOTE: This can be tied to anything. 
-        //       Say, an animation finishing, or a thread returning.
-        if(!commandQueue.empty())
-        {
-            commandQueue.front().get()->Execute();
-            commandQueue.pop();
-            handler.UpdateCommands(&cursor, &map);
-        }
+			if(!commandQueue.empty())
+			{
+				currentTween = commandQueue.front()->GetTween();
+				if(currentTween)
+				{
+					currentTween->Activate();
+					GlobalTweening = true;
+				}
+				else
+				{
+					ReadyForCommand = true;
+				}
+			}
+		}
 
+		if(ReadyForCommand)
+		{
+			commandQueue.front()->Execute();
+			commandQueue.pop();
+			handler.UpdateCommands(&cursor, &map);
+			if(currentTween)
+			{
+				currentTween->Reset();
+			}
+			ReadyForCommand = false;
+		}
+// ================================================================
+
+        lucina->Update();
+        flavia->Update();
+        donnel->Update();
+        cursor.Update();
+
+
+// ============================= render =========================================
         Render(map, cursor, *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
 
 // =========================== v debug messages v ============================================
         endTime = SDL_GetPerformanceCounter();
-        real32 ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency()) * 1000.0f;
+        ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency()) * 1000.0f;
 
         // Debug Messages
         char buffer[256];
@@ -388,13 +549,24 @@ int main(int argc, char *argv[])
         //input.PrintInputState();
         //unit->sheet.PrintSpriteState();
 
-        sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
-               cursor.col, cursor.row, map.tiles[cursor.col][cursor.row].type,
-               map.tiles[cursor.col][cursor.row].occupied,
-               (void *)map.tiles[cursor.col][cursor.row].occupant.get());
+        //sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
+               //cursor.col, cursor.row, map.tiles[cursor.col][cursor.row].type,
+               //map.tiles[cursor.col][cursor.row].occupied,
+               //(void *)map.tiles[cursor.col][cursor.row].occupant.get());
+        sprintf(buffer, "Mode: %d", GlobalInterfaceState);
+
         debugMessageOne = LoadTextureText(string(buffer), {250, 0, 0, 255});
 
-        sprintf(buffer, "Mode: %d", GlobalInterfaceState);
+		if(currentTween)
+		{
+			sprintf(buffer, "GlobalTweening: %d | Start: %d, End: %d, Current: %d, Value: %d",
+					GlobalTweening, currentTween->start, currentTween->end,
+					currentTween->currentTime, *currentTween->value);
+		}
+		else
+		{
+			sprintf(buffer, "GlobalTweening: %d | No Tween ATM.", GlobalTweening);
+		}
         debugMessageTwo = LoadTextureText(string(buffer), {0, 100, 0, 255});
 
         sprintf(buffer, "MS: %.02f, FPS: %d", ElapsedMS, (int)(1.0f / ElapsedMS * 1000.0f));
@@ -465,10 +637,10 @@ Initialize()
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == 0)
     {
         SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
-														SDL_WINDOW_RESIZABLE | 
+                                                        SDL_WINDOW_RESIZABLE | 
                                                         //SDL_WINDOW_ALLOW_HIGHDPI |
                                                         SDL_WINDOW_SHOWN
-														);
+                                                        );
         GlobalWindow = SDL_CreateWindow("Emblem",
                                         700, // Placement for debugging
                                         200,
@@ -494,14 +666,14 @@ Initialize()
                             ImGui::CreateContext();
                             ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-     						// Enable Keyboard Control
+                            // Enable Keyboard Control
                             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-						    // Enable Gamepad Controls
+                            // Enable Gamepad Controls
                             io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-							printf("%d\n", io.WantCaptureKeyboard);
-							io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
+                            printf("%d\n", io.WantCaptureKeyboard);
+                            io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
 
                             // Setup Dear ImGui style
                             ImGui::StyleColorsDark();
@@ -570,172 +742,172 @@ HandleEvents(InputState *input)
     SDL_Event Event;
     while(SDL_PollEvent(&Event))
     {
-		if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_TAB)
-		{
-			GlobalGuiMode = !GlobalGuiMode;
-		}
-		if(Event.type == SDL_QUIT || Event.key.keysym.sym == SDLK_ESCAPE)
-		{
-			GlobalRunning = false;
-		}
-		if(GlobalGuiMode)
-		{
-			ImGui_ImplSDL2_ProcessEvent(&Event);
-		}
-		else
-		{
-			if(Event.type == SDL_KEYDOWN)
-			{
-				switch(Event.key.keysym.sym)
-				{
-					case SDLK_SPACE:
-					{
-						input->a = true;
-					} break;
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_TAB)
+        {
+            GlobalGuiMode = !GlobalGuiMode;
+        }
+        if(Event.type == SDL_QUIT || Event.key.keysym.sym == SDLK_ESCAPE)
+        {
+            GlobalRunning = false;
+        }
+        if(GlobalGuiMode)
+        {
+            ImGui_ImplSDL2_ProcessEvent(&Event);
+        }
+        else
+        {
+            if(Event.type == SDL_KEYDOWN)
+            {
+                switch(Event.key.keysym.sym)
+                {
+                    case SDLK_SPACE:
+                    {
+                        input->a = true;
+                    } break;
 
-					case SDLK_LSHIFT:
-					{
-						input->b = true;
-					} break;
+                    case SDLK_LSHIFT:
+                    {
+                        input->b = true;
+                    } break;
 
-					case SDLK_w:
-					{
-						input->up = true;
-					} break;
+                    case SDLK_w:
+                    {
+                        input->up = true;
+                    } break;
 
-					case SDLK_s:
-					{
-						input->down = true;
-					} break;
+                    case SDLK_s:
+                    {
+                        input->down = true;
+                    } break;
 
-					case SDLK_a:
-					{
-						input->left = true;
-					} break;
+                    case SDLK_a:
+                    {
+                        input->left = true;
+                    } break;
 
-					case SDLK_d:
-					{
-						input->right = true;
-					} break;
+                    case SDLK_d:
+                    {
+                        input->right = true;
+                    } break;
 
-					default:
-					{
-					} break;
-				}
-			}
-			else if(Event.type == SDL_KEYUP)
-			{
-				switch(Event.key.keysym.sym)
-				{
-					case SDLK_w:
-					{
-						input->up = false;
-					} break;
+                    default:
+                    {
+                    } break;
+                }
+            }
+            else if(Event.type == SDL_KEYUP)
+            {
+                switch(Event.key.keysym.sym)
+                {
+                    case SDLK_w:
+                    {
+                        input->up = false;
+                    } break;
 
-					case SDLK_s:
-					{
-						input->down = false;
-					} break;
+                    case SDLK_s:
+                    {
+                        input->down = false;
+                    } break;
 
-					case SDLK_a:
-					{
-						input->left = false;
-					} break;
+                    case SDLK_a:
+                    {
+                        input->left = false;
+                    } break;
 
-					case SDLK_d:
-					{
-						input->right = false;
-					} break;
+                    case SDLK_d:
+                    {
+                        input->right = false;
+                    } break;
 
-					case SDLK_SPACE:
-					{
-						input->a = false;
-					} break;
+                    case SDLK_SPACE:
+                    {
+                        input->a = false;
+                    } break;
 
-					case SDLK_LSHIFT:
-					{
-						input->b = false;
-					} break;
+                    case SDLK_LSHIFT:
+                    {
+                        input->b = false;
+                    } break;
 
-					default:
-					{
-					} break;
-				}
-			}
-			else if(Event.type == SDL_JOYAXISMOTION)
-			{
-				if(Event.jaxis.which == 0)
-				{
-					if(Event.jaxis.axis == 0)
-					{
-						if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
-						{
-							input->left = true;
-						}
-						else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
-						{
-							input->right = true;
-						}
-						else
-						{
-							input->left = false;
-							input->right = false;
-						}
-					}
+                    default:
+                    {
+                    } break;
+                }
+            }
+            else if(Event.type == SDL_JOYAXISMOTION)
+            {
+                if(Event.jaxis.which == 0)
+                {
+                    if(Event.jaxis.axis == 0)
+                    {
+                        if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
+                        {
+                            input->left = true;
+                        }
+                        else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
+                        {
+                            input->right = true;
+                        }
+                        else
+                        {
+                            input->left = false;
+                            input->right = false;
+                        }
+                    }
 
-					if(Event.jaxis.axis == 1)
-					{
-						if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
-						{
-							input->up = true;
-						}
-						else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
-						{
-							input->down = true;
-						}
-						else
-						{
-							input->up = false;
-							input->down = false;
-						}
-					}
-				}
-			}
-			else if(Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
-			{
-				if(Event.jbutton.button == 0)
-				{
-					if(Event.type == SDL_JOYBUTTONDOWN)
-					{
-						input->a = true;
-					}
-					else if(Event.type == SDL_JOYBUTTONUP)
-					{
-						input->a = false;
-					}
-				}
-				if(Event.jbutton.button == 1)
-				{
-					if(Event.type == SDL_JOYBUTTONDOWN)
-					{
-						input->b = true;
-					}
-					else if(Event.type == SDL_JOYBUTTONUP)
-					{
-						input->b = false;
-					}
-				}
-			}
-			else if(Event.type == SDL_JOYDEVICEADDED)
-			{
-				printf("Gamepad connected!\n");
-				GlobalGamepadMode = true;
-			}
-			else if(Event.type == SDL_JOYDEVICEREMOVED)
-			{
-				printf("Gamepad removed!\n");
-				GlobalGamepadMode = false;
-			}
-		}
+                    if(Event.jaxis.axis == 1)
+                    {
+                        if(Event.jaxis.value < -JOYSTICK_DEAD_ZONE)
+                        {
+                            input->up = true;
+                        }
+                        else if(Event.jaxis.value > JOYSTICK_DEAD_ZONE)
+                        {
+                            input->down = true;
+                        }
+                        else
+                        {
+                            input->up = false;
+                            input->down = false;
+                        }
+                    }
+                }
+            }
+            else if(Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
+            {
+                if(Event.jbutton.button == 0)
+                {
+                    if(Event.type == SDL_JOYBUTTONDOWN)
+                    {
+                        input->a = true;
+                    }
+                    else if(Event.type == SDL_JOYBUTTONUP)
+                    {
+                        input->a = false;
+                    }
+                }
+                if(Event.jbutton.button == 1)
+                {
+                    if(Event.type == SDL_JOYBUTTONDOWN)
+                    {
+                        input->b = true;
+                    }
+                    else if(Event.type == SDL_JOYBUTTONUP)
+                    {
+                        input->b = false;
+                    }
+                }
+            }
+            else if(Event.type == SDL_JOYDEVICEADDED)
+            {
+                printf("Gamepad connected!\n");
+                GlobalGamepadMode = true;
+            }
+            else if(Event.type == SDL_JOYDEVICEREMOVED)
+            {
+                printf("Gamepad removed!\n");
+                GlobalGamepadMode = false;
+            }
+        }
     }
 }

@@ -25,10 +25,14 @@ RenderTile(int col, int row, const SDL_Color &color)
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(int col, int row, const SpriteSheet &sheet)
+RenderSprite(int col, int row, 
+             int colPixelOffset, int rowPixelOffset,
+             const SpriteSheet &sheet)
 {
-    SDL_Rect destination = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-    SDL_Rect source = {sheet.col * sheet.size, sheet.row * sheet.size, sheet.size, sheet.size};
+    SDL_Rect destination = {col * TILE_SIZE + colPixelOffset, 
+                            row * TILE_SIZE + rowPixelOffset, 
+                            TILE_SIZE, TILE_SIZE};
+    SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
     SDL_RenderCopy(GlobalRenderer, sheet.texture->sdlTexture, &source, &destination);
 }
@@ -92,34 +96,23 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
-    if(GlobalInterfaceState == TARGETING_OVER_GROUND ||
-       GlobalInterfaceState == TARGETING_OVER_UNTARGETABLE ||
-       GlobalInterfaceState == TARGETING_OVER_ALLY ||
-       GlobalInterfaceState == TARGETING_OVER_ENEMY)
+    if(GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == ATTACK_TARGETING_OVER_UNTARGETABLE)
     {
-        SDL_Color interactingColor = {0, 0, 0, 100};
-        switch(cursor.targetMode)
-        {
-            case(ATTACK_TARGET):
-            {
-                interactingColor = {250, 0, 0, 100};
-            } break;
-            case(HEAL_TARGET):
-            {
-                interactingColor = {0, 250, 0, 100};
-            } break;
-            case(TRADE_TARGET):
-            {
-                interactingColor = {0, 0, 250, 100};
-            } break;
-            default:
-            {
-                assert(!"No targetting goal stated.\n");
-            } break;
-        }
+        SDL_Color attackColor = {250, 0, 0, 100};
         for(pair<int, int> cell : *map.interactible.get())
         {
-            RenderTile(cell.first, cell.second, interactingColor);
+            RenderTile(cell.first, cell.second, attackColor);
+        }
+    }
+
+    if(GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == HEALING_TARGETING_OVER_UNTARGETABLE)
+    {
+        SDL_Color healColor = {0, 100, 0, 100};
+        for(pair<int, int> cell : *map.interactible.get())
+        {
+            RenderTile(cell.first, cell.second, healColor);
         }
     }
 
@@ -137,15 +130,16 @@ Render(const Tilemap &map, const Cursor &cursor,
                 {
                     SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 50, 0, 0);
                 }
-                RenderSprite(col, row, *tileToRender->occupant->sheet);
+                RenderSprite(col, row, 0, 0, *tileToRender->occupant->sheet);
             }
         }
     }
 
 
 // ================================= render cursor ================================================
-    SDL_Color cursorColor = {0, 150, 0, 100};
-    RenderTile(cursor.col, cursor.row, cursorColor);
+    RenderSprite(cursor.col, cursor.row, 
+                 cursor.sheet->colPixelOffset, cursor.sheet->rowPixelOffset, 
+                 *cursor.sheet);
 
 
 // ================================= render ui elements ===========================================
