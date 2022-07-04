@@ -23,17 +23,20 @@ enum InterfaceState
     HEALING_TARGETING_OVER_UNTARGETABLE,
     HEALING_TARGETING_OVER_TARGET,
 
+    TRADING_TARGETING_OVER_UNTARGETABLE,
+    TRADING_TARGETING_OVER_TARGET,
+
     PREVIEW_ATTACK,
     PREVIEW_HEALING,
+    TRADING,
 
     GAME_MENU_ROOT,
+    GAME_MENU_OUTLOOK,
     GAME_MENU_OPTIONS,
-    GAME_MENU_SAVE,
-    GAME_MENU_UNITS,
+    GAME_MENU_END_TURN,
 
     UNIT_MENU_ROOT,
     UNIT_MENU_INFO,
-    UNIT_MENU_TRADE,
     UNIT_MENU_ITEM,
     //UNIT_MENU_TALK,
 
@@ -84,11 +87,9 @@ public:
       map(map_in)
     {}
 
-
     virtual shared_ptr<Tween>
     GetTween()
     {
-        int SPEED = 2;
         shared_ptr<Tween> result;
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
@@ -96,19 +97,19 @@ public:
         {
             if(col == -1)
             {
-                result = make_shared<Tween>(0, -TILE_SIZE, SPEED, &cursor->sheet->colPixelOffset, true);
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
             }
             else if(col == 1)
             {
-                result = make_shared<Tween>(0, TILE_SIZE, SPEED, &cursor->sheet->colPixelOffset, true);
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
             }
             else if(row == -1)
             {
-                result = make_shared<Tween>(0, -TILE_SIZE, SPEED, &cursor->sheet->rowPixelOffset, true);
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
             }
             else if(row == 1)
             {
-                result = make_shared<Tween>(0, TILE_SIZE, SPEED, &cursor->sheet->rowPixelOffset, true);
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
             }
             else
             {
@@ -138,7 +139,6 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-
             if(!hoverTile->occupied || hoverTile->occupant->isExhausted)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_GROUND;
@@ -185,10 +185,7 @@ public:
         cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
-
-        // Find tiles that a unit can access.
         map->accessible = AccessibleFrom(*map, cursor->selectedCol, cursor->selectedRow, cursor->selected->mov);
-
         printf("COMMAND | Select Unit %d at <%d, %d>\n", 
                cursor->selected->id, cursor->col, cursor->row);
     }
@@ -218,11 +215,9 @@ public:
     {
         printf("COMMAND | Deselect Unit %d.\n",
             cursor->selected->id);
-
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
         cursor->selected = nullptr;
-
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 
@@ -244,7 +239,6 @@ public:
     virtual shared_ptr<Tween>
     GetTween()
     {
-        int SPEED = 2;
         shared_ptr<Tween> result;
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
@@ -252,19 +246,19 @@ public:
         {
             if(col == -1)
             {
-                result = make_shared<Tween>(0, -TILE_SIZE, SPEED, &cursor->sheet->colPixelOffset, true);
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
             }
             else if(col == 1)
             {
-                result = make_shared<Tween>(0, TILE_SIZE, SPEED, &cursor->sheet->colPixelOffset, true);
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
             }
             else if(row == -1)
             {
-                result = make_shared<Tween>(0, -TILE_SIZE, SPEED, &cursor->sheet->rowPixelOffset, true);
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
             }
             else if(row == 1)
             {
-                result = make_shared<Tween>(0, TILE_SIZE, SPEED, &cursor->sheet->rowPixelOffset, true);
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
             }
             else
             {
@@ -294,8 +288,6 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            char buffer[256];
-
             if(VectorHasElement(pair<int, int>(newCol, newRow), *map.accessible.get()))
             {
                 if(!hoverTile->occupied || hoverTile->occupant->id == cursor->selected->id)
@@ -345,16 +337,11 @@ public:
     virtual void Execute()
     {
         printf("COMMAND | Place Unit %d at <%d, %d>\n",
-               cursor->selected->id, cursor->col, cursor->row);
-        
+               cursor->selected->id, cursor->col, cursor->row); 
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
         map->tiles[cursor->col][cursor->row].occupied = true;
-
-        //cursor->selectedCol = cursor->col;
-        //cursor->selectedRow = cursor->row;
-
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
 
@@ -382,7 +369,6 @@ public:
     {
         printf("COMMAND | Put Unit %d back at <%d, %d>\n",
                cursor->selected->id, cursor->selectedCol, cursor->selectedRow);
-        
         map->tiles[cursor->col][cursor->row].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupied = false;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
@@ -390,7 +376,6 @@ public:
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
-
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -400,72 +385,7 @@ private:
 };
 
 
-class DeactivateUnitCommand : public Command
-{
-public:
-    DeactivateUnitCommand(Cursor *cursor_in)
-    : cursor(cursor_in)
-    {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
-    virtual void Execute()
-    {
-        printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
-               cursor->selected->id, cursor->col, cursor->row);
-
-        cursor->selected->isExhausted = true;
-        cursor->selected = nullptr;
-
-        cursor->selectedCol = -1;
-        cursor->selectedRow = -1;
-
-        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-    }
-
-private:
-    Cursor *cursor; 
-};
-
-
 // ============================== finding target ===========================================
-class InitiateAttackTargetingCommand : public Command
-{
-public:
-    InitiateAttackTargetingCommand(Cursor *cursor_in, Tilemap *map_in)
-    : cursor(cursor_in),
-      map(map_in)
-    {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
-    virtual void Execute()
-    {
-        cursor->targeterCol = cursor->col;
-        cursor->targeterRow = cursor->row;
-        // Find tiles that a unit can interact with.
-
-        map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
-                                         cursor->selected->minRange, cursor->selected->maxRange);
-
-        printf("COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
-                cursor->selected->id, cursor->col, cursor->row);
-        GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
-    }
-
-private:
-    Cursor *cursor;
-    Tilemap *map;
-};
-
 class MoveAttackTargetingCommand : public Command
 {
 public:
@@ -479,7 +399,6 @@ public:
     virtual shared_ptr<Tween>
     GetTween()
     {
-        int SPEED = 2;
         shared_ptr<Tween> result;
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
@@ -487,19 +406,19 @@ public:
         {
             if(col == -1)
             {
-                result = make_shared<Tween>(0, -TILE_SIZE, SPEED, &cursor->sheet->colPixelOffset, true);
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
             }
             else if(col == 1)
             {
-                result = make_shared<Tween>(0, TILE_SIZE, SPEED, &cursor->sheet->colPixelOffset, true);
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
             }
             else if(row == -1)
             {
-                result = make_shared<Tween>(0, -TILE_SIZE, SPEED, &cursor->sheet->rowPixelOffset, true);
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
             }
             else if(row == 1)
             {
-                result = make_shared<Tween>(0, TILE_SIZE, SPEED, &cursor->sheet->rowPixelOffset, true);
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
             }
             else
             {
@@ -551,39 +470,6 @@ private:
     const Tilemap &map;
 };
 
-class InitiateHealingTargetingCommand : public Command
-{
-public:
-    InitiateHealingTargetingCommand(Cursor *cursor_in, Tilemap *map_in)
-    : cursor(cursor_in),
-      map(map_in)
-    {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
-    virtual void Execute()
-    {
-        cursor->targeterCol = cursor->col;
-        cursor->targeterRow = cursor->row;
-        // Find tiles that a unit can interact with.
-
-        map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
-                                             1, 1);
-
-        printf("COMMAND | Finding targets to heal for Unit %d at <%d, %d>\n", 
-                cursor->selected->id, cursor->col, cursor->row);
-        GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
-    }
-
-private:
-    Cursor *cursor;
-    Tilemap *map;
-};
-
 class MoveHealingTargetingCommand : public Command
 {
 public:
@@ -597,7 +483,38 @@ public:
     virtual shared_ptr<Tween>
     GetTween()
     {
-        return nullptr;
+        shared_ptr<Tween> result;
+        int newCol = cursor->col + col;
+        int newRow = cursor->row + row;
+        if(IsValidBoundsPosition(newCol, newRow))
+        {
+            if(col == -1)
+            {
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
+            }
+            else if(col == 1)
+            {
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
+            }
+            else if(row == -1)
+            {
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
+            }
+            else if(row == 1)
+            {
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
+            }
+            else
+            {
+                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
+            }
+        }
+        else
+        {
+            result = nullptr;
+        }
+        
+        return result;
     }
 
     virtual void Execute()
@@ -625,6 +542,89 @@ public:
             else
             {
                 GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
+            }
+        }
+    }
+
+private:
+    Cursor *cursor; 
+    int col;
+    int row;
+    const Tilemap &map;
+};
+
+class MoveTradingTargetingCommand : public Command
+{
+public:
+    MoveTradingTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      col(col_in),
+      row(row_in),
+      map(map_in)
+    {}
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        shared_ptr<Tween> result;
+        int newCol = cursor->col + col;
+        int newRow = cursor->row + row;
+        if(IsValidBoundsPosition(newCol, newRow))
+        {
+            if(col == -1)
+            {
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
+            }
+            else if(col == 1)
+            {
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
+            }
+            else if(row == -1)
+            {
+                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
+            }
+            else if(row == 1)
+            {
+                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
+            }
+            else
+            {
+                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
+            }
+        }
+        else
+        {
+            result = nullptr;
+        }
+        
+        return result;
+    }
+
+    virtual void Execute()
+    {
+        int newCol = cursor->col + col;
+        int newRow = cursor->row + row;
+        printf("COMMAND | Move Cursor (Targeting for trading) from <%d, %d> to <%d, %d>\n", 
+            cursor->col, cursor->row, newCol, newRow);
+
+        if(IsValidBoundsPosition(newCol, newRow))
+        {
+            // move cursor
+            cursor->col = newCol;
+            cursor->row = newRow;
+
+            // change state
+            const Tile *hoverTile = &map.tiles[newCol][newRow];
+
+            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.interactible) &&
+               hoverTile->occupied &&
+               hoverTile->occupant->isAlly)
+            {
+                GlobalInterfaceState = TRADING_TARGETING_OVER_TARGET;
+            }
+            else
+            {
+                GlobalInterfaceState = TRADING_TARGETING_OVER_UNTARGETABLE;
             }
         }
     }
@@ -724,6 +724,35 @@ private:
     const Tilemap &map;
 };
 
+class InitiateTradingCommand : public Command
+{
+public:
+    InitiateTradingCommand(Cursor *cursor_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
+
+    virtual void Execute()
+    {
+        cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
+
+        printf("COMMAND | Initiate trading on Unit %d at <%d, %d>\n",
+                cursor->targeted->id, cursor->col, cursor->row);
+
+        GlobalInterfaceState = TRADING;
+    }
+
+private:
+    Cursor *cursor;
+    const Tilemap &map;
+};
+
 
 class AttackCommand : public Command
 {
@@ -748,8 +777,10 @@ public:
                cursor->selected->id, cursor->targeted->id, damage);
 
         cursor->selected->isExhausted = true;
+        cursor->col = cursor->targeterCol;
+        cursor->row = cursor->targeterRow;
 
-        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 
 private:
@@ -758,36 +789,36 @@ private:
 
 
 // TODO: Make this system more generalizable
-//class TradeCommand : public Command
-//{
-//public:
-    //TradeCommand(Cursor *cursor_in)
-    //: cursor(cursor_in)
-    //{}
+class TradeCommand : public Command
+{
+public:
+    TradeCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
 
-    //virtual shared_ptr<Tween>
-    //GetTween()
-    //{
-        //return nullptr;
-    //}
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
     
-    //virtual void Execute()
-    //{
-        //int damage = cursor->selected->attack;
+    virtual void Execute()
+    {
+        // TRADING BEHAVIOR HERE
 
-        //cursor->targeted->hp -= damage;
+        printf("COMMAND | Traded between Unit %d and %d.\n", 
+               cursor->selected->id, cursor->targeted->id);
 
-        //printf("COMMAND | Attack from Unit %d on Enemy %d. %d damage.\n", 
-               //cursor->selected->id, cursor->targeted->id, damage);
+        cursor->selected->isExhausted = true;
+        cursor->col = cursor->targeterCol;
+        cursor->row = cursor->targeterRow;
 
-        //cursor->selected->isExhausted = true;
+        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+    }
 
-        //GlobalInterfaceState = NEUTRAL_OVER_ALLY;
-    //}
-
-//private:
-    //Cursor *cursor;
-//};
+private:
+    Cursor *cursor;
+};
 
 
 class HealCommand : public Command
@@ -809,12 +840,14 @@ public:
 
         cursor->targeted->hp += damage;
 
-        printf("COMMAND | Healing from Unit %d on Unit %d. %d damage.\n", 
+        printf("COMMAND | Healing from Unit %d on Unit %d. %d healing.\n", 
                cursor->selected->id, cursor->targeted->id, damage);
 
         cursor->selected->isExhausted = true;
+        cursor->col = cursor->targeterCol;
+        cursor->row = cursor->targeterRow;
 
-        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 
 private:
@@ -867,6 +900,32 @@ public:
         cursor->targeted = nullptr;
 
         GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
+    }
+
+private:
+    Cursor *cursor;
+};
+
+class BackDownFromTradingCommand : public Command
+{
+public:
+    BackDownFromTradingCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
+
+    virtual void Execute()
+    {
+        printf("COMMAND | Backed down from trading with ally.\n");
+
+        cursor->targeted = nullptr;
+
+        GlobalInterfaceState = TRADING_TARGETING_OVER_TARGET;
     }
 
 private:
@@ -1016,7 +1075,6 @@ public:
     virtual void Execute()
     { 
         printf("COMMAND | Open Game Menu\n");
-        printf(" <> INTERFACE | options: 0, field: 0, save: 0, end turn: 0 <>\n");
         GlobalInterfaceState = GAME_MENU_ROOT;
     }
 };
@@ -1038,9 +1096,14 @@ public:
     }
 };
 
+
 class UpdateGameMenuCommand : public Command
 {
 public:
+    UpdateGameMenuCommand(Menu *menu_in, int direction_in)
+    : menu(menu_in),
+      direction(direction_in)
+    {}
 
     virtual shared_ptr<Tween>
     GetTween()
@@ -1051,30 +1114,194 @@ public:
     virtual void Execute()
     { 
         printf("COMMAND | Update Game Menu!\n");
-        printf(" <> INTERFACE | options: 0, field: 0, save: 0, end turn: 0 <>\n");
+        int newCurrent = menu->current + direction;
+        if(newCurrent >= menu->rows)
+        {
+            menu->current = 0;
+        }
+        else if(newCurrent < 0)
+        {
+            menu->current = menu->rows - 1;
+        }
+        else
+        {
+            menu->current = newCurrent;
+        } 
     }
+    // TODO: CHANGE STATE?
+
+private:
+    Menu *menu;
+    int direction;
 };
-// TODO MORE GAME MENU COMMANDS GO HERE
 
 
-// ============================ unit menu commands ==================================
-class UpdateUnitMenuCommand : public Command
+class ChooseGameMenuOptionCommand : public Command
 {
 public:
+    ChooseGameMenuOptionCommand(Menu *menu_in)
+    : menu(menu_in)
+    {}
 
     virtual shared_ptr<Tween>
     GetTween()
     {
         return nullptr;
     }
+
+    virtual void Execute()
+    { 
+        printf("COMMAND | Choose Game Menu Option %d!\n", menu->current);        
+        switch(menu->current)
+        {
+            case(0): // OUTLOOK
+            {
+                GlobalInterfaceState = GAME_MENU_OUTLOOK;
+            } break;
+            case(1): // OPTIONS
+            {
+                GlobalInterfaceState = GAME_MENU_OPTIONS;
+            } break;
+            case(2): // END TURN
+            {
+                GlobalInterfaceState = GAME_MENU_END_TURN;
+            } break;
+        }
+    }
+    // TODO: CHANGE STATE?
+
+private:
+    Menu *menu;
+};
+
+// ============================= unit menu commands =======================
+
+
+class UpdateUnitMenuCommand : public Command
+{
+public:
+    UpdateUnitMenuCommand(Menu *menu_in, int direction_in)
+    : menu(menu_in),
+      direction(direction_in)
+    {}
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
+
     virtual void Execute()
     { 
         printf("COMMAND | Update Unit Menu!\n");
-        printf(" <> INTERFACE | attack: 0, heal: 0, talk: 0, items: 0, \n <> trade: 0, wait: 0 <>\n");
+        int newCurrent = menu->current + direction;
+        if(newCurrent >= menu->rows)
+        {
+            menu->current = 0;
+        }
+        else if(newCurrent < 0)
+        {
+            menu->current = menu->rows - 1;
+        }
+        else
+        {
+            menu->current = newCurrent;
+        } 
     }
-};
-// TODO MORE UNIT MENU COMMANDS GO HERE
 
+private:
+    Menu *menu;
+    int direction;
+};
+
+
+class ChooseUnitMenuOptionCommand : public Command
+{
+public:
+    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in)
+    : cursor(cursor_in),
+      map(map_in),
+      menu(menu_in)
+    {}
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
+
+    virtual void Execute()
+    { 
+        printf("COMMAND | Choose Unit Menu Option %d!\n", menu.current);
+        switch(menu.current)
+        {
+            case(0): // INFO
+            {
+                GlobalInterfaceState = UNIT_MENU_INFO;
+            } break;
+            case(1): // ITEMS
+            {
+                GlobalInterfaceState = UNIT_MENU_ITEM;
+            } break;
+            case(2): // ATTACK
+            {
+                cursor->targeterCol = cursor->col;
+                cursor->targeterRow = cursor->row;
+                map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+                                                 cursor->selected->minRange, cursor->selected->maxRange);
+                printf(" > COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
+                        cursor->selected->id, cursor->col, cursor->row);
+                GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
+            } break;
+            case(3): // HEAL
+            {
+                cursor->targeterCol = cursor->col;
+                cursor->targeterRow = cursor->row;
+                // Find tiles that a unit can interact with.
+
+                map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+                                                     1, 1);
+
+                printf("COMMAND | Finding targets to heal for Unit %d at <%d, %d>\n", 
+                        cursor->selected->id, cursor->col, cursor->row);
+                GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
+            } break;
+            case(4): // TRADE
+            {
+                cursor->targeterCol = cursor->col;
+                cursor->targeterRow = cursor->row;
+                // Find tiles that a unit can interact with.
+
+                map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+                                                     1, 1);
+
+                printf("COMMAND | Finding targets to trade with for Unit %d at <%d, %d>\n", 
+                        cursor->selected->id, cursor->col, cursor->row);
+                GlobalInterfaceState = TRADING_TARGETING_OVER_UNTARGETABLE;
+            } break;
+            case(5): // WAIT
+            {
+                printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
+                       cursor->selected->id, cursor->col, cursor->row);
+                cursor->selected->isExhausted = true;
+                cursor->selected = nullptr;
+
+                cursor->selectedCol = -1;
+                cursor->selectedRow = -1;
+                GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+            } break;
+            default:
+            {
+                printf("CHOOSEUNITMENUOPTIONCOMMAND | How did you get here?\n");
+            } break;
+        }
+    }
+
+private:
+    Cursor *cursor;
+    Tilemap *map;
+    const Menu &menu;
+};
 
 
 // ============================== Input Handler ================================
@@ -1143,7 +1370,7 @@ public:
     // updates what the user can do with their buttons.
 	// contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
-    void UpdateCommands(Cursor *cursor, Tilemap *map)
+    void UpdateCommands(Cursor *cursor, Tilemap *map, Menu *gameMenu, Menu *unitMenu)
     {
         switch(GlobalInterfaceState)
         {
@@ -1256,6 +1483,25 @@ public:
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
+            case(TRADING_TARGETING_OVER_UNTARGETABLE):
+            {
+                BindUp(make_shared<MoveTradingTargetingCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveTradingTargetingCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveTradingTargetingCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveTradingTargetingCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<DetargetCommand>(cursor, map));
+            } break;
+            case(TRADING_TARGETING_OVER_TARGET):
+            {
+                BindUp(make_shared<MoveTradingTargetingCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveTradingTargetingCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveTradingTargetingCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveTradingTargetingCommand>(cursor, 1, 0, *map));
+                BindA(make_shared<InitiateTradingCommand>(cursor, *map));
+                BindB(make_shared<DetargetCommand>(cursor, map));
+            } break;
+
 
             case(PREVIEW_ATTACK):
             {
@@ -1275,16 +1521,34 @@ public:
                 BindA(make_shared<HealCommand>(cursor));
                 BindB(make_shared<BackDownFromHealingCommand>(cursor));
             } break;
+            case(TRADING):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<TradeCommand>(cursor));
+                BindB(make_shared<BackDownFromTradingCommand>(cursor));
+            } break;
 
 
             case(GAME_MENU_ROOT):
+            {
+                BindUp(make_shared<UpdateGameMenuCommand>(gameMenu, -1));
+                BindDown(make_shared<UpdateGameMenuCommand>(gameMenu, 1));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
+                BindB(make_shared<ExitGameMenuCommand>());
+            } break;
+            case(GAME_MENU_OUTLOOK):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<ExitGameMenuCommand>());
+                BindB(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
             {
@@ -1295,7 +1559,7 @@ public:
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
-            case(GAME_MENU_SAVE):
+            case(GAME_MENU_END_TURN):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
@@ -1304,24 +1568,16 @@ public:
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
-            case(GAME_MENU_UNITS):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
-            } break;
+
 
 
             case(UNIT_MENU_ROOT):
             {
-                BindUp(make_shared<DeactivateUnitCommand>(cursor));
-                BindDown(make_shared<InitiateAttackTargetingCommand>(cursor, map));
-                BindLeft(make_shared<InitiateHealingTargetingCommand>(cursor, map));
+                BindUp(make_shared<UpdateUnitMenuCommand>(unitMenu, -1));
+                BindDown(make_shared<UpdateUnitMenuCommand>(unitMenu, 1));
+                BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<InitiateAttackTargetingCommand>(cursor, map));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
             case(UNIT_MENU_INFO):
@@ -1332,15 +1588,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<BackOutOfUnitInfoCommand>());
                 BindB(make_shared<BackOutOfUnitInfoCommand>());
-            } break;
-            case(UNIT_MENU_TRADE):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
             } break;
             case(UNIT_MENU_ITEM):
             {
@@ -1391,7 +1638,6 @@ private:
     shared_ptr<Command> buttonA;
     shared_ptr<Command> buttonB;
 };
-
 
 
 #endif

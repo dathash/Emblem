@@ -5,34 +5,28 @@
 
 /*
     TODO
-    Animation
-        Synchronization
-        Combat Scene
-        Key Repeat
 
     NEXT
-    Fix Trading
+    Animation
+        Combat Scene
+        Key Repeat
     User Interface
-        Show Unit/Enemy details
+        Show Unit/Enemy Info
         Show Tile details
-    Combat Effects actually occur
-    Menus
-        Unit Actions Menu
-        Game Menu
+        Unit Actions
+        Game Options
     Level System
         Loading
         Editing
         Saving
         Transitions
-    Music (MiniAudio)
 
     NICE
+    Music (MiniAudio)
     Smooth Interaction Syntax (Just click on enemy to attack them)
-    Leave characters that have moved and be able to use them to act later
     Replay!
-    Hook in interactions
-        Talk
-        Items
+	Talk
+	Items
 
     LATER
     Switch to GameController API
@@ -41,32 +35,8 @@
     Turns
         Enemy Turn
         Basic AI
+	Redo Trade/Attack/Heal Stuff? Inheritance?
  */
-
-
-// ========================= constants =====================================
-
-// low level
-#define JOYSTICK_DEAD_ZONE 8000
-
-#define TIME_STEP 33.33333
-
-// rendering
-#define TILE_SIZE 100
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 900
-
-#define MENU_WIDTH 300
-#define MENU_ROW_HEIGHT 100
-
-// backend
-#define MAP_SIZE 8
-
-
-
-// TODO MOVE THIS
-static bool GlobalTweening = false;
-static bool ReadyForCommand = false;
 
 
 // ========================== includes =====================================
@@ -93,6 +63,46 @@ typedef float real32;
 typedef double real64;
 
 using namespace std;
+
+
+
+// ========================= constants =====================================
+
+// low level
+#define JOYSTICK_DEAD_ZONE 8000
+
+#define TIME_STEP 33.33333
+
+// rendering
+#define TILE_SIZE 100
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 900
+
+#define MENU_WIDTH 300
+#define MENU_ROW_HEIGHT 100
+
+// backend
+#define MAP_SIZE 8
+
+// animation
+#define CURSOR_MOVE_SPEED 2
+
+
+
+// TODO MOVE THIS
+static bool GlobalTweening = false;
+static bool ReadyForCommand = false;
+
+
+
+// ============================= globals ===================================
+static SDL_Window *GlobalWindow = nullptr;
+static SDL_Renderer *GlobalRenderer = nullptr;
+static bool GlobalRunning = false;
+static bool GlobalGamepadMode = false;
+static bool GlobalGuiMode = false;
+
+static TTF_Font *GlobalFont = nullptr;
 
 
 
@@ -388,32 +398,33 @@ struct Cursor
     }
 };
 
+// TODO: Move!!!
+#include "load.h"
+
 struct Menu
 {
-    u8 rows = 4;
-    u8 current = 0;
-    // TODO: Should a menu contain Command *'s?
+    u8 rows;
+    u8 current;
+
+	vector<unique_ptr<Texture>> optionTextTextures;
+
+	Menu(u8 rows_in, u8 current_in, vector<string> options_in)
+	: rows(rows_in),
+	  current(current_in)
+	{
+		for(string s : options_in)
+		{
+			optionTextTextures.push_back(LoadTextureText(s.c_str(), {0, 0, 0, 255}));
+		}
+	}
 };
+
 
 #include "grid.h"
 #include "command.h"
-
-// ============================= globals ===================================
-static SDL_Window *GlobalWindow = nullptr;
-static SDL_Renderer *GlobalRenderer = nullptr;
-static bool GlobalRunning = false;
-static bool GlobalGamepadMode = false;
-static bool GlobalGuiMode = false;
-
-static TTF_Font *GlobalFont = nullptr;
-
-
 #include "render.h"
 
 // ===================== function signatures ==============================
-shared_ptr<Texture> LoadTextureImage(std::string path);
-unique_ptr<Texture> LoadTextureText(std::string text, SDL_Color color);
-
 bool Initialize();
 void Close();
 void HandleEvents(InputState *input);
@@ -478,6 +489,9 @@ int main(int argc, char *argv[])
     handler.BindA(make_shared<OpenGameMenuCommand>());
     handler.BindB(make_shared<NullCommand>());
 
+	Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
+	Menu unitMenu(6, 0, {"Info", "Items", "Attack", "Heal", "Trade", "Wait"});
+
     unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
     unique_ptr<Texture> debugMessageTwo = LoadTextureText("placeholder2", {0, 100, 0, 255});
     unique_ptr<Texture> debugMessageThree = LoadTextureText("placeholder3", {0, 0, 250, 255});
@@ -519,7 +533,7 @@ int main(int argc, char *argv[])
 		{
 			commandQueue.front()->Execute();
 			commandQueue.pop();
-			handler.UpdateCommands(&cursor, &map);
+			handler.UpdateCommands(&cursor, &map, &gameMenu, &unitMenu);
 			if(currentTween)
 			{
 				currentTween->Reset();
@@ -535,7 +549,7 @@ int main(int argc, char *argv[])
 
 
 // ============================= render =========================================
-        Render(map, cursor, *debugMessageOne, *debugMessageTwo, *debugMessageThree);
+        Render(map, cursor, gameMenu, unitMenu, *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
 
 // =========================== v debug messages v ============================================
@@ -589,44 +603,6 @@ int main(int argc, char *argv[])
 
 // ================================ Helper Functions ======================================================
 
-// ============================== loading data =================================
-// Loads a Texture displaying the given text in the given color.
-unique_ptr<Texture>
-LoadTextureText(std::string text, SDL_Color color)
-{
-    SDL_Texture *texture = nullptr;
-    SDL_Surface *surface = nullptr;
-
-    assert(GlobalFont);
-    surface = TTF_RenderText_Solid(GlobalFont, text.c_str(), color);
-    assert(surface);
-    int width = surface->w;
-    int height = surface->h;
-    texture = SDL_CreateTextureFromSurface(GlobalRenderer, surface);
-    assert(texture);
-    SDL_FreeSurface(surface);
-
-    return make_unique<Texture>(texture, width, height);
-}
-
-// Loads a texture displaying an image, given a path to it.
-shared_ptr<Texture>
-LoadTextureImage(std::string path)
-{
-    SDL_Texture *texture = nullptr;
-    SDL_Surface *surface = nullptr;
-
-    surface = IMG_Load(path.c_str());
-    assert(surface);
-    int width = surface->w;
-    int height = surface->h;
-    texture = SDL_CreateTextureFromSurface(GlobalRenderer, surface);
-    assert(texture);
-    SDL_FreeSurface(surface);
-
-    return make_shared<Texture>(texture, width, height);
-}
-
 
 // ================================== SDL Functions ================================================
 
@@ -666,13 +642,6 @@ Initialize()
                             ImGui::CreateContext();
                             ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-                            // Enable Keyboard Control
-                            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-                            // Enable Gamepad Controls
-                            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-
-                            printf("%d\n", io.WantCaptureKeyboard);
                             io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
 
                             // Setup Dear ImGui style
