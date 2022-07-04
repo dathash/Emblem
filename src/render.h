@@ -6,9 +6,9 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "imgui.h"
-#include "imgui_impl_sdl.h"
-#include "imgui_impl_sdlrenderer.h"
+//#include "imgui.h"
+//#include "imgui_impl_sdl.h"
+//#include "imgui_impl_sdlrenderer.h"
 
 // ================================ Rendering ==========================================
 // Renders an individual tile to the screen, given its game coords and color.
@@ -110,7 +110,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
        GlobalInterfaceState == HEALING_TARGETING_OVER_UNTARGETABLE)
     {
-        SDL_Color healColor = {0, 100, 0, 100};
+        SDL_Color healColor = {0, 255, 0, 100};
         for(pair<int, int> cell : *map.interactible.get())
         {
             RenderTile(cell.first, cell.second, healColor);
@@ -154,17 +154,18 @@ Render(const Tilemap &map, const Cursor &cursor,
 
 
 // ================================= render ui elements ===========================================
-    const SDL_Color menuColor = {60, 60, 150, 250};
-    const SDL_Color menuTextColor = {255, 255, 255, 255};
-    const SDL_Color menuSelectorColor = {50, 50, 50, 100};
+    const SDL_Color uiColor = {60, 60, 150, 250};
+    const SDL_Color uiTextColor = {255, 255, 255, 255};
+    const SDL_Color uiSelectorColor = {50, 50, 50, 100};
 
+// ==================================== menus =====================================================
     if(GlobalInterfaceState == GAME_MENU_ROOT)
     {
         for(int i = 0; i < gameMenu.rows; ++i)
         {
             SDL_Rect menuRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
-            SDL_SetRenderDrawColor(GlobalRenderer, menuColor.r, menuColor.g, menuColor.b, menuColor.a);
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &menuRect);
             SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(GlobalRenderer, &menuRect);
@@ -173,19 +174,19 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
 
         SDL_Rect menuSelectorRect = {TILE_SIZE * MAP_SIZE, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, menuSelectorColor.r, menuSelectorColor.g, menuSelectorColor.b, menuSelectorColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, menuTextColor.r, menuTextColor.g, menuTextColor.b, menuTextColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
-    if(GlobalInterfaceState == UNIT_MENU_ROOT)
+    else if(GlobalInterfaceState == UNIT_MENU_ROOT)
     {
         for(int i = 0; i < unitMenu.rows; ++i)
         {
             SDL_Rect menuRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
-            SDL_SetRenderDrawColor(GlobalRenderer, menuColor.r, menuColor.g, menuColor.b, menuColor.a);
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &menuRect);
             SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(GlobalRenderer, &menuRect);
@@ -194,40 +195,55 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
 
         SDL_Rect menuSelectorRect = {TILE_SIZE * MAP_SIZE, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, menuSelectorColor.r, menuSelectorColor.g, menuSelectorColor.b, menuSelectorColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, menuTextColor.r, menuTextColor.g, menuTextColor.b, menuTextColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
+// ================================== info pages ===============================================
+    else if(GlobalInterfaceState == UNIT_INFO)
+    {
+        // Display unit info page
+    }
+    else if(GlobalInterfaceState == ENEMY_INFO)
+    {
+        // Display enemy info page
+    }
+    else if(GlobalInterfaceState == PREVIEW_ATTACK)
+    {
+        // Display attack preview
+    }
+    else if(GlobalInterfaceState == PREVIEW_HEALING)
+    {
+        // Display healing preview
+    }
+
+
     if(GlobalGuiMode)
     {
-        // Start the Dear ImGui frame
-        ImGui_ImplSDLRenderer_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
-        {
-            static float f = 0.0f;
-            static int counter = 0;
+        //ImGui_ImplSDLRenderer_NewFrame();
+        //ImGui_ImplSDL2_NewFrame();
+        //ImGui::NewFrame();
+        //{
+            //static float f = 0.0f;
+            //static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            //ImGui::Begin("Hello, world!");
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            //ImGui::Text("This is some useful text.");
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+            //if (ImGui::Button("Button"))
+                //counter++;
+            //ImGui::SameLine();
+            //ImGui::Text("counter = %d", counter);
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        // Rendering ImGui
-        ImGui::Render();
-        ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+            //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            //ImGui::End();
+        //}
+        //ImGui::Render();
+        //ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
     }
 
 

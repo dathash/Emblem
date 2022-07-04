@@ -9,12 +9,11 @@
     NEXT
     Animation
         Combat Scene
-        Key Repeat
     User Interface
         Show Unit/Enemy Info
         Show Tile details
-        Unit Actions
-        Game Options
+		Items and Trading Menus
+
     Level System
         Loading
         Editing
@@ -22,14 +21,15 @@
         Transitions
 
     NICE
+	Conversations
     Music (MiniAudio)
-    Smooth Interaction Syntax (Just click on enemy to attack them)
-    Replay!
-	Talk
 	Items
 
     LATER
+    Smooth Interaction Syntax (Just click on enemy to attack them)
+    Replay!
     Switch to GameController API
+	Key Repeat
     Tiles have properties 
         (That remain together and don't rely on eachother)
     Turns
@@ -638,18 +638,18 @@ Initialize()
                         if(IMG_Init(imgFlags) & imgFlags)
                         {
                             // Setup Dear ImGui context
-                            IMGUI_CHECKVERSION();
-                            ImGui::CreateContext();
-                            ImGuiIO& io = ImGui::GetIO(); (void)io;
+                            //IMGUI_CHECKVERSION();
+                            //ImGui::CreateContext();
+                            //ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-                            io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
+                            //io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
 
                             // Setup Dear ImGui style
-                            ImGui::StyleColorsDark();
+                            //ImGui::StyleColorsDark();
 
                             // Setup Platform/Renderer backends
-                            ImGui_ImplSDL2_InitForSDLRenderer(GlobalWindow, GlobalRenderer);
-                            ImGui_ImplSDLRenderer_Init(GlobalRenderer);
+                            //ImGui_ImplSDL2_InitForSDLRenderer(GlobalWindow, GlobalRenderer);
+                            //ImGui_ImplSDLRenderer_Init(GlobalRenderer);
 
                             return true;
                         }
@@ -691,9 +691,9 @@ void Close()
     //Close game controller
     //SDL_JoystickClose(gGameController);
 
-    ImGui_ImplSDLRenderer_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+    //ImGui_ImplSDLRenderer_Shutdown();
+    //ImGui_ImplSDL2_Shutdown();
+    //ImGui::DestroyContext();
 
     TTF_CloseFont(GlobalFont);
     SDL_DestroyRenderer(GlobalRenderer);
@@ -721,7 +721,7 @@ HandleEvents(InputState *input)
         }
         if(GlobalGuiMode)
         {
-            ImGui_ImplSDL2_ProcessEvent(&Event);
+            //ImGui_ImplSDL2_ProcessEvent(&Event);
         }
         else
         {

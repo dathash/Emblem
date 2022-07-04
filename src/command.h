@@ -36,11 +36,10 @@ enum InterfaceState
     GAME_MENU_END_TURN,
 
     UNIT_MENU_ROOT,
-    UNIT_MENU_INFO,
-    UNIT_MENU_ITEM,
-    //UNIT_MENU_TALK,
+    UNIT_INFO,
+    UNIT_ITEMS,
 
-    ENEMY_MENU_ROOT,
+    ENEMY_INFO,
 
     NO_OP,
 };
@@ -946,58 +945,6 @@ public:
 
 
 
-class SelectedItemsCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Selecting Items!\n"); }
-    // Change state to Unit Items State.
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-};
-
-class BackOutOfItemsCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Back Out of Items!\n"); }
-    // Change state to Unit Actions State.
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-};
-
-class SelectedUnitInfoCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Reading Unit Info!\n"); }
-    // Change state to Unit Info State.
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-};
-
-class BackOutOfUnitInfoCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Back Out of Unit Info!\n"); }
-    // Change state to Unit Actions State.
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-};
-
-
-
 // ======================= selecting enemy commands ==========================
 class SelectEnemyCommand : public Command
 {
@@ -1015,7 +962,7 @@ public:
 
     virtual void Execute()
     {
-        GlobalInterfaceState = ENEMY_MENU_ROOT;
+        GlobalInterfaceState = ENEMY_INFO;
         cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
@@ -1237,11 +1184,11 @@ public:
         {
             case(0): // INFO
             {
-                GlobalInterfaceState = UNIT_MENU_INFO;
+                GlobalInterfaceState = UNIT_INFO;
             } break;
             case(1): // ITEMS
             {
-                GlobalInterfaceState = UNIT_MENU_ITEM;
+                GlobalInterfaceState = UNIT_ITEMS;
             } break;
             case(2): // ATTACK
             {
@@ -1302,6 +1249,40 @@ private:
     Tilemap *map;
     const Menu &menu;
 };
+
+class BackOutOfUnitInfoCommand : public Command
+{
+public:
+    virtual void Execute()
+    {
+        printf("COMMAND | Back Out of Unit Info!\n");
+        GlobalInterfaceState = UNIT_MENU_ROOT;
+    }
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
+};
+
+class BackOutOfItemsMenuCommand : public Command
+{
+public:
+    virtual void Execute()
+    {
+        printf("COMMAND | Back Out of Items Menu!\n");
+        GlobalInterfaceState = UNIT_MENU_ROOT;
+    }
+
+    virtual shared_ptr<Tween>
+    GetTween()
+    {
+        return nullptr;
+    }
+};
+
+
 
 
 // ============================== Input Handler ================================
@@ -1580,26 +1561,26 @@ public:
                 BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
-            case(UNIT_MENU_INFO):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<BackOutOfUnitInfoCommand>());
-                BindB(make_shared<BackOutOfUnitInfoCommand>());
-            } break;
-            case(UNIT_MENU_ITEM):
+            case(UNIT_INFO):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<BackOutOfUnitInfoCommand>());
+            } break;
+            case(UNIT_ITEMS):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<BackOutOfItemsMenuCommand>());
             } break;
 
-            case(ENEMY_MENU_ROOT):
+            case(ENEMY_INFO):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
