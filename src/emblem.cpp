@@ -5,14 +5,12 @@
 
 /*
     TODO
+    Combat Preview
 
     NEXT
-    Animation
-        Combat Scene
     User Interface
-        Show Unit/Enemy Info
         Show Tile details
-		Items and Trading Menus
+        Items and Trading Menus
 
     Level System
         Loading
@@ -20,22 +18,30 @@
         Saving
         Transitions
 
-    NICE
-	Conversations
-    Music (MiniAudio)
-	Items
+    Animation
+        Combat Scene
+        Placing Unit moves them to that square (A-star)
+        Generate Arrow while selecting?
 
-    LATER
-    Smooth Interaction Syntax (Just click on enemy to attack them)
+    Items
+        Equipping
+        Trading
+        Different Ranges / Action types
+
+    BACKLOG
+    Conversations
+    Music (MiniAudio)
+    Items
     Replay!
+    Smooth Interaction Syntax (Just click on enemy to attack them)
     Switch to GameController API
-	Key Repeat
+    Key Repeat
     Tiles have properties 
         (That remain together and don't rely on eachother)
     Turns
         Enemy Turn
         Basic AI
-	Redo Trade/Attack/Heal Stuff? Inheritance?
+    Redo Trade/Attack/Heal Stuff? Inheritance?
  */
 
 
@@ -78,8 +84,8 @@ using namespace std;
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 900
 
-#define MENU_WIDTH 300
-#define MENU_ROW_HEIGHT 100
+#define MENU_WIDTH 250
+#define MENU_ROW_HEIGHT 50
 
 // backend
 #define MAP_SIZE 8
@@ -203,6 +209,7 @@ struct SpriteSheet
             assert(!"SpriteSheet | ChooseTrack | Invalid Animation Track!\n");
         }
         this->track = track_in;
+        this->frame = 0;
     }
 
     SpriteSheet()
@@ -247,7 +254,7 @@ struct Tween
     int duration;
     int currentTime = 0;
     bool active = false;
-	bool resetting = false;
+    bool resetting = false;
 
     int *value;
 
@@ -256,24 +263,24 @@ struct Tween
       end(end_in),
       duration(duration_in),
       value(value_in),
-	  resetting(resetting_in)
+      resetting(resetting_in)
     {}
 
     void Activate()
     {
         active = true;
-		GlobalTweening = true;
+        GlobalTweening = true;
     }
 
     void Deactivate()
     {
         active = false;
         GlobalTweening = false;
-		ReadyForCommand = true;
-		if(resetting)
-		{
-			*value = start;
-		}
+        ReadyForCommand = true;
+        if(resetting)
+        {
+            *value = start;
+        }
     }
 
     void Reset()
@@ -284,15 +291,15 @@ struct Tween
 
     void Update()
     {
-		++this->currentTime;
-		if(currentTime < duration)
-		{
-			*value = Position();
-		}
-		else
-		{
-			Deactivate();
-		}
+        ++this->currentTime;
+        if(currentTime < duration)
+        {
+            *value = Position();
+        }
+        else
+        {
+            Deactivate();
+        }
     }
 
     int Lerp(int a, int b, float amount)
@@ -311,14 +318,17 @@ struct Tween
 struct Unit
 {
     int id = 0;
+    bool shouldDie = false;
     bool isAlly = false;
     bool isExhausted = false;
     int mov = 0;
     int hp = 10;
+    int maxHp = 10;
     int attack = 3;
     int healing = 2;
     int minRange = 1;
     int maxRange = 1;
+    int accuracy = 50;
     shared_ptr<SpriteSheet> sheet = nullptr;
 
     void Update()
@@ -406,18 +416,94 @@ struct Menu
     u8 rows;
     u8 current;
 
-	vector<unique_ptr<Texture>> optionTextTextures;
+    vector<unique_ptr<Texture>> optionTextTextures;
 
-	Menu(u8 rows_in, u8 current_in, vector<string> options_in)
-	: rows(rows_in),
-	  current(current_in)
-	{
-		for(string s : options_in)
-		{
-			optionTextTextures.push_back(LoadTextureText(s.c_str(), {0, 0, 0, 255}));
-		}
-	}
+    Menu(u8 rows_in, u8 current_in, vector<string> options_in)
+    : rows(rows_in),
+      current(current_in)
+    {
+        for(string s : options_in)
+        {
+            optionTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+        }
+    }
 };
+
+struct UnitInfo
+{
+    u8 rows;
+
+    vector<unique_ptr<Texture>> infoTextTextures;
+
+    UnitInfo(u8 rows_in, vector<string> info_in)
+    : rows(rows_in)
+    {
+        for(string s : info_in)
+        {
+            infoTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+        }
+    }
+
+    void UpdateTextTextures(vector<string> info_in)
+    {
+        infoTextTextures.clear();
+        int newRows = 0;
+        for(string s : info_in)
+        {
+            infoTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+            ++newRows;
+        }
+        this->rows = newRows;
+    }
+};
+
+int d100()
+{
+    return rand() % 100;
+}
+
+void SimulateCombat(Unit *one, Unit *two)
+{
+    // one -> two
+    int damage = one->attack;
+    if(d100() > one->accuracy)
+    {
+        printf("SIMULATION | %d Damage!\n", damage);
+        if(two->hp - damage <= 0)
+        {
+            two->hp = 0;
+            two->shouldDie = true;
+        }
+        else
+        {
+            two->hp -= damage;
+        }
+    }
+    else
+    {
+        printf("SIMULATION | Missed!\n");
+    }
+
+    // two -> one
+    int damage = two->attack;
+    if(d100() > two->accuracy)
+    {
+        printf("SIMULATION | %d Damage!\n", damage);
+        if(one->hp - damage <= 0)
+        {
+            one->hp = 0;
+            one->shouldDie = true;
+        }
+        else
+        {
+            one->hp -= damage;
+        }
+    }
+    else
+    {
+        printf("SIMULATION | Missed!\n");
+    }
+}
 
 
 #include "grid.h"
@@ -434,6 +520,8 @@ void HandleEvents(InputState *input);
 // ================================== main =================================
 int main(int argc, char *argv[])
 {
+    srand (time(NULL));
+
     if(!Initialize())
         assert(!"Initialization Failed\n");
 
@@ -454,7 +542,7 @@ int main(int argc, char *argv[])
     InputHandler handler;
 
     queue<shared_ptr<Command>> commandQueue = {};
-	shared_ptr<Tween> currentTween = nullptr;
+    shared_ptr<Tween> currentTween = nullptr;
 
     real32 TargetMillisecondsPerFrame = 16.666f;
     u64 startTime = SDL_GetPerformanceCounter();
@@ -489,8 +577,11 @@ int main(int argc, char *argv[])
     handler.BindA(make_shared<OpenGameMenuCommand>());
     handler.BindB(make_shared<NullCommand>());
 
-	Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
-	Menu unitMenu(6, 0, {"Info", "Items", "Attack", "Heal", "Trade", "Wait"});
+    // Initialize Menus
+    Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
+    Menu unitMenu(6, 0, {"Info", "Items", "Attack", "Heal", "Trade", "Wait"});
+
+    UnitInfo unitInfo(1, {"Placeholder"});
 
     unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
     unique_ptr<Texture> debugMessageTwo = LoadTextureText("placeholder2", {0, 100, 0, 255});
@@ -502,44 +593,44 @@ int main(int argc, char *argv[])
         HandleEvents(&input);
 
 // ====================== Where the action Happens ===============
-		if(GlobalTweening)
-		{
+        if(GlobalTweening)
+        {
             currentTween->Update();
-		}
-		else
-		{
-			shared_ptr<Command> newCommand = handler.HandleInput(&input);
-			if(newCommand)
-			{
-				commandQueue.push(newCommand);
-			}
+        }
+        else
+        {
+            shared_ptr<Command> newCommand = handler.HandleInput(&input);
+            if(newCommand)
+            {
+                commandQueue.push(newCommand);
+            }
 
-			if(!commandQueue.empty())
-			{
-				currentTween = commandQueue.front()->GetTween();
-				if(currentTween)
-				{
-					currentTween->Activate();
-					GlobalTweening = true;
-				}
-				else
-				{
-					ReadyForCommand = true;
-				}
-			}
-		}
+            if(!commandQueue.empty())
+            {
+                currentTween = commandQueue.front()->GetTween();
+                if(currentTween)
+                {
+                    currentTween->Activate();
+                    GlobalTweening = true;
+                }
+                else
+                {
+                    ReadyForCommand = true;
+                }
+            }
+        }
 
-		if(ReadyForCommand)
-		{
-			commandQueue.front()->Execute();
-			commandQueue.pop();
-			handler.UpdateCommands(&cursor, &map, &gameMenu, &unitMenu);
-			if(currentTween)
-			{
-				currentTween->Reset();
-			}
-			ReadyForCommand = false;
-		}
+        if(ReadyForCommand)
+        {
+            commandQueue.front()->Execute();
+            commandQueue.pop();
+            handler.UpdateCommands(&cursor, &map, &gameMenu, &unitMenu, &unitInfo);
+            if(currentTween)
+            {
+                currentTween->Reset();
+            }
+            ReadyForCommand = false;
+        }
 // ================================================================
 
         lucina->Update();
@@ -549,7 +640,8 @@ int main(int argc, char *argv[])
 
 
 // ============================= render =========================================
-        Render(map, cursor, gameMenu, unitMenu, *debugMessageOne, *debugMessageTwo, *debugMessageThree);
+        Render(map, cursor, gameMenu, unitMenu, unitInfo, 
+               *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
 
 // =========================== v debug messages v ============================================
@@ -571,16 +663,16 @@ int main(int argc, char *argv[])
 
         debugMessageOne = LoadTextureText(string(buffer), {250, 0, 0, 255});
 
-		if(currentTween)
-		{
-			sprintf(buffer, "GlobalTweening: %d | Start: %d, End: %d, Current: %d, Value: %d",
-					GlobalTweening, currentTween->start, currentTween->end,
-					currentTween->currentTime, *currentTween->value);
-		}
-		else
-		{
-			sprintf(buffer, "GlobalTweening: %d | No Tween ATM.", GlobalTweening);
-		}
+        if(currentTween)
+        {
+            sprintf(buffer, "GlobalTweening: %d | Start: %d, End: %d, Current: %d, Value: %d",
+                    GlobalTweening, currentTween->start, currentTween->end,
+                    currentTween->currentTime, *currentTween->value);
+        }
+        else
+        {
+            sprintf(buffer, "GlobalTweening: %d | No Tween ATM.", GlobalTweening);
+        }
         debugMessageTwo = LoadTextureText(string(buffer), {0, 100, 0, 255});
 
         sprintf(buffer, "MS: %.02f, FPS: %d", ElapsedMS, (int)(1.0f / ElapsedMS * 1000.0f));

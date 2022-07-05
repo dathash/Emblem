@@ -50,6 +50,7 @@ RenderText(const Texture &texture, int x, int y)
 void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu,
+       const UnitInfo &unitInfo,
        const Texture &debugMessageOne, 
        const Texture &debugMessageTwo, 
        const Texture &debugMessageThree)
@@ -202,13 +203,20 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
 // ================================== info pages ===============================================
-    else if(GlobalInterfaceState == UNIT_INFO)
+    else if(GlobalInterfaceState == UNIT_INFO ||
+            GlobalInterfaceState == ENEMY_INFO)
     {
-        // Display unit info page
-    }
-    else if(GlobalInterfaceState == ENEMY_INFO)
-    {
-        // Display enemy info page
+        for(int i = 0; i < unitInfo.rows; ++i)
+        {
+            SDL_Rect infoRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &infoRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
+            SDL_RenderDrawRect(GlobalRenderer, &infoRect);
+
+            RenderText(*unitInfo.infoTextTextures[i], infoRect.x, infoRect.y);
+        }
     }
     else if(GlobalInterfaceState == PREVIEW_ATTACK)
     {

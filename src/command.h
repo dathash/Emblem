@@ -180,13 +180,15 @@ public:
 
     virtual void Execute()
     {
-        GlobalInterfaceState = SELECTED_OVER_GROUND;
         cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
-        map->accessible = AccessibleFrom(*map, cursor->selectedCol, cursor->selectedRow, cursor->selected->mov);
+        map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
+                                         cursor->selectedRow, cursor->selected->mov);
         printf("COMMAND | Select Unit %d at <%d, %d>\n", 
                cursor->selected->id, cursor->col, cursor->row);
+
+        GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
 private:
@@ -217,6 +219,7 @@ public:
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
         cursor->selected = nullptr;
+
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 
@@ -341,6 +344,8 @@ public:
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
         map->tiles[cursor->col][cursor->row].occupied = true;
+
+        cursor->selected->sheet->ChangeTrack(1);
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
 
@@ -375,6 +380,7 @@ public:
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
+        cursor->selected->sheet->ChangeTrack(0);
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -768,14 +774,14 @@ public:
     
     virtual void Execute()
     {
-        int damage = cursor->selected->attack;
+        printf("COMMAND | Attack from Unit %d on Enemy %d. Simulating...\n", 
+               cursor->selected->id, cursor->targeted->id);
 
-        cursor->targeted->hp -= damage;
-
-        printf("COMMAND | Attack from Unit %d on Enemy %d. %d damage.\n", 
-               cursor->selected->id, cursor->targeted->id, damage);
+        SimulateCombat(cursor->selected.get(), cursor->targeted.get());
 
         cursor->selected->isExhausted = true;
+        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected = nullptr;
         cursor->col = cursor->targeterCol;
         cursor->row = cursor->targeterRow;
 
@@ -809,6 +815,8 @@ public:
                cursor->selected->id, cursor->targeted->id);
 
         cursor->selected->isExhausted = true;
+        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected = nullptr;
         cursor->col = cursor->targeterCol;
         cursor->row = cursor->targeterRow;
 
@@ -843,6 +851,8 @@ public:
                cursor->selected->id, cursor->targeted->id, damage);
 
         cursor->selected->isExhausted = true;
+        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected = nullptr;
         cursor->col = cursor->targeterCol;
         cursor->row = cursor->targeterRow;
 
@@ -949,9 +959,10 @@ public:
 class SelectEnemyCommand : public Command
 {
 public:
-    SelectEnemyCommand(Cursor *cursor_in, const Tilemap &map_in)
+    SelectEnemyCommand(Cursor *cursor_in, const Tilemap &map_in, UnitInfo *unitInfo_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      unitInfo(unitInfo_in)
     {}
 
     virtual shared_ptr<Tween>
@@ -967,6 +978,16 @@ public:
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
 
+        unitInfo->UpdateTextTextures({"ID: " + to_string(cursor->selected->id),
+                                      "Ally: " + to_string(cursor->selected->isAlly),
+                                      "Exhausted: " + to_string(cursor->selected->isExhausted),
+                                      "Health: " + to_string(cursor->selected->hp) + " / " + to_string(cursor->selected->maxHp),
+                                      "Movement: " + to_string(cursor->selected->mov),
+                                      "Attack: " + to_string(cursor->selected->attack),
+                                      "Healing: " + to_string(cursor->selected->healing),
+                                      "Range: " + to_string(cursor->selected->minRange) + " / " + to_string(cursor->selected->maxRange)
+                                      });                                        
+
         printf("COMMAND | Select Enemy %d at <%d, %d>\n", 
             cursor->selected->id, cursor->col, cursor->row);
         printf(" <> INTERFACE | ally: %d, mov: %d, etc. <> \n",
@@ -976,6 +997,7 @@ public:
 private:
     Cursor *cursor;
     const Tilemap &map;
+    UnitInfo *unitInfo;
 };
 
 class DeselectEnemyCommand : public Command
@@ -1165,10 +1187,11 @@ private:
 class ChooseUnitMenuOptionCommand : public Command
 {
 public:
-    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in)
+    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in, UnitInfo *unitInfo_in)
     : cursor(cursor_in),
       map(map_in),
-      menu(menu_in)
+      menu(menu_in),
+      unitInfo(unitInfo_in)
     {}
 
     virtual shared_ptr<Tween>
@@ -1184,6 +1207,16 @@ public:
         {
             case(0): // INFO
             {
+                unitInfo->UpdateTextTextures({"ID: " + to_string(cursor->selected->id),
+                                              "Ally: " + to_string(cursor->selected->isAlly),
+                                              "Exhausted: " + to_string(cursor->selected->isExhausted),
+                                              "Health: " + to_string(cursor->selected->hp) + " / " + to_string(cursor->selected->maxHp),
+                                              "Movement: " + to_string(cursor->selected->mov),
+                                              "Attack: " + to_string(cursor->selected->attack),
+                                              "Healing: " + to_string(cursor->selected->healing),
+                                              "Range: " + to_string(cursor->selected->minRange) + " / " + to_string(cursor->selected->maxRange)
+                                              });
+
                 GlobalInterfaceState = UNIT_INFO;
             } break;
             case(1): // ITEMS
@@ -1231,6 +1264,8 @@ public:
                 printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
                        cursor->selected->id, cursor->col, cursor->row);
                 cursor->selected->isExhausted = true;
+
+                cursor->selected->sheet->ChangeTrack(0);
                 cursor->selected = nullptr;
 
                 cursor->selectedCol = -1;
@@ -1248,6 +1283,7 @@ private:
     Cursor *cursor;
     Tilemap *map;
     const Menu &menu;
+    UnitInfo *unitInfo;
 };
 
 class BackOutOfUnitInfoCommand : public Command
@@ -1351,7 +1387,9 @@ public:
     // updates what the user can do with their buttons.
 	// contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
-    void UpdateCommands(Cursor *cursor, Tilemap *map, Menu *gameMenu, Menu *unitMenu)
+    void UpdateCommands(Cursor *cursor, Tilemap *map, 
+                        Menu *gameMenu, Menu *unitMenu,
+                        UnitInfo *unitInfo)
     {
         switch(GlobalInterfaceState)
         {
@@ -1371,7 +1409,7 @@ public:
                 BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<SelectEnemyCommand>(cursor, *map));
+                BindA(make_shared<SelectEnemyCommand>(cursor, *map, unitInfo));
                 BindB(make_shared<NullCommand>());
             } break;
 
@@ -1558,7 +1596,7 @@ public:
                 BindDown(make_shared<UpdateUnitMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu, unitInfo));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
             case(UNIT_INFO):
