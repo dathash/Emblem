@@ -1,0 +1,24 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Level 1
+COM Date: July 2022
+
+MAP 0 0 0 0 0 0 1 1
+MAP 0 1 1 1 1 0 0 1
+MAP 0 1 0 0 0 0 0 1
+MAP 0 1 0 1 0 0 0 0
+MAP 0 0 0 1 0 1 0 0
+MAP 0 1 0 0 0 1 0 0
+MAP 0 1 0 0 1 1 1 0
+MAP 0 0 0 0 1 1 1 1
+
+COM <UNT <name> <id> <col> <row>
+UNT Brutus        0    0     3
+UNT Aeschylus     1    2     2
+UNT Zarathustra   2    0     0
+
+UNT Pirate        3    4     2
+UNT Pirate        3    0     6
+UNT Pirate        3    5     3
+UNT Pirate        3    7     3
+UNT Pirate        3    7     6

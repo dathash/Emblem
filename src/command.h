@@ -660,8 +660,8 @@ public:
         printf("COMMAND | Detarget\n");
         map->interactible = nullptr;
 
-        cursor->col = cursor->targeterCol;
-        cursor->row = cursor->targeterRow;
+        cursor->col = cursor->sourceCol;
+        cursor->row = cursor->sourceRow;
 
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
@@ -674,9 +674,10 @@ private:
 class InitiateAttackCommand : public Command
 {
 public:
-    InitiateAttackCommand(Cursor *cursor_in, const Tilemap &map_in)
+    InitiateAttackCommand(Cursor *cursor_in, const Tilemap &map_in, CombatInfo *combatInfo_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+	  combatInfo(combatInfo_in)
     {}
 
     virtual shared_ptr<Tween>
@@ -692,20 +693,36 @@ public:
         printf("COMMAND | Initiate attack on Unit %d at <%d, %d>\n",
                 cursor->targeted->id, cursor->col, cursor->row);
 
+        combatInfo->UpdateTextTextures(
+								      {
+                                      cursor->selected->name,
+                                      "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
+                                      "Damage: " + to_string(cursor->selected->attack),
+									  "Hit: " + to_string(cursor->selected->accuracy)
+                                      },
+									  {
+                                      cursor->targeted->name,
+                                      "Health: " + to_string(cursor->targeted->hp) + "/" + to_string(cursor->targeted->maxHp),
+                                      "Damage: " + to_string(cursor->targeted->attack),
+									  "Hit: " + to_string(cursor->targeted->accuracy)
+                                      });                                        
+
         GlobalInterfaceState = PREVIEW_ATTACK;
     }
 
 private:
     Cursor *cursor;
     const Tilemap &map;
+	CombatInfo *combatInfo;
 };
 
 class InitiateHealingCommand : public Command
 {
 public:
-    InitiateHealingCommand(Cursor *cursor_in, const Tilemap &map_in)
+    InitiateHealingCommand(Cursor *cursor_in, const Tilemap &map_in, CombatInfo *combatInfo_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+	  combatInfo(combatInfo_in)
     {}
 
     virtual shared_ptr<Tween>
@@ -721,12 +738,27 @@ public:
         printf("COMMAND | Initiate healing on Unit %d at <%d, %d>\n",
                 cursor->targeted->id, cursor->col, cursor->row);
 
+        combatInfo->UpdateTextTextures(
+								      {
+                                      cursor->selected->name,
+                                      "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
+                                      "Healing: " + to_string(cursor->selected->healing),
+									  "Hit: -"
+                                      },
+									  {
+                                      cursor->targeted->name,
+                                      "Health: " + to_string(cursor->targeted->hp) + "/" + to_string(cursor->targeted->maxHp),
+                                      "Healing: -",
+									  "Hit: -"
+                                      });                                        
+
         GlobalInterfaceState = PREVIEW_HEALING;
     }
 
 private:
     Cursor *cursor;
     const Tilemap &map;
+	CombatInfo *combatInfo;
 };
 
 class InitiateTradingCommand : public Command
@@ -782,8 +814,8 @@ public:
         cursor->selected->isExhausted = true;
         cursor->selected->sheet->ChangeTrack(0);
         cursor->selected = nullptr;
-        cursor->col = cursor->targeterCol;
-        cursor->row = cursor->targeterRow;
+        cursor->col = cursor->sourceCol;
+        cursor->row = cursor->sourceRow;
 
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
@@ -817,8 +849,8 @@ public:
         cursor->selected->isExhausted = true;
         cursor->selected->sheet->ChangeTrack(0);
         cursor->selected = nullptr;
-        cursor->col = cursor->targeterCol;
-        cursor->row = cursor->targeterRow;
+        cursor->col = cursor->sourceCol;
+        cursor->row = cursor->sourceRow;
 
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
@@ -843,18 +875,17 @@ public:
 
     virtual void Execute()
     {
-        int damage = cursor->selected->healing;
 
-        cursor->targeted->hp += damage;
+        printf("COMMAND | Healing from Unit %d on Unit %d.\n", 
+               cursor->selected->id, cursor->targeted->id);
 
-        printf("COMMAND | Healing from Unit %d on Unit %d. %d healing.\n", 
-               cursor->selected->id, cursor->targeted->id, damage);
+        SimulateHealing(cursor->selected.get(), cursor->targeted.get());
 
         cursor->selected->isExhausted = true;
         cursor->selected->sheet->ChangeTrack(0);
         cursor->selected = nullptr;
-        cursor->col = cursor->targeterCol;
-        cursor->row = cursor->targeterRow;
+        cursor->col = cursor->sourceCol;
+        cursor->row = cursor->sourceRow;
 
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
@@ -978,20 +1009,20 @@ public:
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
 
-        unitInfo->UpdateTextTextures({"ID: " + to_string(cursor->selected->id),
+        unitInfo->UpdateTextTextures({cursor->selected->name,
+                                      "ID: " + to_string(cursor->selected->id),
                                       "Ally: " + to_string(cursor->selected->isAlly),
                                       "Exhausted: " + to_string(cursor->selected->isExhausted),
                                       "Health: " + to_string(cursor->selected->hp) + " / " + to_string(cursor->selected->maxHp),
                                       "Movement: " + to_string(cursor->selected->mov),
                                       "Attack: " + to_string(cursor->selected->attack),
                                       "Healing: " + to_string(cursor->selected->healing),
-                                      "Range: " + to_string(cursor->selected->minRange) + " / " + to_string(cursor->selected->maxRange)
+                                      "Range: " + to_string(cursor->selected->minRange) + " / " + to_string(cursor->selected->maxRange),
+                                      "Accuracy: " + to_string(cursor->selected->accuracy)
                                       });                                        
 
         printf("COMMAND | Select Enemy %d at <%d, %d>\n", 
             cursor->selected->id, cursor->col, cursor->row);
-        printf(" <> INTERFACE | ally: %d, mov: %d, etc. <> \n",
-               cursor->selected->isAlly, cursor->selected->mov);
     }
 
 private:
@@ -1207,14 +1238,16 @@ public:
         {
             case(0): // INFO
             {
-                unitInfo->UpdateTextTextures({"ID: " + to_string(cursor->selected->id),
+                unitInfo->UpdateTextTextures({cursor->selected->name,
+                                              "ID: " + to_string(cursor->selected->id),
                                               "Ally: " + to_string(cursor->selected->isAlly),
                                               "Exhausted: " + to_string(cursor->selected->isExhausted),
-                                              "Health: " + to_string(cursor->selected->hp) + " / " + to_string(cursor->selected->maxHp),
+                                              "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
                                               "Movement: " + to_string(cursor->selected->mov),
                                               "Attack: " + to_string(cursor->selected->attack),
                                               "Healing: " + to_string(cursor->selected->healing),
-                                              "Range: " + to_string(cursor->selected->minRange) + " / " + to_string(cursor->selected->maxRange)
+                                              "Range: " + to_string(cursor->selected->minRange) + "/" + to_string(cursor->selected->maxRange),
+                                              "Accuracy: " + to_string(cursor->selected->accuracy)
                                               });
 
                 GlobalInterfaceState = UNIT_INFO;
@@ -1225,9 +1258,9 @@ public:
             } break;
             case(2): // ATTACK
             {
-                cursor->targeterCol = cursor->col;
-                cursor->targeterRow = cursor->row;
-                map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+                cursor->sourceCol = cursor->col;
+                cursor->sourceRow = cursor->row;
+                map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                  cursor->selected->minRange, cursor->selected->maxRange);
                 printf(" > COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
                         cursor->selected->id, cursor->col, cursor->row);
@@ -1235,11 +1268,11 @@ public:
             } break;
             case(3): // HEAL
             {
-                cursor->targeterCol = cursor->col;
-                cursor->targeterRow = cursor->row;
+                cursor->sourceCol = cursor->col;
+                cursor->sourceRow = cursor->row;
                 // Find tiles that a unit can interact with.
 
-                map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+                map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                      1, 1);
 
                 printf("COMMAND | Finding targets to heal for Unit %d at <%d, %d>\n", 
@@ -1248,11 +1281,11 @@ public:
             } break;
             case(4): // TRADE
             {
-                cursor->targeterCol = cursor->col;
-                cursor->targeterRow = cursor->row;
+                cursor->sourceCol = cursor->col;
+                cursor->sourceRow = cursor->row;
                 // Find tiles that a unit can interact with.
 
-                map->interactible = InteractibleFrom(*map, cursor->targeterCol, cursor->targeterRow, 
+                map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow,
                                                      1, 1);
 
                 printf("COMMAND | Finding targets to trade with for Unit %d at <%d, %d>\n", 
@@ -1389,7 +1422,7 @@ public:
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map, 
                         Menu *gameMenu, Menu *unitMenu,
-                        UnitInfo *unitInfo)
+                        UnitInfo *unitInfo, CombatInfo *combatInfo)
     {
         switch(GlobalInterfaceState)
         {
@@ -1479,7 +1512,7 @@ public:
                 BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<InitiateAttackCommand>(cursor, *map));
+                BindA(make_shared<InitiateAttackCommand>(cursor, *map, combatInfo));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
@@ -1498,7 +1531,7 @@ public:
                 BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<InitiateHealingCommand>(cursor, *map));
+                BindA(make_shared<InitiateHealingCommand>(cursor, *map, combatInfo));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 

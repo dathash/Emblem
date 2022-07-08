@@ -5,43 +5,42 @@
 
 /*
     TODO
-    Combat Preview
+	MVP
+		Turns
+			Enemy Turn
+			Basic AI
+        Level Transitions
+        Death
+        New Textures
+		Three main Units
+		Create some cool levels
 
-    NEXT
-    User Interface
-        Show Tile details
-        Items and Trading Menus
 
-    Level System
-        Loading
-        Editing
-        Saving
-        Transitions
-
-    Animation
-        Combat Scene
-        Placing Unit moves them to that square (A-star)
-        Generate Arrow while selecting?
-
-    Items
-        Equipping
-        Trading
-        Different Ranges / Action types
+    NICE
+		User Interface
+			Show Tile details
+			Items and Trading Menus
+		Animation
+			Combat Scene
+			Placing Unit moves them to that square (A-star)
+			Generate Arrow while selecting?
+		Items
+			Equipping
+			Trading
+			Different Ranges / Action types
 
     BACKLOG
-    Conversations
-    Music (MiniAudio)
-    Items
-    Replay!
-    Smooth Interaction Syntax (Just click on enemy to attack them)
-    Switch to GameController API
-    Key Repeat
-    Tiles have properties 
-        (That remain together and don't rely on eachother)
-    Turns
-        Enemy Turn
-        Basic AI
-    Redo Trade/Attack/Heal Stuff? Inheritance?
+        Better Level Editor
+		Conversations
+		Music (MiniAudio)
+		Items
+		Replay!
+		Smooth Interaction Syntax (Just click on enemy to attack them)
+		Switch to GameController API
+		Key Repeat
+		Tiles have properties 
+			(That remain together and don't rely on eachother)
+		Redo Trade/Attack/Heal Stuff? Inheritance?
  */
 
 
@@ -50,6 +49,8 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+#include <iostream>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -84,7 +85,7 @@ using namespace std;
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 900
 
-#define MENU_WIDTH 250
+#define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
 
 // backend
@@ -317,15 +318,17 @@ struct Tween
 
 struct Unit
 {
-    int id = 0;
+    string name;
+    int id;
     bool shouldDie = false;
     bool isAlly = false;
     bool isExhausted = false;
     int mov = 0;
     int hp = 10;
     int maxHp = 10;
-    int attack = 3;
-    int healing = 2;
+    int attack = 1;
+    int defense = 1;
+    int healing = 1;
     int minRange = 1;
     int maxRange = 1;
     int accuracy = 50;
@@ -336,17 +339,25 @@ struct Unit
         sheet->Update();
     }
 
-    Unit(int id_in, bool isAlly_in, int mov_in,
+    Unit(string name_in, shared_ptr<Texture> texture_in, 
+         int id_in, bool isAlly_in, int mov_in,
+         int hp_in, int maxHp_in,
          int minRange_in, int maxRange_in,
-         shared_ptr<Texture> texture_in)
+         int attack_in, int defense_in, int accuracy_in)
     {
         //printf("Unit Constructed!\n");
+        this->name = name_in;
+        this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
         this->id = id_in;
         this->isAlly = isAlly_in;
         this->mov = mov_in;
+        this->hp = hp_in;
+        this->maxHp = maxHp_in;
         this->minRange = minRange_in;
         this->maxRange = maxRange_in;
-        this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
+        this->attack = attack_in;
+        this->defense = defense_in;
+        this->accuracy = accuracy_in;
     }
 
     ~Unit()
@@ -384,8 +395,8 @@ struct Cursor
     std::shared_ptr<Unit> targeted = nullptr;
     int selectedCol = -1; // Where the cursor was before placing a unit
     int selectedRow = -1;
-    int targeterCol = -1; // Where the cursor was before choosing a target
-    int targeterRow = -1;
+    int sourceCol = -1; // Where the cursor was before choosing a target
+    int sourceRow = -1;
 
     shared_ptr<SpriteSheet> sheet;
 
@@ -457,6 +468,46 @@ struct UnitInfo
     }
 };
 
+struct CombatInfo
+{
+    u8 rows;
+
+    vector<unique_ptr<Texture>> sourceTextTextures;
+    vector<unique_ptr<Texture>> targetTextTextures;
+
+    CombatInfo(u8 rows_in, vector<string> sourceInfo_in, vector<string> targetInfo_in)
+    : rows(rows_in)
+    {
+        for(string s : sourceInfo_in)
+        {
+            sourceTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+        }
+
+        for(string s : targetInfo_in)
+        {
+            targetTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+        } 
+    }
+
+    void UpdateTextTextures(vector<string> sourceInfo_in, vector<string> targetInfo_in)
+    {
+        assert(sourceInfo_in.size() == targetInfo_in.size());
+        sourceTextTextures.clear();
+        targetTextTextures.clear();
+        int newRows = 0;
+        for(string s : sourceInfo_in)
+        {
+            sourceTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+            ++newRows;
+        }
+        this->rows = newRows;
+        for(string s : targetInfo_in)
+        {
+            targetTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+        }
+    }
+};
+
 int d100()
 {
     return rand() % 100;
@@ -466,7 +517,7 @@ void SimulateCombat(Unit *one, Unit *two)
 {
     // one -> two
     int damage = one->attack;
-    if(d100() > one->accuracy)
+    if(d100() < one->accuracy)
     {
         printf("SIMULATION | %d Damage!\n", damage);
         if(two->hp - damage <= 0)
@@ -485,7 +536,7 @@ void SimulateCombat(Unit *one, Unit *two)
     }
 
     // two -> one
-    int damage = two->attack;
+    damage = two->attack;
     if(d100() > two->accuracy)
     {
         printf("SIMULATION | %d Damage!\n", damage);
@@ -503,6 +554,14 @@ void SimulateCombat(Unit *one, Unit *two)
     {
         printf("SIMULATION | Missed!\n");
     }
+}
+
+void SimulateHealing(Unit *one, Unit *two)
+{
+    // one -> two
+    int healing = one->healing;
+    printf("SIMULATION | %d Healing!\n", healing);
+    two->hp = min(healing + two->hp, two->maxHp);
 }
 
 
@@ -550,30 +609,17 @@ int main(int argc, char *argv[])
     u64 frameNumber = 0;
     real32 ElapsedMS = 0.0f;
 
-    Tilemap map = {};
-    map.tiles[4][4].type = WALL;
-    map.tiles[4][4].penalty = 10;
+    // load data
+    vector<shared_ptr<Unit>> units = LoadCharacters("../data/units.txt");
+    shared_ptr<Tilemap> map = LoadLevel("../data/l1.txt", units);
 
     Cursor cursor(LoadTextureImage("../assets/sprites/cursor.png"));;
 
-    // Initialize Units
-    shared_ptr<Unit> lucina = make_shared<Unit>(0, true, 3, 2, 2, LoadTextureImage("../assets/sprites/lucina_final.png"));
-    map.tiles[3][5].occupant = lucina;
-    map.tiles[3][5].occupied = true;
-
-    shared_ptr<Unit> donnel = make_shared<Unit>(1, true, 6, 1, 1, LoadTextureImage("../assets/sprites/donnel_final.png"));
-    map.tiles[4][5].occupant = donnel;
-    map.tiles[4][5].occupied = true;
-
-    shared_ptr<Unit> flavia = make_shared<Unit>(2, false, 3, 1, 1, LoadTextureImage("../assets/sprites/flavia_final.png"));
-    map.tiles[6][4].occupant = flavia;
-    map.tiles[6][4].occupied = true;
-
     // Initial InputHandler commands
-    handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, map));
-    handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, map));
-    handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, map));
-    handler.BindRight(make_shared<MoveCommand>(&cursor, 1, 0, map));
+    handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, *map));
+    handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, *map));
+    handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, *map));
+    handler.BindRight(make_shared<MoveCommand>(&cursor, 1, 0, *map));
     handler.BindA(make_shared<OpenGameMenuCommand>());
     handler.BindB(make_shared<NullCommand>());
 
@@ -582,6 +628,7 @@ int main(int argc, char *argv[])
     Menu unitMenu(6, 0, {"Info", "Items", "Attack", "Heal", "Trade", "Wait"});
 
     UnitInfo unitInfo(1, {"Placeholder"});
+    CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
 
     unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
     unique_ptr<Texture> debugMessageTwo = LoadTextureText("placeholder2", {0, 100, 0, 255});
@@ -624,7 +671,9 @@ int main(int argc, char *argv[])
         {
             commandQueue.front()->Execute();
             commandQueue.pop();
-            handler.UpdateCommands(&cursor, &map, &gameMenu, &unitMenu, &unitInfo);
+            handler.UpdateCommands(&cursor, map.get(),
+                                   &gameMenu, &unitMenu, 
+                                   &unitInfo, &combatInfo);
             if(currentTween)
             {
                 currentTween->Reset();
@@ -633,14 +682,15 @@ int main(int argc, char *argv[])
         }
 // ================================================================
 
-        lucina->Update();
-        flavia->Update();
-        donnel->Update();
+        for(shared_ptr<Unit> unit : units)
+        {
+            unit->Update();
+        }
         cursor.Update();
 
 
 // ============================= render =========================================
-        Render(map, cursor, gameMenu, unitMenu, unitInfo, 
+        Render(*map, cursor, gameMenu, unitMenu, unitInfo, combatInfo,
                *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
 

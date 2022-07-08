@@ -51,6 +51,7 @@ void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu,
        const UnitInfo &unitInfo,
+       const CombatInfo &combatInfo,
        const Texture &debugMessageOne, 
        const Texture &debugMessageTwo, 
        const Texture &debugMessageThree)
@@ -218,13 +219,25 @@ Render(const Tilemap &map, const Cursor &cursor,
             RenderText(*unitInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
     }
-    else if(GlobalInterfaceState == PREVIEW_ATTACK)
+    else if(GlobalInterfaceState == PREVIEW_ATTACK ||
+            GlobalInterfaceState == PREVIEW_HEALING)
     {
-        // Display attack preview
-    }
-    else if(GlobalInterfaceState == PREVIEW_HEALING)
-    {
-        // Display healing preview
+        for(int i = 0; i < combatInfo.rows; ++i)
+        {
+            SDL_Rect sourceRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            SDL_Rect targetRect = {TILE_SIZE * MAP_SIZE + MENU_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &sourceRect);
+            SDL_RenderFillRect(GlobalRenderer, &targetRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
+            SDL_RenderDrawRect(GlobalRenderer, &sourceRect);
+            SDL_RenderDrawRect(GlobalRenderer, &targetRect);
+
+            RenderText(*combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
+            RenderText(*combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
+        }
     }
 
 

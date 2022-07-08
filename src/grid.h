@@ -66,7 +66,15 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max)
             if(IsValidBoundsPosition(newCol, newRow))
             {
                 const Tile *tileToExplore = &map.tiles[newCol][newRow];
-                int newCost = costs[current.first][current.second] + map.tiles[newCol][newRow].penalty;
+                int newCost;
+                if(map.tiles[newCol][newRow].occupied && !map.tiles[newCol][newRow].occupant->isAlly)
+                {
+                    newCost = 100;
+                }
+                else
+                {
+                    newCost = costs[current.first][current.second] + map.tiles[newCol][newRow].penalty;
+                }
                 if(newCost < costs[newCol][newRow])
                 {
                     costs[newCol][newRow] = newCost;
