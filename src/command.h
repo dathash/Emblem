@@ -57,7 +57,6 @@ public:
     }
 
     virtual void Execute() = 0;
-    virtual shared_ptr<Tween> GetTween() = 0;
 };
 
 class NullCommand : public Command
@@ -66,12 +65,6 @@ public:
     virtual void Execute()
     {
         printf("COMMAND | Null\n");
-    }
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
     }
 };
 
@@ -85,43 +78,6 @@ public:
       row(row_in),
       map(map_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        shared_ptr<Tween> result;
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        if(IsValidBoundsPosition(newCol, newRow))
-        {
-            if(col == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(col == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(row == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else if(row == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else
-            {
-                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
-            }
-        }
-        else
-        {
-            result = nullptr;
-        }
-        
-        return result;
-    }
 
     virtual void Execute()
     {
@@ -172,12 +128,6 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
@@ -206,12 +156,6 @@ public:
     : cursor(cursor_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         printf("COMMAND | Deselect Unit %d.\n",
@@ -237,43 +181,6 @@ public:
       row(row_in),
       map(map_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        shared_ptr<Tween> result;
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        if(IsValidBoundsPosition(newCol, newRow))
-        {
-            if(col == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(col == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(row == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else if(row == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else
-            {
-                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
-            }
-        }
-        else
-        {
-            result = nullptr;
-        }
-        
-        return result;
-    }
 
     virtual void Execute()
     {
@@ -330,12 +237,6 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         printf("COMMAND | Place Unit %d at <%d, %d>\n",
@@ -344,6 +245,10 @@ public:
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
         map->tiles[cursor->col][cursor->row].occupied = true;
+
+        // unit has to know its position as well
+        cursor->selected->col = cursor->col;
+        cursor->selected->row = cursor->row;
 
         cursor->selected->sheet->ChangeTrack(1);
         GlobalInterfaceState = UNIT_MENU_ROOT;
@@ -363,16 +268,11 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         printf("COMMAND | Put Unit %d back at <%d, %d>\n",
                cursor->selected->id, cursor->selectedCol, cursor->selectedRow);
+
         map->tiles[cursor->col][cursor->row].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupied = false;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
@@ -380,6 +280,11 @@ public:
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
+
+        // unit has to know its position as well
+        cursor->selected->col = cursor->col;
+        cursor->selected->row = cursor->row;
+
         cursor->selected->sheet->ChangeTrack(0);
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
@@ -400,43 +305,6 @@ public:
       row(row_in),
       map(map_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        shared_ptr<Tween> result;
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        if(IsValidBoundsPosition(newCol, newRow))
-        {
-            if(col == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(col == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(row == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else if(row == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else
-            {
-                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
-            }
-        }
-        else
-        {
-            result = nullptr;
-        }
-        
-        return result;
-    }
 
     virtual void Execute()
     {
@@ -485,43 +353,6 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        shared_ptr<Tween> result;
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        if(IsValidBoundsPosition(newCol, newRow))
-        {
-            if(col == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(col == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(row == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else if(row == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else
-            {
-                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
-            }
-        }
-        else
-        {
-            result = nullptr;
-        }
-        
-        return result;
-    }
-
     virtual void Execute()
     {
         int newCol = cursor->col + col;
@@ -568,43 +399,6 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        shared_ptr<Tween> result;
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        if(IsValidBoundsPosition(newCol, newRow))
-        {
-            if(col == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(col == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->colPixelOffset, true);
-            }
-            else if(row == -1)
-            {
-                result = make_shared<Tween>(0, -TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else if(row == 1)
-            {
-                result = make_shared<Tween>(0, TILE_SIZE, CURSOR_MOVE_SPEED, &cursor->sheet->rowPixelOffset, true);
-            }
-            else
-            {
-                printf("MOVE COMMAND | You shouldn't be able to get here!\n");
-            }
-        }
-        else
-        {
-            result = nullptr;
-        }
-        
-        return result;
-    }
-
     virtual void Execute()
     {
         int newCol = cursor->col + col;
@@ -649,12 +443,6 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     { 
         printf("COMMAND | Detarget\n");
@@ -680,11 +468,6 @@ public:
 	  combatInfo(combatInfo_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     {
@@ -697,13 +480,13 @@ public:
 								      {
                                       cursor->selected->name,
                                       "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
-                                      "Damage: " + to_string(cursor->selected->attack),
+                                      "Damage: " + to_string(cursor->selected->attack - cursor->targeted->defense),
 									  "Hit: " + to_string(cursor->selected->accuracy)
                                       },
 									  {
                                       cursor->targeted->name,
                                       "Health: " + to_string(cursor->targeted->hp) + "/" + to_string(cursor->targeted->maxHp),
-                                      "Damage: " + to_string(cursor->targeted->attack),
+                                      "Damage: " + to_string(cursor->targeted->attack - cursor->selected->defense),
 									  "Hit: " + to_string(cursor->targeted->accuracy)
                                       });                                        
 
@@ -724,12 +507,6 @@ public:
       map(map_in),
 	  combatInfo(combatInfo_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     {
@@ -769,12 +546,6 @@ public:
       map(map_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
@@ -798,12 +569,6 @@ public:
     : cursor(cursor_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-    
     virtual void Execute()
     {
         printf("COMMAND | Attack from Unit %d on Enemy %d. Simulating...\n", 
@@ -814,6 +579,7 @@ public:
         cursor->selected->isExhausted = true;
         cursor->selected->sheet->ChangeTrack(0);
         cursor->selected = nullptr;
+        cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
@@ -833,12 +599,6 @@ public:
     : cursor(cursor_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-    
     virtual void Execute()
     {
         // TRADING BEHAVIOR HERE
@@ -849,6 +609,7 @@ public:
         cursor->selected->isExhausted = true;
         cursor->selected->sheet->ChangeTrack(0);
         cursor->selected = nullptr;
+        cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
@@ -867,12 +628,6 @@ public:
     : cursor(cursor_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
 
@@ -884,6 +639,7 @@ public:
         cursor->selected->isExhausted = true;
         cursor->selected->sheet->ChangeTrack(0);
         cursor->selected = nullptr;
+        cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
@@ -900,12 +656,6 @@ public:
     BackDownFromAttackingCommand(Cursor *cursor_in)
     : cursor(cursor_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     {
@@ -927,12 +677,6 @@ public:
     : cursor(cursor_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         printf("Command | Backed down from healing ally.\n");
@@ -953,12 +697,6 @@ public:
     : cursor(cursor_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         printf("COMMAND | Backed down from trading with ally.\n");
@@ -976,12 +714,6 @@ class ChangeWeaponBeforeCombatCommand : public Command
 {
 public:
     virtual void Execute() { printf("Change Weapon!\n"); }
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 };
 
 
@@ -996,12 +728,6 @@ public:
       unitInfo(unitInfo_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     {
         GlobalInterfaceState = ENEMY_INFO;
@@ -1011,13 +737,16 @@ public:
 
         unitInfo->UpdateTextTextures({cursor->selected->name,
                                       "ID: " + to_string(cursor->selected->id),
+                                      "col: " + to_string(cursor->selected->col),
+                                      "row: " + to_string(cursor->selected->row),
                                       "Ally: " + to_string(cursor->selected->isAlly),
                                       "Exhausted: " + to_string(cursor->selected->isExhausted),
                                       "Health: " + to_string(cursor->selected->hp) + " / " + to_string(cursor->selected->maxHp),
                                       "Movement: " + to_string(cursor->selected->mov),
                                       "Attack: " + to_string(cursor->selected->attack),
+                                      "Defense: " + to_string(cursor->selected->defense),
                                       "Healing: " + to_string(cursor->selected->healing),
-                                      "Range: " + to_string(cursor->selected->minRange) + " / " + to_string(cursor->selected->maxRange),
+                                      "Range: " + to_string(cursor->selected->minRange) + "-" + to_string(cursor->selected->maxRange),
                                       "Accuracy: " + to_string(cursor->selected->accuracy)
                                       });                                        
 
@@ -1037,12 +766,6 @@ public:
     DeselectEnemyCommand(Cursor *cursor_in)
     : cursor(cursor_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     {
@@ -1066,12 +789,6 @@ class OpenGameMenuCommand : public Command
 {
 public:
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     { 
         printf("COMMAND | Open Game Menu\n");
@@ -1082,12 +799,6 @@ public:
 class ExitGameMenuCommand : public Command
 {
 public:
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     { 
@@ -1104,12 +815,6 @@ public:
     : menu(menu_in),
       direction(direction_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     { 
@@ -1142,12 +847,6 @@ public:
     ChooseGameMenuOptionCommand(Menu *menu_in)
     : menu(menu_in)
     {}
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 
     virtual void Execute()
     { 
@@ -1185,12 +884,6 @@ public:
       direction(direction_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     { 
         printf("COMMAND | Update Unit Menu!\n");
@@ -1225,12 +918,6 @@ public:
       unitInfo(unitInfo_in)
     {}
 
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
-
     virtual void Execute()
     { 
         printf("COMMAND | Choose Unit Menu Option %d!\n", menu.current);
@@ -1240,13 +927,16 @@ public:
             {
                 unitInfo->UpdateTextTextures({cursor->selected->name,
                                               "ID: " + to_string(cursor->selected->id),
+                                              "col: " + to_string(cursor->selected->col),
+                                              "row: " + to_string(cursor->selected->row),
                                               "Ally: " + to_string(cursor->selected->isAlly),
                                               "Exhausted: " + to_string(cursor->selected->isExhausted),
                                               "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
                                               "Movement: " + to_string(cursor->selected->mov),
                                               "Attack: " + to_string(cursor->selected->attack),
+                                              "Defense: " + to_string(cursor->selected->defense),
                                               "Healing: " + to_string(cursor->selected->healing),
-                                              "Range: " + to_string(cursor->selected->minRange) + "/" + to_string(cursor->selected->maxRange),
+                                              "Range: " + to_string(cursor->selected->minRange) + "-" + to_string(cursor->selected->maxRange),
                                               "Accuracy: " + to_string(cursor->selected->accuracy)
                                               });
 
@@ -1262,7 +952,7 @@ public:
                 cursor->sourceRow = cursor->row;
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                  cursor->selected->minRange, cursor->selected->maxRange);
-                printf(" > COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
+                printf("COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
                         cursor->selected->id, cursor->col, cursor->row);
                 GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
             } break;
@@ -1327,12 +1017,6 @@ public:
         printf("COMMAND | Back Out of Unit Info!\n");
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
-    }
 };
 
 class BackOutOfItemsMenuCommand : public Command
@@ -1342,12 +1026,6 @@ public:
     {
         printf("COMMAND | Back Out of Items Menu!\n");
         GlobalInterfaceState = UNIT_MENU_ROOT;
-    }
-
-    virtual shared_ptr<Tween>
-    GetTween()
-    {
-        return nullptr;
     }
 };
 

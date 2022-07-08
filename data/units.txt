@@ -4,8 +4,8 @@ COM File: Units
 COM Date: July 2022
 
 COM <UNT <name>  <texture> <id> <team> <mov> <hp> <max> <short> <long> <atk> <def> <hit>
-UNT Donnel       peasant.png 0   Ally    3     8     8     1       1     2     4     90
-UNT Brutus       warrior.png 1   Ally    5    15    15     2       2     5     1     50
-UNT Zarathustra  lord.png    2   Ally    4    12    12     1       2     3     2    100
+UNT Donnel      peasant.png  0   Ally    4    12    12     1       1     2     4     80
+UNT Brutus      archer.png   1   Ally    5     8     8     2       2     5     1    100
+UNT Zarathustra lord.png     2   Ally    4    10    10     1       2     3     2     90
 
-UNT Pirate       warrior.png 3   Enemy   4     6     6     1       1     3     3     60
+UNT Thief       thief.png    3   Enemy   4     6     6     1       1     4     1     80

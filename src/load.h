@@ -62,7 +62,7 @@ vector<string> split(const string &text, char sep) {
 }
 
 // loads a level from a file. returns a new tilemap.
-shared_ptr<Tilemap> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
+shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
 {
     string line;
 	string type;
@@ -71,7 +71,7 @@ shared_ptr<Tilemap> LoadLevel(string filename_in, const vector<shared_ptr<Unit>>
 
 	int mapRow = 0;
 
-	shared_ptr<Tilemap> map = make_shared<Tilemap>();
+    shared_ptr<Level> level = make_shared<Level>();
 
     ifstream fp;
     fp.open(filename_in);
@@ -93,13 +93,13 @@ shared_ptr<Tilemap> LoadLevel(string filename_in, const vector<shared_ptr<Unit>>
 						{
 							case(0):
 							{
-								map->tiles[col][mapRow].type = FLOOR;
-								map->tiles[col][mapRow].penalty = 1;
+								level->map.tiles[col][mapRow].type = FLOOR;
+								level->map.tiles[col][mapRow].penalty = 1;
 							} break;
 							case(1):
 							{
-								map->tiles[col][mapRow].type = WALL;
-								map->tiles[col][mapRow].penalty = 100;
+								level->map.tiles[col][mapRow].type = WALL;
+								level->map.tiles[col][mapRow].penalty = 100;
 							} break;
 							default:
 							{
@@ -110,8 +110,22 @@ shared_ptr<Tilemap> LoadLevel(string filename_in, const vector<shared_ptr<Unit>>
 				}
 				else if(type == "UNT")
 				{
-					map->tiles[stoi(tokens[2])][stoi(tokens[3])].occupant = units[stoi(tokens[1])];
-					map->tiles[stoi(tokens[2])][stoi(tokens[3])].occupied = true;
+                    shared_ptr<Unit> unitBase = units[stoi(tokens[1])];
+                    shared_ptr<Unit> unitCopy = make_shared<Unit>(*unitBase);
+                    int col = stoi(tokens[2]);
+                    int row = stoi(tokens[3]);
+                    unitCopy->col = col;
+                    unitCopy->row = row;
+                    if(unitCopy->isAlly)
+                    {
+                        level->allies.push_back(unitCopy);
+                    }
+                    else
+                    {
+                        level->enemies.push_back(unitCopy);
+                    }
+					level->map.tiles[col][row].occupant = unitCopy;
+					level->map.tiles[col][row].occupied = true;
 				}
             }
         }
@@ -122,18 +136,7 @@ shared_ptr<Tilemap> LoadLevel(string filename_in, const vector<shared_ptr<Unit>>
     }
     fp.close();
 
-	return map;
-
-    //for(std::shared_ptr<Unit> unit : CurrentLevel.Units)
-    //{
-        //CurrentLevel.Tiles[unit->Position.x][unit->Position.y].Occupant = unit;
-        //CurrentLevel.Tiles[unit->Position.x][unit->Position.y].Occupied = true;
-    //}
-    //for(std::shared_ptr<Unit> unit : CurrentLevel.Enemies)
-    //{
-        //CurrentLevel.Tiles[unit->Position.x][unit->Position.y].Occupant = unit;
-        //CurrentLevel.Tiles[unit->Position.x][unit->Position.y].Occupied = true;
-    //}
+	return level;
 }
 
 // loads the characters for the game from a file. returns a vector of them.

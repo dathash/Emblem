@@ -10,13 +10,15 @@
 			Enemy Turn
 			Basic AI
         Level Transitions
-        Death
         New Textures
 		Three main Units
-		Create some cool levels
+		Three levels
+
 
 
     NICE
+		Figure out fps mystery
+		Add more clear debug messages
 		User Interface
 			Show Tile details
 			Items and Trading Menus
@@ -72,13 +74,11 @@ typedef double real64;
 using namespace std;
 
 
-
 // ========================= constants =====================================
 
 // low level
-#define JOYSTICK_DEAD_ZONE 8000
-
 #define TIME_STEP 33.33333
+#define JOYSTICK_DEAD_ZONE 8000
 
 // rendering
 #define TILE_SIZE 100
@@ -96,20 +96,13 @@ using namespace std;
 
 
 
-// TODO MOVE THIS
-static bool GlobalTweening = false;
-static bool ReadyForCommand = false;
-
-
-
 // ============================= globals ===================================
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
+static TTF_Font *GlobalFont = nullptr;
 static bool GlobalRunning = false;
 static bool GlobalGamepadMode = false;
 static bool GlobalGuiMode = false;
-
-static TTF_Font *GlobalFont = nullptr;
 
 
 
@@ -120,20 +113,8 @@ struct InputState
     bool down;
     bool left;
     bool right;
-
     bool a;
     bool b;
-
-    void PrintInputState()
-    {
-        printf("====== Input ======\n");
-        printf("up  : %d\n", up);
-        printf("down: %d\n", down);
-        printf("left: %d\n", left);
-        printf("rgt : %d\n", right);
-        printf("a   : %d\n", a);
-        printf("b   : %d\n", b);
-    }
 };
 
 
@@ -148,25 +129,6 @@ struct Texture
         this->sdlTexture = sdlTexture_in;
         this->width = width_in;
         this->height = height_in;
-        //printf("Texture Constructed!\n");
-    }
-
-    Texture()
-    {
-        //printf("Texture Constructed! (DEFAULT)\n");
-    }
-
-    ~Texture()
-    {
-        //printf("Texture Destructed!\n");
-    }
-
-    void PrintTextureState()
-    {
-        printf("====== Texture ======\n");
-        printf("tex : %ld\n", (long int)sdlTexture);
-        printf("wid : %d\n", width);
-        printf("hgt : %d\n", height);
     }
 };
 
@@ -207,15 +169,10 @@ struct SpriteSheet
     {
         if(track_in >= tracks || track_in < 0)
         {
-            assert(!"SpriteSheet | ChooseTrack | Invalid Animation Track!\n");
+            assert(!"SpriteSheet | ChangeTrack | Invalid Animation Track!\n");
         }
         this->track = track_in;
         this->frame = 0;
-    }
-
-    SpriteSheet()
-    {
-        //printf("SpriteSheet Constructed! (Default)\n");
     }
 
     SpriteSheet(shared_ptr<Texture> texture_in, int size_in, int speed_in)
@@ -226,112 +183,27 @@ struct SpriteSheet
 
         this->tracks = texture_in->height / size_in;
         this->frames = texture_in->width / size_in;
-        //printf("SpriteSheet Constructed!\n");
-    }
-
-    ~SpriteSheet()
-    {
-        //printf("SpriteSheet Destructed!\n");
-    }
-
-    void PrintSpriteState()
-    {
-        printf("====== Sprite ======\n");
-        texture->PrintTextureState();
-        printf("size: %d\n", size);
-        printf("t's : %d\n", tracks);
-        printf("f's : %d\n", frames);
-        printf("trak: %d\n", track);
-        printf("fram: %d\n", frame);
-        printf("spd : %d\n", speed);
-        printf("cnt : %d\n", counter);
     }
 };
-
-struct Tween
-{
-    int start;
-    int end;
-    int duration;
-    int currentTime = 0;
-    bool active = false;
-    bool resetting = false;
-
-    int *value;
-
-    Tween(int start_in, int end_in, int duration_in, int *value_in, bool resetting_in)
-    : start(start_in),
-      end(end_in),
-      duration(duration_in),
-      value(value_in),
-      resetting(resetting_in)
-    {}
-
-    void Activate()
-    {
-        active = true;
-        GlobalTweening = true;
-    }
-
-    void Deactivate()
-    {
-        active = false;
-        GlobalTweening = false;
-        ReadyForCommand = true;
-        if(resetting)
-        {
-            *value = start;
-        }
-    }
-
-    void Reset()
-    {
-        currentTime = 0;
-        active = true;
-    }
-
-    void Update()
-    {
-        ++this->currentTime;
-        if(currentTime < duration)
-        {
-            *value = Position();
-        }
-        else
-        {
-            Deactivate();
-        }
-    }
-
-    int Lerp(int a, int b, float amount)
-    {
-        return (int)((1.0f - amount) * a + amount * b);
-    }
-
-    int Position()
-    {
-        float amount = (float)currentTime / (float)duration;
-        return Lerp(start, end, amount);
-    }
-};
-
 
 struct Unit
 {
     string name;
     int id;
-    bool shouldDie = false;
-    bool isAlly = false;
+    bool isAlly;
+	int col = 0;
+	int row = 0;
     bool isExhausted = false;
-    int mov = 0;
-    int hp = 10;
-    int maxHp = 10;
-    int attack = 1;
-    int defense = 1;
-    int healing = 1;
-    int minRange = 1;
-    int maxRange = 1;
-    int accuracy = 50;
+    bool shouldDie = false;
+    int mov;
+    int hp;
+    int maxHp;
+    int attack;
+    int defense;
+    int healing = 0;
+    int minRange;
+    int maxRange;
+    int accuracy;
     shared_ptr<SpriteSheet> sheet = nullptr;
 
     void Update()
@@ -345,7 +217,6 @@ struct Unit
          int minRange_in, int maxRange_in,
          int attack_in, int defense_in, int accuracy_in)
     {
-        //printf("Unit Constructed!\n");
         this->name = name_in;
         this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
         this->id = id_in;
@@ -360,13 +231,14 @@ struct Unit
         this->accuracy = accuracy_in;
     }
 
-    ~Unit()
-    {
-        //printf("Unit Destructed!\n");
-    }
+	~Unit()
+	{
+		printf("Unit Destroyed!\n");
+	}
 };
 
 
+// map stuff
 enum TileTypes
 {
     FLOOR,
@@ -386,6 +258,41 @@ struct Tilemap
     shared_ptr<vector<pair<int, int>>> interactible = nullptr;
 };
 
+struct Level
+{
+	Tilemap map;
+	vector<shared_ptr<Unit>> allies;
+	vector<shared_ptr<Unit>> enemies;
+
+	void RemoveDeadUnits()
+	{
+		vector<pair<int, int>> tiles;
+
+		for(shared_ptr<Unit> u : allies)
+		{
+			if(u->shouldDie)
+			{
+				tiles.push_back(pair<int, int>(u->col, u->row)); 
+			}
+		}
+		for(shared_ptr<Unit> u : enemies)
+		{
+			if(u->shouldDie)
+			{
+				tiles.push_back(pair<int, int>(u->col, u->row));
+			}
+		}
+
+		allies.erase(remove_if(allies.begin(), allies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), allies.end());
+		enemies.erase(remove_if(enemies.begin(), enemies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), enemies.end());
+
+		for(pair<int, int> tile : tiles)
+		{
+			map.tiles[tile.first][tile.second].occupant = nullptr;
+			map.tiles[tile.first][tile.second].occupied = false;
+		}
+	}
+};
 
 struct Cursor
 {
@@ -409,19 +316,11 @@ struct Cursor
     {
         sheet->Update();
     }
-
-    void PrintCursorState()
-    {
-        printf("====== Cursor ======\n");
-        printf("Col : %d\n", col);
-        printf("Row : %d\n", row);
-        printf("Sel : %ld\n", (long int)selected.get());
-    }
 };
 
-// TODO: Move!!!
-#include "load.h"
 
+// menu stuff
+#include "load.h"
 struct Menu
 {
     u8 rows;
@@ -439,7 +338,6 @@ struct Menu
         }
     }
 };
-
 struct UnitInfo
 {
     u8 rows;
@@ -467,7 +365,6 @@ struct UnitInfo
         this->rows = newRows;
     }
 };
-
 struct CombatInfo
 {
     u8 rows;
@@ -508,82 +405,27 @@ struct CombatInfo
     }
 };
 
-int d100()
-{
-    return rand() % 100;
-}
-
-void SimulateCombat(Unit *one, Unit *two)
-{
-    // one -> two
-    int damage = one->attack;
-    if(d100() < one->accuracy)
-    {
-        printf("SIMULATION | %d Damage!\n", damage);
-        if(two->hp - damage <= 0)
-        {
-            two->hp = 0;
-            two->shouldDie = true;
-        }
-        else
-        {
-            two->hp -= damage;
-        }
-    }
-    else
-    {
-        printf("SIMULATION | Missed!\n");
-    }
-
-    // two -> one
-    damage = two->attack;
-    if(d100() > two->accuracy)
-    {
-        printf("SIMULATION | %d Damage!\n", damage);
-        if(one->hp - damage <= 0)
-        {
-            one->hp = 0;
-            one->shouldDie = true;
-        }
-        else
-        {
-            one->hp -= damage;
-        }
-    }
-    else
-    {
-        printf("SIMULATION | Missed!\n");
-    }
-}
-
-void SimulateHealing(Unit *one, Unit *two)
-{
-    // one -> two
-    int healing = one->healing;
-    printf("SIMULATION | %d Healing!\n", healing);
-    two->hp = min(healing + two->hp, two->maxHp);
-}
-
-
-#include "grid.h"
-#include "command.h"
-#include "render.h"
 
 // ===================== function signatures ==============================
 bool Initialize();
 void Close();
 void HandleEvents(InputState *input);
 
+#include "fight.h"
+#include "grid.h"
+#include "command.h"
+#include "render.h"
 
 
 // ================================== main =================================
 int main(int argc, char *argv[])
 {
-    srand (time(NULL));
+    srand(time(NULL));
 
     if(!Initialize())
         assert(!"Initialization Failed\n");
 
+	// controller init
     SDL_Joystick *gamePad = NULL;
     if(SDL_NumJoysticks() < 1)
     {
@@ -597,100 +439,74 @@ int main(int argc, char *argv[])
         printf("Joystick mode!\n");
     }
 
-    InputState input = {};
-    InputHandler handler;
-
-    queue<shared_ptr<Command>> commandQueue = {};
-    shared_ptr<Tween> currentTween = nullptr;
-
-    real32 TargetMillisecondsPerFrame = 16.666f;
-    u64 startTime = SDL_GetPerformanceCounter();
-    u64 endTime = 0;
-    u64 frameNumber = 0;
-    real32 ElapsedMS = 0.0f;
-
     // load data
     vector<shared_ptr<Unit>> units = LoadCharacters("../data/units.txt");
-    shared_ptr<Tilemap> map = LoadLevel("../data/l1.txt", units);
+    shared_ptr<Level> level = LoadLevel("../data/l1.txt", units);
 
-    Cursor cursor(LoadTextureImage("../assets/sprites/cursor.png"));;
+    Cursor cursor(LoadTextureImage("../assets/sprites/cursor.png"));
 
-    // Initial InputHandler commands
-    handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, *map));
-    handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, *map));
-    handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, *map));
-    handler.BindRight(make_shared<MoveCommand>(&cursor, 1, 0, *map));
+	// initial inputhandler state
+    InputState input = {};
+    InputHandler handler;
+    queue<shared_ptr<Command>> commandQueue = {};
+    handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, level->map));
+    handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, level->map));
+    handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, level->map));
+    handler.BindRight(make_shared<MoveCommand>(&cursor, 1, 0, level->map));
     handler.BindA(make_shared<OpenGameMenuCommand>());
     handler.BindB(make_shared<NullCommand>());
 
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(6, 0, {"Info", "Items", "Attack", "Heal", "Trade", "Wait"});
-
     UnitInfo unitInfo(1, {"Placeholder"});
     CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
 
+	// debug messages
     unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
     unique_ptr<Texture> debugMessageTwo = LoadTextureText("placeholder2", {0, 100, 0, 255});
     unique_ptr<Texture> debugMessageThree = LoadTextureText("placeholder3", {0, 0, 250, 255});
+
+	// frame timer
+    real32 TargetMillisecondsPerFrame = 16.666f;
+    u64 startTime = SDL_GetPerformanceCounter();
+    u64 endTime = 0;
+    u64 frameNumber = 0;
+    real32 ElapsedMS = 0.0f;
 
     GlobalRunning = true;
     while(GlobalRunning)
     {
         HandleEvents(&input);
 
-// ====================== Where the action Happens ===============
-        if(GlobalTweening)
-        {
-            currentTween->Update();
-        }
-        else
-        {
-            shared_ptr<Command> newCommand = handler.HandleInput(&input);
-            if(newCommand)
-            {
-                commandQueue.push(newCommand);
-            }
+// ====================== command phase ===============
+		shared_ptr<Command> newCommand = handler.HandleInput(&input);
+		if(newCommand)
+		{
+			commandQueue.push(newCommand);
+		}
 
-            if(!commandQueue.empty())
-            {
-                currentTween = commandQueue.front()->GetTween();
-                if(currentTween)
-                {
-                    currentTween->Activate();
-                    GlobalTweening = true;
-                }
-                else
-                {
-                    ReadyForCommand = true;
-                }
-            }
-        }
-
-        if(ReadyForCommand)
-        {
-            commandQueue.front()->Execute();
-            commandQueue.pop();
-            handler.UpdateCommands(&cursor, map.get(),
-                                   &gameMenu, &unitMenu, 
-                                   &unitInfo, &combatInfo);
-            if(currentTween)
-            {
-                currentTween->Reset();
-            }
-            ReadyForCommand = false;
-        }
-// ================================================================
+		while(!commandQueue.empty())
+		{
+			commandQueue.front()->Execute();
+			commandQueue.pop();
+			handler.UpdateCommands(&cursor, &level->map,
+								   &gameMenu, &unitMenu, 
+								   &unitInfo, &combatInfo);
+		}
+// ========================= update phase =======================================
+        cursor.Update();
 
         for(shared_ptr<Unit> unit : units)
         {
             unit->Update();
         }
-        cursor.Update();
+
+		level->RemoveDeadUnits();
 
 
 // ============================= render =========================================
-        Render(*map, cursor, gameMenu, unitMenu, unitInfo, combatInfo,
+        Render(level->map, cursor, gameMenu, unitMenu, unitInfo, combatInfo,
                *debugMessageOne, *debugMessageTwo, *debugMessageThree);
 
 
@@ -701,33 +517,17 @@ int main(int argc, char *argv[])
         // Debug Messages
         char buffer[256];
 
-        //cursor.PrintCursorState();
-        //input.PrintInputState();
-        //unit->sheet.PrintSpriteState();
-
-        //sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
-               //cursor.col, cursor.row, map.tiles[cursor.col][cursor.row].type,
-               //map.tiles[cursor.col][cursor.row].occupied,
-               //(void *)map.tiles[cursor.col][cursor.row].occupant.get());
         sprintf(buffer, "Mode: %d", GlobalInterfaceState);
-
         debugMessageOne = LoadTextureText(string(buffer), {250, 0, 0, 255});
 
-        if(currentTween)
-        {
-            sprintf(buffer, "GlobalTweening: %d | Start: %d, End: %d, Current: %d, Value: %d",
-                    GlobalTweening, currentTween->start, currentTween->end,
-                    currentTween->currentTime, *currentTween->value);
-        }
-        else
-        {
-            sprintf(buffer, "GlobalTweening: %d | No Tween ATM.", GlobalTweening);
-        }
+        sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
+               cursor.col, cursor.row, level->map.tiles[cursor.col][cursor.row].type,
+               level->map.tiles[cursor.col][cursor.row].occupied,
+               (void *)level->map.tiles[cursor.col][cursor.row].occupant.get());
         debugMessageTwo = LoadTextureText(string(buffer), {0, 100, 0, 255});
 
         sprintf(buffer, "MS: %.02f, FPS: %d", ElapsedMS, (int)(1.0f / ElapsedMS * 1000.0f));
         debugMessageThree = LoadTextureText(string(buffer), {0, 0, 250, 255});
-
 
         if(ElapsedMS < TargetMillisecondsPerFrame)
         {
@@ -735,15 +535,10 @@ int main(int argc, char *argv[])
         }
         startTime = SDL_GetPerformanceCounter();
         frameNumber++;
-// ============================ ^ debug messages ^ ================================================
     }
     Close();
     return 0;
 }
-
-
-
-// ================================ Helper Functions ======================================================
 
 
 // ================================== SDL Functions ================================================
