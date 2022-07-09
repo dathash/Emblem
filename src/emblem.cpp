@@ -6,26 +6,25 @@
 /*
     TODO
 	MVP
-		Basic AI
         Level Transitions
 
 		Three main Units
 		Three levels
 		Enemy range rendering
+		Combat Scene animation
+		Better enemy ai
+			better pathing than levenshtein distance
+			healing
+			dynamic modes
 
 
     NICE
 		Items
 			Equipping
 			Trading
-			Different Ranges / Action types
+			Different Ranges / Action types / Damage
 		Items and Trading Menus
-		Animation
-			Combat Scene
-			Placing Unit moves them to that square (A-star)
-			Generate Arrow while selecting?
-		Figure out fps mystery
-		Decide whether cancelling a selection should move your cursor back or not.
+		Statistics determine things
 
 
     BACKLOG
@@ -37,6 +36,11 @@
 		Tiles have properties 
 			(That remain together and don't take four calls to set up.)
 		Redo Trade/Attack/Heal Stuff? Inheritance?
+		Animation
+			Placing Unit moves them to that square (A-star)
+			Generate Arrow while selecting?
+		Figure out fps mystery
+		Decide whether cancelling a selection should move your cursor back or not.
  */
 
 

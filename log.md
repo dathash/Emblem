@@ -15,7 +15,7 @@ Build a fun little game!
 > July 4  | 1h  | 3100		  | Didn't have much time today. Just added some little tweaks and started on combat.
 > July 7  | 3h  | 3300		  | Finished level loading system. Pretty happy with such quick work.
 > July 8  | 6h  | 3100		  | Dropped tween system, added some rudimentary AI.
-> July 9  | 
+> July 9  | 3h  | 3300		  | Finished rudimentary AI.
 
 
  Notes
