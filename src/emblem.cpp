@@ -8,7 +8,7 @@
 	MVP
 		Basic AI
         Level Transitions
-        New Textures
+
 		Three main Units
 		Three levels
 		Enemy range rendering
@@ -96,6 +96,7 @@ static SDL_Renderer *GlobalRenderer = nullptr;
 static TTF_Font *GlobalFont = nullptr;
 static bool GlobalRunning = false;
 static bool GlobalPlayerTurn = true;
+static bool GlobalTurnStart = false;
 static bool GlobalGamepadMode = false;
 static bool GlobalGuiMode = false;
 
@@ -472,6 +473,20 @@ int main(int argc, char *argv[])
         HandleEvents(&input);
 
 // ====================== command phase ========================================
+		if(GlobalTurnStart)
+		{
+			for(shared_ptr<Unit> unit : level->enemies)
+			{
+				unit->isExhausted = false;
+			}
+			for(shared_ptr<Unit> unit : level->allies)
+			{
+				unit->isExhausted = false;
+			}
+			GlobalTurnStart = false;
+			ai.commandQueue = {};
+		}
+
 		if(GlobalPlayerTurn)
 		{
 			handler.Update(&input);
@@ -485,11 +500,13 @@ int main(int argc, char *argv[])
 			{
 				ai.Plan(&cursor, &level->map);
 			}
-			if(!(frameNumber % 30))
+			if(!(frameNumber % 10))
 			{
 				ai.Update();
 			}
 		}
+
+
 
 // ========================= update phase =======================================
         cursor.Update();

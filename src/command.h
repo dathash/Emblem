@@ -449,7 +449,6 @@ public:
     virtual void Execute()
     { 
         printf("COMMAND | Detarget\n");
-        map->interactible.clear();
 
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
@@ -868,6 +867,7 @@ public:
             {
                 GlobalInterfaceState = NO_OP;
                 GlobalPlayerTurn = false;
+                GlobalTurnStart = true;
             } break;
         }
     }
@@ -954,6 +954,7 @@ public:
             {
                 cursor->sourceCol = cursor->col;
                 cursor->sourceRow = cursor->row;
+                map->interactible.clear();
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                  cursor->selected->minRange, cursor->selected->maxRange);
                 printf("COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
@@ -966,6 +967,7 @@ public:
                 cursor->sourceRow = cursor->row;
                 // Find tiles that a unit can interact with.
 
+                map->interactible.clear();
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                      1, 1);
 
@@ -979,6 +981,7 @@ public:
                 cursor->sourceRow = cursor->row;
                 // Find tiles that a unit can interact with.
 
+                map->interactible.clear();
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow,
                                                      1, 1);
 

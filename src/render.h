@@ -141,7 +141,11 @@ Render(const Tilemap &map, const Cursor &cursor,
             {
                 if(tileToRender->occupant->isExhausted)
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 50, 0, 0);
+                    SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 50, 0, 50);
+                }
+                else
+                {
+                    SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 255, 255, 255);
                 }
                 RenderSprite(col, row, 0, 0, *tileToRender->occupant->sheet);
             }

@@ -86,6 +86,14 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
             }
         }
     }
+
+    accessible.erase(remove_if(accessible.begin(), accessible.end(),
+            [map, col, row](pair<int, int> p)
+            {
+                return (!(p.first == col && p.second == row) &&
+                        map.tiles[p.first][p.second].occupied);
+            }),
+            accessible.end());
     return accessible;
 }
 
@@ -155,11 +163,11 @@ shared_ptr<Unit> FindNearest(const Cursor &cursor, const Tilemap &map, bool pred
         {
             if(map.tiles[col][row].occupied && predicate(*map.tiles[col][row].occupant))
             {
-                printf("%d %d\n", col, row);
                 distance = abs(col - cursor.col) + abs(row - cursor.row);
                 if(distance < minDistance)
                 {
                     result = map.tiles[col][row].occupant;
+                    minDistance = distance;
                 }
             }
         }
@@ -178,18 +186,33 @@ pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 
     for(pair<int, int> p : map.accessible)
     {
-        printf("%d %d\n", p.first, p.second);
         // manhattan distance
         distance = abs(p.first - col) + abs(p.second - row);
         if(distance < minDistance)
         {
             result = p;
+            minDistance = distance;
         }
     }
 
     return result;
 }
 
+
+// Finds a target for an attack.
+shared_ptr<Unit> FindVictim(const Cursor &cursor, const Tilemap &map)
+{
+    shared_ptr<Unit> result = nullptr;
+    for(pair<int, int> p : map.interactible)
+    {
+        printf("%d %d\n", p.first, p.second);
+        if(map.tiles[p.first][p.second].occupied && map.tiles[p.first][p.second].occupant->isAlly)
+        {
+            result = map.tiles[p.first][p.second].occupant;
+        }
+    }
+    return result;
+}
 
 
 #endif

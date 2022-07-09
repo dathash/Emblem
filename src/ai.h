@@ -10,6 +10,7 @@ enum AIState
 {
     FINDING_NEXT,
     SELECTED,
+    FOUND_NEW_POSITION,
     PLACED,
 
     ENEMY_TURN
@@ -54,6 +55,7 @@ public:
             GlobalAIState = ENEMY_TURN;
             GlobalPlayerTurn = true;
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            GlobalTurnStart = true;
         }
     }
 
@@ -122,52 +124,107 @@ private:
 };
 
 
-//class AIMoveToClosestSquareCommand : public Command
-//{
-//public:
-    //AIMoveToClosestSquareCommand(Cursor *cursor_in, Tilemap *map_in)
-    //: cursor(cursor_in),
-      //map(map_in)
-    //{}
+class AIMoveToClosestSquareCommand : public Command
+{
+public:
+    AIMoveToClosestSquareCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
 
-    //virtual void Execute()
-    //{
-    //}
+    virtual void Execute()
+    {
+        shared_ptr<Unit> target = FindNearest(*cursor, *map, 
+                [](const Unit &unit) -> bool
+                {
+                    return unit.isAlly;
+                });
+        pair<int, int> targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
+        printf("AI COMMAND | Move Cursor from <%d, %d> to <%d, %d>\n", 
+            cursor->col, cursor->row, targetSquare.first, targetSquare.second);
 
-//private:
-    //Cursor *cursor;
-    //Tilemap *map;
-//};
+        // move cursor
+        cursor->col = targetSquare.first;
+        cursor->row = targetSquare.second;
+
+        GlobalAIState = FOUND_NEW_POSITION;
+    }
+
+private:
+    Cursor *cursor;
+    Tilemap *map;
+};
 
 
-//class AIPlaceUnitCommand : public Command
-//{
-//public:
-    //AIPlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in)
-    //: cursor(cursor_in),
-      //map(map_in)
-    //{}
+class AIPlaceUnitCommand : public Command
+{
+public:
+    AIPlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
 
-    //virtual void Execute()
-    //{
-        //printf("AI COMMAND | Place Unit %d at <%d, %d>\n",
-               //cursor->selected->id, cursor->col, cursor->row); 
-        //map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
-        //map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
-        //map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
-        //map->tiles[cursor->col][cursor->row].occupied = true;
+    virtual void Execute()
+    {
+        printf("AI COMMAND | Place Unit %d at <%d, %d>\n",
+               cursor->selected->id, cursor->col, cursor->row); 
+        map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
+        map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
+        map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
+        map->tiles[cursor->col][cursor->row].occupied = true;
 
-        //// unit has to know its position as well
-        //cursor->selected->col = cursor->col;
-        //cursor->selected->row = cursor->row;
+        // unit has to know its position as well
+        cursor->selected->col = cursor->col;
+        cursor->selected->row = cursor->row;
 
-        //cursor->selected->sheet->ChangeTrack(1);
-    //}
+        cursor->sourceCol = cursor->col;
+        cursor->sourceRow = cursor->row;
 
-//private:
-    //Cursor *cursor; 
-    //Tilemap *map;
-//};
+        cursor->selected->sheet->ChangeTrack(1);
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+};
+
+
+class AIAttackTargetCommand : public Command
+{
+public:
+    AIAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        map->interactible.clear();
+        map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow,
+                                         cursor->selected->minRange, cursor->selected->maxRange);
+
+        cursor->targeted = FindVictim(*cursor, *map);
+        if(cursor->targeted)
+        {
+            printf("AI COMMAND | Attack Unit %d!\n",
+                   cursor->targeted->id);
+            SimulateCombat(cursor->selected.get(), cursor->targeted.get());
+        }
+
+        cursor->selected->isExhausted = true;
+        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected = nullptr;
+        cursor->targeted = nullptr;
+        cursor->col = cursor->sourceCol;
+        cursor->row = cursor->sourceRow;
+
+        GlobalAIState = FINDING_NEXT;
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+};
 
 
 
@@ -185,19 +242,9 @@ struct AI
 
         commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, *map));
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIDeactivateUnitCommand>(cursor));
-
-        //shared_ptr<Unit> target = FindNearest(*cursor, *map, 
-                //[](const Unit &unit) -> bool
-                //{
-                    //return unit.isAlly;
-                //});
-        //pair<int, int> targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
-        //printf("%d %d\n", targetSquare.first, targetSquare.second);
-        //commandQueue.push(make_shared<AIMoveCommand>(cursor, targetSquare.first, targetSquare.second));
-        //commandQueue.push(make_shared<AIPlaceUnitCommand>(cursor, map));
-
-        //}
+        commandQueue.push(make_shared<AIMoveToClosestSquareCommand>(cursor, map));
+        commandQueue.push(make_shared<AIPlaceUnitCommand>(cursor, map));
+        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map));
     }
 
 
