@@ -133,8 +133,11 @@ public:
         cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
+        map->accessible.clear();
         map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
-                                         cursor->selectedRow, cursor->selected->mov);
+                                         cursor->selectedRow, 
+                                         cursor->selected->mov,
+                                         cursor->selected->isAlly);
         printf("COMMAND | Select Unit %d at <%d, %d>\n", 
                cursor->selected->id, cursor->col, cursor->row);
 
@@ -197,7 +200,7 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.accessible.get()))
+            if(VectorHasElement(pair<int, int>(newCol, newRow), map.accessible))
             {
                 if(!hoverTile->occupied || hoverTile->occupant->id == cursor->selected->id)
                 {
@@ -322,7 +325,7 @@ public:
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
 
-            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.interactible) &&
+            if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
                hoverTile->occupied &&
                !hoverTile->occupant->isAlly)
             {
@@ -369,7 +372,7 @@ public:
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
 
-            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.interactible) &&
+            if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
                hoverTile->occupied &&
                hoverTile->occupant->isAlly)
             {
@@ -415,7 +418,7 @@ public:
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
 
-            if(VectorHasElement(pair<int, int>(newCol, newRow), *map.interactible) &&
+            if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
                hoverTile->occupied &&
                hoverTile->occupant->isAlly)
             {
@@ -446,7 +449,7 @@ public:
     virtual void Execute()
     { 
         printf("COMMAND | Detarget\n");
-        map->interactible = nullptr;
+        map->interactible.clear();
 
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
@@ -863,7 +866,8 @@ public:
             } break;
             case(2): // END TURN
             {
-                GlobalInterfaceState = GAME_MENU_END_TURN;
+                GlobalInterfaceState = NO_OP;
+                GlobalPlayerTurn = false;
             } break;
         }
     }
@@ -1067,6 +1071,31 @@ public:
         }
 
         return NULL;
+    }
+
+    InputHandler(Cursor *cursor, const Tilemap &map)
+    {
+        BindUp(make_shared<MoveCommand>(cursor, 0, -1, map));
+        BindDown(make_shared<MoveCommand>(cursor, 0, 1, map));
+        BindLeft(make_shared<MoveCommand>(cursor, -1, 0, map));
+        BindRight(make_shared<MoveCommand>(cursor, 1, 0, map));
+        BindA(make_shared<OpenGameMenuCommand>());
+        BindB(make_shared<NullCommand>());
+    }
+
+    void Update(InputState *input)
+    {
+        shared_ptr<Command> newCommand = HandleInput(input);
+        if(newCommand)
+        {
+            commandQueue.push(newCommand);
+        }
+
+        while(!commandQueue.empty())
+        {
+            commandQueue.front()->Execute();
+            commandQueue.pop();
+        }
     }
 
     // helper functions to bind Commands to each button.
@@ -1349,7 +1378,6 @@ public:
                 BindB(make_shared<NullCommand>());
             } break;
 
-
             default:
             {
                 printf("Invalid Interface State! %d\n",
@@ -1367,6 +1395,8 @@ private:
     shared_ptr<Command> buttonRight;
     shared_ptr<Command> buttonA;
     shared_ptr<Command> buttonB;
+
+    queue<shared_ptr<Command>> commandQueue;
 };
 
 

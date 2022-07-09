@@ -23,7 +23,7 @@ LoadTextureText(std::string text, SDL_Color color)
     assert(texture);
     SDL_FreeSurface(surface);
 
-    return make_unique<Texture>(texture, width, height);
+    return make_unique<Texture>(texture, "", width, height);
 }
 
 // Loads a texture displaying an image, given a path to it.
@@ -41,7 +41,7 @@ LoadTextureImage(std::string path)
     assert(texture);
     SDL_FreeSurface(surface);
 
-    return make_shared<Texture>(texture, width, height);
+    return make_shared<Texture>(texture, path, width, height);
 }
 
 // =================================== level data ===============================
@@ -111,7 +111,21 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
 				else if(type == "UNT")
 				{
                     shared_ptr<Unit> unitBase = units[stoi(tokens[1])];
-                    shared_ptr<Unit> unitCopy = make_shared<Unit>(*unitBase);
+                    // TODO: Figure out how to not do this. 
+                    shared_ptr<Unit> unitCopy = make_shared<Unit>(
+                                                                  unitBase->name,
+                                                                  LoadTextureImage(unitBase->sheet->texture->path),
+                                                                  unitBase->id,
+                                                                  unitBase->isAlly,
+                                                                  unitBase->mov,
+                                                                  unitBase->hp,
+                                                                  unitBase->maxHp,
+                                                                  unitBase->minRange,
+                                                                  unitBase->maxRange,
+                                                                  unitBase->attack,
+                                                                  unitBase->defense,
+                                                                  unitBase->accuracy
+                                                                  );
                     int col = stoi(tokens[2]);
                     int row = stoi(tokens[3]);
                     unitCopy->col = col;

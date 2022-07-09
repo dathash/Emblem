@@ -93,7 +93,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == SELECTED_OVER_ENEMY)
     {
         SDL_Color accessibleColor = {0, 150, 0, 100};
-        for(pair<int, int> cell : *map.accessible.get())
+        for(pair<int, int> cell : map.accessible)
         {
             RenderTile(cell.first, cell.second, accessibleColor);
         }
@@ -103,7 +103,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == ATTACK_TARGETING_OVER_UNTARGETABLE)
     {
         SDL_Color attackColor = {250, 0, 0, 100};
-        for(pair<int, int> cell : *map.interactible.get())
+        for(pair<int, int> cell : map.interactible)
         {
             RenderTile(cell.first, cell.second, attackColor);
         }
@@ -113,7 +113,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == HEALING_TARGETING_OVER_UNTARGETABLE)
     {
         SDL_Color healColor = {0, 255, 0, 100};
-        for(pair<int, int> cell : *map.interactible.get())
+        for(pair<int, int> cell : map.interactible)
         {
             RenderTile(cell.first, cell.second, healColor);
         }
@@ -123,7 +123,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == TRADING_TARGETING_OVER_UNTARGETABLE)
     {
         SDL_Color healColor = {0, 0, 250, 100};
-        for(pair<int, int> cell : *map.interactible.get())
+        for(pair<int, int> cell : map.interactible)
         {
             RenderTile(cell.first, cell.second, healColor);
         }
@@ -237,6 +237,16 @@ Render(const Tilemap &map, const Cursor &cursor,
 
             RenderText(*combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
             RenderText(*combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
+        }
+    }
+
+// ================================ ai visualization DEBUG =============================
+    if(GlobalAIState == SELECTED)
+    {
+        SDL_Color accessibleColor = {150, 0, 0, 100};
+        for(pair<int, int> cell : map.accessible)
+        {
+            RenderTile(cell.first, cell.second, accessibleColor);
         }
     }
 

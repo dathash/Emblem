@@ -33,8 +33,8 @@ VectorHasElement(const pair<int, int> &pair_in, const vector<pair<int, int>> &ve
 
 
 // returns a vector of pairs representing accessible squares for a given unit.
-shared_ptr<vector<pair<int, int>>>
-AccessibleFrom(const Tilemap &map, int col, int row, int max)
+vector<pair<int, int>>
+AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
 {
     vector<pair<int, int>> accessible;
     int costs[MAP_SIZE][MAP_SIZE];
@@ -67,7 +67,7 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max)
             {
                 const Tile *tileToExplore = &map.tiles[newCol][newRow];
                 int newCost;
-                if(map.tiles[newCol][newRow].occupied && !map.tiles[newCol][newRow].occupant->isAlly)
+                if(map.tiles[newCol][newRow].occupied && map.tiles[newCol][newRow].occupant->isAlly != sourceIsAlly)
                 {
                     newCost = 100;
                 }
@@ -86,11 +86,11 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max)
             }
         }
     }
-    return make_shared<vector<pair<int, int>>>(accessible);
+    return accessible;
 }
 
 // returns a vector of pairs representing accessible squares for a given unit.
-shared_ptr<vector<pair<int, int>>>
+vector<pair<int, int>>
 InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
 {
     vector<pair<int, int>> interactible;
@@ -139,7 +139,57 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
     interactible.erase(remove_if(interactible.begin(), interactible.end(),
             [&costs, min](pair<int, int> p) { return costs[p.first][p.second] < min; }),
             interactible.end());
-    return make_shared<vector<pair<int, int>>>(interactible);
+    return interactible;
 }
+
+
+// Finds the nearest unit to the cursor, based on the given predicate expression.
+shared_ptr<Unit> FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
+{
+    int minDistance = 100;
+    int distance = 0;
+    shared_ptr<Unit> result = nullptr;
+    for(int col = 0; col < MAP_SIZE; ++col)
+    {
+        for(int row = 0; row < MAP_SIZE; ++row)
+        {
+            if(map.tiles[col][row].occupied && predicate(*map.tiles[col][row].occupant))
+            {
+                printf("%d %d\n", col, row);
+                distance = abs(col - cursor.col) + abs(row - cursor.row);
+                if(distance < minDistance)
+                {
+                    result = map.tiles[col][row].occupant;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+
+// Finds the nearest accessible space to a given target point.
+// TODO: Do something better than manhattan distance.
+pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
+{
+    int minDistance = 100;
+    int distance = 0;
+    pair<int, int> result;
+
+    for(pair<int, int> p : map.accessible)
+    {
+        printf("%d %d\n", p.first, p.second);
+        // manhattan distance
+        distance = abs(p.first - col) + abs(p.second - row);
+        if(distance < minDistance)
+        {
+            result = p;
+        }
+    }
+
+    return result;
+}
+
+
 
 #endif

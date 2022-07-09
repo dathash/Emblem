@@ -6,42 +6,36 @@
 /*
     TODO
 	MVP
-		Turns
-			Enemy Turn
-			Basic AI
+		Basic AI
         Level Transitions
         New Textures
 		Three main Units
 		Three levels
-
+		Enemy range rendering
 
 
     NICE
-		Figure out fps mystery
-		Add more clear debug messages
-		User Interface
-			Show Tile details
-			Items and Trading Menus
-		Animation
-			Combat Scene
-			Placing Unit moves them to that square (A-star)
-			Generate Arrow while selecting?
 		Items
 			Equipping
 			Trading
 			Different Ranges / Action types
+		Items and Trading Menus
+		Animation
+			Combat Scene
+			Placing Unit moves them to that square (A-star)
+			Generate Arrow while selecting?
+		Figure out fps mystery
+		Decide whether cancelling a selection should move your cursor back or not.
+
 
     BACKLOG
-        Better Level Editor
-		Conversations
 		Music (MiniAudio)
-		Items
-		Replay!
+		Conversations
 		Smooth Interaction Syntax (Just click on enemy to attack them)
 		Switch to GameController API
-		Key Repeat
+		Show Tile details and basic unit overview when hovering.
 		Tiles have properties 
-			(That remain together and don't rely on eachother)
+			(That remain together and don't take four calls to set up.)
 		Redo Trade/Attack/Heal Stuff? Inheritance?
  */
 
@@ -101,6 +95,7 @@ static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static TTF_Font *GlobalFont = nullptr;
 static bool GlobalRunning = false;
+static bool GlobalPlayerTurn = true;
 static bool GlobalGamepadMode = false;
 static bool GlobalGuiMode = false;
 
@@ -121,14 +116,16 @@ struct InputState
 struct Texture
 {
     SDL_Texture *sdlTexture;
+    string path;
     int width;
     int height;
 
-    Texture(SDL_Texture *sdlTexture_in, int width_in, int height_in)
+    Texture(SDL_Texture *sdlTexture_in, string path_in, int width_in, int height_in)
     {
         this->sdlTexture = sdlTexture_in;
         this->width = width_in;
         this->height = height_in;
+        this->path = path_in;
     }
 };
 
@@ -254,8 +251,8 @@ struct Tile
 struct Tilemap
 {
     Tile tiles[MAP_SIZE][MAP_SIZE] = {};
-    shared_ptr<vector<pair<int, int>>> accessible = nullptr;
-    shared_ptr<vector<pair<int, int>>> interactible = nullptr;
+    vector<pair<int, int>> accessible;
+    vector<pair<int, int>> interactible;
 };
 
 struct Level
@@ -414,6 +411,7 @@ void HandleEvents(InputState *input);
 #include "fight.h"
 #include "grid.h"
 #include "command.h"
+#include "ai.h"
 #include "render.h"
 
 
@@ -442,19 +440,12 @@ int main(int argc, char *argv[])
     // load data
     vector<shared_ptr<Unit>> units = LoadCharacters("../data/units.txt");
     shared_ptr<Level> level = LoadLevel("../data/l1.txt", units);
-
     Cursor cursor(LoadTextureImage("../assets/sprites/cursor.png"));
 
-	// initial inputhandler state
-    InputState input = {};
-    InputHandler handler;
-    queue<shared_ptr<Command>> commandQueue = {};
-    handler.BindUp(make_shared<MoveCommand>(&cursor, 0, -1, level->map));
-    handler.BindDown(make_shared<MoveCommand>(&cursor, 0, 1, level->map));
-    handler.BindLeft(make_shared<MoveCommand>(&cursor, -1, 0, level->map));
-    handler.BindRight(make_shared<MoveCommand>(&cursor, 1, 0, level->map));
-    handler.BindA(make_shared<OpenGameMenuCommand>());
-    handler.BindB(make_shared<NullCommand>());
+	// initial actor state
+    InputState input;
+    InputHandler handler(&cursor, level->map);
+	AI ai;
 
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
@@ -474,34 +465,43 @@ int main(int argc, char *argv[])
     u64 frameNumber = 0;
     real32 ElapsedMS = 0.0f;
 
+// ========================= game loop =========================================
     GlobalRunning = true;
     while(GlobalRunning)
     {
         HandleEvents(&input);
 
-// ====================== command phase ===============
-		shared_ptr<Command> newCommand = handler.HandleInput(&input);
-		if(newCommand)
+// ====================== command phase ========================================
+		if(GlobalPlayerTurn)
 		{
-			commandQueue.push(newCommand);
-		}
-
-		while(!commandQueue.empty())
-		{
-			commandQueue.front()->Execute();
-			commandQueue.pop();
+			handler.Update(&input);
 			handler.UpdateCommands(&cursor, &level->map,
 								   &gameMenu, &unitMenu, 
 								   &unitInfo, &combatInfo);
+        }
+        else
+        {
+			if(ai.shouldPlan)
+			{
+				ai.Plan(&cursor, &level->map);
+			}
+			if(!(frameNumber % 30))
+			{
+				ai.Update();
+			}
 		}
+
 // ========================= update phase =======================================
         cursor.Update();
 
-        for(shared_ptr<Unit> unit : units)
+        for(shared_ptr<Unit> unit : level->allies)
         {
             unit->Update();
         }
-
+        for(shared_ptr<Unit> unit : level->enemies)
+        {
+            unit->Update();
+        }
 		level->RemoveDeadUnits();
 
 
