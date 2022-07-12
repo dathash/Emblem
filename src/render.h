@@ -25,16 +25,14 @@ RenderTile(int col, int row, const SDL_Color &color)
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(int col, int row, 
-             int colPixelOffset, int rowPixelOffset,
-             const SpriteSheet &sheet)
+RenderSprite(int col, int row, const SpriteSheet &sheet)
 {
-    SDL_Rect destination = {col * TILE_SIZE + colPixelOffset, 
-                            row * TILE_SIZE + rowPixelOffset, 
+    SDL_Rect destination = {col * TILE_SIZE, 
+                            row * TILE_SIZE, 
                             TILE_SIZE, TILE_SIZE};
     SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
-    SDL_RenderCopy(GlobalRenderer, sheet.texture->sdlTexture, &source, &destination);
+    SDL_RenderCopy(GlobalRenderer, sheet.texture.sdlTexture, &source, &destination);
 }
 
 // Renders a given texture at a pixel point.
@@ -51,10 +49,7 @@ void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu,
        const UnitInfo &unitInfo,
-       const CombatInfo &combatInfo,
-       const Texture &debugMessageOne, 
-       const Texture &debugMessageTwo, 
-       const Texture &debugMessageThree)
+       const CombatInfo &combatInfo)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, 200, 200, 0, 255);
@@ -99,6 +94,15 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
+    if(GlobalInterfaceState == ENEMY_INFO)
+    {
+        SDL_Color accessibleColor = {150, 0, 0, 100};
+        for(pair<int, int> cell : map.accessible)
+        {
+            RenderTile(cell.first, cell.second, accessibleColor);
+        }
+    }
+
     if(GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
        GlobalInterfaceState == ATTACK_TARGETING_OVER_UNTARGETABLE)
     {
@@ -119,17 +123,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
-    if(GlobalInterfaceState == TRADING_TARGETING_OVER_TARGET ||
-       GlobalInterfaceState == TRADING_TARGETING_OVER_UNTARGETABLE)
-    {
-        SDL_Color healColor = {0, 0, 250, 100};
-        for(pair<int, int> cell : map.interactible)
-        {
-            RenderTile(cell.first, cell.second, healColor);
-        }
-    }
-
-
 // ================================= render sprites ================================================
     for(int col = 0; col < MAP_SIZE; ++col)
     {
@@ -141,26 +134,25 @@ Render(const Tilemap &map, const Cursor &cursor,
             {
                 if(tileToRender->occupant->isExhausted)
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 50, 0, 50);
+                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, 50, 0, 50);
                 }
                 else
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet->texture->sdlTexture, 255, 255, 255);
+                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, 255, 255, 255);
                 }
-                RenderSprite(col, row, 0, 0, *tileToRender->occupant->sheet);
+                RenderSprite(col, row, tileToRender->occupant->sheet);
             }
         }
     }
 
 
 // ================================= render cursor ================================================
-    RenderSprite(cursor.col, cursor.row, 
-                 cursor.sheet->colPixelOffset, cursor.sheet->rowPixelOffset, 
-                 *cursor.sheet);
+    RenderSprite(cursor.col, cursor.row, cursor.sheet);
 
 
 // ================================= render ui elements ===========================================
     const SDL_Color uiColor = {60, 60, 150, 250};
+    const SDL_Color enemyColor = {150, 60, 30, 250};
     const SDL_Color uiTextColor = {255, 255, 255, 255};
     const SDL_Color uiSelectorColor = {50, 50, 50, 100};
 
@@ -176,7 +168,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(GlobalRenderer, &menuRect);
 
-            RenderText(*gameMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+            RenderText(gameMenu.optionTextTextures[i], menuRect.x, menuRect.y);
         }
 
         SDL_Rect menuSelectorRect = {TILE_SIZE * MAP_SIZE, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
@@ -197,7 +189,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(GlobalRenderer, &menuRect);
 
-            RenderText(*unitMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+            RenderText(unitMenu.optionTextTextures[i], menuRect.x, menuRect.y);
         }
 
         SDL_Rect menuSelectorRect = {TILE_SIZE * MAP_SIZE, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
@@ -215,12 +207,19 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             SDL_Rect infoRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
-            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            if(GlobalInterfaceState == UNIT_INFO)
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, enemyColor.r, enemyColor.g, enemyColor.b, enemyColor.a);
+            }
             SDL_RenderFillRect(GlobalRenderer, &infoRect);
             SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(GlobalRenderer, &infoRect);
 
-            RenderText(*unitInfo.infoTextTextures[i], infoRect.x, infoRect.y);
+            RenderText(unitInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
     }
     else if(GlobalInterfaceState == PREVIEW_ATTACK ||
@@ -230,17 +229,18 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             SDL_Rect sourceRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
-            SDL_Rect targetRect = {TILE_SIZE * MAP_SIZE + MENU_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect targetRect = {TILE_SIZE * MAP_SIZE, i * MENU_ROW_HEIGHT + combatInfo.rows * sourceRect.h, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &sourceRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, enemyColor.r, enemyColor.g, enemyColor.b, enemyColor.a);
             SDL_RenderFillRect(GlobalRenderer, &targetRect);
             SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(GlobalRenderer, &sourceRect);
             SDL_RenderDrawRect(GlobalRenderer, &targetRect);
 
-            RenderText(*combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
-            RenderText(*combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
+            RenderText(combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
+            RenderText(combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
         }
     }
 
@@ -281,11 +281,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         //ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
     }
 
-
-// ================================= render debug messages ========================================
-    RenderText(debugMessageOne, 0, TILE_SIZE * MAP_SIZE);
-    RenderText(debugMessageTwo, 0, TILE_SIZE * MAP_SIZE + debugMessageOne.height);
-    RenderText(debugMessageThree, 0, TILE_SIZE * MAP_SIZE + debugMessageOne.height + debugMessageTwo.height);
 
     SDL_RenderPresent(GlobalRenderer);
 }

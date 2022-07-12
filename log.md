@@ -16,6 +16,9 @@ Build a fun little game!
 > July 7  | 3h  | 3300		  | Finished level loading system. Pretty happy with such quick work.
 > July 8  | 6h  | 3100		  | Dropped tween system, added some rudimentary AI.
 > July 9  | 3h  | 3300		  | Finished rudimentary AI.
+> July 12 | 3h  | 3000		  | Big refactor! Feels a lot better now.
+
+> Total	  | 49h
 
 
  Notes

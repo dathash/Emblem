@@ -13,12 +13,14 @@ MAP 0 1 0 0 1 1 1 0
 MAP 0 0 0 0 1 1 1 1
 
 COM <UNT <name> <id> <col> <row>
-UNT Brutus        0    0     3
+UNT Soren         0    0     3
 UNT Aeschylus     1    0     0
 UNT Zarathustra   2    2     2
 
-UNT Thief         3    4     2
-UNT Thief         3    0     6
+UNT Brute         4    4     2
+UNT Brute         4    7     3
+
 UNT Thief         3    5     3
-UNT Thief         3    7     3
-UNT Thief         3    7     6
+UNT Thief         3    0     6
+
+UNT Archer        5    7     5

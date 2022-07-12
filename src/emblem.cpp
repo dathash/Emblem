@@ -5,42 +5,46 @@
 
 /*
     TODO
-	MVP
-        Level Transitions
+    REFACTOR
+        
 
-		Three main Units
-		Three levels
-		Enemy range rendering
-		Combat Scene animation
-		Better enemy ai
-			better pathing than levenshtein distance
-			healing
-			dynamic modes
+    MVP
+        Level Transitions / Win Condition
+        Combat Scene animation
+
+        Design
+            Three main Units
+            Three levels
+
+        Better enemy ai
+            A*
+            Goes for "beneficial trades"
+                Higher damage output than input.
+                kills
+            healing?
+            Ranged Attacks
+
+    BUGS
+        Combat Preview is wrong.
 
 
     NICE
-		Items
-			Equipping
-			Trading
-			Different Ranges / Action types / Damage
-		Items and Trading Menus
-		Statistics determine things
+        Attacks lock onto one given target.
+        Statistics determine things
+        Magic / Res
+        Animation
+            Placing Unit moves them to that square (A-star)
+            Generate Arrow while selecting?
+        Smooth Interaction Syntax (Just click on enemy to attack them)
+        Draw Attack range squares
 
 
     BACKLOG
-		Music (MiniAudio)
-		Conversations
-		Smooth Interaction Syntax (Just click on enemy to attack them)
-		Switch to GameController API
-		Show Tile details and basic unit overview when hovering.
-		Tiles have properties 
-			(That remain together and don't take four calls to set up.)
-		Redo Trade/Attack/Heal Stuff? Inheritance?
-		Animation
-			Placing Unit moves them to that square (A-star)
-			Generate Arrow while selecting?
-		Figure out fps mystery
-		Decide whether cancelling a selection should move your cursor back or not.
+        Show Tile details and basic unit overview when hovering.
+        Decide whether cancelling a selection should move your cursor back or not.
+        Music (MiniAudio)
+
+        Figure out fps mystery
  */
 
 
@@ -75,13 +79,13 @@ using namespace std;
 // ========================= constants =====================================
 
 // low level
-#define TIME_STEP 33.33333
+#define TIME_STEP 16.666
 #define JOYSTICK_DEAD_ZONE 8000
 
 // rendering
-#define TILE_SIZE 100
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 900
+#define TILE_SIZE 70
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 800
 
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
@@ -90,8 +94,7 @@ using namespace std;
 #define MAP_SIZE 8
 
 // animation
-#define CURSOR_MOVE_SPEED 2
-
+#define ANIMATION_SPEED 10
 
 
 // ============================= globals ===================================
@@ -136,7 +139,7 @@ struct Texture
 
 struct SpriteSheet
 {
-    shared_ptr<Texture> texture;
+    Texture texture;
     int size    = 32;
     int tracks  = 0;
     int frames  = 0;
@@ -145,8 +148,14 @@ struct SpriteSheet
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
 
-    int colPixelOffset = 0;
-    int rowPixelOffset = 0;
+    SpriteSheet(Texture texture_in, int size_in, int speed_in)
+    : texture(texture_in),
+      size(size_in),
+      speed(speed_in)
+    {
+        this->tracks = texture_in.height / size_in;
+        this->frames = texture_in.width / size_in;
+    }
 
     // called each frame
     void Update()
@@ -176,16 +185,6 @@ struct SpriteSheet
         this->track = track_in;
         this->frame = 0;
     }
-
-    SpriteSheet(shared_ptr<Texture> texture_in, int size_in, int speed_in)
-    {
-        this->texture = texture_in;
-        this->size = size_in;
-        this->speed = speed_in;
-
-        this->tracks = texture_in->height / size_in;
-        this->frames = texture_in->width / size_in;
-    }
 };
 
 struct Unit
@@ -193,8 +192,8 @@ struct Unit
     string name;
     int id;
     bool isAlly;
-	int col = 0;
-	int row = 0;
+    int col = 0;
+    int row = 0;
     bool isExhausted = false;
     bool shouldDie = false;
     int mov;
@@ -206,37 +205,36 @@ struct Unit
     int minRange;
     int maxRange;
     int accuracy;
-    shared_ptr<SpriteSheet> sheet = nullptr;
+    SpriteSheet sheet;
 
     void Update()
     {
-        sheet->Update();
+        sheet.Update();
     }
 
-    Unit(string name_in, shared_ptr<Texture> texture_in, 
+    Unit(string name_in, SpriteSheet sheet_in,
          int id_in, bool isAlly_in, int mov_in,
          int hp_in, int maxHp_in,
          int minRange_in, int maxRange_in,
          int attack_in, int defense_in, int accuracy_in)
-    {
-        this->name = name_in;
-        this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
-        this->id = id_in;
-        this->isAlly = isAlly_in;
-        this->mov = mov_in;
-        this->hp = hp_in;
-        this->maxHp = maxHp_in;
-        this->minRange = minRange_in;
-        this->maxRange = maxRange_in;
-        this->attack = attack_in;
-        this->defense = defense_in;
-        this->accuracy = accuracy_in;
-    }
+    : name(name_in),
+      sheet(sheet_in),
+      id(id_in),
+      isAlly(isAlly_in),
+      mov(mov_in),
+      hp(hp_in),
+      maxHp(maxHp_in),
+      minRange(minRange_in),
+      maxRange(maxRange_in),
+      attack(attack_in),
+      defense(defense_in),
+      accuracy(accuracy_in)
+    {}
 
-	~Unit()
-	{
-		printf("Unit Destroyed!\n");
-	}
+    ~Unit()
+    {
+        printf("Unit Destroyed!\n");
+    }
 };
 
 
@@ -251,7 +249,7 @@ struct Tile
     int type = 0;
     int penalty = 1;
     bool occupied = false;
-    std::shared_ptr<Unit> occupant = nullptr;
+    Unit *occupant = nullptr;
 };
 struct Tilemap
 {
@@ -262,61 +260,60 @@ struct Tilemap
 
 struct Level
 {
-	Tilemap map;
-	vector<shared_ptr<Unit>> allies;
-	vector<shared_ptr<Unit>> enemies;
+    Tilemap map;
+    vector<shared_ptr<Unit>> allies;
+    vector<shared_ptr<Unit>> enemies;
 
-	void RemoveDeadUnits()
-	{
-		vector<pair<int, int>> tiles;
+    void RemoveDeadUnits()
+    {
+        vector<pair<int, int>> tiles;
 
-		for(shared_ptr<Unit> u : allies)
-		{
-			if(u->shouldDie)
-			{
-				tiles.push_back(pair<int, int>(u->col, u->row)); 
-			}
-		}
-		for(shared_ptr<Unit> u : enemies)
-		{
-			if(u->shouldDie)
-			{
-				tiles.push_back(pair<int, int>(u->col, u->row));
-			}
-		}
+        for(shared_ptr<Unit> u : allies)
+        {
+            if(u->shouldDie)
+            {
+                tiles.push_back(pair<int, int>(u->col, u->row)); 
+            }
+        }
+        for(shared_ptr<Unit> u : enemies)
+        {
+            if(u->shouldDie)
+            {
+                tiles.push_back(pair<int, int>(u->col, u->row));
+            }
+        }
 
-		allies.erase(remove_if(allies.begin(), allies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), allies.end());
-		enemies.erase(remove_if(enemies.begin(), enemies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), enemies.end());
+        allies.erase(remove_if(allies.begin(), allies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), allies.end());
+        enemies.erase(remove_if(enemies.begin(), enemies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), enemies.end());
 
-		for(pair<int, int> tile : tiles)
-		{
-			map.tiles[tile.first][tile.second].occupant = nullptr;
-			map.tiles[tile.first][tile.second].occupied = false;
-		}
-	}
+        for(pair<int, int> tile : tiles)
+        {
+            map.tiles[tile.first][tile.second].occupant = nullptr;
+            map.tiles[tile.first][tile.second].occupied = false;
+        }
+    }
 };
 
 struct Cursor
 {
     int col = 1;
     int row = 1;
-    std::shared_ptr<Unit> selected = nullptr;
-    std::shared_ptr<Unit> targeted = nullptr;
+    Unit *selected = nullptr;
+    Unit *targeted = nullptr;
     int selectedCol = -1; // Where the cursor was before placing a unit
     int selectedRow = -1;
     int sourceCol = -1; // Where the cursor was before choosing a target
     int sourceRow = -1;
 
-    shared_ptr<SpriteSheet> sheet;
+    SpriteSheet sheet;
 
-    Cursor(shared_ptr<Texture> texture_in)
-    {
-        this->sheet = make_shared<SpriteSheet>(texture_in, 32, 6);
-    }
+    Cursor(SpriteSheet sheet_in)
+    : sheet(sheet_in)
+    {}
 
     void Update()
     {
-        sheet->Update();
+        sheet.Update();
     }
 };
 
@@ -328,7 +325,7 @@ struct Menu
     u8 rows;
     u8 current;
 
-    vector<unique_ptr<Texture>> optionTextTextures;
+    vector<Texture> optionTextTextures;
 
     Menu(u8 rows_in, u8 current_in, vector<string> options_in)
     : rows(rows_in),
@@ -344,7 +341,7 @@ struct UnitInfo
 {
     u8 rows;
 
-    vector<unique_ptr<Texture>> infoTextTextures;
+    vector<Texture> infoTextTextures;
 
     UnitInfo(u8 rows_in, vector<string> info_in)
     : rows(rows_in)
@@ -371,8 +368,8 @@ struct CombatInfo
 {
     u8 rows;
 
-    vector<unique_ptr<Texture>> sourceTextTextures;
-    vector<unique_ptr<Texture>> targetTextTextures;
+    vector<Texture> sourceTextTextures;
+    vector<Texture> targetTextTextures;
 
     CombatInfo(u8 rows_in, vector<string> sourceInfo_in, vector<string> targetInfo_in)
     : rows(rows_in)
@@ -413,8 +410,8 @@ bool Initialize();
 void Close();
 void HandleEvents(InputState *input);
 
-#include "fight.h"
 #include "grid.h"
+#include "fight.h"
 #include "command.h"
 #include "ai.h"
 #include "render.h"
@@ -428,7 +425,7 @@ int main(int argc, char *argv[])
     if(!Initialize())
         assert(!"Initialization Failed\n");
 
-	// controller init
+    // controller init
     SDL_Joystick *gamePad = NULL;
     if(SDL_NumJoysticks() < 1)
     {
@@ -445,26 +442,21 @@ int main(int argc, char *argv[])
     // load data
     vector<shared_ptr<Unit>> units = LoadCharacters("../data/units.txt");
     shared_ptr<Level> level = LoadLevel("../data/l1.txt", units);
-    Cursor cursor(LoadTextureImage("../assets/sprites/cursor.png"));
+    Cursor cursor(SpriteSheet(LoadTextureImage("../assets/sprites/cursor.png"), 32, ANIMATION_SPEED));
 
-	// initial actor state
+    // initial actor state
     InputState input;
     InputHandler handler(&cursor, level->map);
-	AI ai;
+    AI ai;
 
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
-    Menu unitMenu(6, 0, {"Info", "Items", "Attack", "Heal", "Trade", "Wait"});
+    Menu unitMenu(4, 0, {"Info", "Attack", "Heal", "Wait"});
     UnitInfo unitInfo(1, {"Placeholder"});
     CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
 
-	// debug messages
-    unique_ptr<Texture> debugMessageOne = LoadTextureText("placeholder1", {250, 0, 0, 255});
-    unique_ptr<Texture> debugMessageTwo = LoadTextureText("placeholder2", {0, 100, 0, 255});
-    unique_ptr<Texture> debugMessageThree = LoadTextureText("placeholder3", {0, 0, 250, 255});
-
-	// frame timer
-    real32 TargetMillisecondsPerFrame = 16.666f;
+    // frame timer
+    real32 TargetMillisecondsPerFrame = 16.666;
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
     u64 frameNumber = 0;
@@ -477,39 +469,39 @@ int main(int argc, char *argv[])
         HandleEvents(&input);
 
 // ====================== command phase ========================================
-		if(GlobalTurnStart)
-		{
-			for(shared_ptr<Unit> unit : level->enemies)
-			{
-				unit->isExhausted = false;
-			}
-			for(shared_ptr<Unit> unit : level->allies)
-			{
-				unit->isExhausted = false;
-			}
-			GlobalTurnStart = false;
-			ai.commandQueue = {};
-		}
+        if(GlobalTurnStart)
+        {
+            for(shared_ptr<Unit> unit : level->enemies)
+            {
+                unit->isExhausted = false;
+            }
+            for(shared_ptr<Unit> unit : level->allies)
+            {
+                unit->isExhausted = false;
+            }
+            GlobalTurnStart = false;
+            ai.commandQueue = {};
+        }
 
-		if(GlobalPlayerTurn)
-		{
-			handler.Update(&input);
-			handler.UpdateCommands(&cursor, &level->map,
-								   &gameMenu, &unitMenu, 
-								   &unitInfo, &combatInfo);
+
+        if(GlobalPlayerTurn)
+        {
+            handler.Update(&input);
+            handler.UpdateCommands(&cursor, &level->map,
+                                   &gameMenu, &unitMenu, 
+                                   &unitInfo, &combatInfo);
         }
         else
         {
-			if(ai.shouldPlan)
-			{
-				ai.Plan(&cursor, &level->map);
-			}
-			if(!(frameNumber % 10))
-			{
-				ai.Update();
-			}
-		}
-
+            if(ai.shouldPlan)
+            {
+                ai.Plan(&cursor, &level->map);
+            }
+            if(!(frameNumber % 10))
+            {
+                ai.Update();
+            }
+        }
 
 
 // ========================= update phase =======================================
@@ -523,37 +515,23 @@ int main(int argc, char *argv[])
         {
             unit->Update();
         }
-		level->RemoveDeadUnits();
+
+        // cleanup
+        level->RemoveDeadUnits();
 
 
 // ============================= render =========================================
-        Render(level->map, cursor, gameMenu, unitMenu, unitInfo, combatInfo,
-               *debugMessageOne, *debugMessageTwo, *debugMessageThree);
+        Render(level->map, cursor, gameMenu, unitMenu, unitInfo, combatInfo);
 
 
 // =========================== v debug messages v ============================================
         endTime = SDL_GetPerformanceCounter();
-        ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency()) * 1000.0f;
+        ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency() * 1000.0f);
 
-        // Debug Messages
-        char buffer[256];
-
-        sprintf(buffer, "Mode: %d", GlobalInterfaceState);
-        debugMessageOne = LoadTextureText(string(buffer), {250, 0, 0, 255});
-
-        sprintf(buffer, "Tile <%d, %d> | Type: %d, Occupied: %d, Occupant: %p",
-               cursor.col, cursor.row, level->map.tiles[cursor.col][cursor.row].type,
-               level->map.tiles[cursor.col][cursor.row].occupied,
-               (void *)level->map.tiles[cursor.col][cursor.row].occupant.get());
-        debugMessageTwo = LoadTextureText(string(buffer), {0, 100, 0, 255});
-
-        sprintf(buffer, "MS: %.02f, FPS: %d", ElapsedMS, (int)(1.0f / ElapsedMS * 1000.0f));
-        debugMessageThree = LoadTextureText(string(buffer), {0, 0, 250, 255});
-
-        if(ElapsedMS < TargetMillisecondsPerFrame)
-        {
-            SDL_Delay((int)(TargetMillisecondsPerFrame - ElapsedMS));
-        }
+		if(ElapsedMS < TargetMillisecondsPerFrame)
+		{
+			SDL_Delay((int)(TargetMillisecondsPerFrame - ElapsedMS));
+		}
         startTime = SDL_GetPerformanceCounter();
         frameNumber++;
     }

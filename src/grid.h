@@ -152,11 +152,11 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
 
 
 // Finds the nearest unit to the cursor, based on the given predicate expression.
-shared_ptr<Unit> FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
+Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
 {
     int minDistance = 100;
     int distance = 0;
-    shared_ptr<Unit> result = nullptr;
+    Unit *result = nullptr;
     for(int col = 0; col < MAP_SIZE; ++col)
     {
         for(int row = 0; row < MAP_SIZE; ++row)
@@ -200,9 +200,9 @@ pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 
 
 // Finds a target for an attack.
-shared_ptr<Unit> FindVictim(const Cursor &cursor, const Tilemap &map)
+Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 {
-    shared_ptr<Unit> result = nullptr;
+    Unit *result = nullptr;
     for(pair<int, int> p : map.interactible)
     {
         printf("%d %d\n", p.first, p.second);
@@ -212,6 +212,13 @@ shared_ptr<Unit> FindVictim(const Cursor &cursor, const Tilemap &map)
         }
     }
     return result;
+}
+
+
+// Finds the manhattan distance between two units.
+int Distance(const Unit &one, const Unit &two)
+{
+    return (abs(one.col - two.col) + abs(one.row - two.row));
 }
 
 

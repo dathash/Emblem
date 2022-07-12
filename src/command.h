@@ -23,12 +23,8 @@ enum InterfaceState
     HEALING_TARGETING_OVER_UNTARGETABLE,
     HEALING_TARGETING_OVER_TARGET,
 
-    TRADING_TARGETING_OVER_UNTARGETABLE,
-    TRADING_TARGETING_OVER_TARGET,
-
     PREVIEW_ATTACK,
     PREVIEW_HEALING,
-    TRADING,
 
     GAME_MENU_ROOT,
     GAME_MENU_OUTLOOK,
@@ -37,7 +33,6 @@ enum InterfaceState
 
     UNIT_MENU_ROOT,
     UNIT_INFO,
-    UNIT_ITEMS,
 
     ENEMY_INFO,
 
@@ -47,15 +42,10 @@ enum InterfaceState
 static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
 
 // =============================== commands ====================================
-// inherited class, contains virtual methods.
+// inherited class, contains virtual method for implementing in children.
 class Command
 {
 public:
-    virtual ~Command() 
-    {
-        //printf("Command has been Destructed!\n");
-    }
-
     virtual void Execute() = 0;
 };
 
@@ -64,7 +54,7 @@ class NullCommand : public Command
 public:
     virtual void Execute()
     {
-        printf("COMMAND | Null\n");
+        printf("Null Command\n");
     }
 };
 
@@ -83,8 +73,6 @@ public:
     {
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
-        printf("COMMAND | Move Cursor from <%d, %d> to <%d, %d>\n", 
-            cursor->col, cursor->row, newCol, newRow);
 
         if(IsValidBoundsPosition(newCol, newRow))
         {
@@ -138,9 +126,8 @@ public:
                                          cursor->selectedRow, 
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
-        printf("COMMAND | Select Unit %d at <%d, %d>\n", 
-               cursor->selected->id, cursor->col, cursor->row);
 
+        // change state
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -161,12 +148,11 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Deselect Unit %d.\n",
-            cursor->selected->id);
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
         cursor->selected = nullptr;
 
+        // change state
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 
@@ -189,8 +175,6 @@ public:
     {
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
-        printf("COMMAND | Move Cursor (Checked) from <%d, %d> to <%d, %d>\n", 
-            cursor->col, cursor->row, newCol, newRow);
 
         if(IsValidBoundsPosition(newCol, newRow))
         {
@@ -242,8 +226,6 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Place Unit %d at <%d, %d>\n",
-               cursor->selected->id, cursor->col, cursor->row); 
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
@@ -253,7 +235,9 @@ public:
         cursor->selected->col = cursor->col;
         cursor->selected->row = cursor->row;
 
-        cursor->selected->sheet->ChangeTrack(1);
+        cursor->selected->sheet.ChangeTrack(1);
+
+        // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
 
@@ -273,9 +257,6 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Put Unit %d back at <%d, %d>\n",
-               cursor->selected->id, cursor->selectedCol, cursor->selectedRow);
-
         map->tiles[cursor->col][cursor->row].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupied = false;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
@@ -288,7 +269,9 @@ public:
         cursor->selected->col = cursor->col;
         cursor->selected->row = cursor->row;
 
-        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(0);
+
+        // change state
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -313,9 +296,7 @@ public:
     {
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
-        printf("COMMAND | Move Cursor (Targeting for Attack) from <%d, %d> to <%d, %d>\n", 
-            cursor->col, cursor->row, newCol, newRow);
-
+		
         if(IsValidBoundsPosition(newCol, newRow))
         {
             // move cursor
@@ -324,7 +305,6 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-
             if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
                hoverTile->occupied &&
                !hoverTile->occupant->isAlly)
@@ -360,8 +340,6 @@ public:
     {
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
-        printf("COMMAND | Move Cursor (Targeting for healing) from <%d, %d> to <%d, %d>\n", 
-            cursor->col, cursor->row, newCol, newRow);
 
         if(IsValidBoundsPosition(newCol, newRow))
         {
@@ -371,7 +349,6 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-
             if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
                hoverTile->occupied &&
                hoverTile->occupant->isAlly)
@@ -381,52 +358,6 @@ public:
             else
             {
                 GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
-            }
-        }
-    }
-
-private:
-    Cursor *cursor; 
-    int col;
-    int row;
-    const Tilemap &map;
-};
-
-class MoveTradingTargetingCommand : public Command
-{
-public:
-    MoveTradingTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
-    : cursor(cursor_in),
-      col(col_in),
-      row(row_in),
-      map(map_in)
-    {}
-
-    virtual void Execute()
-    {
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        printf("COMMAND | Move Cursor (Targeting for trading) from <%d, %d> to <%d, %d>\n", 
-            cursor->col, cursor->row, newCol, newRow);
-
-        if(IsValidBoundsPosition(newCol, newRow))
-        {
-            // move cursor
-            cursor->col = newCol;
-            cursor->row = newRow;
-
-            // change state
-            const Tile *hoverTile = &map.tiles[newCol][newRow];
-
-            if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
-               hoverTile->occupied &&
-               hoverTile->occupant->isAlly)
-            {
-                GlobalInterfaceState = TRADING_TARGETING_OVER_TARGET;
-            }
-            else
-            {
-                GlobalInterfaceState = TRADING_TARGETING_OVER_UNTARGETABLE;
             }
         }
     }
@@ -448,11 +379,10 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Detarget\n");
-
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
+        // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
 
@@ -475,9 +405,6 @@ public:
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
 
-        printf("COMMAND | Initiate attack on Unit %d at <%d, %d>\n",
-                cursor->targeted->id, cursor->col, cursor->row);
-
         combatInfo->UpdateTextTextures(
 								      {
                                       cursor->selected->name,
@@ -492,6 +419,7 @@ public:
 									  "Hit: " + to_string(cursor->targeted->accuracy)
                                       });                                        
 
+        // change state
         GlobalInterfaceState = PREVIEW_ATTACK;
     }
 
@@ -514,9 +442,6 @@ public:
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
 
-        printf("COMMAND | Initiate healing on Unit %d at <%d, %d>\n",
-                cursor->targeted->id, cursor->col, cursor->row);
-
         combatInfo->UpdateTextTextures(
 								      {
                                       cursor->selected->name,
@@ -531,6 +456,7 @@ public:
 									  "Hit: -"
                                       });                                        
 
+        // change state
         GlobalInterfaceState = PREVIEW_HEALING;
     }
 
@@ -539,30 +465,6 @@ private:
     const Tilemap &map;
 	CombatInfo *combatInfo;
 };
-
-class InitiateTradingCommand : public Command
-{
-public:
-    InitiateTradingCommand(Cursor *cursor_in, const Tilemap &map_in)
-    : cursor(cursor_in),
-      map(map_in)
-    {}
-
-    virtual void Execute()
-    {
-        cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
-
-        printf("COMMAND | Initiate trading on Unit %d at <%d, %d>\n",
-                cursor->targeted->id, cursor->col, cursor->row);
-
-        GlobalInterfaceState = TRADING;
-    }
-
-private:
-    Cursor *cursor;
-    const Tilemap &map;
-};
-
 
 class AttackCommand : public Command
 {
@@ -573,48 +475,16 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Attack from Unit %d on Enemy %d. Simulating...\n", 
-               cursor->selected->id, cursor->targeted->id);
-
-        SimulateCombat(cursor->selected.get(), cursor->targeted.get());
+        SimulateCombat(cursor->selected, cursor->targeted);
 
         cursor->selected->isExhausted = true;
-        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(0);
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
-        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-    }
-
-private:
-    Cursor *cursor;
-};
-
-
-// TODO: Make this system more generalizable
-class TradeCommand : public Command
-{
-public:
-    TradeCommand(Cursor *cursor_in)
-    : cursor(cursor_in)
-    {}
-
-    virtual void Execute()
-    {
-        // TRADING BEHAVIOR HERE
-
-        printf("COMMAND | Traded between Unit %d and %d.\n", 
-               cursor->selected->id, cursor->targeted->id);
-
-        cursor->selected->isExhausted = true;
-        cursor->selected->sheet->ChangeTrack(0);
-        cursor->selected = nullptr;
-        cursor->targeted = nullptr;
-        cursor->col = cursor->sourceCol;
-        cursor->row = cursor->sourceRow;
-
+        // change state
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 
@@ -633,18 +503,16 @@ public:
     virtual void Execute()
     {
 
-        printf("COMMAND | Healing from Unit %d on Unit %d.\n", 
-               cursor->selected->id, cursor->targeted->id);
-
-        SimulateHealing(cursor->selected.get(), cursor->targeted.get());
+        SimulateHealing(cursor->selected, cursor->targeted);
 
         cursor->selected->isExhausted = true;
-        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(0);
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
+        // change state
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 
@@ -661,10 +529,9 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Backed down from attacking enemy.\n");
-
         cursor->targeted = nullptr;
 
+        // change state
         GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
     }
 
@@ -681,10 +548,9 @@ public:
 
     virtual void Execute()
     {
-        printf("Command | Backed down from healing ally.\n");
-
         cursor->targeted = nullptr;
 
+        // change state
         GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
     }
 
@@ -692,39 +558,12 @@ private:
     Cursor *cursor;
 };
 
-class BackDownFromTradingCommand : public Command
-{
-public:
-    BackDownFromTradingCommand(Cursor *cursor_in)
-    : cursor(cursor_in)
-    {}
-
-    virtual void Execute()
-    {
-        printf("COMMAND | Backed down from trading with ally.\n");
-
-        cursor->targeted = nullptr;
-
-        GlobalInterfaceState = TRADING_TARGETING_OVER_TARGET;
-    }
-
-private:
-    Cursor *cursor;
-};
-
-class ChangeWeaponBeforeCombatCommand : public Command
-{
-public:
-    virtual void Execute() { printf("Change Weapon!\n"); }
-};
-
-
 
 // ======================= selecting enemy commands ==========================
 class SelectEnemyCommand : public Command
 {
 public:
-    SelectEnemyCommand(Cursor *cursor_in, const Tilemap &map_in, UnitInfo *unitInfo_in)
+    SelectEnemyCommand(Cursor *cursor_in, Tilemap *map_in, UnitInfo *unitInfo_in)
     : cursor(cursor_in),
       map(map_in),
       unitInfo(unitInfo_in)
@@ -732,10 +571,17 @@ public:
 
     virtual void Execute()
     {
+        // change state
         GlobalInterfaceState = ENEMY_INFO;
-        cursor->selected = map.tiles[cursor->col][cursor->row].occupant;
+        cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
+
+        map->accessible.clear();
+        map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
+                                         cursor->selectedRow, 
+                                         cursor->selected->mov,
+                                         cursor->selected->isAlly);
 
         unitInfo->UpdateTextTextures({cursor->selected->name,
                                       "ID: " + to_string(cursor->selected->id),
@@ -751,14 +597,11 @@ public:
                                       "Range: " + to_string(cursor->selected->minRange) + "-" + to_string(cursor->selected->maxRange),
                                       "Accuracy: " + to_string(cursor->selected->accuracy)
                                       });                                        
-
-        printf("COMMAND | Select Enemy %d at <%d, %d>\n", 
-            cursor->selected->id, cursor->col, cursor->row);
-    }
+	}
 
 private:
     Cursor *cursor;
-    const Tilemap &map;
+    Tilemap *map;
     UnitInfo *unitInfo;
 };
 
@@ -771,13 +614,11 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Deselect Enemy %d.\n",
-            cursor->selected->id);
-
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
         cursor->selected = nullptr;
 
+        // change state
         GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
     }
 
@@ -793,7 +634,7 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Open Game Menu\n");
+        // change state
         GlobalInterfaceState = GAME_MENU_ROOT;
     }
 };
@@ -804,7 +645,7 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Exit Game Menu\n");
+        // change state
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 };
@@ -820,7 +661,6 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Update Game Menu!\n");
         int newCurrent = menu->current + direction;
         if(newCurrent >= menu->rows)
         {
@@ -852,7 +692,7 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Choose Game Menu Option %d!\n", menu->current);        
+        // change state
         switch(menu->current)
         {
             case(0): // OUTLOOK
@@ -871,7 +711,6 @@ public:
             } break;
         }
     }
-    // TODO: CHANGE STATE?
 
 private:
     Menu *menu;
@@ -890,7 +729,6 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Update Unit Menu!\n");
         int newCurrent = menu->current + direction;
         if(newCurrent >= menu->rows)
         {
@@ -924,7 +762,6 @@ public:
 
     virtual void Execute()
     { 
-        printf("COMMAND | Choose Unit Menu Option %d!\n", menu.current);
         switch(menu.current)
         {
             case(0): // INFO
@@ -946,22 +783,16 @@ public:
 
                 GlobalInterfaceState = UNIT_INFO;
             } break;
-            case(1): // ITEMS
-            {
-                GlobalInterfaceState = UNIT_ITEMS;
-            } break;
-            case(2): // ATTACK
+            case(1): // ATTACK
             {
                 cursor->sourceCol = cursor->col;
                 cursor->sourceRow = cursor->row;
                 map->interactible.clear();
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                  cursor->selected->minRange, cursor->selected->maxRange);
-                printf("COMMAND | Finding targets to attack for Unit %d at <%d, %d>\n", 
-                        cursor->selected->id, cursor->col, cursor->row);
                 GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
             } break;
-            case(3): // HEAL
+            case(2): // HEAL
             {
                 cursor->sourceCol = cursor->col;
                 cursor->sourceRow = cursor->row;
@@ -971,31 +802,13 @@ public:
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                      1, 1);
 
-                printf("COMMAND | Finding targets to heal for Unit %d at <%d, %d>\n", 
-                        cursor->selected->id, cursor->col, cursor->row);
                 GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
             } break;
-            case(4): // TRADE
+            case(3): // WAIT
             {
-                cursor->sourceCol = cursor->col;
-                cursor->sourceRow = cursor->row;
-                // Find tiles that a unit can interact with.
-
-                map->interactible.clear();
-                map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow,
-                                                     1, 1);
-
-                printf("COMMAND | Finding targets to trade with for Unit %d at <%d, %d>\n", 
-                        cursor->selected->id, cursor->col, cursor->row);
-                GlobalInterfaceState = TRADING_TARGETING_OVER_UNTARGETABLE;
-            } break;
-            case(5): // WAIT
-            {
-                printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
-                       cursor->selected->id, cursor->col, cursor->row);
                 cursor->selected->isExhausted = true;
 
-                cursor->selected->sheet->ChangeTrack(0);
+                cursor->selected->sheet.ChangeTrack(0);
                 cursor->selected = nullptr;
 
                 cursor->selectedCol = -1;
@@ -1004,7 +817,7 @@ public:
             } break;
             default:
             {
-                printf("CHOOSEUNITMENUOPTIONCOMMAND | How did you get here?\n");
+                assert(!"CHOOSEUNITMENUOPTIONCOMMAND | How did you get here?\n");
             } break;
         }
     }
@@ -1021,26 +834,12 @@ class BackOutOfUnitInfoCommand : public Command
 public:
     virtual void Execute()
     {
-        printf("COMMAND | Back Out of Unit Info!\n");
+        // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
 };
-
-class BackOutOfItemsMenuCommand : public Command
-{
-public:
-    virtual void Execute()
-    {
-        printf("COMMAND | Back Out of Items Menu!\n");
-        GlobalInterfaceState = UNIT_MENU_ROOT;
-    }
-};
-
-
-
 
 // ============================== Input Handler ================================
-
 class InputHandler
 {
 public:
@@ -1152,7 +951,7 @@ public:
                 BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<SelectEnemyCommand>(cursor, *map, unitInfo));
+                BindA(make_shared<SelectEnemyCommand>(cursor, map, unitInfo));
                 BindB(make_shared<NullCommand>());
             } break;
 
@@ -1245,26 +1044,6 @@ public:
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
-            case(TRADING_TARGETING_OVER_UNTARGETABLE):
-            {
-                BindUp(make_shared<MoveTradingTargetingCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveTradingTargetingCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveTradingTargetingCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveTradingTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<DetargetCommand>(cursor, map));
-            } break;
-            case(TRADING_TARGETING_OVER_TARGET):
-            {
-                BindUp(make_shared<MoveTradingTargetingCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveTradingTargetingCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveTradingTargetingCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveTradingTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<InitiateTradingCommand>(cursor, *map));
-                BindB(make_shared<DetargetCommand>(cursor, map));
-            } break;
-
-
             case(PREVIEW_ATTACK):
             {
                 BindUp(make_shared<NullCommand>());
@@ -1283,16 +1062,6 @@ public:
                 BindA(make_shared<HealCommand>(cursor));
                 BindB(make_shared<BackDownFromHealingCommand>(cursor));
             } break;
-            case(TRADING):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<TradeCommand>(cursor));
-                BindB(make_shared<BackDownFromTradingCommand>(cursor));
-            } break;
-
 
             case(GAME_MENU_ROOT):
             {
@@ -1332,7 +1101,6 @@ public:
             } break;
 
 
-
             case(UNIT_MENU_ROOT):
             {
                 BindUp(make_shared<UpdateUnitMenuCommand>(unitMenu, -1));
@@ -1351,16 +1119,6 @@ public:
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackOutOfUnitInfoCommand>());
             } break;
-            case(UNIT_ITEMS):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<BackOutOfItemsMenuCommand>());
-            } break;
-
             case(ENEMY_INFO):
             {
                 BindUp(make_shared<NullCommand>());
@@ -1383,10 +1141,7 @@ public:
 
             default:
             {
-                printf("Invalid Interface State! %d\n",
-                       GlobalInterfaceState);
-
-                assert(!"Unimplemented?\n");
+                assert(!"Unimplemented GlobalInterfaceState!\n");
             } break;
         }
     }

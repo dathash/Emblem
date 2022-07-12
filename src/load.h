@@ -8,7 +8,7 @@
 
 // ============================== loading data =================================
 // Loads a Texture displaying the given text in the given color.
-unique_ptr<Texture>
+Texture
 LoadTextureText(std::string text, SDL_Color color)
 {
     SDL_Texture *texture = nullptr;
@@ -23,11 +23,11 @@ LoadTextureText(std::string text, SDL_Color color)
     assert(texture);
     SDL_FreeSurface(surface);
 
-    return make_unique<Texture>(texture, "", width, height);
+    return Texture(texture, "", width, height);
 }
 
 // Loads a texture displaying an image, given a path to it.
-shared_ptr<Texture>
+Texture
 LoadTextureImage(std::string path)
 {
     SDL_Texture *texture = nullptr;
@@ -41,7 +41,7 @@ LoadTextureImage(std::string path)
     assert(texture);
     SDL_FreeSurface(surface);
 
-    return make_shared<Texture>(texture, path, width, height);
+    return Texture(texture, path, width, height);
 }
 
 // =================================== level data ===============================
@@ -114,7 +114,7 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
                     // TODO: Figure out how to not do this. 
                     shared_ptr<Unit> unitCopy = make_shared<Unit>(
                                                                   unitBase->name,
-                                                                  LoadTextureImage(unitBase->sheet->texture->path),
+                                                                  SpriteSheet(LoadTextureImage(unitBase->sheet.texture.path), 32, ANIMATION_SPEED),
                                                                   unitBase->id,
                                                                   unitBase->isAlly,
                                                                   unitBase->mov,
@@ -138,7 +138,7 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
                     {
                         level->enemies.push_back(unitCopy);
                     }
-					level->map.tiles[col][row].occupant = unitCopy;
+					level->map.tiles[col][row].occupant = unitCopy.get();
 					level->map.tiles[col][row].occupied = true;
 				}
             }
@@ -179,7 +179,7 @@ vector<shared_ptr<Unit>> LoadCharacters(string filename_in)
 					tokens = split(rest, ' ');
 					units.push_back(make_shared<Unit>(
 						tokens[0],									// name
-						LoadTextureImage("../assets/sprites/" + tokens[1]), // path to texture
+						SpriteSheet(LoadTextureImage("../assets/sprites/" + tokens[1]), 32, ANIMATION_SPEED), // path to texture
 						stoi(tokens[2]),							// id
 						tokens[3] == "Ally" ? true : false,			// team
 						stoi(tokens[4]),							// movement

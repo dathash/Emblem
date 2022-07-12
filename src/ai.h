@@ -30,7 +30,7 @@ public:
     virtual void Execute()
     {
         // find a unit that hasn't acted yet.
-        shared_ptr<Unit> selected = nullptr;
+        Unit *selected = nullptr;
         selected = FindNearest(*cursor, map,
                 [](const Unit &unit) -> bool
                 {
@@ -110,7 +110,7 @@ public:
                cursor->selected->id, cursor->col, cursor->row);
         cursor->selected->isExhausted = true;
 
-        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(0);
         cursor->selected = nullptr;
 
         cursor->selectedCol = -1;
@@ -134,7 +134,7 @@ public:
 
     virtual void Execute()
     {
-        shared_ptr<Unit> target = FindNearest(*cursor, *map, 
+        Unit *target = FindNearest(*cursor, *map, 
                 [](const Unit &unit) -> bool
                 {
                     return unit.isAlly;
@@ -180,7 +180,7 @@ public:
         cursor->sourceCol = cursor->col;
         cursor->sourceRow = cursor->row;
 
-        cursor->selected->sheet->ChangeTrack(1);
+        cursor->selected->sheet.ChangeTrack(1);
     }
 
 private:
@@ -208,11 +208,11 @@ public:
         {
             printf("AI COMMAND | Attack Unit %d!\n",
                    cursor->targeted->id);
-            SimulateCombat(cursor->selected.get(), cursor->targeted.get());
+            SimulateCombat(cursor->selected, cursor->targeted);
         }
 
         cursor->selected->isExhausted = true;
-        cursor->selected->sheet->ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(0);
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
