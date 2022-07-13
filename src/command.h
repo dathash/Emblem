@@ -74,11 +74,14 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
 
-        if(IsValidBoundsPosition(newCol, newRow))
+        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
             // move cursor
             cursor->col = newCol;
             cursor->row = newRow;
+
+            // For rendering
+            MoveViewport(cursor, newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -176,11 +179,14 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
 
-        if(IsValidBoundsPosition(newCol, newRow))
+        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
             // move cursor
             cursor->col = newCol;
             cursor->row = newRow;
+
+            // For rendering
+            MoveViewport(cursor, newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -297,11 +303,14 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
 		
-        if(IsValidBoundsPosition(newCol, newRow))
+        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
             // move cursor
             cursor->col = newCol;
             cursor->row = newRow;
+
+            // For rendering
+            MoveViewport(cursor, newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -341,11 +350,14 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
 
-        if(IsValidBoundsPosition(newCol, newRow))
+        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
             // move cursor
             cursor->col = newCol;
             cursor->row = newRow;
+
+            // For rendering
+            MoveViewport(cursor, newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -817,7 +829,7 @@ public:
             } break;
             default:
             {
-                assert(!"CHOOSEUNITMENUOPTIONCOMMAND | How did you get here?\n");
+                assert(!"ChooseUnitMenuOptionCommand | How did you get here?\n");
             } break;
         }
     }
@@ -872,7 +884,7 @@ public:
             return buttonB;
         }
 
-        return NULL;
+        return nullptr;
     }
 
     InputHandler(Cursor *cursor, const Tilemap &map)

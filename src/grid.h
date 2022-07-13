@@ -9,10 +9,41 @@
 // ========================= grid helper functions ========================
 // returns true if the position is in-bounds.
 bool
-IsValidBoundsPosition(int col, int row)
+IsValidBoundsPosition(int mapWidth, int mapHeight, int col, int row)
 {
-    return (col >= 0 && col < MAP_SIZE
-         && row >= 0 && row < MAP_SIZE);
+    return (col >= 0 && col < mapWidth &&
+			row >= 0 && row < mapHeight);
+}
+
+bool
+WithinViewport(const Cursor &cursor, int col, int row)
+{
+    return (col < cursor.viewportSize + cursor.viewportCol &&
+            col >= cursor.viewportCol &&
+            row < cursor.viewportSize + cursor.viewportRow &&
+            row >= cursor.viewportRow);
+}
+
+// moves the cursor's viewport so that the given tile is on screen.
+void
+MoveViewport(Cursor *cursor, int col, int row)
+{
+    if(col >= cursor->viewportSize + cursor->viewportCol)
+    {
+        ++cursor->viewportCol;
+    }
+    else if(col < cursor->viewportCol)
+    {
+        --cursor->viewportCol;
+    }
+    else if(row >= cursor->viewportSize + cursor->viewportRow)
+    {
+        ++cursor->viewportRow;
+    }
+    else if(row < cursor->viewportRow)
+    {
+        --cursor->viewportRow;
+    }
 }
 
 
@@ -63,7 +94,7 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
         {
             int newCol = current.first + directionsCol[i];
             int newRow = current.second + directionsRow[i];
-            if(IsValidBoundsPosition(newCol, newRow))
+            if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
                 const Tile *tileToExplore = &map.tiles[newCol][newRow];
                 int newCost;
@@ -128,7 +159,7 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
         {
             int newCol = current.first + directionsCol[i];
             int newRow = current.second + directionsRow[i];
-            if(IsValidBoundsPosition(newCol, newRow))
+            if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
                 const Tile *tileToExplore = &map.tiles[newCol][newRow];
                 int newCost = costs[current.first][current.second] + 1;
@@ -205,7 +236,6 @@ Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
     Unit *result = nullptr;
     for(pair<int, int> p : map.interactible)
     {
-        printf("%d %d\n", p.first, p.second);
         if(map.tiles[p.first][p.second].occupied && map.tiles[p.first][p.second].occupant->isAlly)
         {
             result = map.tiles[p.first][p.second].occupant;

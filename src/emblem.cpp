@@ -93,7 +93,7 @@ using namespace std;
 #define MENU_ROW_HEIGHT 50
 
 // backend
-#define MAP_SIZE 8
+#define MAP_SIZE 10
 
 // animation
 #define ANIMATION_SPEED 10
@@ -255,6 +255,8 @@ struct Tile
 };
 struct Tilemap
 {
+    int width = 10;
+    int height = 10;
     Tile tiles[MAP_SIZE][MAP_SIZE] = {};
     vector<pair<int, int>> accessible;
     vector<pair<int, int>> interactible;
@@ -263,21 +265,21 @@ struct Tilemap
 struct Level
 {
     Tilemap map;
-    vector<shared_ptr<Unit>> allies;
-    vector<shared_ptr<Unit>> enemies;
+    vector<unique_ptr<Unit>> allies;
+    vector<unique_ptr<Unit>> enemies;
 
     void RemoveDeadUnits()
     {
         vector<pair<int, int>> tiles;
 
-        for(shared_ptr<Unit> u : allies)
+        for(auto const &u : allies)
         {
             if(u->shouldDie)
             {
                 tiles.push_back(pair<int, int>(u->col, u->row)); 
             }
         }
-        for(shared_ptr<Unit> u : enemies)
+        for(auto const &u : enemies)
         {
             if(u->shouldDie)
             {
@@ -285,8 +287,8 @@ struct Level
             }
         }
 
-        allies.erase(remove_if(allies.begin(), allies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), allies.end());
-        enemies.erase(remove_if(enemies.begin(), enemies.end(), [](shared_ptr<Unit> u) { return u->shouldDie; }), enemies.end());
+        allies.erase(remove_if(allies.begin(), allies.end(), [](auto const &u) { return u->shouldDie; }), allies.end());
+        enemies.erase(remove_if(enemies.begin(), enemies.end(), [](auto const &u) { return u->shouldDie; }), enemies.end());
 
         for(pair<int, int> tile : tiles)
         {
@@ -306,6 +308,10 @@ struct Cursor
     int selectedRow = -1;
     int sourceCol = -1; // Where the cursor was before choosing a target
     int sourceRow = -1;
+
+    int viewportSize = 8;
+    int viewportCol = 0;
+    int viewportRow = 0;
 
     SpriteSheet sheet;
 
@@ -442,13 +448,13 @@ int main(int argc, char *argv[])
     }
 
     // load data
-    vector<shared_ptr<Unit>> units = LoadCharacters("../data/units.txt");
-    shared_ptr<Level> level = LoadLevel("../data/l1.txt", units);
+    vector<unique_ptr<Unit>> units = LoadCharacters("../data/units.txt");
+    Level level = LoadLevel("../data/l1.txt", units);
     Cursor cursor(SpriteSheet(LoadTextureImage("../assets/sprites/cursor.png"), 32, ANIMATION_SPEED));
 
     // initial actor state
     InputState input;
-    InputHandler handler(&cursor, level->map);
+    InputHandler handler(&cursor, level.map);
     AI ai;
 
     // Initialize Menus
@@ -473,11 +479,11 @@ int main(int argc, char *argv[])
 // ====================== command phase ========================================
         if(GlobalTurnStart)
         {
-            for(shared_ptr<Unit> unit : level->enemies)
+            for(auto const &unit : level.enemies)
             {
                 unit->isExhausted = false;
             }
-            for(shared_ptr<Unit> unit : level->allies)
+            for(auto const &unit : level.allies)
             {
                 unit->isExhausted = false;
             }
@@ -489,7 +495,7 @@ int main(int argc, char *argv[])
         if(GlobalPlayerTurn)
         {
             handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level->map,
+            handler.UpdateCommands(&cursor, &level.map,
                                    &gameMenu, &unitMenu, 
                                    &unitInfo, &combatInfo);
         }
@@ -497,7 +503,7 @@ int main(int argc, char *argv[])
         {
             if(ai.shouldPlan)
             {
-                ai.Plan(&cursor, &level->map);
+                ai.Plan(&cursor, &level.map);
             }
             if(!(frameNumber % 10))
             {
@@ -509,21 +515,21 @@ int main(int argc, char *argv[])
 // ========================= update phase =======================================
         cursor.Update();
 
-        for(shared_ptr<Unit> unit : level->allies)
+        for(auto const &unit : level.allies)
         {
             unit->Update();
         }
-        for(shared_ptr<Unit> unit : level->enemies)
+        for(auto const &unit : level.enemies)
         {
             unit->Update();
         }
 
         // cleanup
-        level->RemoveDeadUnits();
+        level.RemoveDeadUnits();
 
 
 // ============================= render =========================================
-        Render(level->map, cursor, gameMenu, unitMenu, unitInfo, combatInfo);
+        Render(level.map, cursor, gameMenu, unitMenu, unitInfo, combatInfo);
 
 
 // =========================== v debug messages v ============================================

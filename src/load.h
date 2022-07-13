@@ -62,7 +62,7 @@ vector<string> split(const string &text, char sep) {
 }
 
 // loads a level from a file. returns a new tilemap.
-shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
+Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 {
     string line;
 	string type;
@@ -71,7 +71,7 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
 
 	int mapRow = 0;
 
-    shared_ptr<Level> level = make_shared<Level>();
+    Level level;
 
     ifstream fp;
     fp.open(filename_in);
@@ -93,13 +93,13 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
 						{
 							case(0):
 							{
-								level->map.tiles[col][mapRow].type = FLOOR;
-								level->map.tiles[col][mapRow].penalty = 1;
+								level.map.tiles[col][mapRow].type = FLOOR;
+								level.map.tiles[col][mapRow].penalty = 1;
 							} break;
 							case(1):
 							{
-								level->map.tiles[col][mapRow].type = WALL;
-								level->map.tiles[col][mapRow].penalty = 100;
+								level.map.tiles[col][mapRow].type = WALL;
+								level.map.tiles[col][mapRow].penalty = 100;
 							} break;
 							default:
 							{
@@ -110,36 +110,22 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
 				}
 				else if(type == "UNT")
 				{
-                    shared_ptr<Unit> unitBase = units[stoi(tokens[1])];
-                    // TODO: Figure out how to not do this. 
-                    shared_ptr<Unit> unitCopy = make_shared<Unit>(
-                                                                  unitBase->name,
-                                                                  SpriteSheet(LoadTextureImage(unitBase->sheet.texture.path), 32, ANIMATION_SPEED),
-                                                                  unitBase->id,
-                                                                  unitBase->isAlly,
-                                                                  unitBase->mov,
-                                                                  unitBase->hp,
-                                                                  unitBase->maxHp,
-                                                                  unitBase->minRange,
-                                                                  unitBase->maxRange,
-                                                                  unitBase->attack,
-                                                                  unitBase->defense,
-                                                                  unitBase->accuracy
-                                                                  );
+                    unique_ptr<Unit> unitCopy = make_unique<Unit>(*units[stoi(tokens[1])]);
                     int col = stoi(tokens[2]);
                     int row = stoi(tokens[3]);
                     unitCopy->col = col;
                     unitCopy->row = row;
                     if(unitCopy->isAlly)
                     {
-                        level->allies.push_back(unitCopy);
+                        level.allies.push_back(move(unitCopy));
+                        level.map.tiles[col][row].occupant = level.allies.back().get();
                     }
                     else
                     {
-                        level->enemies.push_back(unitCopy);
+                        level.enemies.push_back(move(unitCopy));
+                        level.map.tiles[col][row].occupant = level.enemies.back().get();
                     }
-					level->map.tiles[col][row].occupant = unitCopy.get();
-					level->map.tiles[col][row].occupied = true;
+					level.map.tiles[col][row].occupied = true;
 				}
             }
         }
@@ -154,14 +140,14 @@ shared_ptr<Level> LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &
 }
 
 // loads the characters for the game from a file. returns a vector of them.
-vector<shared_ptr<Unit>> LoadCharacters(string filename_in)
+vector<unique_ptr<Unit>> LoadCharacters(string filename_in)
 {
     string line;
 	string type;
 	string rest;
 	vector<string> tokens;
 
-	vector<shared_ptr<Unit>> units;
+	vector<unique_ptr<Unit>> units;
 
     ifstream fp;
     fp.open(filename_in);
@@ -177,7 +163,7 @@ vector<shared_ptr<Unit>> LoadCharacters(string filename_in)
 				if(type == "UNT")
 				{
 					tokens = split(rest, ' ');
-					units.push_back(make_shared<Unit>(
+					units.push_back(make_unique<Unit>(
 						tokens[0],									// name
 						SpriteSheet(LoadTextureImage("../assets/sprites/" + tokens[1]), 32, ANIMATION_SPEED), // path to texture
 						stoi(tokens[2]),							// id

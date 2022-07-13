@@ -52,6 +52,8 @@ public:
 			printf("Out of units! Transitioning...\n");
             cursor->col = 0;
             cursor->row = 0;
+            cursor->viewportCol = 0;
+            cursor->viewportRow = 0;
             GlobalAIState = ENEMY_TURN;
             GlobalPlayerTurn = true;
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
