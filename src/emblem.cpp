@@ -53,6 +53,8 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+#include <miniaudio.h>
+
 #include <iostream>
 #include <fstream>
 #include <memory>
