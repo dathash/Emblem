@@ -3,11 +3,12 @@ Alex Hartford
 
 A small turn-based strategy game in the vein of Fire Emblem.
 
-A learning project in Modern C++, including:
-- Smart Pointers
-- Command Pattern
-- OO (lite) design
-- As many pure functions as I can reasonably fit
+A learning project in Modern C++, with the goal of learning:
+- The Command Pattern
+- Functional Programming, where appropriate
+- Classes and Composition
+- Decoupling of responsibilities
+- Dealing with a larger codebase
 
 Credit to Bob Nystrom for the book <a href="https://gameprogrammingpatterns.com/">Game Programming Patterns</a>, 
 Omar Cornut for <a href="https://github.com/ocornut/imgui">Imgui</a>,
