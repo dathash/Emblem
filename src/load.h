@@ -85,9 +85,21 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
                 rest = line.substr(4);
 				tokens = split(rest, ' ');
 
-				if(type == "MAP")
+				if(type == "WDT")
 				{
-					for(int col = 0; col < MAP_SIZE; ++col)
+					level.map.width = stoi(rest);
+				}
+				else if(type == "HGT")
+				{
+					level.map.height = stoi(rest);
+				}
+				else if(type == "MST")
+				{
+					level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
+				}
+				else if(type == "MAP")
+				{
+					for(int col = 0; col < level.map.width; ++col)
 					{
 						switch(stoi(tokens[col]))
 						{

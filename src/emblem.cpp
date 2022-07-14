@@ -5,9 +5,6 @@
 
 /*
     TODO
-    REFACTOR
-        
-
     MVP
         Level Transitions / Win Condition
         Combat Scene animation
@@ -24,8 +21,13 @@
             healing?
             Ranged Attacks
 
-    BUGS
+		Refactor
+
+        Testing
+        
+        BUGS
         Combat Preview is wrong.
+        AI actions don't move the viewport.
 
 
     NICE
@@ -43,8 +45,6 @@
         Show Tile details and basic unit overview when hovering.
         Decide whether cancelling a selection should move your cursor back or not.
         Music (MiniAudio)
-
-        Figure out fps mystery
  */
 
 
@@ -81,7 +81,7 @@ using namespace std;
 // ========================= constants =====================================
 
 // low level
-#define TIME_STEP 16.666
+#define MS_PER_FRAME 16.666
 #define JOYSTICK_DEAD_ZONE 8000
 
 // rendering
@@ -91,9 +91,6 @@ using namespace std;
 
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
-
-// backend
-#define MAP_SIZE 10
 
 // animation
 #define ANIMATION_SPEED 10
@@ -255,9 +252,9 @@ struct Tile
 };
 struct Tilemap
 {
-    int width = 10;
-    int height = 10;
-    Tile tiles[MAP_SIZE][MAP_SIZE] = {};
+    int width = 6;
+    int height = 6;
+    vector<vector<Tile>> tiles;
     vector<pair<int, int>> accessible;
     vector<pair<int, int>> interactible;
 };
@@ -464,7 +461,6 @@ int main(int argc, char *argv[])
     CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
 
     // frame timer
-    real32 TargetMillisecondsPerFrame = 16.666;
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
     u64 frameNumber = 0;
@@ -536,9 +532,9 @@ int main(int argc, char *argv[])
         endTime = SDL_GetPerformanceCounter();
         ElapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency() * 1000.0f);
 
-		if(ElapsedMS < TargetMillisecondsPerFrame)
+		if(ElapsedMS < MS_PER_FRAME)
 		{
-			SDL_Delay((int)(TargetMillisecondsPerFrame - ElapsedMS));
+			SDL_Delay((int)(MS_PER_FRAME - ElapsedMS));
 		}
         startTime = SDL_GetPerformanceCounter();
         frameNumber++;

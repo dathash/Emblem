@@ -3,6 +3,10 @@ COM Program: Emblem
 COM File: Level 1
 COM Date: July 2022
 
+WDT 10
+HGT 10
+
+MST 0
 MAP 0 0 0 0 0 0 1 1 0 0
 MAP 0 1 1 1 1 0 0 1 0 0
 MAP 0 1 0 0 0 0 0 1 0 0

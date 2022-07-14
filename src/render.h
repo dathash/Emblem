@@ -73,22 +73,22 @@ Render(const Tilemap &map, const Cursor &cursor,
     SDL_RenderClear(GlobalRenderer);
 
 // ================================= render map tiles ============================================
-    for(int col = 0; col < cursor.viewportSize; ++col)
+    for(int col = cursor.viewportCol; col < cursor.viewportSize + cursor.viewportCol; ++col)
     {
-        for(int row = 0; row < cursor.viewportSize; ++row)
+        for(int row = cursor.viewportRow; row < cursor.viewportSize + cursor.viewportRow; ++row)
         {
-            int viewCol = col + cursor.viewportCol;
-            int viewRow = row + cursor.viewportRow;
-            const Tile *tileToRender = &map.tiles[viewCol][viewRow];
+            int screenCol = col - cursor.viewportCol;
+            int screenRow = row - cursor.viewportRow;
+            const Tile *tileToRender = &map.tiles[col][row];
             switch(tileToRender->type)
             {
                 case(FLOOR):
                 {
-                    RenderTile(col, row, floorColor);
+                    RenderTile(screenCol, screenRow, floorColor);
                 } break;
                 case(WALL):
                 {
-                    RenderTile(col, row, wallColor);
+                    RenderTile(screenCol, screenRow, wallColor);
                 } break;
 
                 default:
@@ -171,12 +171,13 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
 // ================================= render sprites ================================================
-    for(int col = 0; col < cursor.viewportSize; ++col)
+    for(int col = cursor.viewportCol; col < cursor.viewportSize + cursor.viewportCol; ++col)
     {
-        for(int row = 0; row < cursor.viewportSize; ++row)
+        for(int row = cursor.viewportRow; row < cursor.viewportSize + cursor.viewportRow; ++row)
         {
+            int screenCol = col - cursor.viewportCol;
+            int screenRow = row - cursor.viewportRow;
             const Tile *tileToRender = &map.tiles[col][row];
-
             if(tileToRender->occupied)
             {
                 if(tileToRender->occupant->isExhausted)
@@ -187,7 +188,7 @@ Render(const Tilemap &map, const Cursor &cursor,
                 {
                     SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, 255, 255, 255);
                 }
-                RenderSprite(col - cursor.viewportCol, row - cursor.viewportRow, tileToRender->occupant->sheet);
+                RenderSprite(screenCol, screenRow, tileToRender->occupant->sheet);
             }
         }
     }

@@ -68,12 +68,18 @@ vector<pair<int, int>>
 AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
 {
     vector<pair<int, int>> accessible;
-    int costs[MAP_SIZE][MAP_SIZE];
 
-    // initialize all elements to high value.
-    for(int i = 0; i < MAP_SIZE; ++i)
-        for(int j = 0; j < MAP_SIZE; ++j)
-            costs[i][j] = 100;
+	// initialize costs matrix
+	vector<vector<int>> costs;
+	for(int col = 0; col < map.width; ++col)
+	{
+        vector<int> currentColumn = {};
+        for(int row = 0; row < map.height; ++row)
+        {
+            currentColumn.push_back(100);
+        }
+        costs.push_back(currentColumn);
+	}
 
     int directionsRow[] = { -1,  0,  1,  0 };
     int directionsCol[] = {  0,  1,  0, -1 };
@@ -133,12 +139,18 @@ vector<pair<int, int>>
 InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
 {
     vector<pair<int, int>> interactible;
-    int costs[MAP_SIZE][MAP_SIZE];
 
-    // initialize all elements to high value.
-    for(int i = 0; i < MAP_SIZE; ++i)
-        for(int j = 0; j < MAP_SIZE; ++j)
-            costs[i][j] = 100;
+	// initialize costs matrix
+	vector<vector<int>> costs;
+	for(int col = 0; col < map.width; ++col)
+	{
+        vector<int> currentColumn = {};
+        for(int row = 0; row < map.height; ++row)
+        {
+            currentColumn.push_back(100);
+        }
+        costs.push_back(currentColumn);
+	}
 
     int directionsRow[] = { -1,  0,  1,  0 };
     int directionsCol[] = {  0,  1,  0, -1 };
@@ -188,9 +200,9 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
     int minDistance = 100;
     int distance = 0;
     Unit *result = nullptr;
-    for(int col = 0; col < MAP_SIZE; ++col)
+    for(int col = 0; col < map.width; ++col)
     {
-        for(int row = 0; row < MAP_SIZE; ++row)
+        for(int row = 0; row < map.height; ++row)
         {
             if(map.tiles[col][row].occupied && predicate(*map.tiles[col][row].occupant))
             {
