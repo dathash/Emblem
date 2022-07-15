@@ -6,6 +6,8 @@
 #ifndef LOAD_H
 #define LOAD_H
 
+#include <fstream>
+
 // ============================== loading data =================================
 // Loads a Texture displaying the given text in the given color.
 Texture
@@ -113,6 +115,11 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 								level.map.tiles[col][mapRow].type = WALL;
 								level.map.tiles[col][mapRow].penalty = 100;
 							} break;
+							case(2):
+							{
+								level.map.tiles[col][mapRow].type = OBJECTIVE;
+								level.map.tiles[col][mapRow].penalty = 1;
+							} break;
 							default:
 							{
 							} break;
@@ -144,7 +151,7 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
     }
     else
     {
-        cout << "LoadLevel ERROR\n";
+        printf("LoadLevel ERROR\n");
     }
     fp.close();
 
@@ -195,7 +202,7 @@ vector<unique_ptr<Unit>> LoadCharacters(string filename_in)
     }
     else
     {
-        cout << "LoadCharacters ERROR\n";
+        printf("LoadCharacters ERROR\n");
     }
     fp.close();
 

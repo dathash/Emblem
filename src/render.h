@@ -106,7 +106,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.accessible)
         {
-            if(WithinViewport(cursor, cell.first, cell.second))
+            if(cursor.WithinViewport(cell.first, cell.second))
             {
                 RenderTile(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
@@ -119,7 +119,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.accessible)
         {
-            if(WithinViewport(cursor, cell.first, cell.second))
+            if(cursor.WithinViewport(cell.first, cell.second))
             {
                 RenderTile(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
@@ -133,7 +133,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.interactible)
         {
-            if(WithinViewport(cursor, cell.first, cell.second))
+            if(cursor.WithinViewport(cell.first, cell.second))
             {
                 RenderTile(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
@@ -147,7 +147,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.interactible)
         {
-            if(WithinViewport(cursor, cell.first, cell.second))
+            if(cursor.WithinViewport(cell.first, cell.second))
             {
                 RenderTile(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
@@ -161,7 +161,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.accessible)
         {
-            if(WithinViewport(cursor, cell.first, cell.second))
+            if(cursor.WithinViewport(cell.first, cell.second))
             {
                 RenderTile(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 

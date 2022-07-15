@@ -6,21 +6,29 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
+// Rolls a d100. range: 00 to 99.
 int d100()
 {
     return rand() % 100;
 }
 
+// Determines what damage a hit will do.
+int CalculateDamage(int attack, int defense)
+{
+    return max(attack - defense, 0);
+}
+
+// Simulates a single combat between a unit and their enemy.
 void SimulateCombat(Unit *one, Unit *two)
 {
 	int damage;
-	int dist = Distance(*one, *two);
+	int dist = ManhattanDistance(*one, *two);
 	bool oneAttacking = dist >= one->minRange && dist <= one->maxRange; 
 	bool twoAttacking = dist >= two->minRange && dist <= two->maxRange; 
     // one -> two
 	if(oneAttacking)
 	{
-		damage = max(one->attack - two->defense, 0);
+		damage = CalculateDamage(one->attack, two->defense);
 		if(d100() < one->accuracy)
 		{
 			printf("SIMULATION | %d Damage!\n", damage);
@@ -41,10 +49,10 @@ void SimulateCombat(Unit *one, Unit *two)
 		}
 	}
 
-	if(twoAttacking)
+	if(twoAttacking && !two->shouldDie)
 	{
 		// two -> one
-		damage = max(two->attack - one->defense, 0);
+		damage = CalculateDamage(two->attack, one->defense);
 		if(d100() > two->accuracy)
 		{
 			printf("SIMULATION | %d Damage!\n", damage);

@@ -48,7 +48,7 @@ public:
         }
         else
         {
-            // TODO: Make this robust.
+            // TODO: Make this robust. Happens in some place.
 			printf("Out of units! Transitioning...\n");
             cursor->col = 0;
             cursor->row = 0;

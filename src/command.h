@@ -81,7 +81,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            MoveViewport(cursor, newCol, newRow);
+            cursor->MoveViewport(newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -186,7 +186,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            MoveViewport(cursor, newCol, newRow);
+            cursor->MoveViewport(newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -245,6 +245,19 @@ public:
 
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
+
+		// Move onto next level!
+		if(map->tiles[cursor->col][cursor->row].type == OBJECTIVE)
+		{
+			printf("Objective Reached. Onto the next level!\n");
+            GlobalNextLevel = true;
+            cursor->col = 0;
+            cursor->row = 0;
+            cursor->viewportCol = 0;
+            cursor->viewportRow = 0;
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            GlobalTurnStart = true;
+		}
     }
 
 private:
@@ -310,7 +323,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            MoveViewport(cursor, newCol, newRow);
+            cursor->MoveViewport(newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -357,7 +370,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            MoveViewport(cursor, newCol, newRow);
+            cursor->MoveViewport(newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -417,19 +430,7 @@ public:
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
 
-        combatInfo->UpdateTextTextures(
-								      {
-                                      cursor->selected->name,
-                                      "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
-                                      "Damage: " + to_string(cursor->selected->attack - cursor->targeted->defense),
-									  "Hit: " + to_string(cursor->selected->accuracy)
-                                      },
-									  {
-                                      cursor->targeted->name,
-                                      "Health: " + to_string(cursor->targeted->hp) + "/" + to_string(cursor->targeted->maxHp),
-                                      "Damage: " + to_string(cursor->targeted->attack - cursor->selected->defense),
-									  "Hit: " + to_string(cursor->targeted->accuracy)
-                                      });                                        
+        combatInfo->UpdatePreview(*cursor->selected, *cursor->targeted);
 
         // change state
         GlobalInterfaceState = PREVIEW_ATTACK;
@@ -454,19 +455,7 @@ public:
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
 
-        combatInfo->UpdateTextTextures(
-								      {
-                                      cursor->selected->name,
-                                      "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
-                                      "Healing: " + to_string(cursor->selected->healing),
-									  "Hit: -"
-                                      },
-									  {
-                                      cursor->targeted->name,
-                                      "Health: " + to_string(cursor->targeted->hp) + "/" + to_string(cursor->targeted->maxHp),
-                                      "Healing: -",
-									  "Hit: -"
-                                      });                                        
+        combatInfo->UpdatePreview(*cursor->selected, *cursor->targeted);
 
         // change state
         GlobalInterfaceState = PREVIEW_HEALING;
@@ -1166,7 +1155,7 @@ private:
     shared_ptr<Command> buttonA;
     shared_ptr<Command> buttonB;
 
-    queue<shared_ptr<Command>> commandQueue;
+    queue<shared_ptr<Command>> commandQueue = {};
 };
 
 

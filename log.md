@@ -1,10 +1,24 @@
-# Hiring Log
+# Emblem Log
 # Summer 2022
 # Alex Hartford
 
  Plan
 ======
 Build a fun little game!
+
+ Notes
+=======
+July 15
+	I'm finding that there are many easy tasks, which are not essential, which I love to do, and few very difficult tasks,
+	which are essential, which I do not want to do. It is as though the force of gravity pulls me down, away from the work
+	that truly needs doing.
+
+	Also of note is that refactoring is pretty enjoyable, especially when I write decent code. Maybe it falls into that
+	category of easy tasks above, but it feels beneficial in some way.
+	
+	Testing, however, seems to have very little import. I will try some more, but it has some crucial flaws.
+	To test the important parts of the system is difficult, and to test the trivial parts of the system is easy.
+	Must reconcile these differences.
 
  Log
 =====
@@ -17,9 +31,7 @@ Build a fun little game!
 > July 8  | 6h  | 3100		  | Dropped tween system, added some rudimentary AI.
 > July 9  | 3h  | 3300		  | Finished rudimentary AI.
 > July 12 | 3h  | 3000		  | Big refactor! Feels a lot better now.
+> July 14 | 2h  | 3100		  | Worked a bit on refining interfaces.
+> July 15 | 
 
-> Total	  | 49h
-
-
- Notes
-=======
+> Total	  | 51h

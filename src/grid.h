@@ -15,38 +15,6 @@ IsValidBoundsPosition(int mapWidth, int mapHeight, int col, int row)
 			row >= 0 && row < mapHeight);
 }
 
-bool
-WithinViewport(const Cursor &cursor, int col, int row)
-{
-    return (col < cursor.viewportSize + cursor.viewportCol &&
-            col >= cursor.viewportCol &&
-            row < cursor.viewportSize + cursor.viewportRow &&
-            row >= cursor.viewportRow);
-}
-
-// moves the cursor's viewport so that the given tile is on screen.
-void
-MoveViewport(Cursor *cursor, int col, int row)
-{
-    if(col >= cursor->viewportSize + cursor->viewportCol)
-    {
-        ++cursor->viewportCol;
-    }
-    else if(col < cursor->viewportCol)
-    {
-        --cursor->viewportCol;
-    }
-    else if(row >= cursor->viewportSize + cursor->viewportRow)
-    {
-        ++cursor->viewportRow;
-    }
-    else if(row < cursor->viewportRow)
-    {
-        --cursor->viewportRow;
-    }
-}
-
-
 // returns true if a given pair is in a vector of pairs.
 bool
 VectorHasElement(const pair<int, int> &pair_in, const vector<pair<int, int>> &vector_in)
@@ -258,7 +226,7 @@ Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 
 
 // Finds the manhattan distance between two units.
-int Distance(const Unit &one, const Unit &two)
+int ManhattanDistance(const Unit &one, const Unit &two)
 {
     return (abs(one.col - two.col) + abs(one.row - two.row));
 }
