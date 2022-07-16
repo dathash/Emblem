@@ -29,7 +29,6 @@ enum InterfaceState
     GAME_MENU_ROOT,
     GAME_MENU_OUTLOOK,
     GAME_MENU_OPTIONS,
-    GAME_MENU_END_TURN,
 
     UNIT_MENU_ROOT,
     UNIT_INFO,
@@ -62,11 +61,13 @@ public:
 class MoveCommand : public Command
 {
 public:
-    MoveCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    MoveCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in,
+                TileInfo *tileInfo_in)
     : cursor(cursor_in),
       col(col_in),
       row(row_in),
-      map(map_in)
+      map(map_in),
+      tileInfo(tileInfo_in)
     {}
 
     virtual void Execute()
@@ -82,6 +83,13 @@ public:
 
             // For rendering
             cursor->MoveViewport(newCol, newRow);
+
+            if(map.tiles[newCol][newRow].occupied)
+            {
+                tileInfo->UpdateTextTextures({map.tiles[newCol][newRow].occupant->name});
+                tileInfo->hp = map.tiles[newCol][newRow].occupant->hp;
+                tileInfo->maxHp = map.tiles[newCol][newRow].occupant->maxHp;
+            }
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -108,6 +116,7 @@ private:
     int col;
     int row;
     const Tilemap &map;
+    TileInfo *tileInfo;
 };
 
 
@@ -246,18 +255,13 @@ public:
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
 
-		// Move onto next level!
-		if(map->tiles[cursor->col][cursor->row].type == OBJECTIVE)
-		{
-			printf("Objective Reached. Onto the next level!\n");
+        // Move onto next level!
+        if(map->tiles[cursor->col][cursor->row].type == OBJECTIVE)
+        {
+            printf("Objective Reached. Onto the next level!\n");
             GlobalNextLevel = true;
-            cursor->col = 0;
-            cursor->row = 0;
-            cursor->viewportCol = 0;
-            cursor->viewportRow = 0;
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
             GlobalTurnStart = true;
-		}
+        }
     }
 
 private:
@@ -315,7 +319,7 @@ public:
     {
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
-		
+        
         if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
             // move cursor
@@ -422,7 +426,7 @@ public:
     InitiateAttackCommand(Cursor *cursor_in, const Tilemap &map_in, CombatInfo *combatInfo_in)
     : cursor(cursor_in),
       map(map_in),
-	  combatInfo(combatInfo_in)
+      combatInfo(combatInfo_in)
     {}
 
 
@@ -439,7 +443,7 @@ public:
 private:
     Cursor *cursor;
     const Tilemap &map;
-	CombatInfo *combatInfo;
+    CombatInfo *combatInfo;
 };
 
 class InitiateHealingCommand : public Command
@@ -448,7 +452,7 @@ public:
     InitiateHealingCommand(Cursor *cursor_in, const Tilemap &map_in, CombatInfo *combatInfo_in)
     : cursor(cursor_in),
       map(map_in),
-	  combatInfo(combatInfo_in)
+      combatInfo(combatInfo_in)
     {}
 
     virtual void Execute()
@@ -464,7 +468,7 @@ public:
 private:
     Cursor *cursor;
     const Tilemap &map;
-	CombatInfo *combatInfo;
+    CombatInfo *combatInfo;
 };
 
 class AttackCommand : public Command
@@ -598,7 +602,7 @@ public:
                                       "Range: " + to_string(cursor->selected->minRange) + "-" + to_string(cursor->selected->maxRange),
                                       "Accuracy: " + to_string(cursor->selected->accuracy)
                                       });                                        
-	}
+    }
 
 private:
     Cursor *cursor;
@@ -876,12 +880,12 @@ public:
         return nullptr;
     }
 
-    InputHandler(Cursor *cursor, const Tilemap &map)
+    InputHandler(Cursor *cursor, const Tilemap &map, TileInfo *tileInfo)
     {
-        BindUp(make_shared<MoveCommand>(cursor, 0, -1, map));
-        BindDown(make_shared<MoveCommand>(cursor, 0, 1, map));
-        BindLeft(make_shared<MoveCommand>(cursor, -1, 0, map));
-        BindRight(make_shared<MoveCommand>(cursor, 1, 0, map));
+        BindUp(make_shared<MoveCommand>(cursor, 0, -1, map, tileInfo));
+        BindDown(make_shared<MoveCommand>(cursor, 0, 1, map, tileInfo));
+        BindLeft(make_shared<MoveCommand>(cursor, -1, 0, map, tileInfo));
+        BindRight(make_shared<MoveCommand>(cursor, 1, 0, map, tileInfo));
         BindA(make_shared<OpenGameMenuCommand>());
         BindB(make_shared<NullCommand>());
     }
@@ -928,40 +932,41 @@ public:
     }
 
     // updates what the user can do with their buttons.
-	// contains some state: the minimum amount.
+    // contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map, 
                         Menu *gameMenu, Menu *unitMenu,
-                        UnitInfo *unitInfo, CombatInfo *combatInfo)
+                        UnitInfo *unitInfo, TileInfo *tileInfo,
+                        CombatInfo *combatInfo)
     {
         switch(GlobalInterfaceState)
         {
             case(NEUTRAL_OVER_GROUND):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_ENEMY):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
                 BindA(make_shared<SelectEnemyCommand>(cursor, map, unitInfo));
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_UNIT):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
                 BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
             } break;
@@ -1091,15 +1096,6 @@ public:
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
-            case(GAME_MENU_END_TURN):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
-            } break;
 
 
             case(UNIT_MENU_ROOT):
@@ -1145,6 +1141,11 @@ public:
                 assert(!"Unimplemented GlobalInterfaceState!\n");
             } break;
         }
+    }
+
+    void clearQueue()
+    {
+        commandQueue = {};
     }
 
 private:

@@ -6,8 +6,8 @@
 /*
     TODO
     MVP
-        Combat Scene animation
         Show Tile details and basic unit overview when hovering.
+        Combat Scene animation
 
         Design
             Three main Units
@@ -26,8 +26,8 @@
         AI actions don't move the viewport.
 
     NICE
-		Testing
-		Making more Pure Functions where I can.
+        Testing
+        Making more Pure Functions where I can.
         Level Transitions/Win Screen
         Attacks locking onto first target.
         Cannot attack if no targets
@@ -63,7 +63,6 @@ typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
-typedef int32 bool32;
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -111,21 +110,21 @@ int main(int argc, char *argv[])
     Level level = LoadLevel(levels[GlobalLevelNumber], units);
     Cursor cursor(SpriteSheet(LoadTextureImage("../assets/sprites/cursor.png"), 32, ANIMATION_SPEED));
 
-    // initial actor state
-    InputState input = {};
-    InputHandler handler(&cursor, level.map);
-    AI ai;
-
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(4, 0, {"Info", "Attack", "Heal", "Wait"});
     UnitInfo unitInfo(1, {"Placeholder"});
+    TileInfo tileInfo(1, {"Placeholder"});
     CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
+
+    // initial actor state
+    InputState input = {};
+    InputHandler handler(&cursor, level.map, &tileInfo);
+    AI ai;
 
     // frame timer
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
-    u64 frameNumber = 0;
     real32 elapsedMS = 0.0f;
 
 // ========================= game loop =========================================
@@ -145,8 +144,15 @@ int main(int argc, char *argv[])
             {
                 unit->isExhausted = false;
             }
+            cursor.col = 0;
+            cursor.row = 0;
+            cursor.viewportCol = 0;
+            cursor.viewportRow = 0;
+            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+
             GlobalTurnStart = false;
-            ai.commandQueue = {};
+            ai.clearQueue();
+            handler.clearQueue();
         }
 
 
@@ -155,7 +161,8 @@ int main(int argc, char *argv[])
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
                                    &gameMenu, &unitMenu, 
-                                   &unitInfo, &combatInfo);
+                                   &unitInfo, &tileInfo,
+                                   &combatInfo);
         }
         else
         {
@@ -163,7 +170,7 @@ int main(int argc, char *argv[])
             {
                 ai.Plan(&cursor, &level.map);
             }
-            if(!(frameNumber % 10))
+            if(!(GlobalFrameNumber % 10))
             {
                 ai.Update();
             }
@@ -188,25 +195,25 @@ int main(int argc, char *argv[])
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
-			GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? GlobalLevelNumber + 1 : 0;
+            GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? GlobalLevelNumber + 1 : 0;
             level = LoadLevel(levels[GlobalLevelNumber], units);
         }
 
 
 // ============================= render =========================================
-        Render(level.map, cursor, gameMenu, unitMenu, unitInfo, combatInfo);
+        Render(level.map, cursor, gameMenu, unitMenu, unitInfo, tileInfo, combatInfo);
 
 
 // =========================== v debug messages v ============================================
         endTime = SDL_GetPerformanceCounter();
         elapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency() * 1000.0f);
 
-		if(elapsedMS < MS_PER_FRAME)
-		{
-			SDL_Delay((int)(MS_PER_FRAME - elapsedMS));
-		}
+        if(elapsedMS < MS_PER_FRAME)
+        {
+            SDL_Delay((int)(MS_PER_FRAME - elapsedMS));
+        }
         startTime = SDL_GetPerformanceCounter();
-        frameNumber++;
+        GlobalFrameNumber++;
     }
     Close();
     return 0;

@@ -98,6 +98,13 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 				else if(type == "MST")
 				{
 					level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
+                    for(int col = 0; col < level.map.width; ++col)
+                    {
+                        for(int row = 0; row < level.map.height; ++row)
+                        {
+                            level.map.tiles[col][row] = {};
+                        }
+                    }
 				}
 				else if(type == "MAP")
 				{

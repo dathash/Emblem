@@ -50,13 +50,8 @@ public:
         {
             // TODO: Make this robust. Happens in some place.
 			printf("Out of units! Transitioning...\n");
-            cursor->col = 0;
-            cursor->row = 0;
-            cursor->viewportCol = 0;
-            cursor->viewportRow = 0;
             GlobalAIState = ENEMY_TURN;
             GlobalPlayerTurn = true;
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
             GlobalTurnStart = true;
         }
     }
@@ -233,7 +228,6 @@ private:
 // ============================== struct ====================================
 struct AI
 {
-    queue<shared_ptr<Command>> commandQueue;
     bool shouldPlan = true;
 
     // Fills the command queue with the current plan.
@@ -249,7 +243,6 @@ struct AI
         commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map));
     }
 
-
     void Update()
     {
         if(!commandQueue.empty())
@@ -262,6 +255,14 @@ struct AI
             shouldPlan = true;
         }
     }
+
+    void clearQueue()
+    {
+        commandQueue = {};
+    }
+
+private:
+    queue<shared_ptr<Command>> commandQueue;
 };
 
 #endif

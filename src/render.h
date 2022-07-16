@@ -44,32 +44,65 @@ RenderText(const Texture &texture, int x, int y)
     SDL_RenderCopy(GlobalRenderer, texture.sdlTexture, NULL, &destination);
 }
 
+// Renders a Health Bar
+void
+RenderHealthBar(int x, int y, int hp, int maxHp)
+{
+    SDL_Rect healthRect;
+    for(int i = 0; i < maxHp; ++i)
+    {
+        SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
+        if(i < hp)
+        {
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r, healthBarColor.g, healthBarColor.b, healthBarColor.a);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarLostColor.r, healthBarLostColor.g, healthBarLostColor.b, healthBarLostColor.a);
+        }
+        SDL_RenderFillRect(GlobalRenderer, &healthRect);
+        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_RenderDrawRect(GlobalRenderer, &healthRect);
+    }
+}
+
+// Renders a Health Bar, with a damage amount taken out of it.
+void
+RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg)
+{
+    SDL_Rect healthRect;
+    for(int i = 0; i < maxHp; ++i)
+    {
+        SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
+        if(i > hp - Dmg)
+        {
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r % GlobalFrameNumber, healthBarColor.g % GlobalFrameNumber, healthBarColor.b % GlobalFrameNumber, healthBarColor.a % GlobalFrameNumber);
+        }
+        else if(i < hp)
+        {
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r, healthBarColor.g, healthBarColor.b, healthBarColor.a);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarLostColor.r, healthBarLostColor.g, healthBarLostColor.b, healthBarLostColor.a);
+        }
+        SDL_RenderFillRect(GlobalRenderer, &healthRect);
+        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_RenderDrawRect(GlobalRenderer, &healthRect);
+    }
+}
+
+
 // Renders the scene from the given game state.
 void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu,
        const UnitInfo &unitInfo,
+       const TileInfo &tileInfo,
        const CombatInfo &combatInfo)
 {
-    // Tiles
-    const SDL_Color floorColor = {255, 255, 255, 255};
-    const SDL_Color wallColor = {50, 50, 50, 255};
-
-    // Overlays
-    const SDL_Color moveColor = {0, 150, 0, 100};
-    const SDL_Color aiMoveColor = {150, 0, 0, 100};
-    const SDL_Color attackColor = {250, 0, 0, 100};
-    const SDL_Color healColor = {0, 255, 0, 100};
-
-    // UI
-    const SDL_Color uiColor = {60, 60, 150, 250};
-    const SDL_Color enemyColor = {150, 60, 30, 250};
-    const SDL_Color uiTextColor = {255, 255, 255, 255};
-    const SDL_Color uiSelectorColor = {50, 50, 50, 100};
-
-
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(GlobalRenderer, 200, 200, 0, 255);
+    SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     SDL_RenderClear(GlobalRenderer);
 
 // ================================= render map tiles ============================================
@@ -199,52 +232,32 @@ Render(const Tilemap &map, const Cursor &cursor,
 
 
 // ================================= render ui elements ===========================================
-// ==================================== menus =====================================================
-    if(GlobalInterfaceState == GAME_MENU_ROOT)
+    // Tile Info
+    if(GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
+       GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
+       GlobalInterfaceState == SELECTED_OVER_ALLY ||
+       GlobalInterfaceState == SELECTED_OVER_ENEMY ||
+       GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == GAME_MENU_ROOT ||
+       GlobalInterfaceState == UNIT_MENU_ROOT)
     {
-        for(int i = 0; i < gameMenu.rows; ++i)
+        for(int i = 0; i < tileInfo.rows; ++i)
         {
-            SDL_Rect menuRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect infoRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_SetRenderDrawColor(GlobalRenderer, uiAltColor.r, uiAltColor.g, uiAltColor.b, uiAltColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &infoRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+            SDL_RenderDrawRect(GlobalRenderer, &infoRect);
 
-            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &menuRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
-            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
-
-            RenderText(gameMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+            RenderText(tileInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
-
-        SDL_Rect menuSelectorRect = {TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
-        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
-        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
+        RenderHealthBar(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp);
     }
 
-    else if(GlobalInterfaceState == UNIT_MENU_ROOT)
-    {
-        for(int i = 0; i < unitMenu.rows; ++i)
-        {
-            SDL_Rect menuRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &menuRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
-            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
-
-            RenderText(unitMenu.optionTextTextures[i], menuRect.x, menuRect.y);
-        }
-
-        SDL_Rect menuSelectorRect = {TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
-        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
-        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
-    }
-
-// ================================== info pages ===============================================
-    else if(GlobalInterfaceState == UNIT_INFO ||
-            GlobalInterfaceState == ENEMY_INFO)
+    // Unit Info
+    if(GlobalInterfaceState == UNIT_INFO ||
+       GlobalInterfaceState == ENEMY_INFO)
     {
         for(int i = 0; i < unitInfo.rows; ++i)
         {
@@ -259,14 +272,16 @@ Render(const Tilemap &map, const Cursor &cursor,
                 SDL_SetRenderDrawColor(GlobalRenderer, enemyColor.r, enemyColor.g, enemyColor.b, enemyColor.a);
             }
             SDL_RenderFillRect(GlobalRenderer, &infoRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
             SDL_RenderDrawRect(GlobalRenderer, &infoRect);
 
             RenderText(unitInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
     }
-    else if(GlobalInterfaceState == PREVIEW_ATTACK ||
-            GlobalInterfaceState == PREVIEW_HEALING)
+    
+    // Combat Preview
+    if(GlobalInterfaceState == PREVIEW_ATTACK ||
+       GlobalInterfaceState == PREVIEW_HEALING)
     {
         for(int i = 0; i < combatInfo.rows; ++i)
         {
@@ -278,15 +293,65 @@ Render(const Tilemap &map, const Cursor &cursor,
             SDL_RenderFillRect(GlobalRenderer, &sourceRect);
             SDL_SetRenderDrawColor(GlobalRenderer, enemyColor.r, enemyColor.g, enemyColor.b, enemyColor.a);
             SDL_RenderFillRect(GlobalRenderer, &targetRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
             SDL_RenderDrawRect(GlobalRenderer, &sourceRect);
             SDL_RenderDrawRect(GlobalRenderer, &targetRect);
 
             RenderText(combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
             RenderText(combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
         }
+        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.unitDamage);
+        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.enemyDamage);
+                                                      // 5 is for alignment
     }
 
+
+// ==================================== menus =====================================================
+    // Game Menu
+    if(GlobalInterfaceState == GAME_MENU_ROOT)
+    {
+        for(int i = 0; i < gameMenu.rows; ++i)
+        {
+            SDL_Rect menuRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &menuRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
+
+            RenderText(gameMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+        }
+
+        SDL_Rect menuSelectorRect = {TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
+        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
+        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
+    }
+
+    // Unit Menu
+    if(GlobalInterfaceState == UNIT_MENU_ROOT)
+    {
+        for(int i = 0; i < unitMenu.rows; ++i)
+        {
+            SDL_Rect menuRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &menuRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
+
+            RenderText(unitMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+        }
+
+        SDL_Rect menuSelectorRect = {TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
+        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
+        SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
+        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
+    }
+
+    // Dev Gui
     if(GlobalGuiMode)
     {
         //ImGui_ImplSDLRenderer_NewFrame();

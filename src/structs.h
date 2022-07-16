@@ -267,10 +267,39 @@ struct Menu
         }
     }
 };
-struct UnitInfo
+struct TileInfo
 {
     u8 rows;
 
+    vector<Texture> infoTextTextures;
+
+    int hp = 5;
+    int maxHp = 10;
+
+    TileInfo(u8 rows_in, vector<string> info_in)
+    : rows(rows_in)
+    {
+        for(string s : info_in)
+        {
+            infoTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+        }
+    }
+
+    void UpdateTextTextures(vector<string> info_in)
+    {
+        infoTextTextures.clear();
+        int newRows = 0;
+        for(string s : info_in)
+        {
+            infoTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+            ++newRows;
+        }
+        this->rows = newRows;
+    }
+};
+struct UnitInfo
+{
+    u8 rows;
     vector<Texture> infoTextTextures;
 
     UnitInfo(u8 rows_in, vector<string> info_in)
@@ -301,6 +330,21 @@ struct CombatInfo
     vector<Texture> sourceTextTextures;
     vector<Texture> targetTextTextures;
 
+    int unitHp = 5;
+    int unitMaxHp = 10;
+    int enemyHp = 5;
+    int enemyMaxHp = 10;
+
+    int unitDamage = 0;
+    int enemyDamage = 0;
+
+    // TODO: Remove!!!
+    // Determines what damage a hit will do.
+    int CalculateDamage(int attack, int defense)
+    {
+        return max(attack - defense, 0);
+    }
+
     CombatInfo(u8 rows_in, vector<string> sourceInfo_in, vector<string> targetInfo_in)
     : rows(rows_in)
     {
@@ -317,22 +361,28 @@ struct CombatInfo
 
     void UpdatePreview(Unit &unit, Unit &enemy)
     {
+        unitHp = unit.hp;
+        unitMaxHp = unit.maxHp;
+        enemyHp = enemy.hp;
+        enemyMaxHp = enemy.maxHp;
+
+        unitDamage = CalculateDamage(unit.attack, enemy.defense);
+        enemyDamage = CalculateDamage(enemy.attack, unit.defense);
+
         vector<string> unitInfo =
         {
         unit.name,
-        "Health: " + to_string(unit.hp) + "/" + to_string(unit.maxHp),
+        "N/A",
         "Hit: " + to_string(unit.accuracy),
-        "Atk: " + to_string(unit.attack),
-        "Def: " + to_string(unit.defense)
+        "Dmg: " + to_string(unitDamage),
         };
 
         vector<string> enemyInfo =
         {
         enemy.name,
-        "Health: " + to_string(enemy.hp) + "/" + to_string(enemy.maxHp),
+        "N/A",
         "Hit: " + to_string(enemy.accuracy),
-        "Atk: " + to_string(enemy.attack),
-        "Def: " + to_string(enemy.defense)
+        "Dmg: " + to_string(enemyDamage),
         };
 
         sourceTextTextures.clear();
