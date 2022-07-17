@@ -141,6 +141,7 @@ struct Tile
 {
     int type = 0;
     int penalty = 1;
+    int avoid = 0;
     bool occupied = false;
     Unit *occupant = nullptr;
 };
@@ -371,18 +372,18 @@ struct CombatInfo
 
         vector<string> unitInfo =
         {
-        unit.name,
-        "N/A",
-        "Hit: " + to_string(unit.accuracy),
-        "Dmg: " + to_string(unitDamage),
+            unit.name,
+            "N/A",
+            "Hit: " + to_string(unit.accuracy),
+            "Dmg: " + to_string(unitDamage),
         };
 
         vector<string> enemyInfo =
         {
-        enemy.name,
-        "N/A",
-        "Hit: " + to_string(enemy.accuracy),
-        "Dmg: " + to_string(enemyDamage),
+            enemy.name,
+            "N/A",
+            "Hit: " + to_string(enemy.accuracy),
+            "Dmg: " + to_string(enemyDamage),
         };
 
         sourceTextTextures.clear();

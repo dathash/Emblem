@@ -31,6 +31,7 @@
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static TTF_Font *GlobalFont = nullptr;
+static ma_engine GlobalMusicEngine;
 static bool GlobalRunning = false;
 static u64 GlobalFrameNumber = 0;
 static int GlobalLevelNumber = 0;
@@ -55,19 +56,18 @@ const SDL_Color attackColor = {250, 0, 0, 100};
 const SDL_Color healColor = {0, 255, 0, 100};
 
 // UI
-const SDL_Color backgroundColor = {200, 200, 0, 255};
+const SDL_Color backgroundColor = {200, 200, 10, 255};
 const SDL_Color uiColor = {60, 60, 150, 255};
-const SDL_Color outlineColor = {0, 0, 0, 255};
+const SDL_Color outlineColor = {10, 10, 10, 255};
 const SDL_Color uiAltColor = {60, 100, 30, 255};
 const SDL_Color enemyColor = {150, 60, 30, 255};
 const SDL_Color uiTextColor = {255, 255, 255, 255};
 const SDL_Color uiSelectorColor = {50, 50, 50, 100};
 
 // Combat
-const SDL_Color healthBarColor = {0, 150, 0, 255};
-const SDL_Color healthBarLostColor = {0, 70, 0, 255};
-
-
+const SDL_Color healthBarColor = {10, 150, 10, 255};
+const SDL_Color healthBarLosingColor = {10, 70, 10, 255};
+const SDL_Color healthBarLostColor = {10, 10, 10, 255};
 
 
 #endif

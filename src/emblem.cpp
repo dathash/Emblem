@@ -6,8 +6,8 @@
 /*
     TODO
     MVP
-        Show Tile details and basic unit overview when hovering.
         Combat Scene animation
+        Attacks locking onto first target.
 
         Design
             Three main Units
@@ -22,27 +22,16 @@
             Ranged Attacks
         
         BUGS
-        Combat Preview is wrong.
         AI actions don't move the viewport.
 
     NICE
         Testing
-        Making more Pure Functions where I can.
         Level Transitions/Win Screen
-        Attacks locking onto first target.
-        Cannot attack if no targets
-        Statistics determine things
-        Magic / Res
+        Cannot attack or heal if no targets
         Animation
             Placing Unit moves them to that square (A-star)
             Generate Arrow while selecting?
-        Smooth Interaction Syntax (Just click on enemy to attack them)
         Draw Attack range squares
-
-
-    BACKLOG
-        Decide whether cancelling a selection should move your cursor back or not.
-        Music (MiniAudio)
  */
 
 
@@ -51,6 +40,7 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+#define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 
 #include <memory>
@@ -126,6 +116,8 @@ int main(int argc, char *argv[])
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
     real32 elapsedMS = 0.0f;
+
+    ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/bach.mp3", NULL);
 
 // ========================= game loop =========================================
     GlobalRunning = true;

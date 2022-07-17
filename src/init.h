@@ -39,6 +39,10 @@ Initialize()
                         int imgFlags = IMG_INIT_PNG;
                         if(IMG_Init(imgFlags) & imgFlags)
                         {
+                            if(ma_engine_init(NULL, &GlobalMusicEngine) == MA_SUCCESS) {
+                                return true;
+                            }
+                            assert(!"ERROR: MINIAUDIO\n");
                             // Setup Dear ImGui context
                             //IMGUI_CHECKVERSION();
                             //ImGui::CreateContext();
@@ -52,8 +56,6 @@ Initialize()
                             // Setup Platform/Renderer backends
                             //ImGui_ImplSDL2_InitForSDLRenderer(GlobalWindow, GlobalRenderer);
                             //ImGui_ImplSDLRenderer_Init(GlobalRenderer);
-
-                            return true;
                         }
                         assert(!"ERROR: IMG\n");
                     }
@@ -96,6 +98,8 @@ void Close()
     //ImGui_ImplSDLRenderer_Shutdown();
     //ImGui_ImplSDL2_Shutdown();
     //ImGui::DestroyContext();
+
+    ma_engine_uninit(&GlobalMusicEngine);
 
     TTF_CloseFont(GlobalFont);
     SDL_DestroyRenderer(GlobalRenderer);

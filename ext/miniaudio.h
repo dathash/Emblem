@@ -86882,7 +86882,7 @@ static type* drflac__full_read_and_close_ ## extension (drflac* pFlac, unsigned 
                                                                                                                                                                     \
     if (sampleRateOut) *sampleRateOut = pFlac->sampleRate;                                                                                                          \
     if (channelsOut) *channelsOut = pFlac->channels;                                                                                                                \
-    if (totalPCMFrameCountOut) *totalPCMFrameCountOut = totalPCMFra[OmeCount;                                                                                         \
+    if (totalPCMFrameCountOut) *totalPCMFrameCountOut = totalPCMFrameCount;                                                                                         \
                                                                                                                                                                     \
     drflac_close(pFlac);                                                                                                                                            \
     return pSampleData;                                                                                                                                             \

@@ -33,6 +33,6 @@ July 15
 > July 12 | 3h  | 3000		  | Big refactor! Feels a lot better now.
 > July 14 | 2h  | 3100		  | Worked a bit on refining interfaces.
 > July 15 | 3h  | 3500		  | Refactoring and added Health Bar
-> July 16 | 
+> July 16 | 2h  | 3500 		  | Added Miniaudio
 
-> Total	  | 51h
+> Total	  | 56h

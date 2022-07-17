@@ -1,5 +1,5 @@
 emblem:
-	clang++ ../src/emblem.cpp -g -O0 -std=c++14 -o em -I/opt/homebrew/include/SDL2 -I../ext/ -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
+	clang++ ../src/emblem.cpp -g -Wno-deprecated-declarations -O0 -std=c++14 -o em -I../ext/ -I/opt/homebrew/include/SDL2 -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
 
 test:
 	clang++ ../src/test.cpp -g -O0 -std=c++14 -o t -I/opt/homebrew/include/SDL2 -I../ext/ -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf

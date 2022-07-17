@@ -86,7 +86,9 @@ public:
 
             if(map.tiles[newCol][newRow].occupied)
             {
-                tileInfo->UpdateTextTextures({map.tiles[newCol][newRow].occupant->name});
+                tileInfo->UpdateTextTextures({
+                            map.tiles[newCol][newRow].occupant->name,
+                            "Tile AVO: " + to_string(map.tiles[newCol][newRow].avoid)});
                 tileInfo->hp = map.tiles[newCol][newRow].occupant->hp;
                 tileInfo->maxHp = map.tiles[newCol][newRow].occupant->maxHp;
             }
@@ -1158,6 +1160,5 @@ private:
 
     queue<shared_ptr<Command>> commandQueue = {};
 };
-
 
 #endif

@@ -74,13 +74,13 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg)
     for(int i = 0; i < maxHp; ++i)
     {
         SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
-        if(i > hp - Dmg)
+        if(i < hp - Dmg)
         {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r % GlobalFrameNumber, healthBarColor.g % GlobalFrameNumber, healthBarColor.b % GlobalFrameNumber, healthBarColor.a % GlobalFrameNumber);
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r, healthBarColor.g, healthBarColor.b, healthBarColor.a);
         }
         else if(i < hp)
         {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r, healthBarColor.g, healthBarColor.b, healthBarColor.a);
+            SDL_SetRenderDrawColor(GlobalRenderer, healthBarLosingColor.r, healthBarLosingColor.g, healthBarLosingColor.b, healthBarLosingColor.a);
         }
         else
         {
@@ -252,7 +252,8 @@ Render(const Tilemap &map, const Cursor &cursor,
 
             RenderText(tileInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
-        RenderHealthBar(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp);
+        RenderHealthBar(TILE_SIZE * cursor.viewportSize, 2 * MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp);
+                                                      // 2 is for alignment
     }
 
     // Unit Info
@@ -300,8 +301,8 @@ Render(const Tilemap &map, const Cursor &cursor,
             RenderText(combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
             RenderText(combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
         }
-        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.unitDamage);
-        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.enemyDamage);
+        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage);
+        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage);
                                                       // 5 is for alignment
     }
 
