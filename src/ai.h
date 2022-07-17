@@ -203,9 +203,13 @@ public:
         cursor->targeted = FindVictim(*cursor, *map);
         if(cursor->targeted)
         {
+            int dist = ManhattanDistance(*cursor->selected, *cursor->targeted);
+            bool oneAttacking = dist >= cursor->selected->minRange && dist <= cursor->selected->maxRange; 
+            bool twoAttacking = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
+
             printf("AI COMMAND | Attack Unit %d!\n",
                    cursor->targeted->id);
-            SimulateCombat(cursor->selected, cursor->targeted);
+            SimulateCombat(cursor->selected, cursor->targeted, oneAttacking, twoAttacking);
         }
 
         cursor->selected->isExhausted = true;

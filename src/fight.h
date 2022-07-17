@@ -19,22 +19,17 @@ int CalculateDamage(int attack, int defense)
 }
 
 // Simulates a single combat between a unit and their enemy.
-void SimulateCombat(Unit *one, Unit *two)
+void SimulateCombat(Unit *one, Unit *two, bool oneAttacking, bool twoAttacking)
 {
 	int damage;
-	int dist = ManhattanDistance(*one, *two);
-	bool oneAttacking = dist >= one->minRange && dist <= one->maxRange; 
-	bool twoAttacking = dist >= two->minRange && dist <= two->maxRange; 
     // one -> two
 	if(oneAttacking)
 	{
 		damage = CalculateDamage(one->attack, two->defense);
 		if(d100() < one->accuracy)
 		{
-			printf("SIMULATION | %d Damage!\n", damage);
 			if(two->hp - damage <= 0)
 			{
-				printf("SIMULATION | Target Died!\n");
 				two->hp = 0;
 				two->shouldDie = true;
 			}
@@ -42,10 +37,6 @@ void SimulateCombat(Unit *one, Unit *two)
 			{
 				two->hp -= damage;
 			}
-		}
-		else
-		{
-			printf("SIMULATION | Missed!\n");
 		}
 	}
 
@@ -55,10 +46,8 @@ void SimulateCombat(Unit *one, Unit *two)
 		damage = CalculateDamage(two->attack, one->defense);
 		if(d100() > two->accuracy)
 		{
-			printf("SIMULATION | %d Damage!\n", damage);
 			if(one->hp - damage <= 0)
 			{
-				printf("SIMULATION | Unit Died!\n");
 				one->hp = 0;
 				one->shouldDie = true;
 			}
@@ -67,10 +56,6 @@ void SimulateCombat(Unit *one, Unit *two)
 				one->hp -= damage;
 			}
 		}
-		else
-		{
-			printf("SIMULATION | Missed!\n");
-		}
 	}
 }
 
@@ -78,7 +63,6 @@ void SimulateHealing(Unit *one, Unit *two)
 {
     // one -> two
     int healing = one->healing;
-    printf("SIMULATION | %d Healing!\n", healing);
     two->hp = min(healing + two->hp, two->maxHp);
 }
 

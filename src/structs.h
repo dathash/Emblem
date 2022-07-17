@@ -324,6 +324,14 @@ struct UnitInfo
         this->rows = newRows;
     }
 };
+
+// Finds the manhattan distance between two units.
+int ManhattanDistance(const Unit &one, const Unit &two)
+{
+    return (abs(one.col - two.col) + abs(one.row - two.row));
+}
+
+
 struct CombatInfo
 {
     u8 rows;
@@ -338,6 +346,10 @@ struct CombatInfo
 
     int unitDamage = 0;
     int enemyDamage = 0;
+
+    bool oneAttacking = false;
+    bool twoAttacking = false;
+
 
     // TODO: Remove!!!
     // Determines what damage a hit will do.
@@ -367,8 +379,27 @@ struct CombatInfo
         enemyHp = enemy.hp;
         enemyMaxHp = enemy.maxHp;
 
-        unitDamage = CalculateDamage(unit.attack, enemy.defense);
-        enemyDamage = CalculateDamage(enemy.attack, unit.defense);
+        int dist = ManhattanDistance(unit, enemy);
+        oneAttacking = dist >= unit.minRange && dist <= unit.maxRange; 
+        twoAttacking = dist >= enemy.minRange && dist <= enemy.maxRange; 
+        printf("%d %d\n", oneAttacking, twoAttacking);
+
+        if(oneAttacking)
+        {
+            unitDamage = CalculateDamage(unit.attack, enemy.defense);
+        }
+        else
+        {
+            unitDamage = 0;
+        }
+        if(twoAttacking)
+        {
+            enemyDamage = CalculateDamage(enemy.attack, unit.defense);
+        }
+        else
+        {
+            enemyDamage = 0;
+        }
 
         vector<string> unitInfo =
         {

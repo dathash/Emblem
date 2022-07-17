@@ -235,6 +235,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     // Tile Info
     if(GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
        GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
+       GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
        GlobalInterfaceState == SELECTED_OVER_ALLY ||
        GlobalInterfaceState == SELECTED_OVER_ENEMY ||
        GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||

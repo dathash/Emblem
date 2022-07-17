@@ -225,11 +225,4 @@ Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 }
 
 
-// Finds the manhattan distance between two units.
-int ManhattanDistance(const Unit &one, const Unit &two)
-{
-    return (abs(one.col - two.col) + abs(one.row - two.row));
-}
-
-
 #endif

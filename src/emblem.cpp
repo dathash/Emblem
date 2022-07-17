@@ -7,7 +7,9 @@
     TODO
     MVP
         Combat Scene animation
-        Attacks locking onto first target.
+		Just cycle through possible targets when targeting, don't allow them to
+		move around willy-nilly!
+        Can only attack or heal if there are targets
 
         Design
             Three main Units
@@ -20,18 +22,21 @@
                 kills
             healing?
             Ranged Attacks
-        
-        BUGS
-        AI actions don't move the viewport.
+
+			BUG | AI actions don't move the viewport.
+			BUG | After attacking, TileInfo doesn't update.
 
     NICE
         Testing
         Level Transitions/Win Screen
-        Cannot attack or heal if no targets
-        Animation
-            Placing Unit moves them to that square (A-star)
-            Generate Arrow while selecting?
-        Draw Attack range squares
+
+		Rendering
+			Animation
+				Placing Unit moves them smoothly to that square (A-star)
+				Generate Arrow while selecting?
+			Draw Attack range squares
+			Background Tiles
+			Character sprites when hovering
  */
 
 
