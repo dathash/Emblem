@@ -6,41 +6,6 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-enum InterfaceState
-{
-    NEUTRAL_OVER_GROUND,
-    NEUTRAL_OVER_ENEMY,
-    NEUTRAL_OVER_UNIT,
-    NEUTRAL_OVER_DEACTIVATED_UNIT,
-
-    SELECTED_OVER_GROUND,
-    SELECTED_OVER_INACCESSIBLE,
-    SELECTED_OVER_ALLY,
-    SELECTED_OVER_ENEMY,
-
-    ATTACK_TARGETING_OVER_UNTARGETABLE,
-    ATTACK_TARGETING_OVER_TARGET,
-
-    HEALING_TARGETING_OVER_UNTARGETABLE,
-    HEALING_TARGETING_OVER_TARGET,
-
-    PREVIEW_ATTACK,
-    PREVIEW_HEALING,
-
-    GAME_MENU_ROOT,
-    GAME_MENU_OUTLOOK,
-    GAME_MENU_OPTIONS,
-
-    UNIT_MENU_ROOT,
-    UNIT_INFO,
-
-    ENEMY_INFO,
-
-    NO_OP,
-};
-
-static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-
 // =============================== commands ====================================
 // inherited class, contains virtual method for implementing in children.
 class Command
@@ -497,31 +462,33 @@ private:
 class AttackCommand : public Command
 {
 public:
-    AttackCommand(Cursor *cursor_in)
-    : cursor(cursor_in)
+    AttackCommand(Cursor *cursor_in, CombatResolver *combatResolver_in)
+    : cursor(cursor_in),
+      combatResolver(combatResolver_in)
     {}
 
     virtual void Execute()
     {
         int dist = ManhattanDistance(*cursor->selected, *cursor->targeted);
-        bool oneAttacking = dist >= cursor->selected->minRange && dist <= cursor->selected->maxRange; 
-        bool twoAttacking = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
+        bool counter = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
 
-        SimulateCombat(cursor->selected, cursor->targeted, oneAttacking, twoAttacking);
+        combatResolver->attacker = cursor->selected;
+        combatResolver->victim = cursor->targeted;
+        combatResolver->counterAttack = counter;
 
-        cursor->selected->isExhausted = true;
-        cursor->selected->sheet.ChangeTrack(0);
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
         // change state
-        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+        GlobalResolvingAction = true;
+        GlobalInterfaceState = NO_OP;
     }
 
 private:
     Cursor *cursor;
+    CombatResolver *combatResolver;
 };
 
 
@@ -945,21 +912,24 @@ public:
     // simply executes the given command.
     shared_ptr<Command> HandleInput(InputState *input)
     {
-        if(input->up) {
-            input->up = false;
-            return buttonUp;
-        }
-        if(input->down) {
-            input->down = false;
-            return buttonDown;
-        }
-        if(input->left) {
-            input->left = false;
-            return buttonLeft;
-        }
-        if(input->right) {
-            input->right = false;
-            return buttonRight;
+        if(!input->joystickCooldown)
+        {
+            if(input->up) {
+                input->joystickCooldown = JOYSTICK_COOLDOWN_TIME;
+                return buttonUp;
+            }
+            if(input->down) {
+                input->joystickCooldown = JOYSTICK_COOLDOWN_TIME;
+                return buttonDown;
+            }
+            if(input->left) {
+                input->joystickCooldown = JOYSTICK_COOLDOWN_TIME;
+                return buttonLeft;
+            }
+            if(input->right) {
+                input->joystickCooldown = JOYSTICK_COOLDOWN_TIME;
+                return buttonRight;
+            }
         }
         if(input->a) {
             input->a = false;
@@ -1030,7 +1000,7 @@ public:
     void UpdateCommands(Cursor *cursor, Tilemap *map, 
                         Menu *gameMenu, Menu *unitMenu,
                         UnitInfo *unitInfo, TileInfo *tileInfo,
-                        CombatInfo *combatInfo)
+                        CombatInfo *combatInfo, CombatResolver *combatResolver)
     {
         switch(GlobalInterfaceState)
         {
@@ -1159,7 +1129,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<AttackCommand>(cursor));
+                BindA(make_shared<AttackCommand>(cursor, combatResolver));
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
             } break;
             case(PREVIEW_HEALING):

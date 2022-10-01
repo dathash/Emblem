@@ -6,18 +6,6 @@
 #ifndef AI_H
 #define AI_H
 
-enum AIState
-{
-    FINDING_NEXT,
-    SELECTED,
-    FOUND_NEW_POSITION,
-    PLACED,
-
-    ENEMY_TURN
-};
-
-static AIState GlobalAIState = ENEMY_TURN;
-
 // ============================= ai commands ================================
 class AIFindNextUnitCommand : public Command
 {
@@ -189,9 +177,10 @@ private:
 class AIAttackTargetCommand : public Command
 {
 public:
-    AIAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in)
+    AIAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in, CombatResolver *combatResolver_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      combatResolver(combatResolver_in)
     {}
 
     virtual void Execute()
@@ -204,12 +193,16 @@ public:
         if(cursor->targeted)
         {
             int dist = ManhattanDistance(*cursor->selected, *cursor->targeted);
-            bool oneAttacking = dist >= cursor->selected->minRange && dist <= cursor->selected->maxRange; 
-            bool twoAttacking = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
+            bool counter = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
 
             printf("AI COMMAND | Attack Unit %d!\n",
                    cursor->targeted->id);
-            SimulateCombat(cursor->selected, cursor->targeted, oneAttacking, twoAttacking);
+
+            combatResolver->attacker = cursor->selected;
+            combatResolver->victim = cursor->targeted;
+            combatResolver->counterAttack = counter;
+
+            GlobalResolvingAction = true;
         }
 
         cursor->selected->isExhausted = true;
@@ -225,6 +218,7 @@ public:
 private:
     Cursor *cursor; 
     Tilemap *map;
+    CombatResolver *combatResolver;
 };
 
 
@@ -235,7 +229,7 @@ struct AI
     bool shouldPlan = true;
 
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Tilemap *map)
+    void Plan(Cursor *cursor, Tilemap *map, CombatResolver *combatResolver)
     {
         printf("Planning!\n");
         shouldPlan = false;
@@ -244,7 +238,7 @@ struct AI
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
         commandQueue.push(make_shared<AIMoveToClosestSquareCommand>(cursor, map));
         commandQueue.push(make_shared<AIPlaceUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map));
+        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map, combatResolver));
     }
 
     void Update()

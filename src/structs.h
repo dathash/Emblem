@@ -15,6 +15,8 @@ struct InputState
     bool right;
     bool a;
     bool b;
+
+	int joystickCooldown = 0;
 };
 
 
@@ -107,6 +109,10 @@ struct Unit
     void Update()
     {
         sheet.Update();
+		if(hp <= 0)
+		{
+			shouldDie = true;
+		}
     }
 
     Unit(string name_in, SpriteSheet sheet_in,
@@ -268,6 +274,7 @@ struct Menu
         }
     }
 };
+
 struct TileInfo
 {
     u8 rows;
@@ -298,6 +305,7 @@ struct TileInfo
         this->rows = newRows;
     }
 };
+
 struct UnitInfo
 {
     u8 rows;
@@ -347,9 +355,8 @@ struct CombatInfo
     int unitDamage = 0;
     int enemyDamage = 0;
 
-    bool oneAttacking = false;
-    bool twoAttacking = false;
-
+    bool attackerAttacking = false;
+    bool victimAttacking = false;
 
     // TODO: Remove!!!
     // Determines what damage a hit will do.
@@ -380,11 +387,11 @@ struct CombatInfo
         enemyMaxHp = enemy.maxHp;
 
         int dist = ManhattanDistance(unit, enemy);
-        oneAttacking = dist >= unit.minRange && dist <= unit.maxRange; 
-        twoAttacking = dist >= enemy.minRange && dist <= enemy.maxRange; 
-        printf("%d %d\n", oneAttacking, twoAttacking);
+        attackerAttacking = dist >= unit.minRange && dist <= unit.maxRange; 
+        victimAttacking = dist >= enemy.minRange && dist <= enemy.maxRange; 
+        printf("%d %d\n", attackerAttacking, victimAttacking);
 
-        if(oneAttacking)
+        if(attackerAttacking)
         {
             unitDamage = CalculateDamage(unit.attack, enemy.defense);
         }
@@ -392,7 +399,7 @@ struct CombatInfo
         {
             unitDamage = 0;
         }
-        if(twoAttacking)
+        if(victimAttacking)
         {
             enemyDamage = CalculateDamage(enemy.attack, unit.defense);
         }
@@ -432,6 +439,126 @@ struct CombatInfo
             targetTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
         }
     }
+};
+
+// ========================== Combat Resolver =================================
+
+struct CombatResolver
+{
+    Unit *attacker;
+    Unit *victim;
+    bool counterAttack;
+    int framesActive;
+    int inc;
+	int damageToAttacker;
+	int damageToVictim;
+
+    CombatResolver()
+    {}
+
+    void Update()
+    {
+        if(inc == 0)
+        {
+			SimulateCombat();
+            printf("%p, %p, %d\n", attacker, victim, counterAttack);
+        }
+		printf("%d\n", inc);
+        ++inc;
+        if(inc > framesActive)
+        {
+			AssignDamage();
+			WrapUp();
+        }
+    }
+
+    void WrapUp()
+    {
+		attacker->isExhausted = true;
+		attacker->sheet.ChangeTrack(0);
+
+		// Reset Fields
+        attacker = NULL;
+        victim = NULL;
+        counterAttack = false;
+        inc = 0;
+		damageToAttacker = 0;
+		damageToVictim = 0;
+
+		// Transition back to normal play
+		if(GlobalPlayerTurn)
+		{
+			GlobalResolvingAction = false;
+			GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+			printf("Transitioning | player's turn!\n");
+		}
+		else
+		{
+			GlobalResolvingAction = false;
+			GlobalAIState = FINDING_NEXT;
+			printf("Transitioning | enemy's turn!\n");
+		}
+    }
+
+    // Rolls a d100. range: 00 to 99.
+    int d100()
+    {
+        return rand() % 100;
+    }
+
+    // Determines what damage a hit will do.
+    int CalculateDamage(int attack, int defense)
+    {
+        return max(attack - defense, 0);
+    }
+
+    // Simulates a single combat between a unit and their enemy
+    void
+	SimulateCombat()
+    {
+		printf("Simulating Combat...\n");
+        if(d100() < attacker->accuracy)
+        {
+			damageToVictim = CalculateDamage(attacker->attack, victim->defense);
+			printf("%d\n", damageToVictim);
+			if(damageToVictim > victim->hp)
+			{
+				counterAttack = false;
+			}
+        }
+
+        if(counterAttack)
+        {
+            if(d100() > victim->accuracy)
+            {
+				printf("%d\n", damageToAttacker);
+				damageToAttacker = CalculateDamage(victim->attack, attacker->defense);
+            }
+        }
+    }
+
+	void
+	AssignDamage()
+	{
+		printf("Assigning Damage!\n");
+		if(victim->hp - damageToVictim <= 0)
+		{
+			victim->hp = 0;
+		}
+		else
+		{
+			victim->hp -= damageToVictim;
+		}
+
+		if(attacker->hp - damageToAttacker <= 0)
+		{
+			attacker->hp = 0;
+		}
+		else
+		{
+			attacker->hp -= damageToAttacker;
+		}
+	}
 };
 
 #endif

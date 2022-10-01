@@ -39,25 +39,33 @@ Initialize()
                         int imgFlags = IMG_INIT_PNG;
                         if(IMG_Init(imgFlags) & imgFlags)
                         {
-                            if(ma_engine_init(NULL, &GlobalMusicEngine) == MA_SUCCESS) {
+                            if(ma_engine_init(NULL, &GlobalMusicEngine) == MA_SUCCESS)
+                            {
+                                // Setup Dear ImGui context
+                                IMGUI_CHECKVERSION();
+                                ImGui::CreateContext();
+                                ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+                                io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
+
+                                // Setup Dear ImGui style
+                                ImGui::StyleColorsDark();
+
+                                // Setup Platform/Renderer backends
+                                ImGui_ImplSDL2_InitForSDLRenderer(GlobalWindow, GlobalRenderer);
+                                ImGui_ImplSDLRenderer_Init(GlobalRenderer);
+
                                 return true;
                             }
+                            else
+                            {
                             assert(!"ERROR: MINIAUDIO\n");
-                            // Setup Dear ImGui context
-                            //IMGUI_CHECKVERSION();
-                            //ImGui::CreateContext();
-                            //ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-                            //io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
-
-                            // Setup Dear ImGui style
-                            //ImGui::StyleColorsDark();
-
-                            // Setup Platform/Renderer backends
-                            //ImGui_ImplSDL2_InitForSDLRenderer(GlobalWindow, GlobalRenderer);
-                            //ImGui_ImplSDLRenderer_Init(GlobalRenderer);
+                            }
                         }
+                        else
+                        {
                         assert(!"ERROR: IMG\n");
+                        }
                     }
                     else
                     {
@@ -114,6 +122,11 @@ void Close()
 void
 HandleEvents(InputState *input)
 {
+    if(input->joystickCooldown)
+    {
+        --input->joystickCooldown;
+        printf("CD: %d\n", input->joystickCooldown);
+    }
     SDL_Event Event;
     while(SDL_PollEvent(&Event))
     {
@@ -127,7 +140,7 @@ HandleEvents(InputState *input)
         }
         if(GlobalGuiMode)
         {
-            //ImGui_ImplSDL2_ProcessEvent(&Event);
+            ImGui_ImplSDL2_ProcessEvent(&Event);
         }
         else
         {

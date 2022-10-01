@@ -48,6 +48,10 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_sdlrenderer.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -103,7 +107,8 @@ int main(int argc, char *argv[])
     vector<unique_ptr<Unit>> units = LoadCharacters("../data/units.txt");
     vector<string> levels = {"../data/l1.txt", "../data/l2.txt"};
     Level level = LoadLevel(levels[GlobalLevelNumber], units);
-    Cursor cursor(SpriteSheet(LoadTextureImage("../assets/sprites/cursor.png"), 32, ANIMATION_SPEED));
+    Cursor cursor(SpriteSheet(LoadTextureImage("../assets/sprites/cursor.png"), 
+		32, ANIMATION_SPEED));
 
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
@@ -117,12 +122,17 @@ int main(int argc, char *argv[])
     InputHandler handler(&cursor, level.map, &tileInfo);
     AI ai;
 
+    CombatResolver combatResolver = {};
+	combatResolver.framesActive = 70;
+    combatResolver.inc = 0;
+
     // frame timer
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
     real32 elapsedMS = 0.0f;
 
-    ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/bach.mp3", NULL);
+	// Play Music
+    //ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/bach.mp3", NULL);
 
 // ========================= game loop =========================================
     GlobalRunning = true;
@@ -145,7 +155,7 @@ int main(int argc, char *argv[])
             cursor.row = 0;
             cursor.viewportCol = 0;
             cursor.viewportRow = 0;
-            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
             GlobalTurnStart = false;
             ai.clearQueue();
@@ -153,24 +163,31 @@ int main(int argc, char *argv[])
         }
 
 
-        if(GlobalPlayerTurn)
+        if(!GlobalResolvingAction)
         {
-            handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level.map,
-                                   &gameMenu, &unitMenu, 
-                                   &unitInfo, &tileInfo,
-                                   &combatInfo);
+            if(GlobalPlayerTurn)
+            {
+                handler.Update(&input);
+                handler.UpdateCommands(&cursor, &level.map,
+                                       &gameMenu, &unitMenu, 
+                                       &unitInfo, &tileInfo,
+                                       &combatInfo, &combatResolver);
+            }
+            else
+            {
+                if(ai.shouldPlan)
+                {
+                    ai.Plan(&cursor, &level.map, &combatResolver);
+                }
+                if(!(GlobalFrameNumber % 10))
+                {
+                    ai.Update();
+                }
+            }
         }
         else
         {
-            if(ai.shouldPlan)
-            {
-                ai.Plan(&cursor, &level.map);
-            }
-            if(!(GlobalFrameNumber % 10))
-            {
-                ai.Update();
-            }
+            combatResolver.Update();
         }
 
 
@@ -192,18 +209,21 @@ int main(int argc, char *argv[])
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
-            GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? GlobalLevelNumber + 1 : 0;
+            GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
+				GlobalLevelNumber + 1 : 0;
             level = LoadLevel(levels[GlobalLevelNumber], units);
         }
 
 
 // ============================= render =========================================
-        Render(level.map, cursor, gameMenu, unitMenu, unitInfo, tileInfo, combatInfo);
+        Render(level.map, cursor, gameMenu, unitMenu, 
+			   unitInfo, tileInfo, combatInfo, combatResolver);
 
 
-// =========================== v debug messages v ============================================
+// =========================== timing ============================================
         endTime = SDL_GetPerformanceCounter();
-        elapsedMS = ((endTime - startTime) / (real32)SDL_GetPerformanceFrequency() * 1000.0f);
+        elapsedMS = ((endTime - startTime) / 
+					 (real32)SDL_GetPerformanceFrequency() * 1000.0f);
 
         if(elapsedMS < MS_PER_FRAME)
         {

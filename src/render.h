@@ -46,7 +46,7 @@ RenderText(const Texture &texture, int x, int y)
 
 // Renders a Health Bar
 void
-RenderHealthBar(int x, int y, int hp, int maxHp)
+RenderHealthBar(int x, int y, int hp, int maxHp, bool allyColor)
 {
     SDL_Rect healthRect;
     for(int i = 0; i < maxHp; ++i)
@@ -54,7 +54,14 @@ RenderHealthBar(int x, int y, int hp, int maxHp)
         SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
         if(i < hp)
         {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r, healthBarColor.g, healthBarColor.b, healthBarColor.a);
+            if(allyColor)
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, allyHealthBarColor.r, allyHealthBarColor.g, allyHealthBarColor.b, allyHealthBarColor.a);
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, enemyHealthBarColor.r, enemyHealthBarColor.g, enemyHealthBarColor.b, enemyHealthBarColor.a);
+            }
         }
         else
         {
@@ -68,7 +75,7 @@ RenderHealthBar(int x, int y, int hp, int maxHp)
 
 // Renders a Health Bar, with a damage amount taken out of it.
 void
-RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg)
+RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
 {
     SDL_Rect healthRect;
     for(int i = 0; i < maxHp; ++i)
@@ -76,11 +83,25 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg)
         SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
         if(i < hp - Dmg)
         {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarColor.r, healthBarColor.g, healthBarColor.b, healthBarColor.a);
+            if(allyColor)
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, allyHealthBarColor.r, allyHealthBarColor.g, allyHealthBarColor.b, allyHealthBarColor.a);
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, enemyHealthBarColor.r, enemyHealthBarColor.g, enemyHealthBarColor.b, enemyHealthBarColor.a);
+            }
         }
         else if(i < hp)
         {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarLosingColor.r, healthBarLosingColor.g, healthBarLosingColor.b, healthBarLosingColor.a);
+            if(allyColor)
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, allyHealthBarLosingColor.r, allyHealthBarLosingColor.g, allyHealthBarLosingColor.b, allyHealthBarLosingColor.a);
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(GlobalRenderer, enemyHealthBarLosingColor.r, enemyHealthBarColor.g, enemyHealthBarLosingColor.b, enemyHealthBarLosingColor.a);
+            }
         }
         else
         {
@@ -99,7 +120,8 @@ Render(const Tilemap &map, const Cursor &cursor,
        const Menu &gameMenu, const Menu &unitMenu,
        const UnitInfo &unitInfo,
        const TileInfo &tileInfo,
-       const CombatInfo &combatInfo)
+       const CombatInfo &combatInfo,
+       const CombatResolver &combatResolver)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -127,7 +149,6 @@ Render(const Tilemap &map, const Cursor &cursor,
                 default:
                 {} break;
             }
-
         }
     }
 
@@ -215,11 +236,11 @@ Render(const Tilemap &map, const Cursor &cursor,
             {
                 if(tileToRender->occupant->isExhausted)
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, 50, 0, 50);
+                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
                 }
                 else
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, 255, 255, 255);
+                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, readyMod.r, readyMod.g, readyMod.b);
                 }
                 RenderSprite(screenCol, screenRow, tileToRender->occupant->sheet);
             }
@@ -253,7 +274,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 
             RenderText(tileInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
-        RenderHealthBar(TILE_SIZE * cursor.viewportSize, 2 * MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp);
+        RenderHealthBar(TILE_SIZE * cursor.viewportSize, 2 * MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp, true);
                                                       // 2 is for alignment
     }
 
@@ -302,8 +323,8 @@ Render(const Tilemap &map, const Cursor &cursor,
             RenderText(combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
             RenderText(combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
         }
-        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage);
-        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage);
+        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage, true);
+        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage, false);
                                                       // 5 is for alignment
     }
 
@@ -352,32 +373,59 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
+	
+	// Combat Screen
+	if(GlobalResolvingAction)
+	{
+        if(combatResolver.inc < (float)combatResolver.framesActive * 0.6666)
+        {
+            RenderHealthBar(0, 560, combatResolver.attacker->hp,
+                    combatResolver.attacker->maxHp, combatResolver.attacker->isAlly);
+        }
+        else
+        {
+            RenderHealthBarDamage(0, 560, combatResolver.attacker->hp,
+                    combatResolver.attacker->maxHp, combatResolver.damageToAttacker,
+                    combatResolver.attacker->isAlly);
+        }
+        if(combatResolver.inc < (float)combatResolver.framesActive * 0.3333)
+        {
+            RenderHealthBar(200, 560, combatResolver.victim->hp,
+                    combatResolver.victim->maxHp, combatResolver.victim->isAlly);
+        }
+        else
+        {
+            RenderHealthBarDamage(200, 560, combatResolver.victim->hp,
+                    combatResolver.victim->maxHp, combatResolver.damageToVictim, 
+                    combatResolver.victim->isAlly);
+        }
+	}
 
-    // Dev Gui
+	// ImGui
     if(GlobalGuiMode)
     {
-        //ImGui_ImplSDLRenderer_NewFrame();
-        //ImGui_ImplSDL2_NewFrame();
-        //ImGui::NewFrame();
-        //{
-            //static float f = 0.0f;
-            //static int counter = 0;
+        ImGui_ImplSDLRenderer_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+        {
+            static float f = 0.0f;
+            static int counter = 0;
 
-            //ImGui::Begin("Hello, world!");
+            ImGui::Begin("Hello, world!");
 
-            //ImGui::Text("This is some useful text.");
+            ImGui::Text("This is some useful text.");
 
-            //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            //if (ImGui::Button("Button"))
-                //counter++;
-            //ImGui::SameLine();
-            //ImGui::Text("counter = %d", counter);
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+            if (ImGui::Button("Button"))
+                counter++;
+            ImGui::SameLine();
+            ImGui::Text("counter = %d", counter);
 
-            //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            //ImGui::End();
-        //}
-        //ImGui::Render();
-        //ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+        ImGui::Render();
+        ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
     }
 
 
