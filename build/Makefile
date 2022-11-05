@@ -1,11 +1,29 @@
-emblem:
-	clang++ ../src/emblem.cpp ../ext/imgui/*.cpp ../ext/imgui/backends/*.cpp  -g -Wno-deprecated-declarations -O0 -std=c++14 -o em -I../ext/ -I../ext/imgui/ -I../ext/imgui/backends -I/opt/homebrew/include/SDL2 -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
 
-test:
-	clang++ ../src/test.cpp -g -O0 -std=c++14 -o t -I/opt/homebrew/include/SDL2 -I../ext/ -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
 
-withimgui:
-	clang++ ../src/emblem.cpp ../ext/imgui/*.cpp ../ext/imgui/backends/imgui_impl_sdlrenderer.cpp -I../ext/ ../ext/imgui/backends/imgui_impl_sdl.cpp -g -O0 -std=c++14 -o em -I/opt/homebrew/include/SDL2 -I../ext/imgui/ -I../ext/imgui/backends/ -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
+SRC = $(wildcard ../src/*.cpp ../ext/imgui/*.cpp ../ext/imgui/backends/*.cpp)
+OBJ = ${SRC:.cpp=.o}
+
+LDFLAGS = -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
+INCFLAGS = -I../src/ -I../ext/ -I../ext/imgui/ -I../ext/imgui/backends -I/opt/homebrew/include/SDL2
+FLAGS = -std=c++14 -Wno-deprecated -g3 -O0
+OUT = em
+
+CC = clang++
+
+# For debugging
+print-%  : ; @echo $* = $($*)
+
+$(OUT): $(OBJ)
+	@$(CC) $(FLAGS) $(INCFLAGS) $(LDFLAGS) $^ -o $@
+	@printf "\e[33mLinking\e[90m %s\e[0m\n" $@
+	@printf "\e[34mDone!\e[0m\n"
+
+%.o: %.cpp
+	@$(CC) $(FLAGS) $(INCFLAGS) -c $< -o $@
+	@printf "\e[36mCompile\e[90m %s\e[0m\n" $@
+
+../src/emblem.o: ../src/*.h
 
 clean:
-	-rm *.o $(objects) mp1
+	@rm -f $(OUT) $(OBJ)
+	@printf "\e[34mAll clear!\e[0m\n"

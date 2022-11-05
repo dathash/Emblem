@@ -103,9 +103,9 @@ void Close()
     //Close game controller
     //SDL_JoystickClose(gGameController);
 
-    //ImGui_ImplSDLRenderer_Shutdown();
-    //ImGui_ImplSDL2_Shutdown();
-    //ImGui::DestroyContext();
+    ImGui_ImplSDLRenderer_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 
     ma_engine_uninit(&GlobalMusicEngine);
 
@@ -125,22 +125,23 @@ HandleEvents(InputState *input)
     if(input->joystickCooldown)
     {
         --input->joystickCooldown;
-        printf("CD: %d\n", input->joystickCooldown);
     }
     SDL_Event Event;
     while(SDL_PollEvent(&Event))
     {
         if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_TAB)
         {
-            GlobalGuiMode = !GlobalGuiMode;
+            GlobalEditorMode = !GlobalEditorMode;
         }
-        if(Event.type == SDL_QUIT || Event.key.keysym.sym == SDLK_ESCAPE)
+        if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {
+            printf("Quit Received!\n");
             GlobalRunning = false;
         }
-        if(GlobalGuiMode)
+        if(GlobalEditorMode)
         {
             ImGui_ImplSDL2_ProcessEvent(&Event);
+            return;
         }
         else
         {

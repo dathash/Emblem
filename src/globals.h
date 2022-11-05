@@ -8,15 +8,20 @@
 
 // ========================= constants =====================================
 
+// meta
+#define EDITOR 1
+
 // low level
 #define MS_PER_FRAME 16.666
 #define JOYSTICK_DEAD_ZONE 8000
 #define JOYSTICK_COOLDOWN_TIME 4 // Frames
 
 // rendering
-#define TILE_SIZE 70
+#define TILE_SIZE 60
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
+
+#define PORTRAIT_SIZE 300
 
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
@@ -27,8 +32,15 @@
 // animation
 #define ANIMATION_SPEED 10
 
+#define DATA_PATH "../data/"
+#define SPRITES_PATH "../assets/sprites/"
+#define PORTRAITS_PATH "../assets/portraits/"
+#define INITIAL_LEVEL "l1.txt"
+#define INITIAL_UNITS "units.txt"
 
-// ============================= globals ===================================
+#define DEFAULT_PORTRAIT "ph.png"
+#define DEFAULT_SHEET "warrior.png"
+
 
 enum InterfaceState
 {
@@ -63,8 +75,6 @@ enum InterfaceState
     NO_OP,
 };
 
-static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-
 enum AIState
 {
     FINDING_NEXT,
@@ -75,8 +85,9 @@ enum AIState
     ENEMY_TURN
 };
 
+// ============================= globals ===================================
+static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
 static AIState GlobalAIState = ENEMY_TURN;
-
 
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
@@ -93,7 +104,9 @@ static bool GlobalResolvingAction = false;
 static bool GlobalPlayerTurn = true;
 static bool GlobalTurnStart = false;
 static bool GlobalGamepadMode = false;
-static bool GlobalGuiMode = false;
+
+static bool GlobalEditorMode = false;
+static int GlobalCurrentID = 0;
 
 
 // ============================ color palette ==============================

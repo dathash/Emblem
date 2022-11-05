@@ -18,7 +18,7 @@ MAP 0 0 0 0 1 1 1 1 0 0
 MAP 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 1 1 1 1 0 0
 
-COM <UNT <name> <id> <col> <row>
+COM <UNT <name> <id> <col> <row>>
 UNT Soren         0    0     3
 UNT Aeschylus     1    0     0
 UNT Zarathustra   2    2     2

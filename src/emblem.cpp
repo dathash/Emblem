@@ -1,19 +1,21 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Main
-// Date: July 2022
+// Date: November 2022
 
 /*
     TODO
     MVP
-        Combat Scene animation
-		Just cycle through possible targets when targeting, don't allow them to
-		move around willy-nilly!
-        Can only attack or heal if there are targets
 
-        Design
-            Three main Units
-            Three levels
+        IMGUI
+            Level Saving/Editing/Loading
+                Change the structure of our units/level structs.
+                    Make the units be an array, where each unit's pointer is kept at
+                    its given id space.
+                    Then, make the level's "allies" and "enemies"
+                    vectors each just contain ids, which index into that array.
+                Will be faster, simpler, and easier to reason about.
+                Will also lead to just one source of units, which is a great place to be.
 
         Better enemy ai
             A*
@@ -27,7 +29,7 @@
 			BUG | After attacking, TileInfo doesn't update.
 
     NICE
-        Testing
+        More Asserts everywhere
         Level Transitions/Win Screen
 
 		Rendering
@@ -37,8 +39,15 @@
 			Draw Attack range squares
 			Background Tiles
 			Character sprites when hovering
- */
 
+		Just cycle through possible targets when targeting, don't allow them to
+		move around willy-nilly!
+        Can only attack or heal if there are targets
+
+        CSV/TSV for units and levels?
+            Probably don't need this because we're doing
+            all our editing in the editor now.
+ */
 
 // ========================== includes =====================================
 #include <SDL.h>
@@ -73,17 +82,20 @@ using namespace std;
 
 #include "globals.h"
 #include "structs.h"
+#include "fight_res.h"
 #include "init.h"
 #include "grid.h"
 #include "fight.h"
 #include "command.h"
 #include "ai.h"
 #include "render.h"
+#include "editor.h"
 
 
 // ================================== main =================================
 int main(int argc, char *argv[])
 {
+// ================================== init =================================
     srand(time(NULL));
 
     if(!Initialize())
@@ -103,11 +115,11 @@ int main(int argc, char *argv[])
         printf("Joystick mode!\n");
     }
 
-    // load data
-    vector<unique_ptr<Unit>> units = LoadCharacters("../data/units.txt");
-    vector<string> levels = {"../data/l1.txt", "../data/l2.txt"};
+// ================================== load =================================
+    vector<unique_ptr<Unit>> units = LoadCharacters(DATA_PATH + string(INITIAL_UNITS));
+    vector<string> levels = {DATA_PATH + string("l1.txt"), DATA_PATH + string("l2.txt")};
     Level level = LoadLevel(levels[GlobalLevelNumber], units);
-    Cursor cursor(SpriteSheet(LoadTextureImage("../assets/sprites/cursor.png"), 
+    Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
 
     // Initialize Menus
@@ -155,13 +167,12 @@ int main(int argc, char *argv[])
             cursor.row = 0;
             cursor.viewportCol = 0;
             cursor.viewportRow = 0;
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
 
             GlobalTurnStart = false;
             ai.clearQueue();
             handler.clearQueue();
         }
-
 
         if(!GlobalResolvingAction)
         {
@@ -190,7 +201,6 @@ int main(int argc, char *argv[])
             combatResolver.Update();
         }
 
-
 // ========================= update phase =======================================
         cursor.Update();
 
@@ -209,15 +219,25 @@ int main(int argc, char *argv[])
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
+            GlobalInterfaceState = NEUTRAL_OVER_GROUND; // TODO: This is a lie.
             GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
 				GlobalLevelNumber + 1 : 0;
             level = LoadLevel(levels[GlobalLevelNumber], units);
         }
 
-
 // ============================= render =========================================
         Render(level.map, cursor, gameMenu, unitMenu, 
 			   unitInfo, tileInfo, combatInfo, combatResolver);
+
+#if EDITOR
+        // IMGUI
+        if(GlobalEditorMode)
+        {
+            EditorPass(&units, &level);
+        }
+#endif
+
+        SDL_RenderPresent(GlobalRenderer);
 
 
 // =========================== timing ============================================

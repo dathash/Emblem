@@ -6,10 +6,6 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-//#include "imgui.h"
-//#include "imgui_impl_sdl.h"
-//#include "imgui_impl_sdlrenderer.h"
-
 // ================================ Rendering ==========================================
 // Renders an individual tile to the screen, given its game coords and color.
 void
@@ -33,6 +29,18 @@ RenderSprite(int col, int row, const SpriteSheet &sheet)
     SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
     SDL_RenderCopy(GlobalRenderer, sheet.texture.sdlTexture, &source, &destination);
+}
+
+// Renders a unit's portrait.
+void
+RenderPortrait(int x, int y, const Texture &portrait)
+{
+    SDL_Rect destination = {x, y, 
+                            PORTRAIT_SIZE,
+                            PORTRAIT_SIZE};
+    SDL_Rect source = {0, 0, portrait.width, portrait.height};
+
+    SDL_RenderCopy(GlobalRenderer, portrait.sdlTexture, &source, &destination);
 }
 
 // Renders a given texture at a pixel point.
@@ -373,7 +381,25 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
-	
+
+    // Portraits
+    if(GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
+       GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
+       GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+       GlobalInterfaceState == SELECTED_OVER_ALLY ||
+       GlobalInterfaceState == SELECTED_OVER_ENEMY ||
+       GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == UNIT_MENU_ROOT ||
+	   GlobalInterfaceState == UNIT_INFO ||
+	   GlobalInterfaceState == ENEMY_INFO ||
+	   GlobalInterfaceState == PREVIEW_ATTACK ||
+	   GlobalInterfaceState == PREVIEW_HEALING)
+    {
+        assert(map.tiles[cursor.col][cursor.row].occupied);
+        RenderPortrait(500, 400, map.tiles[cursor.col][cursor.row].occupant->portrait);
+    }
+
 	// Combat Screen
 	if(GlobalResolvingAction)
 	{
@@ -400,36 +426,6 @@ Render(const Tilemap &map, const Cursor &cursor,
                     combatResolver.victim->isAlly);
         }
 	}
-
-	// ImGui
-    if(GlobalGuiMode)
-    {
-        ImGui_ImplSDLRenderer_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");
-
-            ImGui::Text("This is some useful text.");
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            if (ImGui::Button("Button"))
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-        ImGui::Render();
-        ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-    }
-
-
-    SDL_RenderPresent(GlobalRenderer);
 }
 
 #endif

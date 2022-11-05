@@ -23,16 +23,18 @@ struct InputState
 struct Texture
 {
     SDL_Texture *sdlTexture;
-    string path;
+    string filename;
+    string dir;
     int width;
     int height;
 
-    Texture(SDL_Texture *sdlTexture_in, string path_in, int width_in, int height_in)
+    Texture(SDL_Texture *sdlTexture_in, string dir_in, string filename_in, int width_in, int height_in)
     {
         this->sdlTexture = sdlTexture_in;
         this->width = width_in;
         this->height = height_in;
-        this->path = path_in;
+        this->dir = dir_in;
+        this->filename = filename_in;
     }
 };
 
@@ -77,10 +79,7 @@ struct SpriteSheet
     // switches the sprite to the next animation track
     void ChangeTrack(int track_in)
     {
-        if(track_in >= tracks || track_in < 0)
-        {
-            assert(!"SpriteSheet | ChangeTrack | Invalid Animation Track!\n");
-        }
+        assert(track_in < tracks && track_in >= 0);
         this->track = track_in;
         this->frame = 0;
     }
@@ -105,6 +104,7 @@ struct Unit
     int maxRange;
     int accuracy;
     SpriteSheet sheet;
+    Texture portrait;
 
     void Update()
     {
@@ -116,12 +116,14 @@ struct Unit
     }
 
     Unit(string name_in, SpriteSheet sheet_in,
+         Texture portrait_in,
          int id_in, bool isAlly_in, int mov_in,
          int hp_in, int maxHp_in,
          int minRange_in, int maxRange_in,
          int attack_in, int defense_in, int accuracy_in)
     : name(name_in),
       sheet(sheet_in),
+      portrait(portrait_in),
       id(id_in),
       isAlly(isAlly_in),
       mov(mov_in),
@@ -132,11 +134,13 @@ struct Unit
       attack(attack_in),
       defense(defense_in),
       accuracy(accuracy_in)
-    {}
+    {} // haha c++
+    // This little thing is like a vestigial organ
+    // disgusting
 };
 
 
-// map stuff
+// ========================== map stuff =======================================
 enum TileTypes
 {
     FLOOR,
@@ -255,7 +259,7 @@ struct Cursor
 };
 
 
-// menu stuff
+// ============================= menu stuff ====================================
 #include "load.h"
 struct Menu
 {
@@ -439,126 +443,6 @@ struct CombatInfo
             targetTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
         }
     }
-};
-
-// ========================== Combat Resolver =================================
-
-struct CombatResolver
-{
-    Unit *attacker;
-    Unit *victim;
-    bool counterAttack;
-    int framesActive;
-    int inc;
-	int damageToAttacker;
-	int damageToVictim;
-
-    CombatResolver()
-    {}
-
-    void Update()
-    {
-        if(inc == 0)
-        {
-			SimulateCombat();
-            printf("%p, %p, %d\n", attacker, victim, counterAttack);
-        }
-		printf("%d\n", inc);
-        ++inc;
-        if(inc > framesActive)
-        {
-			AssignDamage();
-			WrapUp();
-        }
-    }
-
-    void WrapUp()
-    {
-		attacker->isExhausted = true;
-		attacker->sheet.ChangeTrack(0);
-
-		// Reset Fields
-        attacker = NULL;
-        victim = NULL;
-        counterAttack = false;
-        inc = 0;
-		damageToAttacker = 0;
-		damageToVictim = 0;
-
-		// Transition back to normal play
-		if(GlobalPlayerTurn)
-		{
-			GlobalResolvingAction = false;
-			GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-			printf("Transitioning | player's turn!\n");
-		}
-		else
-		{
-			GlobalResolvingAction = false;
-			GlobalAIState = FINDING_NEXT;
-			printf("Transitioning | enemy's turn!\n");
-		}
-    }
-
-    // Rolls a d100. range: 00 to 99.
-    int d100()
-    {
-        return rand() % 100;
-    }
-
-    // Determines what damage a hit will do.
-    int CalculateDamage(int attack, int defense)
-    {
-        return max(attack - defense, 0);
-    }
-
-    // Simulates a single combat between a unit and their enemy
-    void
-	SimulateCombat()
-    {
-		printf("Simulating Combat...\n");
-        if(d100() < attacker->accuracy)
-        {
-			damageToVictim = CalculateDamage(attacker->attack, victim->defense);
-			printf("%d\n", damageToVictim);
-			if(damageToVictim > victim->hp)
-			{
-				counterAttack = false;
-			}
-        }
-
-        if(counterAttack)
-        {
-            if(d100() > victim->accuracy)
-            {
-				printf("%d\n", damageToAttacker);
-				damageToAttacker = CalculateDamage(victim->attack, attacker->defense);
-            }
-        }
-    }
-
-	void
-	AssignDamage()
-	{
-		printf("Assigning Damage!\n");
-		if(victim->hp - damageToVictim <= 0)
-		{
-			victim->hp = 0;
-		}
-		else
-		{
-			victim->hp -= damageToVictim;
-		}
-
-		if(attacker->hp - damageToAttacker <= 0)
-		{
-			attacker->hp = 0;
-		}
-		else
-		{
-			attacker->hp -= damageToAttacker;
-		}
-	}
 };
 
 #endif
