@@ -161,6 +161,13 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
     return interactible;
 }
 
+// Super simple distance equation.
+float ManhattanDistance(int col, int row, int tar_col, int tar_row)
+{
+    return (abs(tar_col - col) + abs(tar_row - row));
+}
+
+// A* Pathfinding distance equation.
 
 // Finds the nearest unit to the cursor, based on the given predicate expression.
 Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
@@ -174,7 +181,7 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
         {
             if(map.tiles[col][row].occupied && predicate(*map.tiles[col][row].occupant))
             {
-                distance = abs(col - cursor.col) + abs(row - cursor.row);
+                distance = ManhattanDistance(cursor.col, cursor.row, col, row);
                 if(distance < minDistance)
                 {
                     result = map.tiles[col][row].occupant;
@@ -197,8 +204,7 @@ pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 
     for(pair<int, int> p : map.accessible)
     {
-        // manhattan distance
-        distance = abs(p.first - col) + abs(p.second - row);
+        distance = ManhattanDistance(col, row, p.first, p.second);
         if(distance < minDistance)
         {
             result = p;
