@@ -30,7 +30,6 @@ struct CombatResolver
 			SimulateCombat();
             printf("%p, %p, %d\n", attacker, victim, counterAttack);
         }
-		printf("%d\n", inc);
         ++inc;
         if(inc > framesActive)
         {
@@ -85,11 +84,9 @@ struct CombatResolver
     void
 	SimulateCombat()
     {
-		printf("Simulating Combat...\n");
         if(d100() < attacker->accuracy)
         {
 			damageToVictim = CalculateDamage(attacker->attack, victim->defense);
-			printf("%d\n", damageToVictim);
 			if(damageToVictim > victim->hp)
 			{
 				counterAttack = false;
@@ -100,7 +97,6 @@ struct CombatResolver
         {
             if(d100() > victim->accuracy)
             {
-				printf("%d\n", damageToAttacker);
 				damageToAttacker = CalculateDamage(victim->attack, attacker->defense);
             }
         }
@@ -109,7 +105,6 @@ struct CombatResolver
 	void
 	AssignDamage()
 	{
-		printf("Assigning Damage!\n");
 		if(victim->hp - damageToVictim <= 0)
 		{
 			victim->hp = 0;

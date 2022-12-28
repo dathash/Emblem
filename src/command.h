@@ -50,7 +50,7 @@ public:
             // For rendering
             cursor->MoveViewport(newCol, newRow);
 
-            if(map.tiles[newCol][newRow].occupied)
+            if(map.tiles[newCol][newRow].occupant)
             {
                 tileInfo->UpdateTextTextures({
                             map.tiles[newCol][newRow].occupant->name,
@@ -61,7 +61,7 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(!hoverTile->occupied)
+            if(!hoverTile->occupant)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_GROUND;
             }
@@ -171,9 +171,9 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(pair<int, int>(newCol, newRow), map.accessible))
+            if(VectorHasElement(point(newCol, newRow), map.accessible))
             {
-                if(!hoverTile->occupied || hoverTile->occupant->id == cursor->selected->id)
+                if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
                 {
                     GlobalInterfaceState = SELECTED_OVER_GROUND;
                 }
@@ -214,9 +214,7 @@ public:
     virtual void Execute()
     {
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
-        map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
-        map->tiles[cursor->col][cursor->row].occupied = true;
 
         // unit has to know its position as well
         cursor->selected->col = cursor->col;
@@ -253,9 +251,7 @@ public:
     virtual void Execute()
     {
         map->tiles[cursor->col][cursor->row].occupant = nullptr;
-        map->tiles[cursor->col][cursor->row].occupied = false;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
-        map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = true;
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
@@ -304,7 +300,7 @@ public:
             cursor->MoveViewport(newCol, newRow);
 
             // Update tileInfo
-            if(map.tiles[newCol][newRow].occupied)
+            if(map.tiles[newCol][newRow].occupant)
             {
                 tileInfo->UpdateTextTextures({
                             map.tiles[newCol][newRow].occupant->name,
@@ -315,8 +311,8 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
-               hoverTile->occupied &&
+            if(VectorHasElement(point(newCol, newRow), map.interactible) &&
+               hoverTile->occupant &&
                !hoverTile->occupant->isAlly)
             {
                 GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
@@ -365,8 +361,8 @@ public:
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(pair<int, int>(newCol, newRow), map.interactible) &&
-               hoverTile->occupied &&
+            if(VectorHasElement(point(newCol, newRow), map.interactible) &&
+               hoverTile->occupant &&
                hoverTile->occupant->isAlly)
             {
                 GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
@@ -792,10 +788,10 @@ public:
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                  cursor->selected->minRange, cursor->selected->maxRange);
                 bool initialTargetFound = false;
-                pair<int, int> targetSpot;
-                for(pair<int, int> p : map->interactible)
+                point targetSpot;
+                for(point p : map->interactible)
                 {
-                    if(map->tiles[p.first][p.second].occupied && 
+                    if(map->tiles[p.first][p.second].occupant && 
                        !map->tiles[p.first][p.second].occupant->isAlly)
                     {
                         initialTargetFound = true;
@@ -815,7 +811,7 @@ public:
                 }
 
                 // Update tileInfo
-                if(map->tiles[cursor->col][cursor->row].occupied)
+                if(map->tiles[cursor->col][cursor->row].occupant)
                 {
                     tileInfo->UpdateTextTextures({
                                 map->tiles[cursor->col][cursor->row].occupant->name,
@@ -834,10 +830,10 @@ public:
                 map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
                                                      1, 1);
                 bool initialTargetFound = false;
-                pair<int, int> targetSpot;
-                for(pair<int, int> p : map->interactible)
+                point targetSpot;
+                for(point p : map->interactible)
                 {
-                    if(map->tiles[p.first][p.second].occupied && 
+                    if(map->tiles[p.first][p.second].occupant && 
                        map->tiles[p.first][p.second].occupant->isAlly &&
                        map->tiles[p.first][p.second].occupant->hp < map->tiles[p.first][p.second].occupant->maxHp)
                     {
@@ -858,7 +854,7 @@ public:
                 }
 
                 // Update tileInfo
-                if(map->tiles[cursor->col][cursor->row].occupied)
+                if(map->tiles[cursor->col][cursor->row].occupant)
                 {
                     tileInfo->UpdateTextTextures({
                                 map->tiles[cursor->col][cursor->row].occupant->name,

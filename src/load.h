@@ -153,7 +153,6 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
                         level.enemies.push_back(move(unitCopy));
                         level.map.tiles[col][row].occupant = level.enemies.back().get();
                     }
-					level.map.tiles[col][row].occupied = true;
 				}
             }
         }

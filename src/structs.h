@@ -137,6 +137,8 @@ struct Unit
     {} // haha c++
     // This little thing is like a vestigial organ
     // disgusting
+
+    Unit(Unit &) = default;
 };
 
 
@@ -152,7 +154,6 @@ struct Tile
     int type = 0;
     int penalty = 1;
     int avoid = 0;
-    bool occupied = false;
     Unit *occupant = nullptr;
 };
 struct Tilemap
@@ -195,7 +196,6 @@ struct Level
         for(pair<int, int> tile : tiles)
         {
             map.tiles[tile.first][tile.second].occupant = nullptr;
-            map.tiles[tile.first][tile.second].occupied = false;
         }
     }
 };
@@ -211,7 +211,7 @@ struct Cursor
     int sourceCol = -1; // Where the cursor was before choosing a target
     int sourceRow = -1;
 
-    int viewportSize = 8;
+    int viewportSize = VIEWPORT_SIZE;
     int viewportCol = 0;
     int viewportRow = 0;
 

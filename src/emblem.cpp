@@ -21,6 +21,8 @@
 #include <queue>
 #include <assert.h>
 
+using namespace std;
+
 typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
@@ -30,7 +32,8 @@ typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
 
-using namespace std;
+typedef pair<int, int> point;
+typedef vector<point> path;
 
 #include "constants.h"
 
@@ -58,8 +61,8 @@ static bool GlobalEditorMode = false;
 static int GlobalCurrentID = 0;
 
 // editor
-static pair<int, int> point_debug = pair<int, int>(0, 0);
-static vector<pair<int, int>> path_debug = {};
+static point editor_cursor = pair<int, int>(0, 0);
+static path path_debug = {};
 
 #include "structs.h"
 #include "fight_res.h"

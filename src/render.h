@@ -11,7 +11,10 @@
 void
 RenderTile(int col, int row, const SDL_Color &color)
 {
-    assert(col >= 0 && row >= 0);
+    //TODO: Put the viewport stuff all in here, so the rest of the
+    // code doesn't have to worry about it.
+
+    //assert(col >= 0 && row >= 0);
     SDL_Rect tileRect = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
 
     SDL_SetRenderDrawColor(GlobalRenderer, color.r, color.g, color.b, color.a);
@@ -154,9 +157,15 @@ Render(const Tilemap &map, const Cursor &cursor,
                 {
                     RenderTile(screenCol, screenRow, wallColor);
                 } break;
+                case(OBJECTIVE):
+                {
+                    RenderTile(screenCol, screenRow, objectiveColor);
+                } break;
 
                 default:
-                {} break;
+                {
+                    cout << "Unhandled tile render\n";
+                } break;
             }
         }
     }
@@ -241,7 +250,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             int screenCol = col - cursor.viewportCol;
             int screenRow = row - cursor.viewportRow;
             const Tile *tileToRender = &map.tiles[col][row];
-            if(tileToRender->occupied)
+            if(tileToRender->occupant)
             {
                 if(tileToRender->occupant->isExhausted)
                 {
@@ -397,7 +406,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)
     {
-        assert(map.tiles[cursor.col][cursor.row].occupied);
+        assert(map.tiles[cursor.col][cursor.row].occupant);
         RenderPortrait(500, 400, map.tiles[cursor.col][cursor.row].occupant->portrait);
     }
 
@@ -429,19 +438,22 @@ Render(const Tilemap &map, const Cursor &cursor,
 	}
 
 // ============================ editor debug ===================================
-    if(path_debug.size() > 0)
+    if(GlobalEditorMode)
     {
-        for(pair<int, int> point : path_debug)
+        if(path_debug.size() > 0)
         {
-            RenderTile(point.first - cursor.viewportCol,
-                       point.second - cursor.viewportRow,
-                       healColor);
+            for(pair<int, int> point : path_debug)
+            {
+                RenderTile(point.first - cursor.viewportCol,
+                           point.second - cursor.viewportRow,
+                           healColor);
+            }
         }
-    }
 
-    RenderTile(point_debug.first - cursor.viewportCol,
-               point_debug.second - cursor.viewportRow,
-               editorColor);
+        RenderTile(editor_cursor.first - cursor.viewportCol,
+                   editor_cursor.second - cursor.viewportRow,
+                   editorColor);
+    }
 }
 
 #endif

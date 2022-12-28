@@ -16,6 +16,7 @@
 #define JOYSTICK_COOLDOWN_TIME 4 // Frames
 
 // rendering
+#define VIEWPORT_SIZE 8
 #define TILE_SIZE 60
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
@@ -88,6 +89,7 @@ enum AIState
 // Tiles
 const SDL_Color floorColor = {255, 255, 255, 255};
 const SDL_Color wallColor = {50, 50, 50, 255};
+const SDL_Color objectiveColor = {50, 200, 50, 255};
 
 // Overlays
 const SDL_Color moveColor = {0, 150, 0, 100};
@@ -100,7 +102,7 @@ const SDL_Color readyMod = {255, 255, 255, 0};
 const SDL_Color editorColor = {255, 255, 0, 100};
 
 // UI
-const SDL_Color backgroundColor = {200, 200, 10, 255};
+const SDL_Color backgroundColor = {165, 179, 201, 255};
 const SDL_Color uiColor = {60, 60, 150, 255};
 const SDL_Color outlineColor = {10, 10, 10, 255};
 const SDL_Color uiAltColor = {60, 100, 30, 255};

@@ -9,10 +9,9 @@
 
 #if EDITOR
 
+static uint8_t selectedIndex = 0;
 void UnitEditor(vector<unique_ptr<Unit>> *units)
 {
-	static uint8_t selectedIndex = 0;
-
 	ImGui::Begin("unit editor");
 	{
 		if(ImGui::Button("create"))
@@ -72,28 +71,83 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 	ImGui::End();
 }
 
-void LevelEditor(Level *level)
+// Generate arbitrary debug paths
+void 
+GenerateDebugPaths(const Level &level)
+{
+    static int col = 0;
+    static int row = 0;
+    static int destCol = 0;
+    static int destRow = 0;
+    ImGui::Text("From:");
+    ImGui::SliderInt("fcol", &col, 0, 10);
+    ImGui::SliderInt("frow", &row, 0, 10);
+    ImGui::Text("To:");
+    ImGui::SliderInt("dcol", &destCol, 0, 10);
+    ImGui::SliderInt("drow", &destRow, 0, 10);
+    if(ImGui::Button("from"))
+    {
+        path_debug = GetPath(level.map, col, row, destCol, destRow);
+    }
+}
+
+void
+EditorPollForKeyboardInput()
+{
+    //TODO: Make the editor also move the viewport.
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+    {
+        editor_cursor.first = max(editor_cursor.first - 1, 0);
+    }
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+    {
+        editor_cursor.first = min(editor_cursor.first + 1, 10);
+    }
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
+    {
+        editor_cursor.second = max(editor_cursor.second - 1, 0);
+    }
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
+    {
+        editor_cursor.second = min(editor_cursor.second + 1, 10);
+    }
+}
+
+void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 {
 	ImGui::Begin("level editor");
 	{
+        static bool showDebugPaths = false;
+
         //TODO: point and click feature plz!!!
         ImGui::Text("Cursor:");
-        ImGui::SliderInt("col", &point_debug.first, 0, 10);
-        ImGui::SliderInt("row", &point_debug.second, 0, 10);
-        static int col = 0;
-        static int row = 0;
-        static int destCol = 0;
-        static int destRow = 0;
-        ImGui::Text("From:");
-        ImGui::SliderInt("col", &col, 0, 10);
-        ImGui::SliderInt("row", &row, 0, 10);
-        ImGui::Text("To:");
-        ImGui::SliderInt("dcol", &destCol, 0, 10);
-        ImGui::SliderInt("drow", &destRow, 0, 10);
-        if(ImGui::Button("from"))
+        ImGui::SliderInt("col", &editor_cursor.first, 0, 10);
+        ImGui::SliderInt("row", &editor_cursor.second, 0, 10);
+
+        EditorPollForKeyboardInput();
+
+        if(ImGui::Button("add"))
         {
-            path_debug = GetPath(level->map, col, row, destCol, destRow);
+            if(!(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant ||
+                 level->map.tiles[editor_cursor.first][editor_cursor.second].type == WALL))
+            {
+                level->allies.push_back(make_unique<Unit>(*units[selectedIndex]));
+                level->allies.back()->col = editor_cursor.first;
+                level->allies.back()->row = editor_cursor.second;
+                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = level->allies.back().get();
+            }
+            else
+            {
+                cout << "Cannot place unit there.\n";
+            }
         }
+
+        ImGui::Checkbox("debug paths", &showDebugPaths);
+        if(showDebugPaths)
+        {
+            GenerateDebugPaths(*level);
+        }
+
         if(ImGui::Button("distance"))
         {
             PrintDistanceField(DistanceField(level->map, 0, 0));
@@ -158,7 +212,7 @@ void EditorPass(vector<unique_ptr<Unit>> *units,
         
         if(showLevelEditor)
         {
-			LevelEditor(level);
+			LevelEditor(level, *units);
         }
     }
 	ImGui::Render();

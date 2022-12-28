@@ -21,6 +21,7 @@ HandleEvents(InputState *input)
         if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_TAB)
         {
             GlobalEditorMode = !GlobalEditorMode;
+            return;
         }
         if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {

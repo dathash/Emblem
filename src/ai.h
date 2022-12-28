@@ -124,7 +124,19 @@ public:
                 {
                     return unit.isAlly;
                 });
-        pair<int, int> targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
+		pair<int, int> targetSquare;
+		vector<pair<int, int>> path = GetPath(*map, cursor->col, cursor->row, target->col, target->row);
+		if(path.size() > cursor->selected->mov)
+		{
+			targetSquare = FindClosestAccessibleTile(*map, 
+							   path[cursor->selected->mov].first, 
+							   path[cursor->selected->mov].second);
+		}
+		else
+		{
+			targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
+		}
+
         printf("AI COMMAND | Move Cursor from <%d, %d> to <%d, %d>\n", 
             cursor->col, cursor->row, targetSquare.first, targetSquare.second);
 
@@ -154,9 +166,7 @@ public:
         printf("AI COMMAND | Place Unit %d at <%d, %d>\n",
                cursor->selected->id, cursor->col, cursor->row); 
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
-        map->tiles[cursor->selectedCol][cursor->selectedRow].occupied = false;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
-        map->tiles[cursor->col][cursor->row].occupied = true;
 
         // unit has to know its position as well
         cursor->selected->col = cursor->col;

@@ -4,24 +4,15 @@ todo
 Alex Hartford
 
 MVP
+    Generate Arrow while selecting
     Better enemy ai
-        A*
-        Goes for "beneficial trades"
-            Higher damage output than input.
-            kills
-        healing?
+        We use A* when we go after a unit, but we don't use it when choosing the
+            closest unit yet.
         Ranged Attacks
         BUG | AI actions don't move the viewport.
         BUG | After attacking, TileInfo doesn't update.
     IMGUI
         Level Saving/Editing/Loading
-            Change the structure of our units/level structs.
-                Make the units be an array, where each unit's pointer is kept at
-                its given id space.
-                Then, make the level's "allies" and "enemies"
-                vectors each just contain ids, which index into that array.
-            Will be faster, simpler, and easier to reason about.
-            Will also lead to just one source of units, which is a great place to be.
 
 BUGS
     Constant Framerate seems to not work.
@@ -34,10 +25,27 @@ NICE
     Rendering
         Animation
             Placing Unit moves them smoothly to that square (A-star)
-            Generate Arrow while selecting?
         Draw Attack range squares
         Background Tiles
         Character sprites when hovering
     BUG | Just cycle through possible targets when targeting, don't allow them to
     move around willy-nilly!
     BUG | Can only attack or heal if there are targets
+    Enemy healing?
+    Enemy AI Goes for "beneficial trades"
+        Higher damage output than input.
+        kills
+
+REFACTOR
+    The Grid code is a mess, but it could probably just be like 3 functions.
+    The animation system needs an overhaul.
+    remove unique_ptrs. Just allocate and free the memory ourselves.
+    big unit storage refactor
+        No more allies and enemies vectors, just one big vector we iterate through.
+        Change the structure of our units/level structs.
+            Make the units be an array, where each unit's pointer is kept at
+            its given id space.
+            Then, make the level's "allies" and "enemies"
+            vectors each just contain ids, which index into that array.
+        Will be faster, simpler, and easier to reason about.
+        Will also lead to just one source of units, which is a great place to be.

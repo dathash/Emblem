@@ -15,14 +15,14 @@ IsValidBoundsPosition(int mapWidth, int mapHeight, int col, int row)
 			row >= 0 && row < mapHeight);
 }
 
-// returns true if a given pair is in a vector of pairs.
+// returns true if a given point is in a vector.
 bool
-VectorHasElement(const pair<int, int> &pair_in, const vector<pair<int, int>> &vector_in)
+VectorHasElement(const point &point_in, const vector<point> &vector_in)
 {
     bool has = false;
-    for(pair<int, int> p : vector_in)
+    for(point p : vector_in)
     {
-        if(pair_in == p)
+        if(point_in == p)
         {
             has = true;
         }
@@ -31,11 +31,11 @@ VectorHasElement(const pair<int, int> &pair_in, const vector<pair<int, int>> &ve
 }
 
 
-// returns a vector of pairs representing accessible squares for a given unit.
-vector<pair<int, int>>
+// returns a vector of points representing accessible squares for a given unit.
+vector<point>
 AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
 {
-    vector<pair<int, int>> accessible;
+    vector<point> accessible;
 
 	// initialize costs matrix
 	vector<vector<int>> costs;
@@ -52,13 +52,13 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
     int directionsRow[] = { -1,  0,  1,  0 };
     int directionsCol[] = {  0,  1,  0, -1 };
 
-    queue<pair<int, int>> unexplored;
+    queue<point> unexplored;
     unexplored.push(make_pair(col, row));
     costs[col][row] = 0;
     
     while(!unexplored.empty())
     { 
-        pair<int, int> current = unexplored.front();
+        point current = unexplored.front();
         unexplored.pop();
 
         accessible.push_back(current);
@@ -71,7 +71,7 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
             if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
                 int newCost;
-                if(map.tiles[newCol][newRow].occupied && map.tiles[newCol][newRow].occupant->isAlly != sourceIsAlly)
+                if(map.tiles[newCol][newRow].occupant && map.tiles[newCol][newRow].occupant->isAlly != sourceIsAlly)
                 {
                     newCost = 100;
                 }
@@ -92,20 +92,20 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
     }
 
     accessible.erase(remove_if(accessible.begin(), accessible.end(),
-            [map, col, row](pair<int, int> p)
+            [map, col, row](point p)
             {
                 return (!(p.first == col && p.second == row) &&
-                        map.tiles[p.first][p.second].occupied);
+                        map.tiles[p.first][p.second].occupant);
             }),
             accessible.end());
     return accessible;
 }
 
 // returns a vector of pairs representing accessible squares for a given unit.
-vector<pair<int, int>>
+vector<point>
 InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
 {
-    vector<pair<int, int>> interactible;
+    vector<point> interactible;
 
 	// initialize costs matrix
 	vector<vector<int>> costs;
@@ -122,13 +122,13 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
     int directionsRow[] = { -1,  0,  1,  0 };
     int directionsCol[] = {  0,  1,  0, -1 };
 
-    queue<pair<int, int>> unexplored;
+    queue<point> unexplored;
     unexplored.push(make_pair(col, row));
     costs[col][row] = 0;
     
     while(!unexplored.empty())
     { 
-        pair<int, int> current = unexplored.front();
+        point current = unexplored.front();
         unexplored.pop();
 
         interactible.push_back(current);
@@ -154,7 +154,7 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
     }
 
     interactible.erase(remove_if(interactible.begin(), interactible.end(),
-            [&costs, min](pair<int, int> p) { return costs[p.first][p.second] < min; }),
+            [&costs, min](point p) { return costs[p.first][p.second] < min; }),
             interactible.end());
     return interactible;
 }
@@ -165,8 +165,7 @@ float ManhattanDistance(int col, int row, int tar_col, int tar_row)
     return (abs(tar_col - col) + abs(tar_row - row));
 }
 
-// A* Pathfinding distance equation.
-
+//TODO: This is still doing things naively.
 // Finds the nearest unit to the cursor, based on the given predicate expression.
 Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
 {
@@ -177,7 +176,7 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
     {
         for(int row = 0; row < map.height; ++row)
         {
-            if(map.tiles[col][row].occupied && predicate(*map.tiles[col][row].occupant))
+            if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
             {
                 distance = ManhattanDistance(cursor.col, cursor.row, col, row);
                 if(distance < minDistance)
@@ -194,13 +193,13 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
 
 // Finds the nearest accessible space to a given target point.
 // TODO: Do something better than manhattan distance.
-pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
+point FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 {
     int minDistance = 100;
     int distance = 0;
-    pair<int, int> result;
+    point result;
 
-    for(pair<int, int> p : map.accessible)
+    for(point p : map.accessible)
     {
         distance = ManhattanDistance(col, row, p.first, p.second);
         if(distance < minDistance)
@@ -217,9 +216,9 @@ pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 {
     Unit *result = nullptr;
-    for(pair<int, int> p : map.interactible)
+    for(point p : map.interactible)
     {
-        if(map.tiles[p.first][p.second].occupied && map.tiles[p.first][p.second].occupant->isAlly)
+        if(map.tiles[p.first][p.second].occupant && map.tiles[p.first][p.second].occupant->isAlly)
         {
             result = map.tiles[p.first][p.second].occupant;
         }
@@ -248,7 +247,7 @@ DistanceField(const Tilemap &map, int col, int row)
     vector<vector<int>> field;
     int minDistance = 100;
     int distance = 0;
-    pair<int, int> result;
+    point result;
 	for(int col = 0; col < map.width; ++col)
 	{
         vector<int> currentColumn = {};
@@ -262,13 +261,13 @@ DistanceField(const Tilemap &map, int col, int row)
     int directionsRow[] = { -1,  0,  1,  0 };
     int directionsCol[] = {  0,  1,  0, -1 };
 
-    queue<pair<int, int>> unexplored;
+    queue<point> unexplored;
     unexplored.push(make_pair(col, row));
     field[col][row] = 0;
 
     while(!unexplored.empty())
     { 
-        pair<int, int> current = unexplored.front();
+        point current = unexplored.front();
         unexplored.pop();
 
         for(int i = 0; i < 4; ++i)
@@ -291,11 +290,11 @@ DistanceField(const Tilemap &map, int col, int row)
 }
 
 void
-PrintFromsField(const vector<vector<pair<int, int>>> &field)
+PrintFromsField(const vector<vector<point>> &field)
 {
-    for(vector<pair<int, int>> row : field)
+    for(vector<point> row : field)
     {
-        for(pair<int, int> val : row)
+        for(point val : row)
         {
             string dir = "o";
             if(val.first == -1 && val.second == -1)
@@ -330,17 +329,17 @@ PrintFromsField(const vector<vector<pair<int, int>>> &field)
 
 
 // Get a field of pairs which indicate where they came from.
-vector<vector<pair<int, int>>>
+vector<vector<point>>
 FromsField(const Tilemap &map, int col, int row)
 {
     //TODO: look up what this field should be called haha
-    vector<vector<pair<int, int>>> froms;
+    vector<vector<point>> froms;
 	for(int col = 0; col < map.width; ++col)
 	{
-        vector<pair<int, int>> currentColumn = {};
+        vector<point> currentColumn = {};
         for(int row = 0; row < map.height; ++row)
         {
-            currentColumn.push_back(pair<int, int>(-1, -1));
+            currentColumn.push_back(point(-1, -1));
         }
         froms.push_back(currentColumn);
 	}
@@ -348,25 +347,21 @@ FromsField(const Tilemap &map, int col, int row)
     int directionsRow[] = { -1,  0,  1,  0 };
     int directionsCol[] = {  0,  1,  0, -1 };
 
-    queue<pair<int, int>> unexplored;
+    queue<point> unexplored;
     unexplored.push(make_pair(col, row));
-    froms[col][row] = pair<int, int>(-2, -2);
+    froms[col][row] = point(-2, -2);
 
     while(!unexplored.empty())
     { 
-        pair<int, int> current = unexplored.front();
+        point current = unexplored.front();
         unexplored.pop();
-        cout << current.first << " " << current.second << "\n";
-        cout << "New ones:\n";
         for(int i = 0; i < 4; ++i)
         {
-            pair<int, int> direction = pair<int, int>( -directionsRow[i], -directionsCol[i]);
+            point direction = point( -directionsRow[i], -directionsCol[i]);
             int newCol = current.first + directionsCol[i];
             int newRow = current.second + directionsRow[i];
             if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
-                cout << newCol << " " << newRow << "\n";
-                cout << "Pen: " << map.tiles[newCol][newRow].penalty << "\n";
                 if(froms[newCol][newRow].first == -1 &&
                    froms[newCol][newRow].second == -1 &&
                    map.tiles[newCol][newRow].penalty == 1)
@@ -384,31 +379,31 @@ FromsField(const Tilemap &map, int col, int row)
 }
 
 void
-PrintPath(const vector<pair<int, int>> path)
+PrintPath(const vector<point> path)
 {
     cout << "PATH:\n";
-    for(pair<int, int> point : path)
+    for(point point : path)
     {
         cout << point.first << " " << point.second << "\n";
     }
 }
 
 // TODO: Col and row get swapped for some reason. I fixed it, but it's suck.
-vector<pair<int, int>>
+vector<point>
 GetPath(const Tilemap &map,
         int col, int row,
         int destCol, int destRow)
 {
-    vector<pair<int, int>> path;
-    vector<vector<pair<int, int>>> froms = FromsField(map, destCol, destRow);
-    PrintFromsField(froms);
-    pair<int, int> next = pair<int, int>(col, row);
-	pair<int, int> from = pair<int, int>(0, 0);
+    vector<point> path;
+    vector<vector<point>> froms = FromsField(map, destCol, destRow);
+
+    point next = point(col, row);
+	point from = point(0, 0);
     while(!(from.first == -2 && from.second == -2))
     {
         path.push_back(next);
 		from = froms[next.first][next.second];
-        next = pair<int, int>(next.first + from.second,
+        next = point(next.first + from.second,
                               next.second + from.first);
         if(from.first == -1 && from.second == -1)
         {
@@ -416,7 +411,6 @@ GetPath(const Tilemap &map,
             return path;
         }
     }
-    PrintPath(path);
     return path;
 }
 
