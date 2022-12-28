@@ -137,11 +137,7 @@ int main(int argc, char *argv[])
 // ====================== command phase ========================================
         if(GlobalTurnStart)
         {
-            for(auto const &unit : level.enemies)
-            {
-                unit->isExhausted = false;
-            }
-            for(auto const &unit : level.allies)
+            for(auto const &unit : level.combatants)
             {
                 unit->isExhausted = false;
             }
@@ -186,11 +182,7 @@ int main(int argc, char *argv[])
 // ========================= update phase =======================================
         cursor.Update();
 
-        for(auto const &unit : level.allies)
-        {
-            unit->Update();
-        }
-        for(auto const &unit : level.enemies)
+        for(auto const &unit : level.combatants)
         {
             unit->Update();
         }

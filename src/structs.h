@@ -168,30 +168,21 @@ struct Tilemap
 struct Level
 {
     Tilemap map;
-    vector<unique_ptr<Unit>> allies;
-    vector<unique_ptr<Unit>> enemies;
+    vector<unique_ptr<Unit>> combatants;
 
     void RemoveDeadUnits()
     {
         vector<pair<int, int>> tiles;
 
-        for(auto const &u : allies)
+        for(auto const &u : combatants)
         {
             if(u->shouldDie)
             {
                 tiles.push_back(pair<int, int>(u->col, u->row)); 
             }
         }
-        for(auto const &u : enemies)
-        {
-            if(u->shouldDie)
-            {
-                tiles.push_back(pair<int, int>(u->col, u->row));
-            }
-        }
 
-        allies.erase(remove_if(allies.begin(), allies.end(), [](auto const &u) { return u->shouldDie; }), allies.end());
-        enemies.erase(remove_if(enemies.begin(), enemies.end(), [](auto const &u) { return u->shouldDie; }), enemies.end());
+        combatants.erase(remove_if(combatants.begin(), combatants.end(), [](auto const &u) { return u->shouldDie; }), combatants.end());
 
         for(pair<int, int> tile : tiles)
         {

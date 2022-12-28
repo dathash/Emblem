@@ -131,10 +131,10 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
             if(!(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant ||
                  level->map.tiles[editor_cursor.first][editor_cursor.second].type == WALL))
             {
-                level->allies.push_back(make_unique<Unit>(*units[selectedIndex]));
-                level->allies.back()->col = editor_cursor.first;
-                level->allies.back()->row = editor_cursor.second;
-                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = level->allies.back().get();
+                level->combatants.push_back(make_unique<Unit>(*units[selectedIndex]));
+                level->combatants.back()->col = editor_cursor.first;
+                level->combatants.back()->row = editor_cursor.second;
+                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = level->combatants.back().get();
             }
             else
             {

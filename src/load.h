@@ -65,7 +65,7 @@ vector<string> split(const string &text, char sep) {
     return tokens;
 }
 
-// loads a level from a file. returns a new tilemap.
+// loads a level from a file.
 Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 {
     string line;
@@ -143,16 +143,8 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
                     int row = stoi(tokens[3]);
                     unitCopy->col = col;
                     unitCopy->row = row;
-                    if(unitCopy->isAlly)
-                    {
-                        level.allies.push_back(move(unitCopy));
-                        level.map.tiles[col][row].occupant = level.allies.back().get();
-                    }
-                    else
-                    {
-                        level.enemies.push_back(move(unitCopy));
-                        level.map.tiles[col][row].occupant = level.enemies.back().get();
-                    }
+                    level.combatants.push_back(move(unitCopy));
+                    level.map.tiles[col][row].occupant = level.combatants.back().get();
 				}
             }
         }
@@ -285,8 +277,8 @@ SaveLevel(string filename_in, const Level &level)
     fp << "\n";
 
     fp << "COM <UNT <name> <id> <col> <row>\n";
-    // TODO: Consolidate
-    for(const unique_ptr<Unit> &unit : level.allies)
+    // TODO: Separate allies and enemies when we save levels?
+    for(const unique_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "
                      << unit->id << " "
@@ -295,14 +287,6 @@ SaveLevel(string filename_in, const Level &level)
                      << "\n";
     }
     fp << "\n";
-    for(const unique_ptr<Unit> &unit : level.enemies)
-    {
-        fp << "UNT " << unit->name << " "
-                     << unit->id << " "
-                     << unit->col << " "
-                     << unit->row << " "
-                     << "\n";
-    }
     fp.close();
 }
 

@@ -406,6 +406,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)
     {
+        // TODO: Broken because level loading can put us into degenerate gamestates
         assert(map.tiles[cursor.col][cursor.row].occupant);
         RenderPortrait(500, 400, map.tiles[cursor.col][cursor.row].occupant->portrait);
     }
