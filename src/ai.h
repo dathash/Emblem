@@ -6,6 +6,13 @@
 #ifndef AI_H
 #define AI_H
 
+void EndAITurn()
+{
+    GlobalAIState = ENEMY_TURN;
+    GlobalPlayerTurn = true;
+    GlobalTurnStart = true;
+}
+
 // ============================= ai commands ================================
 class AIFindNextUnitCommand : public Command
 {
@@ -36,14 +43,9 @@ public:
         }
         else
         {
-            // TODO: Make this robust. Happens in some place.
-			printf("Out of units! Transitioning...\n");
-            GlobalAIState = ENEMY_TURN;
-            GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
+            EndAITurn();
         }
     }
-
 private: 
     Cursor *cursor;
     const Tilemap &map;
@@ -75,7 +77,6 @@ public:
 
         GlobalAIState = SELECTED;
     }
-
 private:
     Cursor *cursor;
     Tilemap *map;
@@ -103,7 +104,6 @@ public:
 
         GlobalAIState = FINDING_NEXT;
     }
-
 private:
     Cursor *cursor; 
 };
@@ -220,7 +220,6 @@ private:
     Tilemap *map;
     CombatResolver *combatResolver;
 };
-
 
 
 // ============================== struct ====================================

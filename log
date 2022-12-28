@@ -1,33 +1,30 @@
 
-Emblem
-Log
+emblem
+log
 Alex Hartford
 
-# Plan
-Build a fun little game!
+Plan
+> Build a fun little game!
 
 # Notes
 July 15
-    I'm finding that there are many easy tasks, which are not essential, which I
+* I'm finding that there are many easy tasks, which are not essential, which I
     love to do, and few very difficult tasks, which are essential, which I do
     not want to do. It is as though the force of gravity pulls me down, away
     from the work that truly needs doing.
-
-    Also of note is that refactoring is pretty enjoyable, especially when I
+* Also of note is that refactoring is pretty enjoyable, especially when I
     write decent code. Maybe it falls into that category of easy tasks above,
-    but it feels beneficial in some way.
-	
-    Testing, however, seems to have very little import. I will try some more,
+    but it feels beneficial in some way.	
+* Testing, however, seems to have very little import. I will try some more,
     but it has some crucial flaws.  To test the important parts of the system is
     difficult, and to test the trivial parts of the system is easy.  Must
     reconcile these differences.
 
 November 4
-    Returned to the game after a long time away.
+* Returned to the game after a long time away.
     It's actually pretty well put together, and I didn't have a hard time
     reading the code or adding something new.
-
-    I'm still a little intimidated by adding big features, which is next.
+* I'm still a little intimidated by adding big features, which is next.
 
 # Log
 ## Summer 2022
@@ -48,3 +45,5 @@ Total   | 57h
 ## Fall 2022
 Nov 4   | 1h  | 3800 lines     | Added Portraits to the game.
 Nov 5   | 6h  | 3900 lines     | Added Editor features, like saving/loading files.
+## Winter 2023
+Dec 23  | 2h  | 4000 lines     | Refactored input function. Started work on pathfinding.

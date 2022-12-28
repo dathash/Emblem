@@ -70,7 +70,6 @@ AccessibleFrom(const Tilemap &map, int col, int row, int max, bool sourceIsAlly)
             int newRow = current.second + directionsRow[i];
             if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
-                const Tile *tileToExplore = &map.tiles[newCol][newRow];
                 int newCost;
                 if(map.tiles[newCol][newRow].occupied && map.tiles[newCol][newRow].occupant->isAlly != sourceIsAlly)
                 {
@@ -141,7 +140,6 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
             int newRow = current.second + directionsRow[i];
             if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
-                const Tile *tileToExplore = &map.tiles[newCol][newRow];
                 int newCost = costs[current.first][current.second] + 1;
                 if(newCost < costs[newCol][newRow])
                 {
@@ -215,7 +213,6 @@ pair<int, int> FindClosestAccessibleTile(const Tilemap &map, int col, int row)
     return result;
 }
 
-
 // Finds a target for an attack.
 Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 {
@@ -226,9 +223,201 @@ Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
         {
             result = map.tiles[p.first][p.second].occupant;
         }
+        // determine nearest enemy here
+        // (add possible enemies to a list, sort.)
     }
     return result;
 }
 
+void
+PrintDistanceField(const vector<vector<int>> &field)
+{
+    for(vector<int> row : field)
+    {
+        for(int val : row)
+        {
+            cout << std::setw(3) << val << " ";
+        }
+        cout << "\n";
+    }
+}
+
+vector<vector<int>>
+DistanceField(const Tilemap &map, int col, int row)
+{
+    vector<vector<int>> field;
+    int minDistance = 100;
+    int distance = 0;
+    pair<int, int> result;
+	for(int col = 0; col < map.width; ++col)
+	{
+        vector<int> currentColumn = {};
+        for(int row = 0; row < map.height; ++row)
+        {
+            currentColumn.push_back(100);
+        }
+        field.push_back(currentColumn);
+	}
+
+    int directionsRow[] = { -1,  0,  1,  0 };
+    int directionsCol[] = {  0,  1,  0, -1 };
+
+    queue<pair<int, int>> unexplored;
+    unexplored.push(make_pair(col, row));
+    field[col][row] = 0;
+
+    while(!unexplored.empty())
+    { 
+        pair<int, int> current = unexplored.front();
+        unexplored.pop();
+
+        for(int i = 0; i < 4; ++i)
+        {
+            int newCol = current.first + directionsCol[i];
+            int newRow = current.second + directionsRow[i];
+            if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+            {
+                int newCost = field[current.first][current.second] + map.tiles[newCol][newRow].penalty;
+                if(newCost < field[newCol][newRow])
+                {
+                    field[newCol][newRow] = newCost;
+                    unexplored.push(make_pair(newCol, newRow));
+                }
+            }
+        }
+    }
+
+    return field;
+}
+
+void
+PrintFromsField(const vector<vector<pair<int, int>>> &field)
+{
+    for(vector<pair<int, int>> row : field)
+    {
+        for(pair<int, int> val : row)
+        {
+            string dir = "o";
+            if(val.first == -1 && val.second == -1)
+            {
+                dir = "o";
+            }
+            else if(val.first == -2 && val.second == -2)
+            {
+                dir = "x";
+            }
+            else if(val.first == -1 && val.second == 0)
+            {
+                dir = "<";
+            }
+            else if(val.first == 1 && val.second == 0)
+            {
+                dir = ">";
+            }
+            else if(val.first == 0 && val.second == -1)
+            {
+                dir = "^";
+            }
+            else if(val.first == 0 && val.second == 1)
+            {
+                dir = "v";
+            }
+            cout << dir << " ";
+        }
+        cout << "\n";
+    }
+}
+
+
+// Get a field of pairs which indicate where they came from.
+vector<vector<pair<int, int>>>
+FromsField(const Tilemap &map, int col, int row)
+{
+    //TODO: look up what this field should be called haha
+    vector<vector<pair<int, int>>> froms;
+	for(int col = 0; col < map.width; ++col)
+	{
+        vector<pair<int, int>> currentColumn = {};
+        for(int row = 0; row < map.height; ++row)
+        {
+            currentColumn.push_back(pair<int, int>(-1, -1));
+        }
+        froms.push_back(currentColumn);
+	}
+
+    int directionsRow[] = { -1,  0,  1,  0 };
+    int directionsCol[] = {  0,  1,  0, -1 };
+
+    queue<pair<int, int>> unexplored;
+    unexplored.push(make_pair(col, row));
+    froms[col][row] = pair<int, int>(-2, -2);
+
+    while(!unexplored.empty())
+    { 
+        pair<int, int> current = unexplored.front();
+        unexplored.pop();
+        cout << current.first << " " << current.second << "\n";
+        cout << "New ones:\n";
+        for(int i = 0; i < 4; ++i)
+        {
+            pair<int, int> direction = pair<int, int>( -directionsRow[i], -directionsCol[i]);
+            int newCol = current.first + directionsCol[i];
+            int newRow = current.second + directionsRow[i];
+            if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+            {
+                cout << newCol << " " << newRow << "\n";
+                cout << "Pen: " << map.tiles[newCol][newRow].penalty << "\n";
+                if(froms[newCol][newRow].first == -1 &&
+                   froms[newCol][newRow].second == -1 &&
+                   map.tiles[newCol][newRow].penalty == 1)
+                    // is froms algorithm always shortest path?
+                    // TODO: doesn't handle penalties (forest, desert, etc.)
+                {
+                    froms[newCol][newRow] = direction;
+                    unexplored.push(make_pair(newCol, newRow));
+                }
+            }
+        }
+    }
+
+    return froms;
+}
+
+void
+PrintPath(const vector<pair<int, int>> path)
+{
+    cout << "PATH:\n";
+    for(pair<int, int> point : path)
+    {
+        cout << point.first << " " << point.second << "\n";
+    }
+}
+
+// TODO: Col and row get swapped for some reason. I fixed it, but it's suck.
+vector<pair<int, int>>
+GetPath(const Tilemap &map,
+        int col, int row,
+        int destCol, int destRow)
+{
+    vector<pair<int, int>> path;
+    vector<vector<pair<int, int>>> froms = FromsField(map, destCol, destRow);
+    PrintFromsField(froms);
+    pair<int, int> next = pair<int, int>(col, row);
+	pair<int, int> from = pair<int, int>(0, 0);
+    while(!(from.first == -2 && from.second == -2))
+    {
+        path.push_back(next);
+		from = froms[next.first][next.second];
+        next = pair<int, int>(next.first + from.second,
+                              next.second + from.first);
+        if(from.first == -1 && from.second == -1)
+        {
+            cout << "ERROR: Targeting Wall.\n";
+            return path;
+        }
+    }
+    PrintPath(path);
+    return path;
+}
 
 #endif

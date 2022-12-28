@@ -1,53 +1,7 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Main
-// Date: November 2022
-
-/*
-    TODO
-    MVP
-
-        IMGUI
-            Level Saving/Editing/Loading
-                Change the structure of our units/level structs.
-                    Make the units be an array, where each unit's pointer is kept at
-                    its given id space.
-                    Then, make the level's "allies" and "enemies"
-                    vectors each just contain ids, which index into that array.
-                Will be faster, simpler, and easier to reason about.
-                Will also lead to just one source of units, which is a great place to be.
-
-        Better enemy ai
-            A*
-            Goes for "beneficial trades"
-                Higher damage output than input.
-                kills
-            healing?
-            Ranged Attacks
-
-			BUG | AI actions don't move the viewport.
-			BUG | After attacking, TileInfo doesn't update.
-
-    NICE
-        More Asserts everywhere
-        Level Transitions/Win Screen
-
-		Rendering
-			Animation
-				Placing Unit moves them smoothly to that square (A-star)
-				Generate Arrow while selecting?
-			Draw Attack range squares
-			Background Tiles
-			Character sprites when hovering
-
-		Just cycle through possible targets when targeting, don't allow them to
-		move around willy-nilly!
-        Can only attack or heal if there are targets
-
-        CSV/TSV for units and levels?
-            Probably don't need this because we're doing
-            all our editing in the editor now.
- */
+// Date: December 2022
 
 // ========================== includes =====================================
 #include <SDL.h>
@@ -75,15 +29,42 @@ typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
-typedef float real32;
-typedef double real64;
 
 using namespace std;
 
-#include "globals.h"
+#include "constants.h"
+
+// ============================= globals ===================================
+static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+static AIState GlobalAIState = ENEMY_TURN;
+
+static SDL_Window *GlobalWindow = nullptr;
+static SDL_Renderer *GlobalRenderer = nullptr;
+static TTF_Font *GlobalFont = nullptr;
+static ma_engine GlobalMusicEngine;
+static bool GlobalRunning = false;
+static u64 GlobalFrameNumber = 0;
+static int GlobalLevelNumber = 0;
+static bool GlobalNextLevel = false;
+static int GlobalTotalLevels = 2;
+
+static bool GlobalResolvingAction = false;
+
+static bool GlobalPlayerTurn = true;
+static bool GlobalTurnStart = false;
+static bool GlobalGamepadMode = false;
+
+static bool GlobalEditorMode = false;
+static int GlobalCurrentID = 0;
+
+// editor
+static pair<int, int> point_debug = pair<int, int>(0, 0);
+static vector<pair<int, int>> path_debug = {};
+
 #include "structs.h"
 #include "fight_res.h"
 #include "init.h"
+#include "input.h"
 #include "grid.h"
 #include "fight.h"
 #include "command.h"
@@ -91,8 +72,6 @@ using namespace std;
 #include "render.h"
 #include "editor.h"
 
-
-// ================================== main =================================
 int main(int argc, char *argv[])
 {
 // ================================== init =================================
@@ -141,7 +120,7 @@ int main(int argc, char *argv[])
     // frame timer
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
-    real32 elapsedMS = 0.0f;
+    float elapsedMS = 0.0f;
 
 	// Play Music
     //ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/bach.mp3", NULL);
@@ -230,28 +209,27 @@ int main(int argc, char *argv[])
 			   unitInfo, tileInfo, combatInfo, combatResolver);
 
 #if EDITOR
-        // IMGUI
         if(GlobalEditorMode)
-        {
             EditorPass(&units, &level);
-        }
 #endif
 
         SDL_RenderPresent(GlobalRenderer);
 
-
 // =========================== timing ============================================
         endTime = SDL_GetPerformanceCounter();
         elapsedMS = ((endTime - startTime) / 
-					 (real32)SDL_GetPerformanceFrequency() * 1000.0f);
+					 (float)SDL_GetPerformanceFrequency() * 1000.0f);
 
+		// Set constant 60fps
         if(elapsedMS < MS_PER_FRAME)
         {
             SDL_Delay((int)(MS_PER_FRAME - elapsedMS));
         }
+
         startTime = SDL_GetPerformanceCounter();
         GlobalFrameNumber++;
-    }
+    } // End Game Loop
+
     Close();
     return 0;
 }

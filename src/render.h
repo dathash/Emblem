@@ -11,6 +11,7 @@
 void
 RenderTile(int col, int row, const SDL_Color &color)
 {
+    assert(col >= 0 && row >= 0);
     SDL_Rect tileRect = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
 
     SDL_SetRenderDrawColor(GlobalRenderer, color.r, color.g, color.b, color.a);
@@ -426,6 +427,21 @@ Render(const Tilemap &map, const Cursor &cursor,
                     combatResolver.victim->isAlly);
         }
 	}
+
+// ============================ editor debug ===================================
+    if(path_debug.size() > 0)
+    {
+        for(pair<int, int> point : path_debug)
+        {
+            RenderTile(point.first - cursor.viewportCol,
+                       point.second - cursor.viewportRow,
+                       healColor);
+        }
+    }
+
+    RenderTile(point_debug.first - cursor.viewportCol,
+               point_debug.second - cursor.viewportRow,
+               editorColor);
 }
 
 #endif
