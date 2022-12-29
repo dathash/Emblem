@@ -114,23 +114,34 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 					{
 						switch(stoi(tokens[col]))
 						{
-							case(0):
+							case(FLOOR):
 							{
-								level.map.tiles[col][mapRow].type = FLOOR;
-								level.map.tiles[col][mapRow].penalty = 1;
+                                level.map.tiles[col][mapRow] = 
+                                    FLOOR_TILE;
 							} break;
-							case(1):
+							case(WALL):
 							{
-								level.map.tiles[col][mapRow].type = WALL;
-								level.map.tiles[col][mapRow].penalty = 100;
+                                level.map.tiles[col][mapRow] = 
+                                    WALL_TILE;
 							} break;
-							case(2):
+							case(FOREST):
 							{
-								level.map.tiles[col][mapRow].type = OBJECTIVE;
-								level.map.tiles[col][mapRow].penalty = 1;
+                                level.map.tiles[col][mapRow] = 
+                                    FOREST_TILE;
+							} break;
+							case(DESERT):
+							{
+                                level.map.tiles[col][mapRow] = 
+                                    DESERT_TILE;
+							} break;
+							case(OBJECTIVE):
+							{
+                                level.map.tiles[col][mapRow] = 
+                                    OBJECTIVE_TILE;
 							} break;
 							default:
 							{
+                                cout << "ERROR: Unhandled tile type in loader!\n";
 							} break;
 						}
 					}

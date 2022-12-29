@@ -166,6 +166,9 @@ public:
             cursor->col = newCol;
             cursor->row = newRow;
 
+            cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
+                                        cursor->col, cursor->row);
+
             // For rendering
             cursor->MoveViewport(newCol, newRow);
 

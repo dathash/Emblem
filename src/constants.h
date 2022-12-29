@@ -89,10 +89,13 @@ enum AIState
 // Tiles
 const SDL_Color floorColor = {255, 255, 255, 255};
 const SDL_Color wallColor = {50, 50, 50, 255};
-const SDL_Color objectiveColor = {50, 200, 50, 255};
+const SDL_Color forestColor = {50, 200, 50, 255};
+const SDL_Color desertColor = {200, 200, 100, 255};
+const SDL_Color objectiveColor = {50, 50, 200, 255};
 
 // Overlays
 const SDL_Color moveColor = {0, 150, 0, 100};
+const SDL_Color pathColor = {50, 255, 50, 255};
 const SDL_Color aiMoveColor = {150, 0, 0, 100};
 const SDL_Color attackColor = {250, 0, 0, 100};
 const SDL_Color healColor = {0, 255, 0, 100};

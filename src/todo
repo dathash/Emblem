@@ -1,0 +1,46 @@
+
+emblem
+todo
+Alex Hartford
+
+MVP
+    Better enemy ai
+        We use A* when we go after a unit, but we don't use it when choosing the
+            closest unit yet.
+        Ranged Attacks
+        BUG | AI actions don't move the viewport.
+        BUG | After attacking, TileInfo doesn't update.
+    IMGUI
+        Level Saving/Editing/Loading
+
+NICE
+    Level Transitions/Win Screen
+    Generate Arrow while selecting
+    Placing Unit moves them smoothly to that square (A-star)
+    Draw Attack range squares
+    Background Tiles
+    BUG | Just cycle through possible targets when targeting, don't allow them to
+        move around willy-nilly!
+    BUG | Can only attack or heal if there are targets
+    Enemy healing?
+    Enemy AI Goes for "beneficial trades"
+        Higher damage output than input.
+        kills
+    BUG | Constant Framerate seems to not work.
+        Debug without IMGUI, I think that library makes framerate constant on
+        its own.
+    BUG | Paths are still generated when we target walls, unless we don't border
+    any open space. There's a lot weird going on here, and it can be pretty
+    simple if done right.
+    More Asserts everywhere
+
+REFACTOR
+    The Grid code is a mess, but it could probably just be like 3 functions.
+    The animation system needs an overhaul.
+    remove unique_ptrs. Just allocate and free the memory ourselves.
+    big unit storage refactor
+        Open Questions:
+            * Should the Map contain all tiles, which contain all units?
+            * Should The Level contain maps and units, and units contain
+              references to their tiles?
+        I don't really know.

@@ -402,13 +402,13 @@ GetPath(const Tilemap &map,
     while(!(from.first == -2 && from.second == -2))
     {
         path.push_back(next);
-		from = froms[next.first][next.second];
+        from = froms[next.first][next.second];
         next = point(next.first + from.second,
-                              next.second + from.first);
+                     next.second + from.first);
         if(from.first == -1 && from.second == -1)
         {
             cout << "ERROR: Targeting Wall.\n";
-            return path;
+            return {};
         }
     }
     return path;

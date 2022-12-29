@@ -95,19 +95,19 @@ void
 EditorPollForKeyboardInput()
 {
     //TODO: Make the editor also move the viewport.
-    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_A)))
     {
         editor_cursor.first = max(editor_cursor.first - 1, 0);
     }
-    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
     {
         editor_cursor.first = min(editor_cursor.first + 1, 10);
     }
-    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
     {
         editor_cursor.second = max(editor_cursor.second - 1, 0);
     }
-    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
     {
         editor_cursor.second = min(editor_cursor.second + 1, 10);
     }
@@ -120,12 +120,9 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         static bool showDebugPaths = false;
 
         //TODO: point and click feature plz!!!
-        ImGui::Text("Cursor:");
-        ImGui::SliderInt("col", &editor_cursor.first, 0, 10);
-        ImGui::SliderInt("row", &editor_cursor.second, 0, 10);
-
         EditorPollForKeyboardInput();
 
+        ImGui::Text("Units:");
         if(ImGui::Button("add"))
         {
             if(!(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant ||
@@ -142,15 +139,60 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
             }
         }
 
+        ImGui::Text("Tiles:");
+        if(ImGui::Button("floor"))
+        {
+            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
+                FLOOR_TILE;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("wall"))
+        {
+            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
+                WALL_TILE;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("forest"))
+        {
+            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
+                FOREST_TILE;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("desert"))
+        {
+            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
+                DESERT_TILE;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("objective"))
+        {
+            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
+                OBJECTIVE_TILE;
+        }
+
+        /*
+        if(ImGui::Button("remove"))
+        {
+            if(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant)
+            {
+                level->combatants.push_back(make_unique<Unit>(*units[selectedIndex]));
+                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = level->combatants.back().get();
+            }
+            else
+            {
+                cout << "Cannot place unit there.\n";
+            }
+        }
+        */
+
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)
         {
             GenerateDebugPaths(*level);
-        }
-
-        if(ImGui::Button("distance"))
-        {
-            PrintDistanceField(DistanceField(level->map, 0, 0));
+            if(ImGui::Button("distance"))
+            {
+                PrintDistanceField(DistanceField(level->map, 0, 0));
+            }
         }
 	}
 	ImGui::End();

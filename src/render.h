@@ -157,6 +157,14 @@ Render(const Tilemap &map, const Cursor &cursor,
                 {
                     RenderTile(screenCol, screenRow, wallColor);
                 } break;
+                case(FOREST):
+                {
+                    RenderTile(screenCol, screenRow, forestColor);
+                } break;
+                case(DESERT):
+                {
+                    RenderTile(screenCol, screenRow, desertColor);
+                } break;
                 case(OBJECTIVE):
                 {
                     RenderTile(screenCol, screenRow, objectiveColor);
@@ -184,6 +192,13 @@ Render(const Tilemap &map, const Cursor &cursor,
                            cell.second - cursor.viewportRow, 
                            moveColor);
             }
+        }
+
+        for(const point &p : cursor.path_draw)
+        {
+            RenderTile(p.first - cursor.viewportCol, 
+                       p.second - cursor.viewportRow, 
+                       pathColor);
         }
     }
 

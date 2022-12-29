@@ -147,8 +147,18 @@ enum TileTypes
 {
     FLOOR,
     WALL,
+    FOREST,
+    DESERT,
     OBJECTIVE,
 };
+
+//TODO: There's gotta be a better way than shitty macros to
+//      set some default tile types.
+#define FLOOR_TILE {FLOOR, 1, 0, nullptr}
+#define WALL_TILE {WALL, 100, 0, nullptr}
+#define FOREST_TILE {FOREST, 2, 10, nullptr}
+#define DESERT_TILE {DESERT, 4, 0, nullptr}
+#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr}
 struct Tile
 {
     int type = 0;
@@ -207,6 +217,7 @@ struct Cursor
     int viewportRow = 0;
 
     SpriteSheet sheet;
+    path path_draw = {};
 
     Cursor(SpriteSheet sheet_in)
     : sheet(sheet_in)
