@@ -8,17 +8,18 @@
 
 // ========================= constants =====================================
 // meta
-#define EDITOR 1
+#define EDITOR 0
 
 // low level
 #define MS_PER_FRAME 16.666
 #define JOYSTICK_DEAD_ZONE 8000
-#define JOYSTICK_COOLDOWN_TIME 4 // Frames
+#define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
 // rendering
-#define VIEWPORT_SIZE 8
+#define VIEWPORT_WIDTH 15
+#define VIEWPORT_HEIGHT 10
 #define TILE_SIZE 60
-#define SCREEN_WIDTH 800
+#define SCREEN_WIDTH 1120
 #define SCREEN_HEIGHT 800
 
 #define PORTRAIT_SIZE 300

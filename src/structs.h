@@ -221,7 +221,6 @@ struct Cursor
     int sourceCol = -1; // Where the cursor was before choosing a target
     int sourceRow = -1;
 
-    int viewportSize = VIEWPORT_SIZE;
     int viewportCol = 0;
     int viewportRow = 0;
 
@@ -240,9 +239,9 @@ struct Cursor
     bool
     WithinViewport(int col, int row) const
     {
-        return (col < viewportSize + viewportCol &&
+        return (col < VIEWPORT_WIDTH + viewportCol &&
                 col >= viewportCol &&
-                row < viewportSize + viewportRow &&
+                row < VIEWPORT_HEIGHT + viewportRow &&
                 row >= viewportRow);
     }
 
@@ -250,7 +249,7 @@ struct Cursor
     void
     MoveViewport(int col, int row)
     {
-        if(col >= viewportSize + viewportCol)
+        if(col >= VIEWPORT_WIDTH + viewportCol)
         {
             ++viewportCol;
         }
@@ -258,7 +257,7 @@ struct Cursor
         {
             --viewportCol;
         }
-        else if(row >= viewportSize + viewportRow)
+        else if(row >= VIEWPORT_HEIGHT + viewportRow)
         {
             ++viewportRow;
         }

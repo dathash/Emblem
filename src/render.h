@@ -15,11 +15,14 @@ RenderTileColor(int col, int row, const SDL_Color &color)
     // code doesn't have to worry about it.
 
     //assert(col >= 0 && row >= 0);
-    SDL_Rect tileRect = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+    SDL_Rect tileRect = {TILE_SIZE / 16 + col * TILE_SIZE, TILE_SIZE / 16 + row * TILE_SIZE, 
+                         TILE_SIZE - (TILE_SIZE / 16) * 2, 
+                         TILE_SIZE - (TILE_SIZE / 16) * 2};
 
     SDL_SetRenderDrawColor(GlobalRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(GlobalRenderer, &tileRect);
-    SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
+    // TODO: Add a cool outline?
+    SDL_SetRenderDrawColor(GlobalRenderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
@@ -152,9 +155,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     SDL_RenderClear(GlobalRenderer);
 
 // ================================= render map tiles ============================================
-    for(int col = cursor.viewportCol; col < cursor.viewportSize + cursor.viewportCol; ++col)
+    for(int col = cursor.viewportCol; col < VIEWPORT_WIDTH + cursor.viewportCol; ++col)
     {
-        for(int row = cursor.viewportRow; row < cursor.viewportSize + cursor.viewportRow; ++row)
+        for(int row = cursor.viewportRow; row < VIEWPORT_HEIGHT + cursor.viewportRow; ++row)
         {
             int screenCol = col - cursor.viewportCol;
             int screenRow = row - cursor.viewportRow;
@@ -243,9 +246,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
 // ================================= render sprites ================================================
-    for(int col = cursor.viewportCol; col < cursor.viewportSize + cursor.viewportCol; ++col)
+    for(int col = cursor.viewportCol; col < VIEWPORT_WIDTH + cursor.viewportCol; ++col)
     {
-        for(int row = cursor.viewportRow; row < cursor.viewportSize + cursor.viewportRow; ++row)
+        for(int row = cursor.viewportRow; row < VIEWPORT_HEIGHT + cursor.viewportRow; ++row)
         {
             int screenCol = col - cursor.viewportCol;
             int screenRow = row - cursor.viewportRow;
@@ -284,7 +287,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < tileInfo.rows; ++i)
         {
-            SDL_Rect infoRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect infoRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
             SDL_SetRenderDrawColor(GlobalRenderer, uiAltColor.r, uiAltColor.g, uiAltColor.b, uiAltColor.a);
             SDL_RenderFillRect(GlobalRenderer, &infoRect);
             SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
@@ -292,7 +295,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 
             RenderText(tileInfo.infoTextTextures[i], infoRect.x, infoRect.y);
         }
-        RenderHealthBar(TILE_SIZE * cursor.viewportSize, 2 * MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp, true);
+        RenderHealthBar(TILE_SIZE * VIEWPORT_WIDTH, 2 * MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp, true);
                                                       // 2 is for alignment
     }
 
@@ -302,7 +305,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < unitInfo.rows; ++i)
         {
-            SDL_Rect infoRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect infoRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             if(GlobalInterfaceState == UNIT_INFO)
             {
@@ -326,9 +329,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < combatInfo.rows; ++i)
         {
-            SDL_Rect sourceRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect sourceRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
-            SDL_Rect targetRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT + combatInfo.rows * sourceRect.h, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect targetRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT + combatInfo.rows * sourceRect.h, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &sourceRect);
@@ -341,8 +344,8 @@ Render(const Tilemap &map, const Cursor &cursor,
             RenderText(combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
             RenderText(combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
         }
-        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage, true);
-        RenderHealthBarDamage(TILE_SIZE * cursor.viewportSize, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage, false);
+        RenderHealthBarDamage(TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage, true);
+        RenderHealthBarDamage(TILE_SIZE * VIEWPORT_WIDTH, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage, false);
                                                       // 5 is for alignment
     }
 
@@ -353,7 +356,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < gameMenu.rows; ++i)
         {
-            SDL_Rect menuRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect menuRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &menuRect);
@@ -363,7 +366,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             RenderText(gameMenu.optionTextTextures[i], menuRect.x, menuRect.y);
         }
 
-        SDL_Rect menuSelectorRect = {TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_Rect menuSelectorRect = {TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
         SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
@@ -375,7 +378,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < unitMenu.rows; ++i)
         {
-            SDL_Rect menuRect = {TILE_SIZE * cursor.viewportSize, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect menuRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &menuRect);
@@ -385,7 +388,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             RenderText(unitMenu.optionTextTextures[i], menuRect.x, menuRect.y);
         }
 
-        SDL_Rect menuSelectorRect = {TILE_SIZE * cursor.viewportSize, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_Rect menuSelectorRect = {TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
         SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
