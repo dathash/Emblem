@@ -221,16 +221,16 @@ void EditorPass(vector<unique_ptr<Unit>> *units,
 
             if(ImGui::Button("Load"))
             {
-                *units = LoadCharacters(string(DATA_PATH) + string(fileName));
-                cout << "Characters loaded: " << fileName << "\n";
+                *units = LoadUnits(string(DATA_PATH) + string(fileName));
+                cout << "Units loaded: " << fileName << "\n";
                 *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
-                cout << "Level reloaded: " << levelFileName << "\n";
+                cout << "Level loaded: " << levelFileName << "\n";
             }
             ImGui::SameLine();
-            if(ImGui::Button("Save Ch"))
+            if(ImGui::Button("Save Units"))
             {
-                SaveCharacters(string(DATA_PATH) + string(fileName), *units);
-                cout << "Characters saved: " << fileName << "\n";
+                SaveUnits(string(DATA_PATH) + string(fileName), *units);
+                cout << "Units saved: " << fileName << "\n";
             }
             ImGui::SameLine();
             if(ImGui::Button("Save Level"))

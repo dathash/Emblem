@@ -9,7 +9,7 @@
 // ================================ Rendering ==========================================
 // Renders an individual tile to the screen, given its game coords and color.
 void
-RenderTile(int col, int row, const SDL_Color &color)
+RenderTileColor(int col, int row, const SDL_Color &color)
 {
     //TODO: Put the viewport stuff all in here, so the rest of the
     // code doesn't have to worry about it.
@@ -21,6 +21,18 @@ RenderTile(int col, int row, const SDL_Color &color)
     SDL_RenderFillRect(GlobalRenderer, &tileRect);
     SDL_SetRenderDrawColor(GlobalRenderer, 0, 0, 0, 255);
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
+}
+
+// Renders an individual tile to the screen, given its game coords and tile (for texture).
+void
+RenderTileTexture(const Tilemap &map, const Tile &tile,
+                  int col, int row)
+{
+    SDL_Rect destination = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+    SDL_Rect source = {tile.atlas_index.first * map.atlas_tile_size, 
+                       tile.atlas_index.second * map.atlas_tile_size, 
+                       map.atlas_tile_size, map.atlas_tile_size};
+    SDL_RenderCopy(GlobalRenderer, map.atlas.sdlTexture, &source, &destination);
 }
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
@@ -146,35 +158,8 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             int screenCol = col - cursor.viewportCol;
             int screenRow = row - cursor.viewportRow;
-            const Tile *tileToRender = &map.tiles[col][row];
-            switch(tileToRender->type)
-            {
-                case(FLOOR):
-                {
-                    RenderTile(screenCol, screenRow, floorColor);
-                } break;
-                case(WALL):
-                {
-                    RenderTile(screenCol, screenRow, wallColor);
-                } break;
-                case(FOREST):
-                {
-                    RenderTile(screenCol, screenRow, forestColor);
-                } break;
-                case(DESERT):
-                {
-                    RenderTile(screenCol, screenRow, desertColor);
-                } break;
-                case(OBJECTIVE):
-                {
-                    RenderTile(screenCol, screenRow, objectiveColor);
-                } break;
-
-                default:
-                {
-                    cout << "Unhandled tile render\n";
-                } break;
-            }
+            const Tile &tile = map.tiles[col][row];
+            RenderTileTexture(map, tile, screenCol, screenRow);
         }
     }
 
@@ -188,7 +173,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTile(cell.first - cursor.viewportCol, 
+                RenderTileColor(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
                            moveColor);
             }
@@ -196,7 +181,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 
         for(const point &p : cursor.path_draw)
         {
-            RenderTile(p.first - cursor.viewportCol, 
+            RenderTileColor(p.first - cursor.viewportCol, 
                        p.second - cursor.viewportRow, 
                        pathColor);
         }
@@ -208,7 +193,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTile(cell.first - cursor.viewportCol, 
+                RenderTileColor(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
                            aiMoveColor);
             }
@@ -222,7 +207,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTile(cell.first - cursor.viewportCol, 
+                RenderTileColor(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
                            attackColor);
             }
@@ -236,7 +221,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTile(cell.first - cursor.viewportCol, 
+                RenderTileColor(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
                            healColor);
             }
@@ -250,7 +235,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTile(cell.first - cursor.viewportCol, 
+                RenderTileColor(cell.first - cursor.viewportCol, 
                            cell.second - cursor.viewportRow, 
                            aiMoveColor);
             }
@@ -460,13 +445,13 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             for(pair<int, int> point : path_debug)
             {
-                RenderTile(point.first - cursor.viewportCol,
+                RenderTileColor(point.first - cursor.viewportCol,
                            point.second - cursor.viewportRow,
                            healColor);
             }
         }
 
-        RenderTile(editor_cursor.first - cursor.viewportCol,
+        RenderTileColor(editor_cursor.first - cursor.viewportCol,
                    editor_cursor.second - cursor.viewportRow,
                    editorColor);
     }

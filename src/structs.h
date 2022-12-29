@@ -6,7 +6,7 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-// ============================ structs ====================================
+
 struct InputState
 {
     bool up;
@@ -19,7 +19,7 @@ struct InputState
 	int joystickCooldown = 0;
 };
 
-
+// ================================= Rendering =================================
 struct Texture
 {
     SDL_Texture *sdlTexture;
@@ -36,12 +36,17 @@ struct Texture
         this->dir = dir_in;
         this->filename = filename_in;
     }
+
+    Texture()
+    {
+        printf("WARN: Default texture constructor called.\n");
+    }
 };
 
 struct SpriteSheet
 {
     Texture texture;
-    int size    = 32;
+    int size    = SPRITE_SIZE;
     int tracks  = 0;
     int frames  = 0;
     int track   = 0;
@@ -85,6 +90,7 @@ struct SpriteSheet
     }
 };
 
+// =================================== Gameplay ================================
 struct Unit
 {
     string name;
@@ -152,19 +158,20 @@ enum TileTypes
     OBJECTIVE,
 };
 
-//TODO: There's gotta be a better way than shitty macros to
-//      set some default tile types.
-#define FLOOR_TILE {FLOOR, 1, 0, nullptr}
-#define WALL_TILE {WALL, 100, 0, nullptr}
-#define FOREST_TILE {FOREST, 2, 10, nullptr}
-#define DESERT_TILE {DESERT, 4, 0, nullptr}
-#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr}
+//TODO: There's gotta be a better way than macros to set some default tile types
+#define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
+#define WALL_TILE {WALL, 100, 0, nullptr, {6, 22}}
+#define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
+#define DESERT_TILE {DESERT, 4, 0, nullptr, {18, 29}}
+#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
+
 struct Tile
 {
     int type = 0;
     int penalty = 1;
     int avoid = 0;
     Unit *occupant = nullptr;
+    point atlas_index = {0, 16};
 };
 struct Tilemap
 {
@@ -173,6 +180,8 @@ struct Tilemap
     vector<vector<Tile>> tiles;
     vector<pair<int, int>> accessible;
     vector<pair<int, int>> interactible;
+    Texture atlas;
+    int atlas_tile_size = ATLAS_TILE_SIZE;
 };
 
 struct Level

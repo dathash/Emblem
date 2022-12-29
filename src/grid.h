@@ -316,6 +316,10 @@ GetField(const Tilemap &map, int col, int row)
     queue<point> unexplored;
     unexplored.push(make_pair(col, row));
     field[col][row] = point(-2, -2);
+    if(map.tiles[col][row].type == WALL)
+    {
+        field[col][row] = point(-1, -1);
+    }
     distances[col][row] = 0;
 
     while(!unexplored.empty())
@@ -342,8 +346,8 @@ GetField(const Tilemap &map, int col, int row)
             }
         }
     }
-    PrintDistanceField(distances);
     cout << "=============================\n";
+    PrintDistanceField(distances);
     PrintField(field);
 
     return field;
@@ -370,7 +374,8 @@ GetPath(const Tilemap &map,
 
     point next = point(col, row);
 	point from = field[next.first][next.second];
-    while(!(from.first == -2 && from.second == -2))
+    while(!(from.first == -2 && from.second == -2) &&
+          !(from.first == -1 && from.second == -1))
     {
         path.push_back(next);
         from = field[next.first][next.second];
@@ -378,8 +383,8 @@ GetPath(const Tilemap &map,
                      next.second + from.first);
         if(from.first == -1 && from.second == -1)
         {
-            cout << "ERROR: Targeting Wall.\n";
             return {};
+            printf("HEY\n");
         }
     }
     PrintPath(path);

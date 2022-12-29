@@ -111,6 +111,10 @@ public:
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
 
+        // TODO: Should I reset this when I finish using a unit, or
+        // when I'm about to use one?
+        //cursor->path_draw = {};
+
         // change state
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
@@ -135,6 +139,8 @@ public:
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
         cursor->selected = nullptr;
+
+        cursor->path_draw = {};
 
         // change state
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
@@ -166,9 +172,6 @@ public:
             cursor->col = newCol;
             cursor->row = newRow;
 
-            cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
-                                        cursor->col, cursor->row);
-
             // For rendering
             cursor->MoveViewport(newCol, newRow);
 
@@ -176,6 +179,9 @@ public:
             const Tile *hoverTile = &map.tiles[newCol][newRow];
             if(VectorHasElement(point(newCol, newRow), map.accessible))
             {
+                cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
+                                            cursor->col, cursor->row);
+
                 if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
                 {
                     GlobalInterfaceState = SELECTED_OVER_GROUND;
@@ -258,6 +264,8 @@ public:
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
+
+        cursor->path_draw = {};
 
         // unit has to know its position as well
         cursor->selected->col = cursor->col;
@@ -480,6 +488,8 @@ public:
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
+        cursor->path_draw = {};
+
         // change state
         GlobalResolvingAction = true;
         GlobalInterfaceState = NO_OP;
@@ -509,6 +519,8 @@ public:
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
+
+        cursor->path_draw = {};
 
         // change state
         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -876,6 +888,8 @@ public:
 
                 cursor->selectedCol = -1;
                 cursor->selectedRow = -1;
+
+                cursor->path_draw = {};
                 GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
             } break;
             default:

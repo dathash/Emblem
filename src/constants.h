@@ -22,6 +22,8 @@
 #define SCREEN_HEIGHT 800
 
 #define PORTRAIT_SIZE 300
+#define SPRITE_SIZE 32
+#define ATLAS_TILE_SIZE 16
 
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
@@ -35,6 +37,7 @@
 #define DATA_PATH "../data/"
 #define SPRITES_PATH "../assets/sprites/"
 #define PORTRAITS_PATH "../assets/portraits/"
+#define TILESETS_PATH "../assets/tilesets/"
 #define INITIAL_LEVEL "l1.txt"
 #define INITIAL_UNITS "units.txt"
 
@@ -88,19 +91,13 @@ enum AIState
 // TODO put global tile types here, instead of macro solution in structs.h.
 
 // ============================ color palette ==================================
-// Tiles
-const SDL_Color floorColor = {255, 255, 255, 255};
-const SDL_Color wallColor = {50, 50, 50, 255};
-const SDL_Color forestColor = {50, 200, 50, 255};
-const SDL_Color desertColor = {200, 200, 100, 255};
-const SDL_Color objectiveColor = {50, 50, 200, 255};
-
-// Overlays
-const SDL_Color moveColor = {0, 150, 0, 100};
-const SDL_Color pathColor = {50, 255, 50, 255};
+// Tile overlays
+const SDL_Color moveColor = {100, 100, 180, 100};
+const SDL_Color pathColor = {150, 150, 150, 100};
 const SDL_Color aiMoveColor = {150, 0, 0, 100};
 const SDL_Color attackColor = {250, 0, 0, 100};
 const SDL_Color healColor = {0, 255, 0, 100};
+
 const SDL_Color exhaustedMod = {50, 0, 50, 0};
 const SDL_Color readyMod = {255, 255, 255, 0};
 

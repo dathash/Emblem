@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
 
 // ================================== load =================================
-    vector<unique_ptr<Unit>> units = LoadCharacters(DATA_PATH + string(INITIAL_UNITS));
+    vector<unique_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
     vector<string> levels = {DATA_PATH + string("l1.txt"), DATA_PATH + string("l2.txt")};
     Level level = LoadLevel(levels[GlobalLevelNumber], units);
     Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 

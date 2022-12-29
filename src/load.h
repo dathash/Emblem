@@ -89,7 +89,11 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
                 rest = line.substr(4);
 				tokens = split(rest, ' ');
 
-				if(type == "WDT")
+                if(type == "ATL")
+                {
+                    level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
+                }
+				else if(type == "WDT")
 				{
 					level.map.width = stoi(rest);
 				}
@@ -169,8 +173,8 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 	return level;
 }
 
-// loads the characters for the game from a file. returns a vector of them.
-vector<unique_ptr<Unit>> LoadCharacters(string filename_in)
+// loads units from a file. returns a vector of them.
+vector<unique_ptr<Unit>> LoadUnits(string filename_in)
 {
     string line;
 	string type;
@@ -223,9 +227,9 @@ vector<unique_ptr<Unit>> LoadCharacters(string filename_in)
 
 // ================================ saving ====================================
 
-// saves the characters to a file.
+// saves the units to a file.
 void
-SaveCharacters(string filename_in, const vector<unique_ptr<Unit>> &units)
+SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
 {
     ofstream fp;
     fp.open(filename_in);
@@ -271,6 +275,8 @@ SaveLevel(string filename_in, const Level &level)
     fp << "COM File: Level\n";
     fp << "COM Date: November 2022\n\n";
     fp << "COM NOTE: Don't use tabs in here!\n\n";
+
+    fp << "ATL " << level.map.atlas.filename << "\n\n";
 
     // Save Map Data
     fp << "WDT " << level.map.width << "\n";

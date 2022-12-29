@@ -8,36 +8,35 @@ MVP
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
         Ranged Attacks
-
-NICE
+    Conversations
+    Battle Animations
     Level Transitions/Win Screen
-    Generate Arrow while selecting
-    Placing Unit moves them smoothly to that square (A-star)
-    Draw Attack range squares
-    Background Tiles
-    BUG | Just cycle through possible targets when targeting, don't allow them to
-        move around willy-nilly!
-    BUG | Can only attack or heal if there are targets
-    Enemy healing?
-    Enemy AI Goes for "beneficial trades"
-        Higher damage output than input.
-        kills
-    BUG | Constant Framerate seems to not work.
-        Debug without IMGUI, I think that library makes framerate constant on
-        its own.
-    BUG | Paths are still generated when we target walls, unless we don't border
-    any open space. There's a lot weird going on here, and it can be pretty
-    simple if done right.
-    More Asserts everywhere
-    Easy: Make tiles global.
+    Cycle through possible targets when targeting instead of moving cursor.
+    Only able to attack or heal if there are targets.
     BUG | AI actions don't move the viewport.
     BUG | After attacking, TileInfo doesn't update.
 
+NICE
+    Polish
+        Generate true arrow for movement (with bitfields)
+        Placing Unit moves them smoothly to that square (A-star)
+        Draw Attack range squares
+    AI
+        Enemy healing?
+        Enemy AI Goes for "beneficial trades"
+            Higher damage output than input.
+            goes for kills
+    Easy: Make tiles global.
+    More Asserts everywhere
+    BUG | Constant Framerate seems to not work.
+        Debug without IMGUI, I think that library makes framerate constant on
+        its own.
+
+
 REFACTOR
     The Grid code is a mess, but it could probably just be like 3 functions.
-    The animation system needs an overhaul.
-    remove unique ptrs. Just allocate and free the memory ourselves.
     big unit storage refactor
+        remove unique ptrs. Just allocate and free the memory ourselves.
         Open Questions:
             * Should the Map contain all tiles, which contain all units?
             * Should The Level contain maps and units, and units contain
