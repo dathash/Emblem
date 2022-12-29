@@ -29,5 +29,4 @@ UNT Thief 3 0 6
 UNT Brute 4 4 2 
 UNT Brute 4 7 3 
 UNT Archer 5 7 5 
-UNT Donnel 0 3 0 
 

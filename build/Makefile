@@ -1,6 +1,6 @@
 
 
-SRC = $(wildcard ../src/*.cpp ../ext/imgui/*.cpp ../ext/imgui/backends/*.cpp)
+SRC = $(wildcard ../src/*.cpp ../ext/imgui/*.cpp ../ext/imgui/misc/cpp/*.cpp ../ext/imgui/backends/*.cpp)
 OBJ = ${SRC:.cpp=.o}
 
 LDFLAGS = -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf

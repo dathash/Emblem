@@ -12,6 +12,7 @@
 #include <miniaudio.h>
 
 #include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_sdlrenderer.h"
 

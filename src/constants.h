@@ -84,8 +84,10 @@ enum AIState
 
     ENEMY_TURN
 };
+// =============================== tiles =======================================
+// TODO put global tile types here, instead of macro solution in structs.h.
 
-// ============================ color palette ==============================
+// ============================ color palette ==================================
 // Tiles
 const SDL_Color floorColor = {255, 255, 255, 255};
 const SDL_Color wallColor = {50, 50, 50, 255};

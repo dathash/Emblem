@@ -56,7 +56,9 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 
 		assert(selectedIndex < units->size());
 		Unit *selected = (*units)[selectedIndex].get();
+
 		ImGui::Text("%s | %d", selected->name.c_str(), selected->id);
+        ImGui::InputText("name", &(selected->name));
 		// TODO
 		// Update name
 		// Update texture sources, spritesheet.
@@ -135,12 +137,28 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
             }
             else
             {
-                cout << "Cannot place unit there.\n";
+                cout << "MISUSE: Cannot place unit there.\n";
             }
         }
 
+        ImGui::SameLine();
+        if(ImGui::Button("remove"))
+        {
+            if(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant)
+            {
+                // TODO: This shouldn't even have to happen. Let's get rid of combatants<> when we can.
+                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant->shouldDie = true;
+                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = nullptr;
+            }
+            else
+            {
+                cout << "MISUSE: No unit to delete.\n";
+            }
+        }
+
+        // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
-        if(ImGui::Button("floor"))
+        if(ImGui::Button("none"))
         {
             level->map.tiles[editor_cursor.first][editor_cursor.second] = 
                 FLOOR_TILE;
@@ -152,38 +170,23 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
                 WALL_TILE;
         }
         ImGui::SameLine();
-        if(ImGui::Button("forest"))
+        if(ImGui::Button("frst"))
         {
             level->map.tiles[editor_cursor.first][editor_cursor.second] = 
                 FOREST_TILE;
         }
-        ImGui::SameLine();
-        if(ImGui::Button("desert"))
+
+        if(ImGui::Button("dsrt"))
         {
             level->map.tiles[editor_cursor.first][editor_cursor.second] = 
                 DESERT_TILE;
         }
         ImGui::SameLine();
-        if(ImGui::Button("objective"))
+        if(ImGui::Button("obj"))
         {
             level->map.tiles[editor_cursor.first][editor_cursor.second] = 
                 OBJECTIVE_TILE;
         }
-
-        /*
-        if(ImGui::Button("remove"))
-        {
-            if(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant)
-            {
-                level->combatants.push_back(make_unique<Unit>(*units[selectedIndex]));
-                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = level->combatants.back().get();
-            }
-            else
-            {
-                cout << "Cannot place unit there.\n";
-            }
-        }
-        */
 
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)

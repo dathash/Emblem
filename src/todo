@@ -8,10 +8,6 @@ MVP
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
         Ranged Attacks
-        BUG | AI actions don't move the viewport.
-        BUG | After attacking, TileInfo doesn't update.
-    IMGUI
-        Level Saving/Editing/Loading
 
 NICE
     Level Transitions/Win Screen
@@ -33,11 +29,14 @@ NICE
     any open space. There's a lot weird going on here, and it can be pretty
     simple if done right.
     More Asserts everywhere
+    Easy: Make tiles global.
+    BUG | AI actions don't move the viewport.
+    BUG | After attacking, TileInfo doesn't update.
 
 REFACTOR
     The Grid code is a mess, but it could probably just be like 3 functions.
     The animation system needs an overhaul.
-    remove unique_ptrs. Just allocate and free the memory ourselves.
+    remove unique ptrs. Just allocate and free the memory ourselves.
     big unit storage refactor
         Open Questions:
             * Should the Map contain all tiles, which contain all units?
