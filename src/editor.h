@@ -192,10 +192,6 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         if(showDebugPaths)
         {
             GenerateDebugPaths(*level);
-            if(ImGui::Button("distance"))
-            {
-                PrintDistanceField(DistanceField(level->map, 0, 0));
-            }
         }
 	}
 	ImGui::End();

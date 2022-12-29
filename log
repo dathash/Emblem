@@ -46,4 +46,8 @@ Total   | 57h
 Nov 4   | 1h  | 3800 lines     | Added Portraits to the game.
 Nov 5   | 6h  | 3900 lines     | Added Editor features, like saving/loading files.
 ## Winter 2023
-Dec 23  | 2h  | 4000 lines     | Refactored input function. Started work on pathfinding.
+Dec 23  | 2h  | 4000 lines      | Refactored input function. Started work on pathfinding.
+Dec 28  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
+                                  various stupid things I was doing. Realized
+                                  how many stupid things I was doing.
+

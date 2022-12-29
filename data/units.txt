@@ -9,6 +9,6 @@ COM <UNT <name>  <texture> <portrait> <id> <team> <mov> <hp> <max> <short> <long
 UNT Darko donnel.png donnel.png 0 Ally 4 12 6 1 1 4 6 80 
 UNT Soren soren.png noire.png 1 Ally 5 8 8 2 2 8 3 100 
 UNT Zarathustra lord.png lucina-transformed.png 2 Ally 6 10 10 1 2 5 5 90 
-UNT Thief thief.png ph.png 3 Enemy 2 6 6 1 1 5 1 80 
-UNT Brute brute.png ph.png 4 Enemy 1 10 10 1 1 7 2 50 
-UNT Archer archer.png ph.png 5 Enemy 2 8 8 2 2 8 1 80 
+UNT Thief thief.png ph.png 3 Enemy 6 6 6 1 1 5 1 80 
+UNT Brute brute.png ph.png 4 Enemy 4 10 10 1 1 7 2 50 
+UNT Archer archer.png ph.png 5 Enemy 5 8 8 2 2 8 1 80 

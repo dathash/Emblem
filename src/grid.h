@@ -241,56 +241,9 @@ PrintDistanceField(const vector<vector<int>> &field)
     }
 }
 
-vector<vector<int>>
-DistanceField(const Tilemap &map, int col, int row)
-{
-    vector<vector<int>> field;
-    int minDistance = 100;
-    int distance = 0;
-    point result;
-	for(int col = 0; col < map.width; ++col)
-	{
-        vector<int> currentColumn = {};
-        for(int row = 0; row < map.height; ++row)
-        {
-            currentColumn.push_back(100);
-        }
-        field.push_back(currentColumn);
-	}
-
-    int directionsRow[] = { -1,  0,  1,  0 };
-    int directionsCol[] = {  0,  1,  0, -1 };
-
-    queue<point> unexplored;
-    unexplored.push(make_pair(col, row));
-    field[col][row] = 0;
-
-    while(!unexplored.empty())
-    { 
-        point current = unexplored.front();
-        unexplored.pop();
-
-        for(int i = 0; i < 4; ++i)
-        {
-            int newCol = current.first + directionsCol[i];
-            int newRow = current.second + directionsRow[i];
-            if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
-            {
-                int newCost = field[current.first][current.second] + map.tiles[newCol][newRow].penalty;
-                if(newCost < field[newCol][newRow])
-                {
-                    field[newCol][newRow] = newCost;
-                    unexplored.push(make_pair(newCol, newRow));
-                }
-            }
-        }
-    }
-
-    return field;
-}
 
 void
-PrintFromsField(const vector<vector<point>> &field)
+PrintField(const vector<vector<point>> &field)
 {
     for(vector<point> row : field)
     {
@@ -328,12 +281,14 @@ PrintFromsField(const vector<vector<point>> &field)
 }
 
 
-// Get a field of pairs which indicate where they came from.
+// Get a field of pairs which indicate shortest paths to a specified node.
+// Also produces a Distance Field, which indicates distance at each point.
+// Currently just prints out the distance field.
 vector<vector<point>>
-FromsField(const Tilemap &map, int col, int row)
+GetField(const Tilemap &map, int col, int row)
 {
     //TODO: look up what this field should be called haha
-    vector<vector<point>> froms;
+    vector<vector<point>> field;
 	for(int col = 0; col < map.width; ++col)
 	{
         vector<point> currentColumn = {};
@@ -341,7 +296,18 @@ FromsField(const Tilemap &map, int col, int row)
         {
             currentColumn.push_back(point(-1, -1));
         }
-        froms.push_back(currentColumn);
+        field.push_back(currentColumn);
+	}
+
+    vector<vector<int>> distances;
+	for(int col = 0; col < map.width; ++col)
+	{
+        vector<int> currentColumn = {};
+        for(int row = 0; row < map.height; ++row)
+        {
+            currentColumn.push_back(100);
+        }
+        distances.push_back(currentColumn);
 	}
 
     int directionsRow[] = { -1,  0,  1,  0 };
@@ -349,33 +315,38 @@ FromsField(const Tilemap &map, int col, int row)
 
     queue<point> unexplored;
     unexplored.push(make_pair(col, row));
-    froms[col][row] = point(-2, -2);
+    field[col][row] = point(-2, -2);
+    distances[col][row] = 0;
 
     while(!unexplored.empty())
-    { 
+    {
         point current = unexplored.front();
         unexplored.pop();
+
         for(int i = 0; i < 4; ++i)
         {
-            point direction = point( -directionsRow[i], -directionsCol[i]);
+            // TODO: This is strange. I shouldn't have to swap them.
+            point direction = point(-directionsRow[i], -directionsCol[i]);
             int newCol = current.first + directionsCol[i];
             int newRow = current.second + directionsRow[i];
             if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
             {
-                if(froms[newCol][newRow].first == -1 &&
-                   froms[newCol][newRow].second == -1 &&
-                   map.tiles[newCol][newRow].penalty == 1)
-                    // is froms algorithm always shortest path?
-                    // TODO: doesn't handle penalties (forest, desert, etc.)
+                int newCost = distances[current.first][current.second]
+                              + map.tiles[newCol][newRow].penalty;
+                if(newCost < distances[newCol][newRow])
                 {
-                    froms[newCol][newRow] = direction;
+                    field[newCol][newRow] = direction;
+                    distances[newCol][newRow] = newCost;
                     unexplored.push(make_pair(newCol, newRow));
                 }
             }
         }
     }
+    PrintDistanceField(distances);
+    cout << "=============================\n";
+    PrintField(field);
 
-    return froms;
+    return field;
 }
 
 void
@@ -388,21 +359,21 @@ PrintPath(const vector<point> path)
     }
 }
 
-// TODO: Col and row get swapped for some reason. I fixed it, but it's suck.
+// TODO: Col and row get swapped for some reason. I put in a hotfix.
 vector<point>
 GetPath(const Tilemap &map,
         int col, int row,
         int destCol, int destRow)
 {
     vector<point> path;
-    vector<vector<point>> froms = FromsField(map, destCol, destRow);
+    vector<vector<point>> field = GetField(map, destCol, destRow);
 
     point next = point(col, row);
-	point from = point(0, 0);
+	point from = field[next.first][next.second];
     while(!(from.first == -2 && from.second == -2))
     {
         path.push_back(next);
-        from = froms[next.first][next.second];
+        from = field[next.first][next.second];
         next = point(next.first + from.second,
                      next.second + from.first);
         if(from.first == -1 && from.second == -1)
@@ -411,6 +382,7 @@ GetPath(const Tilemap &map,
             return {};
         }
     }
+    PrintPath(path);
     return path;
 }
 
