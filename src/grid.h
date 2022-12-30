@@ -389,7 +389,7 @@ GetPath(const Tilemap &map,
             printf("HEY\n");
         }
     }
-    PrintPath(path);
+    //PrintPath(path);
     return path;
 }
 

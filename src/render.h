@@ -268,27 +268,12 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
 
-
 // ================================= render cursor ================================================
     RenderSprite(cursor.col - viewportCol, cursor.row - viewportRow, cursor.sheet);
 
 
-
 // ================================= render ui elements ===========================================
-    // Tile Info
-    if(GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
-       GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-       GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
-       GlobalInterfaceState == SELECTED_OVER_ALLY ||
-       GlobalInterfaceState == SELECTED_OVER_ENEMY ||
-       GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
-       GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
-       GlobalInterfaceState == GAME_MENU_ROOT ||
-       GlobalInterfaceState == UNIT_MENU_ROOT)
-    {
-        //DisplayTileInfo();
-    }
-
+    //////////////////////////
     // Unit Info
     if(GlobalInterfaceState == UNIT_INFO ||
        GlobalInterfaceState == ENEMY_INFO)
@@ -336,8 +321,8 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
         RenderHealthBarDamage(TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage, true);
         RenderHealthBarDamage(TILE_SIZE * VIEWPORT_WIDTH, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage, false);
-                                                      // 5 is for alignment
     }
+    //////////////////////////
 
 
 // ==================================== menus =====================================================

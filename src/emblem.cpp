@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
     Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
 
+	UI_State ui = {};
+
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(4, 0, {"Info", "Attack", "Heal", "Wait"});
@@ -183,6 +185,7 @@ int main(int argc, char *argv[])
 
 // ========================= update phase =======================================
         cursor.Update();
+		ui.Update();
 
         for(auto const &unit : level.combatants)
         {
@@ -205,10 +208,22 @@ int main(int argc, char *argv[])
         Render(level.map, cursor, gameMenu, unitMenu, 
 			   unitInfo, combatInfo, combatResolver);
 
+// TODO: Extract this code. //////////////////
+		ImGui_ImplSDLRenderer_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
+		ImGui::NewFrame();
+		{
+			RenderUI(&ui);
+
 #if DEV_MODE
-        if(GlobalEditorMode)
-            EditorPass(&units, &level);
+			if(GlobalEditorMode)
+				EditorPass(&units, &level);
 #endif
+		}
+		ImGui::EndFrame();
+		ImGui::Render();
+		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+//////////////////////////////////////
 
         SDL_RenderPresent(GlobalRenderer);
 

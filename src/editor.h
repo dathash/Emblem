@@ -220,62 +220,55 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 void EditorPass(vector<unique_ptr<Unit>> *units,
                 Level *level)
 {
-    ImGui_ImplSDLRenderer_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
+    // Internal variables
+    static bool showUnitEditor = true;
+    static bool showLevelEditor = true;
+
+    static char fileName[128] = INITIAL_UNITS;
+    static char levelFileName[128] = INITIAL_LEVEL;
+
+    ImGui::Begin("emblem editor");
     {
-        // Internal variables
-        static bool showUnitEditor = true;
-        static bool showLevelEditor = true;
+        ImGui::Text("Files: <no directory needed>");
+        ImGui::InputText("units", fileName, IM_ARRAYSIZE(fileName));
+        ImGui::InputText("level", levelFileName, IM_ARRAYSIZE(levelFileName));
 
-        static char fileName[128] = INITIAL_UNITS;
-        static char levelFileName[128] = INITIAL_LEVEL;
-
-        ImGui::Begin("emblem editor");
+        if(ImGui::Button("Load"))
         {
-            ImGui::Text("Files: <no directory needed>");
-            ImGui::InputText("units", fileName, IM_ARRAYSIZE(fileName));
-            ImGui::InputText("level", levelFileName, IM_ARRAYSIZE(levelFileName));
-
-            if(ImGui::Button("Load"))
-            {
-                *units = LoadUnits(string(DATA_PATH) + string(fileName));
-                cout << "Units loaded: " << fileName << "\n";
-                *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
-                cout << "Level loaded: " << levelFileName << "\n";
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Save Units"))
-            {
-                SaveUnits(string(DATA_PATH) + string(fileName), *units);
-                cout << "Units saved: " << fileName << "\n";
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Save Level"))
-            {
-                SaveLevel(string(DATA_PATH) + string(levelFileName), *level);
-                cout << "Level saved: " << levelFileName << "\n";
-            }
-
-            ImGui::Checkbox("Unit Editor", &showUnitEditor);
-            ImGui::Checkbox("Level Editor", &showLevelEditor);
-
-            ImGui::Text("avg %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            *units = LoadUnits(string(DATA_PATH) + string(fileName));
+            cout << "Units loaded: " << fileName << "\n";
+            *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
+            cout << "Level loaded: " << levelFileName << "\n";
         }
-        ImGui::End();
-
-        if(showUnitEditor)
+        ImGui::SameLine();
+        if(ImGui::Button("Save Units"))
         {
-			UnitEditor(units);
+            SaveUnits(string(DATA_PATH) + string(fileName), *units);
+            cout << "Units saved: " << fileName << "\n";
         }
-        
-        if(showLevelEditor)
+        ImGui::SameLine();
+        if(ImGui::Button("Save Level"))
         {
-			LevelEditor(level, *units);
+            SaveLevel(string(DATA_PATH) + string(levelFileName), *level);
+            cout << "Level saved: " << levelFileName << "\n";
         }
+
+        ImGui::Checkbox("Unit Editor", &showUnitEditor);
+        ImGui::Checkbox("Level Editor", &showLevelEditor);
+
+        ImGui::Text("avg %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
-	ImGui::Render();
-	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+    ImGui::End();
+
+    if(showUnitEditor)
+    {
+        UnitEditor(units);
+    }
+    
+    if(showLevelEditor)
+    {
+        LevelEditor(level, *units);
+    }
 }
 #endif // EDITOR
 

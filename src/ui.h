@@ -7,16 +7,60 @@
 #define UI_H
 
 // ============================ New UI =========================================
+struct UI_State
+{
+    bool tile_info = false;
+    bool unit_info = false;
+    bool combat_preview = false;
+    bool game_menu = false;
+    bool unit_menu = false;
+    bool combat_screen = false;
+
+    void Update()
+    {
+        if(GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
+           GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
+           GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+           GlobalInterfaceState == SELECTED_OVER_ALLY ||
+           GlobalInterfaceState == SELECTED_OVER_ENEMY ||
+           GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
+           GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
+           GlobalInterfaceState == GAME_MENU_ROOT ||
+           GlobalInterfaceState == UNIT_MENU_ROOT)
+        {
+            tile_info = true;
+        }
+        else
+        {
+            tile_info = false;
+        }
+    }
+};
+
 void DisplayTileInfo()
 {
-    ImGui::Begin("Test #1694", 0);//ImGuiWindowFlags_AlwaysAutoResize);
-    char width[6] = "", height[6] = "";
-    ImGui::InputText("World Width", width, 6);
-    ImGui::InputText("World Height", height, 6);
-    ImGui::Button("Cancel");
-    ImGui::SameLine();
-    ImGui::Button("Create");
+    ImGui::Begin("Tile Info");//ImGuiWindowFlags_AlwaysAutoResize);
+    {
+        char width[6] = "", height[6] = "";
+        ImGui::InputText("World Width", width, 6);
+        ImGui::InputText("World Height", height, 6);
+        ImGui::Button("Cancel");
+        ImGui::SameLine();
+        ImGui::Button("Create");
+    }
     ImGui::End();
+}
+
+void RenderUI(UI_State *ui)
+{
+    // Internal variables
+    //
+
+    if(ui->tile_info)
+    {
+        DisplayTileInfo();
+    }
+    //ImGui::ShowDemoWindow();
 }
 
 // ================================= Old UI ====================================
