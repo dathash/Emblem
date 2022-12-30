@@ -202,7 +202,8 @@ public:
         cursor->targeted = FindVictim(*cursor, *map);
         if(cursor->targeted)
         {
-            int dist = ManhattanDistance(*cursor->selected, *cursor->targeted);
+            int dist = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
+                                         point(cursor->targeted->col, cursor->targeted->row));
             bool counter = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
 
             printf("AI COMMAND | Attack Unit %d!\n",

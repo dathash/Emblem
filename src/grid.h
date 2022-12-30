@@ -159,10 +159,10 @@ InteractibleFrom(const Tilemap &map, int col, int row, int min, int max)
     return interactible;
 }
 
-// Super simple distance equation.
-float ManhattanDistance(int col, int row, int tar_col, int tar_row)
+// Finds the manhattan distance between two points.
+int ManhattanDistance(const point &one, const point &two)
 {
-    return (abs(tar_col - col) + abs(tar_row - row));
+    return (abs(one.first - two.first) + abs(one.second - two.second));
 }
 
 //TODO: This is still doing things naively.
@@ -178,7 +178,7 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
         {
             if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
             {
-                distance = ManhattanDistance(cursor.col, cursor.row, col, row);
+                distance = ManhattanDistance(point(cursor.col, cursor.row), point(col, row));
                 if(distance < minDistance)
                 {
                     result = map.tiles[col][row].occupant;
@@ -201,7 +201,7 @@ point FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 
     for(point p : map.accessible)
     {
-        distance = ManhattanDistance(col, row, p.first, p.second);
+        distance = ManhattanDistance(point(col, row), p);
         if(distance < minDistance)
         {
             result = p;
@@ -346,9 +346,11 @@ GetField(const Tilemap &map, int col, int row)
             }
         }
     }
+#if 0
     cout << "=============================\n";
     PrintDistanceField(distances);
     PrintField(field);
+#endif
 
     return field;
 }

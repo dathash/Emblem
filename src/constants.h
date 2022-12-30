@@ -8,11 +8,13 @@
 
 // ========================= constants =====================================
 // meta
-#define EDITOR 0
+#define DEV_MODE 1
 
 // low level
 #define MS_PER_FRAME 16.666
 #define JOYSTICK_DEAD_ZONE 8000
+// TODO: Create a separate system for keyboard inputs
+//       OR Decide on one input system or the other.
 #define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
 // rendering

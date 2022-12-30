@@ -7,7 +7,7 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#if EDITOR
+#if DEV_MODE
 
 static uint8_t selectedIndex = 0;
 void UnitEditor(vector<unique_ptr<Unit>> *units)

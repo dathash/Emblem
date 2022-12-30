@@ -476,7 +476,8 @@ public:
 
     virtual void Execute()
     {
-        int dist = ManhattanDistance(*cursor->selected, *cursor->targeted);
+        int dist = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
+                                     point(cursor->targeted->col, cursor->targeted->row));
         bool counter = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
 
         combatResolver->attacker = cursor->selected;

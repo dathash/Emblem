@@ -66,10 +66,12 @@ static point editor_cursor = pair<int, int>(0, 0);
 static path path_debug = {};
 
 #include "structs.h"
+#include "load.h"
 #include "fight_res.h"
 #include "init.h"
 #include "input.h"
 #include "grid.h"
+#include "ui.h"
 #include "fight.h"
 #include "command.h"
 #include "ai.h"
@@ -204,7 +206,7 @@ int main(int argc, char *argv[])
         Render(level.map, cursor, gameMenu, unitMenu, 
 			   unitInfo, tileInfo, combatInfo, combatResolver);
 
-#if EDITOR
+#if DEV_MODE
         if(GlobalEditorMode)
             EditorPass(&units, &level);
 #endif
