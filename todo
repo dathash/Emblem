@@ -10,6 +10,7 @@ MVP
     Better enemy ai
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
+            Manhattan Distance doesn't have to be used by the UI as well.
         Ranged units set up for and calculate for ranged attacks
     Conversations
     Battle Animations
