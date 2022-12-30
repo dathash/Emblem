@@ -27,13 +27,11 @@ public:
 class MoveCommand : public Command
 {
 public:
-    MoveCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in,
-                TileInfo *tileInfo_in)
+    MoveCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
     : cursor(cursor_in),
       col(col_in),
       row(row_in),
-      map(map_in),
-      tileInfo(tileInfo_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -50,14 +48,7 @@ public:
             // For rendering
             cursor->MoveViewport(newCol, newRow);
 
-            if(map.tiles[newCol][newRow].occupant)
-            {
-                tileInfo->UpdateTextTextures({
-                            map.tiles[newCol][newRow].occupant->name,
-                            "Tile AVO: " + to_string(map.tiles[newCol][newRow].avoid)});
-                tileInfo->hp = map.tiles[newCol][newRow].occupant->hp;
-                tileInfo->maxHp = map.tiles[newCol][newRow].occupant->maxHp;
-            }
+            // TILEINFO
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -88,7 +79,6 @@ private:
     int col;
     int row;
     const Tilemap &map;
-    TileInfo *tileInfo;
 };
 
 
@@ -287,13 +277,11 @@ private:
 class MoveAttackTargetingCommand : public Command
 {
 public:
-    MoveAttackTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in,
-                               TileInfo *tileInfo_in)
+    MoveAttackTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
     : cursor(cursor_in),
       col(col_in),
       row(row_in),
-      map(map_in),
-      tileInfo(tileInfo_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -310,15 +298,7 @@ public:
             // For rendering
             cursor->MoveViewport(newCol, newRow);
 
-            // Update tileInfo
-            if(map.tiles[newCol][newRow].occupant)
-            {
-                tileInfo->UpdateTextTextures({
-                            map.tiles[newCol][newRow].occupant->name,
-                            "Tile AVO: " + to_string(map.tiles[newCol][newRow].avoid)});
-                tileInfo->hp = map.tiles[newCol][newRow].occupant->hp;
-                tileInfo->maxHp = map.tiles[newCol][newRow].occupant->maxHp;
-            }
+            // TILEINFO
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -341,19 +321,16 @@ private:
     int col;
     int row;
     const Tilemap &map;
-    TileInfo *tileInfo;
 };
 
 class MoveHealingTargetingCommand : public Command
 {
 public:
-    MoveHealingTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in,
-                                TileInfo *tileInfo_in)
+    MoveHealingTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
     : cursor(cursor_in),
       col(col_in),
       row(row_in),
-      map(map_in),
-      tileInfo(tileInfo_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -390,7 +367,6 @@ private:
     int col;
     int row;
     const Tilemap &map;
-    TileInfo *tileInfo;
 };
 
 class DetargetCommand : public Command
@@ -764,13 +740,11 @@ private:
 class ChooseUnitMenuOptionCommand : public Command
 {
 public:
-    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in, UnitInfo *unitInfo_in,
-                                TileInfo *tileInfo_in)
+    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in, UnitInfo *unitInfo_in)
     : cursor(cursor_in),
       map(map_in),
       menu(menu_in),
-      unitInfo(unitInfo_in),
-      tileInfo(tileInfo_in)
+      unitInfo(unitInfo_in)
     {}
 
     virtual void Execute()
@@ -826,15 +800,8 @@ public:
                     GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
                 }
 
-                // Update tileInfo
-                if(map->tiles[cursor->col][cursor->row].occupant)
-                {
-                    tileInfo->UpdateTextTextures({
-                                map->tiles[cursor->col][cursor->row].occupant->name,
-                                "Tile AVO: " + to_string(map->tiles[cursor->col][cursor->row].avoid)});
-                    tileInfo->hp = map->tiles[cursor->col][cursor->row].occupant->hp;
-                    tileInfo->maxHp = map->tiles[cursor->col][cursor->row].occupant->maxHp;
-                }
+                // TILEINFO
+
             } break;
             case(2): // HEAL
             {
@@ -869,15 +836,7 @@ public:
                     GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
                 }
 
-                // Update tileInfo
-                if(map->tiles[cursor->col][cursor->row].occupant)
-                {
-                    tileInfo->UpdateTextTextures({
-                                map->tiles[cursor->col][cursor->row].occupant->name,
-                                "Tile AVO: " + to_string(map->tiles[cursor->col][cursor->row].avoid)});
-                    tileInfo->hp = map->tiles[cursor->col][cursor->row].occupant->hp;
-                    tileInfo->maxHp = map->tiles[cursor->col][cursor->row].occupant->maxHp;
-                }
+                // TILEINFO
 
             } break;
             case(3): // WAIT
@@ -905,7 +864,6 @@ private:
     Tilemap *map;
     const Menu &menu;
     UnitInfo *unitInfo;
-    TileInfo *tileInfo;
 };
 
 class BackOutOfUnitInfoCommand : public Command
@@ -957,12 +915,12 @@ public:
         return nullptr;
     }
 
-    InputHandler(Cursor *cursor, const Tilemap &map, TileInfo *tileInfo)
+    InputHandler(Cursor *cursor, const Tilemap &map)
     {
-        BindUp(make_shared<MoveCommand>(cursor, 0, -1, map, tileInfo));
-        BindDown(make_shared<MoveCommand>(cursor, 0, 1, map, tileInfo));
-        BindLeft(make_shared<MoveCommand>(cursor, -1, 0, map, tileInfo));
-        BindRight(make_shared<MoveCommand>(cursor, 1, 0, map, tileInfo));
+        BindUp(make_shared<MoveCommand>(cursor, 0, -1, map));
+        BindDown(make_shared<MoveCommand>(cursor, 0, 1, map));
+        BindLeft(make_shared<MoveCommand>(cursor, -1, 0, map));
+        BindRight(make_shared<MoveCommand>(cursor, 1, 0, map));
         BindA(make_shared<OpenGameMenuCommand>());
         BindB(make_shared<NullCommand>());
     }
@@ -1011,49 +969,50 @@ public:
     // updates what the user can do with their buttons.
     // contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
-    void UpdateCommands(Cursor *cursor, Tilemap *map, 
+    void UpdateCommands(Cursor *cursor, Tilemap *map,
                         Menu *gameMenu, Menu *unitMenu,
-                        UnitInfo *unitInfo, TileInfo *tileInfo,
-                        CombatInfo *combatInfo, CombatResolver *combatResolver)
+                        UnitInfo *unitInfo,
+                        CombatInfo *combatInfo,
+                        CombatResolver *combatResolver)
     {
         switch(GlobalInterfaceState)
         {
             case(NEUTRAL_OVER_GROUND):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_ENEMY):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<SelectEnemyCommand>(cursor, map, unitInfo));
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_UNIT):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_DEACTIVATED_UNIT):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
             } break;
@@ -1101,38 +1060,38 @@ public:
 
             case(ATTACK_TARGETING_OVER_UNTARGETABLE):
             {
-                BindUp(make_shared<MoveAttackTargetingCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveAttackTargetingCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
             case(ATTACK_TARGETING_OVER_TARGET):
             {
-                BindUp(make_shared<MoveAttackTargetingCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveAttackTargetingCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<InitiateAttackCommand>(cursor, *map, combatInfo));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
             case(HEALING_TARGETING_OVER_UNTARGETABLE):
             {
-                BindUp(make_shared<MoveHealingTargetingCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveHealingTargetingCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
             case(HEALING_TARGETING_OVER_TARGET):
             {
-                BindUp(make_shared<MoveHealingTargetingCommand>(cursor, 0, -1, *map, tileInfo));
-                BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map, tileInfo));
-                BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map, tileInfo));
-                BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map, tileInfo));
+                BindUp(make_shared<MoveHealingTargetingCommand>(cursor, 0, -1, *map));
+                BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map));
+                BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map));
+                BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<InitiateHealingCommand>(cursor, *map, combatInfo));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
@@ -1191,7 +1150,7 @@ public:
                 BindDown(make_shared<UpdateUnitMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu, unitInfo, tileInfo));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu, unitInfo));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
             case(UNIT_INFO):

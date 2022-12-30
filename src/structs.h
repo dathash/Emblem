@@ -175,8 +175,8 @@ struct Tile
 };
 struct Tilemap
 {
-    int width = 6;
-    int height = 6;
+    int width;
+    int height;
     vector<vector<Tile>> tiles;
     vector<pair<int, int>> accessible;
     vector<pair<int, int>> interactible;
@@ -220,9 +220,6 @@ struct Cursor
     int selectedRow = -1;
     int sourceCol = -1; // Where the cursor was before choosing a target
     int sourceRow = -1;
-
-    int viewportCol = 0;
-    int viewportRow = 0;
 
     SpriteSheet sheet;
     path path_draw = {};

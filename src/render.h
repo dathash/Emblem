@@ -146,7 +146,6 @@ void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu,
        const UnitInfo &unitInfo,
-       const TileInfo &tileInfo,
        const CombatInfo &combatInfo,
        const CombatResolver &combatResolver)
 {
@@ -155,12 +154,12 @@ Render(const Tilemap &map, const Cursor &cursor,
     SDL_RenderClear(GlobalRenderer);
 
 // ================================= render map tiles ============================================
-    for(int col = cursor.viewportCol; col < VIEWPORT_WIDTH + cursor.viewportCol; ++col)
+    for(int col = viewportCol; col < VIEWPORT_WIDTH + viewportCol; ++col)
     {
-        for(int row = cursor.viewportRow; row < VIEWPORT_HEIGHT + cursor.viewportRow; ++row)
+        for(int row = viewportRow; row < VIEWPORT_HEIGHT + viewportRow; ++row)
         {
-            int screenCol = col - cursor.viewportCol;
-            int screenRow = row - cursor.viewportRow;
+            int screenCol = col - viewportCol;
+            int screenRow = row - viewportRow;
             const Tile &tile = map.tiles[col][row];
             RenderTileTexture(map, tile, screenCol, screenRow);
         }
@@ -176,16 +175,16 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - cursor.viewportCol, 
-                           cell.second - cursor.viewportRow, 
+                RenderTileColor(cell.first - viewportRow, 
+                           cell.second - viewportRow, 
                            moveColor);
             }
         }
 
         for(const point &p : cursor.path_draw)
         {
-            RenderTileColor(p.first - cursor.viewportCol, 
-                       p.second - cursor.viewportRow, 
+            RenderTileColor(p.first - viewportRow, 
+                       p.second - viewportRow, 
                        pathColor);
         }
     }
@@ -196,8 +195,8 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - cursor.viewportCol, 
-                           cell.second - cursor.viewportRow, 
+                RenderTileColor(cell.first - viewportRow, 
+                           cell.second - viewportRow, 
                            aiMoveColor);
             }
         }
@@ -210,8 +209,8 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - cursor.viewportCol, 
-                           cell.second - cursor.viewportRow, 
+                RenderTileColor(cell.first - viewportRow, 
+                           cell.second - viewportRow, 
                            attackColor);
             }
         }
@@ -224,8 +223,8 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - cursor.viewportCol, 
-                           cell.second - cursor.viewportRow, 
+                RenderTileColor(cell.first - viewportRow, 
+                           cell.second - viewportRow, 
                            healColor);
             }
         }
@@ -238,39 +237,41 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(cursor.WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - cursor.viewportCol, 
-                           cell.second - cursor.viewportRow, 
+                RenderTileColor(cell.first - viewportRow, 
+                           cell.second - viewportRow, 
                            aiMoveColor);
             }
         }
     }
 
 // ================================= render sprites ================================================
-    for(int col = cursor.viewportCol; col < VIEWPORT_WIDTH + cursor.viewportCol; ++col)
+    for(int col = viewportCol; col < VIEWPORT_WIDTH + viewportCol; ++col)
     {
-        for(int row = cursor.viewportRow; row < VIEWPORT_HEIGHT + cursor.viewportRow; ++row)
+        for(int row = viewportRow; row < VIEWPORT_HEIGHT + viewportRow; ++row)
         {
-            int screenCol = col - cursor.viewportCol;
-            int screenRow = row - cursor.viewportRow;
-            const Tile *tileToRender = &map.tiles[col][row];
-            if(tileToRender->occupant)
+            int screenCol = col - viewportCol;
+            int screenRow = row - viewportRow;
+            const Tile &tileToRender = map.tiles[col][row];
+            if(tileToRender.occupant)
             {
-                if(tileToRender->occupant->isExhausted)
+                if(tileToRender.occupant->isExhausted)
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
+                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdlTexture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
                 }
                 else
                 {
-                    SDL_SetTextureColorMod(tileToRender->occupant->sheet.texture.sdlTexture, readyMod.r, readyMod.g, readyMod.b);
+                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdlTexture, readyMod.r, readyMod.g, readyMod.b);
                 }
-                RenderSprite(screenCol, screenRow, tileToRender->occupant->sheet);
+                RenderSprite(screenCol, screenRow, tileToRender.occupant->sheet);
             }
         }
     }
 
 
+
 // ================================= render cursor ================================================
-    RenderSprite(cursor.col - cursor.viewportCol, cursor.row - cursor.viewportRow, cursor.sheet);
+    RenderSprite(cursor.col - viewportCol, cursor.row - viewportRow, cursor.sheet);
+
 
 
 // ================================= render ui elements ===========================================
@@ -285,18 +286,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == GAME_MENU_ROOT ||
        GlobalInterfaceState == UNIT_MENU_ROOT)
     {
-        for(int i = 0; i < tileInfo.rows; ++i)
-        {
-            SDL_Rect infoRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
-            SDL_SetRenderDrawColor(GlobalRenderer, uiAltColor.r, uiAltColor.g, uiAltColor.b, uiAltColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &infoRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-            SDL_RenderDrawRect(GlobalRenderer, &infoRect);
-
-            RenderText(tileInfo.infoTextTextures[i], infoRect.x, infoRect.y);
-        }
-        RenderHealthBar(TILE_SIZE * VIEWPORT_WIDTH, 2 * MENU_ROW_HEIGHT, tileInfo.hp, tileInfo.maxHp, true);
-                                                      // 2 is for alignment
+        //DisplayTileInfo();
     }
 
     // Unit Info
@@ -440,24 +430,6 @@ Render(const Tilemap &map, const Cursor &cursor,
                     combatResolver.victim->isAlly);
         }
 	}
-
-// ============================ editor debug ===================================
-    if(GlobalEditorMode)
-    {
-        if(path_debug.size() > 0)
-        {
-            for(pair<int, int> point : path_debug)
-            {
-                RenderTileColor(point.first - cursor.viewportCol,
-                           point.second - cursor.viewportRow,
-                           healColor);
-            }
-        }
-
-        RenderTileColor(editor_cursor.first - cursor.viewportCol,
-                   editor_cursor.second - cursor.viewportRow,
-                   editorColor);
-    }
 }
 
 #endif

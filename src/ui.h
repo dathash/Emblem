@@ -1,4 +1,3 @@
-
 // Author: Alex Hartford
 // Program: Emblem
 // File: UI
@@ -7,6 +6,20 @@
 #ifndef UI_H
 #define UI_H
 
+// ============================ New UI =========================================
+void DisplayTileInfo()
+{
+    ImGui::Begin("Test #1694", 0);//ImGuiWindowFlags_AlwaysAutoResize);
+    char width[6] = "", height[6] = "";
+    ImGui::InputText("World Width", width, 6);
+    ImGui::InputText("World Height", height, 6);
+    ImGui::Button("Cancel");
+    ImGui::SameLine();
+    ImGui::Button("Create");
+    ImGui::End();
+}
+
+// ================================= Old UI ====================================
 struct Menu
 {
     u8 rows;
@@ -22,37 +35,6 @@ struct Menu
         {
             optionTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
         }
-    }
-};
-
-struct TileInfo
-{
-    u8 rows;
-
-    vector<Texture> infoTextTextures;
-
-    int hp = 5;
-    int maxHp = 10;
-
-    TileInfo(u8 rows_in, vector<string> info_in)
-    : rows(rows_in)
-    {
-        for(string s : info_in)
-        {
-            infoTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
-        }
-    }
-
-    void UpdateTextTextures(vector<string> info_in)
-    {
-        infoTextTextures.clear();
-        int newRows = 0;
-        for(string s : info_in)
-        {
-            infoTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
-            ++newRows;
-        }
-        this->rows = newRows;
     }
 };
 

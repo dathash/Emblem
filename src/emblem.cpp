@@ -61,9 +61,8 @@ static bool GlobalGamepadMode = false;
 static bool GlobalEditorMode = false;
 static int GlobalCurrentID = 0;
 
-// editor
-static point editor_cursor = pair<int, int>(0, 0);
-static path path_debug = {};
+static int viewportCol = 0;
+static int viewportRow = 0;
 
 #include "structs.h"
 #include "load.h"
@@ -111,12 +110,11 @@ int main(int argc, char *argv[])
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(4, 0, {"Info", "Attack", "Heal", "Wait"});
     UnitInfo unitInfo(1, {"Placeholder"});
-    TileInfo tileInfo(1, {"Placeholder"});
     CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
 
     // initial actor state
     InputState input = {};
-    InputHandler handler(&cursor, level.map, &tileInfo);
+    InputHandler handler(&cursor, level.map);
     AI ai;
 
     CombatResolver combatResolver = {};
@@ -146,8 +144,8 @@ int main(int argc, char *argv[])
             }
             cursor.col = 0;
             cursor.row = 0;
-            cursor.viewportCol = 0;
-            cursor.viewportRow = 0;
+            viewportCol = 0;
+            viewportRow = 0;
             GlobalInterfaceState = NEUTRAL_OVER_GROUND;
 
             GlobalTurnStart = false;
@@ -162,8 +160,9 @@ int main(int argc, char *argv[])
                 handler.Update(&input);
                 handler.UpdateCommands(&cursor, &level.map,
                                        &gameMenu, &unitMenu, 
-                                       &unitInfo, &tileInfo,
-                                       &combatInfo, &combatResolver);
+                                       &unitInfo,
+                                       &combatInfo,
+									   &combatResolver);
             }
             else
             {
@@ -204,7 +203,7 @@ int main(int argc, char *argv[])
 
 // ============================= render =========================================
         Render(level.map, cursor, gameMenu, unitMenu, 
-			   unitInfo, tileInfo, combatInfo, combatResolver);
+			   unitInfo, combatInfo, combatResolver);
 
 #if DEV_MODE
         if(GlobalEditorMode)

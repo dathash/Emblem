@@ -75,7 +75,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 
 // Generate arbitrary debug paths
 void 
-GenerateDebugPaths(const Level &level)
+GenerateDebugPaths(const Level &level, path *path_debug)
 {
     static int col = 0;
     static int row = 0;
@@ -89,29 +89,29 @@ GenerateDebugPaths(const Level &level)
     ImGui::SliderInt("drow", &destRow, 0, 10);
     if(ImGui::Button("from"))
     {
-        path_debug = GetPath(level.map, col, row, destCol, destRow);
+        *path_debug = GetPath(level.map, col, row, destCol, destRow);
     }
 }
 
 void
-EditorPollForKeyboardInput()
+EditorPollForKeyboardInput(point *editor_cursor)
 {
     //TODO: Make the editor also move the viewport.
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_A)))
     {
-        editor_cursor.first = max(editor_cursor.first - 1, 0);
+        editor_cursor->first = max(editor_cursor->first - 1, 0);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
     {
-        editor_cursor.first = min(editor_cursor.first + 1, 10);
+        editor_cursor->first = min(editor_cursor->first + 1, 10);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
     {
-        editor_cursor.second = max(editor_cursor.second - 1, 0);
+        editor_cursor->second = max(editor_cursor->second - 1, 0);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
     {
-        editor_cursor.second = min(editor_cursor.second + 1, 10);
+        editor_cursor->second = min(editor_cursor->second + 1, 10);
     }
 }
 
@@ -119,10 +119,13 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 {
 	ImGui::Begin("level editor");
 	{
+        static point editor_cursor = pair<int, int>(0, 0);
+        static path path_debug = {};
+
         static bool showDebugPaths = false;
 
         //TODO: point and click feature plz!!!
-        EditorPollForKeyboardInput();
+        EditorPollForKeyboardInput(&editor_cursor);
 
         ImGui::Text("Units:");
         if(ImGui::Button("add"))
@@ -191,8 +194,23 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)
         {
-            GenerateDebugPaths(*level);
+            GenerateDebugPaths(*level, &path_debug);
         }
+
+        // Render overlays to the main target
+        if(path_debug.size() > 0)
+        {
+            for(pair<int, int> point : path_debug)
+            {
+                RenderTileColor(point.first - viewportCol,
+                           point.second - viewportRow,
+                           healColor);
+            }
+        }
+
+        RenderTileColor(editor_cursor.first - viewportCol,
+                   editor_cursor.second - viewportRow,
+                   editorColor);
 	}
 	ImGui::End();
 }
