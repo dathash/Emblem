@@ -128,9 +128,13 @@ void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
     ImGui::End();
 }
 
-void DisplayHealthBar(int hp, int maxHp)
+// Displays a health bar, with an overlay for the damage to be done.
+void DisplayHealthBar(int hp, int maxHp, int damage)
 {
-	float percentHealth = (float)hp / (float)maxHp;
+	float original_cursor_position = ImGui::GetCursorPosX();
+	float original_line_height = ImGui::GetFrameHeight();
+	float percentHealth = (((float)hp - damage) / (float)maxHp);
+	percentHealth = (0 < percentHealth ? percentHealth : 0);
 	if(percentHealth > 0.66)
 	{
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(0, 255, 0, 255));
@@ -145,9 +149,21 @@ void DisplayHealthBar(int hp, int maxHp)
 	}
 	ImGui::ProgressBar(percentHealth, ImVec2(-1.0f, 0.0f));
 	ImGui::PopStyleColor();
+
+	// NOTE: An idea for an overlay.
+	/*
+	ImGui::SameLine();
+
+    ImGui::SetCursorPosX(original_cursor_position);
+
+	ImVec2 size = ImVec2(100, original_line_height);
+	ImVec2 pos = ImGui::GetCursorScreenPos();
+	ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(255, 255, 255, 100));
+	ImGui::Dummy(size);
+	*/
 }
 
-// Just display HP bar.
+// Just display a unit's name and HP bar.
 // TODO: Move portrait rendering into this.
 void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 {
@@ -161,7 +177,7 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
 
-			DisplayHealthBar(unit.hp, unit.maxHp);
+			DisplayHealthBar(unit.hp, unit.maxHp, 0);
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
@@ -192,7 +208,7 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
 
-			DisplayHealthBar(unit.hp, unit.maxHp);
+			DisplayHealthBar(unit.hp, unit.maxHp, 0);
 
 			// Second line
 			ImGui::Text("[ATK %d]", unit.attack);
@@ -226,11 +242,17 @@ void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &ene
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Combat", NULL, wf);
     {
+		// TODO: This uses dummy values. Use the real fight resolution code,
+		// call it and resolve a fight when you start it, and just do it right.
+		int damageToEnemy = CalculateDamage(ally.attack, enemy.defense);
+		int damageToAlly = CalculateDamage(enemy.attack, ally.defense);
+		cout << damageToEnemy << " " << damageToAlly << "\n";
+
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
 			TextCentered(ally.name);
 
-			DisplayHealthBar(ally.hp, ally.maxHp);
+			DisplayHealthBar(ally.hp, ally.maxHp, damageToAlly);
 
 			ImGui::BeginTable("Combat", 4, ImGuiTableFlags_RowBg);
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
@@ -238,7 +260,7 @@ void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &ene
 				ImGui::TableNextColumn();
 				ImGui::Text("%d", ally.hp);	
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", CalculateDamage(ally.attack, enemy.defense));
+				ImGui::Text("%d", damageToEnemy);
 				ImGui::TableNextColumn();
 				ImGui::Text("%d", ally.accuracy - enemy.avoid);
 				ImGui::TableNextColumn();
@@ -262,7 +284,7 @@ void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &ene
 				ImGui::TableNextColumn();
 				ImGui::Text("%d", enemy.hp);
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", CalculateDamage(enemy.attack, ally.defense));
+				ImGui::Text("%d", damageToAlly);
 				ImGui::TableNextColumn();
 				ImGui::Text("%d", enemy.accuracy - ally.avoid);
 				ImGui::TableNextColumn();
@@ -270,7 +292,7 @@ void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &ene
 				ImGui::PopStyleColor();
 			ImGui::EndTable();
 
-			DisplayHealthBar(enemy.hp, enemy.maxHp);
+			DisplayHealthBar(enemy.hp, enemy.maxHp, damageToEnemy);
 
 			TextCentered(enemy.name);
 		ImGui::PopFont();
