@@ -50,4 +50,6 @@ Dec 23  | 2h  | 4000 lines      | Refactored input function. Started work on pat
 Dec 28  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
                                   various stupid things I was doing. Realized
                                   how many stupid things I was doing.
-
+Dec 29  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
+Dec 29  | 6h  | ???             | Mostly refactoring and tilesets
+Dec 30  | 6h  | 4200 lines      | UI Day! Swapped gross retained mode code to IMGUI.
