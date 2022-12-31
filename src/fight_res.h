@@ -10,6 +10,13 @@
 #ifndef FIGHT_RES_H
 #define FIGHT_RES_H
 
+
+// Determines what damage a hit will do.
+int CalculateDamage(int attack, int defense)
+{
+    return max(attack - defense, 0);
+}
+
 struct CombatResolver
 {
     Unit *attacker;
@@ -70,12 +77,6 @@ struct CombatResolver
     int d100()
     {
         return rand() % 100;
-    }
-
-    // Determines what damage a hit will do.
-    int CalculateDamage(int attack, int defense)
-    {
-        return max(attack - defense, 0);
     }
 
     // Simulates a single combat between a unit and their enemy

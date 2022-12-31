@@ -269,6 +269,10 @@ void EditorPass(vector<unique_ptr<Unit>> *units,
     {
         LevelEditor(level, *units);
     }
+
+	// debug
+	ImGui::ShowStyleEditor();
+	ImGui::ShowDemoWindow();
 }
 #endif // EDITOR
 

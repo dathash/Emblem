@@ -145,8 +145,6 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
 void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu,
-       const UnitInfo &unitInfo,
-       const CombatInfo &combatInfo,
        const CombatResolver &combatResolver)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
@@ -270,59 +268,6 @@ Render(const Tilemap &map, const Cursor &cursor,
 
 // ================================= render cursor ================================================
     RenderSprite(cursor.col - viewportCol, cursor.row - viewportRow, cursor.sheet);
-
-
-// ================================= render ui elements ===========================================
-    //////////////////////////
-    // Unit Info
-    if(GlobalInterfaceState == UNIT_INFO ||
-       GlobalInterfaceState == ENEMY_INFO)
-    {
-        for(int i = 0; i < unitInfo.rows; ++i)
-        {
-            SDL_Rect infoRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            if(GlobalInterfaceState == UNIT_INFO)
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, enemyColor.r, enemyColor.g, enemyColor.b, enemyColor.a);
-            }
-            SDL_RenderFillRect(GlobalRenderer, &infoRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-            SDL_RenderDrawRect(GlobalRenderer, &infoRect);
-
-            RenderText(unitInfo.infoTextTextures[i], infoRect.x, infoRect.y);
-        }
-    }
-    
-    // Combat Preview
-    if(GlobalInterfaceState == PREVIEW_ATTACK ||
-       GlobalInterfaceState == PREVIEW_HEALING)
-    {
-        for(int i = 0; i < combatInfo.rows; ++i)
-        {
-            SDL_Rect sourceRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            SDL_Rect targetRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT + combatInfo.rows * sourceRect.h, MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &sourceRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, enemyColor.r, enemyColor.g, enemyColor.b, enemyColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &targetRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-            SDL_RenderDrawRect(GlobalRenderer, &sourceRect);
-            SDL_RenderDrawRect(GlobalRenderer, &targetRect);
-
-            RenderText(combatInfo.sourceTextTextures[i], sourceRect.x, sourceRect.y);
-            RenderText(combatInfo.targetTextTextures[i], targetRect.x, targetRect.y);
-        }
-        RenderHealthBarDamage(TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT, combatInfo.unitHp, combatInfo.unitMaxHp, combatInfo.enemyDamage, true);
-        RenderHealthBarDamage(TILE_SIZE * VIEWPORT_WIDTH, 5 * MENU_ROW_HEIGHT, combatInfo.enemyHp, combatInfo.enemyMaxHp, combatInfo.unitDamage, false);
-    }
-    //////////////////////////
 
 
 // ==================================== menus =====================================================

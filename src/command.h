@@ -394,18 +394,15 @@ private:
 class InitiateAttackCommand : public Command
 {
 public:
-    InitiateAttackCommand(Cursor *cursor_in, const Tilemap &map_in, CombatInfo *combatInfo_in)
+    InitiateAttackCommand(Cursor *cursor_in, const Tilemap &map_in)
     : cursor(cursor_in),
-      map(map_in),
-      combatInfo(combatInfo_in)
+      map(map_in)
     {}
 
 
     virtual void Execute()
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
-
-        combatInfo->UpdatePreview(*cursor->selected, *cursor->targeted);
 
         // change state
         GlobalInterfaceState = PREVIEW_ATTACK;
@@ -414,23 +411,19 @@ public:
 private:
     Cursor *cursor;
     const Tilemap &map;
-    CombatInfo *combatInfo;
 };
 
 class InitiateHealingCommand : public Command
 {
 public:
-    InitiateHealingCommand(Cursor *cursor_in, const Tilemap &map_in, CombatInfo *combatInfo_in)
+    InitiateHealingCommand(Cursor *cursor_in, const Tilemap &map_in)
     : cursor(cursor_in),
-      map(map_in),
-      combatInfo(combatInfo_in)
+      map(map_in)
     {}
 
     virtual void Execute()
     {
         cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
-
-        combatInfo->UpdatePreview(*cursor->selected, *cursor->targeted);
 
         // change state
         GlobalInterfaceState = PREVIEW_HEALING;
@@ -439,7 +432,6 @@ public:
 private:
     Cursor *cursor;
     const Tilemap &map;
-    CombatInfo *combatInfo;
 };
 
 class AttackCommand : public Command
@@ -550,10 +542,9 @@ private:
 class SelectEnemyCommand : public Command
 {
 public:
-    SelectEnemyCommand(Cursor *cursor_in, Tilemap *map_in, UnitInfo *unitInfo_in)
+    SelectEnemyCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
-      map(map_in),
-      unitInfo(unitInfo_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -569,27 +560,11 @@ public:
                                          cursor->selectedRow, 
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
-
-        unitInfo->UpdateTextTextures({cursor->selected->name,
-                                      "ID: " + to_string(cursor->selected->id),
-                                      "col: " + to_string(cursor->selected->col),
-                                      "row: " + to_string(cursor->selected->row),
-                                      "Ally: " + to_string(cursor->selected->isAlly),
-                                      "Exhausted: " + to_string(cursor->selected->isExhausted),
-                                      "Health: " + to_string(cursor->selected->hp) + " / " + to_string(cursor->selected->maxHp),
-                                      "Movement: " + to_string(cursor->selected->mov),
-                                      "Attack: " + to_string(cursor->selected->attack),
-                                      "Defense: " + to_string(cursor->selected->defense),
-                                      "Healing: " + to_string(cursor->selected->healing),
-                                      "Range: " + to_string(cursor->selected->minRange) + "-" + to_string(cursor->selected->maxRange),
-                                      "Accuracy: " + to_string(cursor->selected->accuracy)
-                                      });                                        
     }
 
 private:
     Cursor *cursor;
     Tilemap *map;
-    UnitInfo *unitInfo;
 };
 
 class DeselectEnemyCommand : public Command
@@ -740,11 +715,10 @@ private:
 class ChooseUnitMenuOptionCommand : public Command
 {
 public:
-    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in, UnitInfo *unitInfo_in)
+    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in)
     : cursor(cursor_in),
       map(map_in),
-      menu(menu_in),
-      unitInfo(unitInfo_in)
+      menu(menu_in)
     {}
 
     virtual void Execute()
@@ -753,21 +727,6 @@ public:
         {
             case(0): // INFO
             {
-                unitInfo->UpdateTextTextures({cursor->selected->name,
-                                              "ID: " + to_string(cursor->selected->id),
-                                              "col: " + to_string(cursor->selected->col),
-                                              "row: " + to_string(cursor->selected->row),
-                                              "Ally: " + to_string(cursor->selected->isAlly),
-                                              "Exhausted: " + to_string(cursor->selected->isExhausted),
-                                              "Health: " + to_string(cursor->selected->hp) + "/" + to_string(cursor->selected->maxHp),
-                                              "Movement: " + to_string(cursor->selected->mov),
-                                              "Attack: " + to_string(cursor->selected->attack),
-                                              "Defense: " + to_string(cursor->selected->defense),
-                                              "Healing: " + to_string(cursor->selected->healing),
-                                              "Range: " + to_string(cursor->selected->minRange) + "-" + to_string(cursor->selected->maxRange),
-                                              "Accuracy: " + to_string(cursor->selected->accuracy)
-                                              });
-
                 GlobalInterfaceState = UNIT_INFO;
             } break;
             case(1): // ATTACK
@@ -863,7 +822,6 @@ private:
     Cursor *cursor;
     Tilemap *map;
     const Menu &menu;
-    UnitInfo *unitInfo;
 };
 
 class BackOutOfUnitInfoCommand : public Command
@@ -971,8 +929,6 @@ public:
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map,
                         Menu *gameMenu, Menu *unitMenu,
-                        UnitInfo *unitInfo,
-                        CombatInfo *combatInfo,
                         CombatResolver *combatResolver)
     {
         switch(GlobalInterfaceState)
@@ -993,7 +949,7 @@ public:
                 BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<SelectEnemyCommand>(cursor, map, unitInfo));
+                BindA(make_shared<SelectEnemyCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
             } break;
 
@@ -1073,7 +1029,7 @@ public:
                 BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<InitiateAttackCommand>(cursor, *map, combatInfo));
+                BindA(make_shared<InitiateAttackCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
@@ -1092,7 +1048,7 @@ public:
                 BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<InitiateHealingCommand>(cursor, *map, combatInfo));
+                BindA(make_shared<InitiateHealingCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
             } break;
 
@@ -1150,7 +1106,7 @@ public:
                 BindDown(make_shared<UpdateUnitMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu, unitInfo));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
             } break;
             case(UNIT_INFO):

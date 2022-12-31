@@ -46,7 +46,10 @@ static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static TTF_Font *GlobalFont = nullptr;
 static ma_engine GlobalMusicEngine;
+
 static bool GlobalRunning = false;
+
+// TODO: unnecessary?
 static u64 GlobalFrameNumber = 0;
 static int GlobalLevelNumber = 0;
 static bool GlobalNextLevel = false;
@@ -64,14 +67,19 @@ static int GlobalCurrentID = 0;
 static int viewportCol = 0;
 static int viewportRow = 0;
 
+// TODO: unnecessary?
+static ImFont *uiFontSmall;
+static ImFont *uiFontMedium;
+static ImFont *uiFontLarge;
+
 #include "structs.h"
 #include "load.h"
 #include "fight_res.h"
 #include "init.h"
 #include "input.h"
 #include "grid.h"
-#include "ui.h"
 #include "fight.h"
+#include "ui.h"
 #include "command.h"
 #include "ai.h"
 #include "render.h"
@@ -111,8 +119,6 @@ int main(int argc, char *argv[])
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(4, 0, {"Info", "Attack", "Heal", "Wait"});
-    UnitInfo unitInfo(1, {"Placeholder"});
-    CombatInfo combatInfo(1, {"Placeholder"}, {"Placeholder"});
 
     // initial actor state
     InputState input = {};
@@ -162,8 +168,6 @@ int main(int argc, char *argv[])
                 handler.Update(&input);
                 handler.UpdateCommands(&cursor, &level.map,
                                        &gameMenu, &unitMenu, 
-                                       &unitInfo,
-                                       &combatInfo,
 									   &combatResolver);
             }
             else
@@ -205,15 +209,14 @@ int main(int argc, char *argv[])
         }
 
 // ============================= render =========================================
-        Render(level.map, cursor, gameMenu, unitMenu, 
-			   unitInfo, combatInfo, combatResolver);
+        Render(level.map, cursor, gameMenu, unitMenu, combatResolver);
 
 // TODO: Extract this code. //////////////////
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		{
-			RenderUI(&ui);
+			RenderUI(&ui, cursor, level.map);
 
 #if DEV_MODE
 			if(GlobalEditorMode)

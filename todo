@@ -16,12 +16,22 @@ MVP
     Battle Animations
     Level Transitions/Win Screen
     BUG | AI actions don't move the viewport.
-    BUG | After attacking, TileInfo doesn't update.
-    Settle on a viewport size.
     10 levels
     Heal self.
+    UI Tweaks
+        Pressing R always brings up a unit's Stats page
+        Pressing up or down on a unit's Stats page brings you to the next unit's
+        stats page (And also moves your cursor to them)
+        * This behavior can be triggered with L button as well, allowing you to
+          cycle through available units on the battlefield. (Non-exhausted)
+    Add Mag, Res, Multiple attacks, Avoid, Crit
+    BUG | Fix the issue at the start of the player's turn where we put the
+    cursor over 0, 0, and there's a unit there, but it doesn't update the
+    interface state properly.
+    More accurate HIT calculations, with tile avoid factored in.
 
 NICE
+    BUG | Flood-Fill results in duplicates sometimes (for enemies mostly)
     Polish
         Generate true arrow for movement (with bitfields)
         Placing Unit moves them smoothly to that square (A-star)
@@ -41,6 +51,7 @@ NICE
         Debug without IMGUI, I think that library makes framerate constant on
         its own.
     Test out an items system.
+    Add some normal glyphs to the bjg font (%, <> (), {}, &)
 
 REFACTOR
     The Grid code is a mess, but it could probably just be like 3 functions.

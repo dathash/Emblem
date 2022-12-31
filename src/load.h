@@ -204,12 +204,12 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                     tokens[4] == "Ally" ? true : false,			// team
                     stoi(tokens[5]),							// movement
                     stoi(tokens[6]),							// hp
-                    stoi(tokens[7]),							// max hp
-                    stoi(tokens[8]),						    // short range
-                    stoi(tokens[9]),						    // long range
-                    stoi(tokens[10]),						    // attack
-                    stoi(tokens[11]),						    // defense
-                    stoi(tokens[12])						    // accuracy
+                    stoi(tokens[6]),							// max hp
+                    stoi(tokens[7]),						    // short range
+                    stoi(tokens[8]),						    // long range
+                    stoi(tokens[9]),						    // attack
+                    stoi(tokens[10]),						    // defense
+                    stoi(tokens[11])						    // accuracy
                 ));
 
                 // TODO: Make the ID system generate an id in a more robust way.

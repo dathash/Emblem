@@ -91,6 +91,7 @@ struct SpriteSheet
 };
 
 // =================================== Gameplay ================================
+// TODO: Implement a lot of these
 struct Unit
 {
     string name;
@@ -104,11 +105,15 @@ struct Unit
     int hp;
     int maxHp;
     int attack;
+    int magic = 0;
     int defense;
+    int resistance = 0;
     int healing = 0;
     int minRange;
     int maxRange;
     int accuracy;
+    int avoid = 0;
+    int crit = 0;
     SpriteSheet sheet;
     Texture portrait;
 
@@ -160,7 +165,7 @@ enum TileTypes
 
 //TODO: There's gotta be a better way than macros to set some default tile types
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
-#define WALL_TILE {WALL, 100, 0, nullptr, {6, 22}}
+#define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
 #define DESERT_TILE {DESERT, 4, 0, nullptr, {18, 29}}
 #define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
