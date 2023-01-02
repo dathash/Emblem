@@ -10,7 +10,7 @@ A learning project in Modern C++, with the goal of learning:
 - Decoupling of responsibilities
 - Dealing with a larger codebase
 
-![](emblemshot.png)
+![screenshot](emblem.png)
 
 Credit to Bob Nystrom for the book <a href="https://gameprogrammingpatterns.com/">Game Programming Patterns</a>, 
 Omar Cornut for <a href="https://github.com/ocornut/imgui">Imgui</a>,
