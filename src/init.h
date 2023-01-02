@@ -32,7 +32,7 @@ Initialize()
             {
                 if(TTF_Init() != -1)
                 {
-                    GlobalFont = TTF_OpenFont("../assets/fonts/verdanab.ttf", 28);
+                    GlobalFont = TTF_OpenFont("../assets/fonts/pixel.ttf", 20);
                     if(GlobalFont)
                     {
                         int imgFlags = IMG_INIT_PNG;
@@ -44,6 +44,8 @@ Initialize()
                                 IMGUI_CHECKVERSION();
                                 ImGui::CreateContext();
                                 ImGuiIO& io = ImGui::GetIO(); (void)io;
+                                //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+                                //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
                                 io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
                                 uiFontSmall = io.Fonts->AddFontFromFileTTF("../assets/fonts/pixel.ttf", 20.0f);

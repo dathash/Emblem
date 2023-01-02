@@ -276,17 +276,17 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < gameMenu.rows; ++i)
         {
-            SDL_Rect menuRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect menuRect = {650, 140 + i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &menuRect);
             SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
             SDL_RenderDrawRect(GlobalRenderer, &menuRect);
 
-            RenderText(gameMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+            RenderText(gameMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
         }
 
-        SDL_Rect menuSelectorRect = {TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * gameMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
         SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
@@ -298,17 +298,17 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int i = 0; i < unitMenu.rows; ++i)
         {
-            SDL_Rect menuRect = {TILE_SIZE * VIEWPORT_WIDTH, i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+            SDL_Rect menuRect = {650, 140 + i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
 
             SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
             SDL_RenderFillRect(GlobalRenderer, &menuRect);
             SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
             SDL_RenderDrawRect(GlobalRenderer, &menuRect);
 
-            RenderText(unitMenu.optionTextTextures[i], menuRect.x, menuRect.y);
+            RenderText(unitMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
         }
 
-        SDL_Rect menuSelectorRect = {TILE_SIZE * VIEWPORT_WIDTH, MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
         SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);

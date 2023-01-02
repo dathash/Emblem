@@ -108,12 +108,12 @@ const SDL_Color editorColor = {255, 255, 0, 100};
 
 // UI
 const SDL_Color backgroundColor = {165, 179, 201, 255};
-const SDL_Color uiColor = {60, 60, 150, 255};
-const SDL_Color outlineColor = {10, 10, 10, 255};
+const SDL_Color uiColor = {255, 224, 137, 255};
+const SDL_Color outlineColor = {85, 70, 31, 255};
 const SDL_Color uiAltColor = {60, 100, 30, 255};
 const SDL_Color enemyColor = {150, 60, 30, 255};
-const SDL_Color uiTextColor = {255, 255, 255, 255};
-const SDL_Color uiSelectorColor = {50, 50, 50, 100};
+const SDL_Color uiTextColor = {0, 0, 0, 255};
+const SDL_Color uiSelectorColor = {121, 100, 43, 100};
 
 // Combat
 const SDL_Color allyHealthBarColor = {10, 10, 200, 255};

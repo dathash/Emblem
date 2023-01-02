@@ -678,6 +678,17 @@ private:
     Menu *menu;
 };
 
+class BackToGameMenuCommand : public Command
+{
+public:
+
+    virtual void Execute()
+    { 
+        // change state
+        GlobalInterfaceState = GAME_MENU_ROOT;
+    }
+};
+
 // ============================= unit menu commands =======================
 
 
@@ -1087,7 +1098,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<BackToGameMenuCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
             {
@@ -1096,9 +1107,8 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<BackToGameMenuCommand>());
             } break;
-
 
             case(UNIT_MENU_ROOT):
             {

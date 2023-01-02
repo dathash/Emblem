@@ -36,7 +36,9 @@ HandleEvents(InputState *input)
         }
         else
         {
+            ImGui_ImplSDL2_ProcessEvent(&Event);
 // ================================= gameplay inputs ===========================
+
             if(Event.type == SDL_KEYDOWN)
             {
                 switch(Event.key.keysym.sym)

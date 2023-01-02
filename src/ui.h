@@ -40,6 +40,7 @@ struct UI_State
     bool unit_info = false;
     bool combat_preview = false;
     bool game_menu = false;
+    bool options_menu = false;
     bool unit_menu = false;
     bool combat_screen = false;
 
@@ -98,6 +99,15 @@ struct UI_State
 		else
 		{
 			combat_preview = false;
+		}
+
+		if(GlobalInterfaceState == GAME_MENU_OPTIONS)
+		{
+			options_menu = true;
+		}
+		else
+		{
+			options_menu = false;
 		}
     }
 };
@@ -300,6 +310,28 @@ void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &ene
     ImGui::End();
 }
 
+// Displays options menu
+void DisplayOptionsMenu(ImGuiWindowFlags wf)
+{
+	static bool bl;
+	ImGui::SetNextWindowFocus();
+	// Window sizing
+    ImGui::SetNextWindowPos(ImVec2(400, 300), 0, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowSize(ImVec2(420, 310));
+
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Options", NULL, wf);
+    {
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontMedium);
+			ImGui::Checkbox("checkbox1", &bl);
+			ImGui::Checkbox("checkbox2", &bl);
+			ImGui::Checkbox("checkbox3", &bl);
+		ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
 {
     ImGuiWindowFlags window_flags = 0;
@@ -323,6 +355,8 @@ void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
 		DisplayUnitInfo(window_flags, *map.tiles[cursor.col][cursor.row].occupant);
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted);
+	if(ui->options_menu)
+		DisplayOptionsMenu(window_flags);
 
 	// cleanup
 	ImGui::PopStyleVar();
@@ -344,7 +378,7 @@ struct Menu
     {
         for(string s : options_in)
         {
-            optionTextTextures.push_back(LoadTextureText(s.c_str(), {250, 250, 250, 255}));
+            optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));
         }
     }
 };
