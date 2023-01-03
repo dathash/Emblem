@@ -103,7 +103,7 @@ EditorPollForKeyboardInput(point *editor_cursor)
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
     {
-        editor_cursor->first = min(editor_cursor->first + 1, 10);
+        editor_cursor->first = min(editor_cursor->first + 1, 100);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
     {
@@ -111,7 +111,12 @@ EditorPollForKeyboardInput(point *editor_cursor)
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
     {
-        editor_cursor->second = min(editor_cursor->second + 1, 10);
+        editor_cursor->second = min(editor_cursor->second + 1, 100);
+    }
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_R)))
+    {
+        // NOTE: This is temporary, just puts the cursor smack dab in the middle.
+        *editor_cursor = point(viewportCol + 7, viewportRow + 5);
     }
 }
 
