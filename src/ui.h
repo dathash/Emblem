@@ -246,65 +246,46 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy)
 {
 	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(470, 10));
-    ImGui::SetNextWindowSize(ImVec2(420, 310));
+    ImGui::SetNextWindowPos(ImVec2(450, 10));
+    ImGui::SetNextWindowSize(ImVec2(440, 220));
 
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Combat", NULL, wf);
     {
-		// TODO: This uses dummy values. Use the real fight resolution code,
-		// call it and resolve a fight when you start it, and just do it right.
-		int damageToEnemy = CalculateDamage(ally.attack, enemy.defense);
-		int damageToAlly = CalculateDamage(enemy.attack, ally.defense);
-		cout << damageToEnemy << " " << damageToAlly << "\n";
+        Outcome outcome = PredictCombat(ally, enemy, 
+                          ManhattanDistance(point(ally.col, ally.row), 
+                                            point(enemy.col, enemy.row)));
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
-			TextCentered(ally.name);
+            ImGui::Text("%s", ally.name.c_str());
 
-			DisplayHealthBar(ally.hp, ally.maxHp, damageToAlly);
-
-			ImGui::BeginTable("Combat", 4, ImGuiTableFlags_RowBg);
+			ImGui::BeginTable("Combat", 3, ImGuiTableFlags_RowBg);
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
-				ImGui::TableNextRow();
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", ally.hp);	
+		        ImGui::PushFont(uiFontLarge);
+				ImGui::Text("%d/%d", ally.hp, outcome.one_health);
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", damageToEnemy);
+		        ImGui::PopFont();
+				ImGui::Text("%d%% hit", outcome.one_hit);
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", ally.accuracy - enemy.avoid);
-				ImGui::TableNextColumn();
-				ImGui::Text("%d", ally.crit);
-				ImGui::PopStyleColor();
-
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				ImGui::Text("HP");
-				ImGui::TableNextColumn();
-				ImGui::Text("DMG");
-				ImGui::TableNextColumn();
-				ImGui::Text("HIT");
-				ImGui::TableNextColumn();
-				ImGui::Text("CRIT");
+				ImGui::Text("%d%% crit", outcome.one_crit);
 				ImGui::PopStyleColor();
 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				ImGui::TableNextRow();
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", enemy.hp);
+		        ImGui::PushFont(uiFontLarge);
+				ImGui::Text("%d/%d", enemy.hp, outcome.two_health);
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", damageToAlly);
+		        ImGui::PopFont();
+				ImGui::Text("%d%% hit", outcome.two_hit);
 				ImGui::TableNextColumn();
-				ImGui::Text("%d", enemy.accuracy - ally.avoid);
-				ImGui::TableNextColumn();
-				ImGui::Text("%d", enemy.crit);
+				ImGui::Text("%d%% crit", outcome.two_crit);
 				ImGui::PopStyleColor();
 			ImGui::EndTable();
 
-			DisplayHealthBar(enemy.hp, enemy.maxHp, damageToEnemy);
-
-			TextCentered(enemy.name);
+            ImGui::Text("%s", enemy.name.c_str());
 		ImGui::PopFont();
     }
     ImGui::End();

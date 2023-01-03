@@ -114,6 +114,7 @@ const SDL_Color uiAltColor = {60, 100, 30, 255};
 const SDL_Color enemyColor = {150, 60, 30, 255};
 const SDL_Color uiTextColor = {0, 0, 0, 255};
 const SDL_Color uiSelectorColor = {121, 100, 43, 100};
+const SDL_Color black = {0, 0, 0, 255};
 
 // Combat
 const SDL_Color allyHealthBarColor = {10, 10, 200, 255};

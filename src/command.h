@@ -46,7 +46,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            cursor->MoveViewport(newCol, newRow);
+            MoveViewport(newCol, newRow);
 
             // TILEINFO
 
@@ -163,7 +163,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            cursor->MoveViewport(newCol, newRow);
+            MoveViewport(newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -296,7 +296,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            cursor->MoveViewport(newCol, newRow);
+            MoveViewport(newCol, newRow);
 
             // TILEINFO
 
@@ -345,7 +345,7 @@ public:
             cursor->row = newRow;
 
             // For rendering
-            cursor->MoveViewport(newCol, newRow);
+            MoveViewport(newCol, newRow);
 
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
@@ -437,20 +437,15 @@ private:
 class AttackCommand : public Command
 {
 public:
-    AttackCommand(Cursor *cursor_in, CombatResolver *combatResolver_in)
-    : cursor(cursor_in),
-      combatResolver(combatResolver_in)
+    AttackCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
     {}
 
     virtual void Execute()
     {
-        int dist = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
-                                     point(cursor->targeted->col, cursor->targeted->row));
-        bool counter = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
-
-        combatResolver->attacker = cursor->selected;
-        combatResolver->victim = cursor->targeted;
-        combatResolver->counterAttack = counter;
+        int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
+                                         point(cursor->targeted->col, cursor->targeted->row));
+        SimulateCombat(cursor->selected, cursor->targeted, distance);
 
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
@@ -459,14 +454,11 @@ public:
 
         cursor->path_draw = {};
 
-        // change state
-        GlobalResolvingAction = true;
-        GlobalInterfaceState = NO_OP;
+        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
     }
 
 private:
     Cursor *cursor;
-    CombatResolver *combatResolver;
 };
 
 
@@ -939,8 +931,7 @@ public:
     // contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map,
-                        Menu *gameMenu, Menu *unitMenu,
-                        CombatResolver *combatResolver)
+                        Menu *gameMenu, Menu *unitMenu)
     {
         switch(GlobalInterfaceState)
         {
@@ -1069,7 +1060,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<AttackCommand>(cursor, combatResolver));
+                BindA(make_shared<AttackCommand>(cursor));
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
             } break;
             case(PREVIEW_HEALING):

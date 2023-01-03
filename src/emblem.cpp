@@ -55,8 +55,6 @@ static int GlobalLevelNumber = 0;
 static bool GlobalNextLevel = false;
 static int GlobalTotalLevels = 2;
 
-static bool GlobalResolvingAction = false;
-
 static bool GlobalPlayerTurn = true;
 static bool GlobalTurnStart = false;
 static bool GlobalGamepadMode = false;
@@ -72,9 +70,9 @@ static ImFont *uiFontSmall;
 static ImFont *uiFontMedium;
 static ImFont *uiFontLarge;
 
+#include "utils.h"
 #include "structs.h"
 #include "load.h"
-#include "fight_res.h"
 #include "init.h"
 #include "input.h"
 #include "grid.h"
@@ -125,10 +123,6 @@ int main(int argc, char *argv[])
     InputHandler handler(&cursor, level.map);
     AI ai;
 
-    CombatResolver combatResolver = {};
-	combatResolver.framesActive = 70;
-    combatResolver.inc = 0;
-
     // frame timer
     u64 startTime = SDL_GetPerformanceCounter();
     u64 endTime = 0;
@@ -161,31 +155,23 @@ int main(int argc, char *argv[])
             handler.clearQueue();
         }
 
-        if(!GlobalResolvingAction)
-        {
-            if(GlobalPlayerTurn)
-            {
-                handler.Update(&input);
-                handler.UpdateCommands(&cursor, &level.map,
-                                       &gameMenu, &unitMenu, 
-									   &combatResolver);
-            }
-            else
-            {
-                if(ai.shouldPlan)
-                {
-                    ai.Plan(&cursor, &level.map, &combatResolver);
-                }
-                if(!(GlobalFrameNumber % 10))
-                {
-                    ai.Update();
-                }
-            }
-        }
-        else
-        {
-            combatResolver.Update();
-        }
+		if(GlobalPlayerTurn)
+		{
+			handler.Update(&input);
+			handler.UpdateCommands(&cursor, &level.map,
+								   &gameMenu, &unitMenu);
+		}
+		else
+		{
+			if(ai.shouldPlan)
+			{
+				ai.Plan(&cursor, &level.map);
+			}
+			if(!(GlobalFrameNumber % 10))
+			{
+				ai.Update();
+			}
+		}
 
 // ========================= update phase =======================================
         cursor.Update();
@@ -209,7 +195,7 @@ int main(int argc, char *argv[])
         }
 
 // ============================= render =========================================
-        Render(level.map, cursor, gameMenu, unitMenu, combatResolver);
+        Render(level.map, cursor, gameMenu, unitMenu);
 
 // TODO: Extract this code. //////////////////
 		ImGui_ImplSDLRenderer_NewFrame();

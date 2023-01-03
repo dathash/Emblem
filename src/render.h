@@ -95,7 +95,7 @@ RenderHealthBar(int x, int y, int hp, int maxHp, bool allyColor)
             SDL_SetRenderDrawColor(GlobalRenderer, healthBarLostColor.r, healthBarLostColor.g, healthBarLostColor.b, healthBarLostColor.a);
         }
         SDL_RenderFillRect(GlobalRenderer, &healthRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
         SDL_RenderDrawRect(GlobalRenderer, &healthRect);
     }
 }
@@ -135,7 +135,7 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
             SDL_SetRenderDrawColor(GlobalRenderer, healthBarLostColor.r, healthBarLostColor.g, healthBarLostColor.b, healthBarLostColor.a);
         }
         SDL_RenderFillRect(GlobalRenderer, &healthRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
         SDL_RenderDrawRect(GlobalRenderer, &healthRect);
     }
 }
@@ -144,8 +144,7 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
 // Renders the scene from the given game state.
 void
 Render(const Tilemap &map, const Cursor &cursor, 
-       const Menu &gameMenu, const Menu &unitMenu,
-       const CombatResolver &combatResolver)
+       const Menu &gameMenu, const Menu &unitMenu)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -171,7 +170,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.accessible)
         {
-            if(cursor.WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell.first, cell.second))
             {
                 RenderTileColor(cell.first - viewportRow, 
                            cell.second - viewportRow, 
@@ -191,7 +190,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.accessible)
         {
-            if(cursor.WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell.first, cell.second))
             {
                 RenderTileColor(cell.first - viewportRow, 
                            cell.second - viewportRow, 
@@ -205,7 +204,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.interactible)
         {
-            if(cursor.WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell.first, cell.second))
             {
                 RenderTileColor(cell.first - viewportRow, 
                            cell.second - viewportRow, 
@@ -219,7 +218,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.interactible)
         {
-            if(cursor.WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell.first, cell.second))
             {
                 RenderTileColor(cell.first - viewportRow, 
                            cell.second - viewportRow, 
@@ -233,7 +232,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(pair<int, int> cell : map.accessible)
         {
-            if(cursor.WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell.first, cell.second))
             {
                 RenderTileColor(cell.first - viewportRow, 
                            cell.second - viewportRow, 
@@ -311,7 +310,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, uiTextColor.r, uiTextColor.g, uiTextColor.b, uiTextColor.a);
+        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
@@ -334,32 +333,32 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderPortrait(500, 400, map.tiles[cursor.col][cursor.row].occupant->portrait);
     }
 
+    /*
 	// Combat Screen
-	if(GlobalResolvingAction)
-	{
-        if(combatResolver.inc < (float)combatResolver.framesActive * 0.6666)
-        {
-            RenderHealthBar(0, 560, combatResolver.attacker->hp,
-                    combatResolver.attacker->maxHp, combatResolver.attacker->isAlly);
-        }
-        else
-        {
-            RenderHealthBarDamage(0, 560, combatResolver.attacker->hp,
-                    combatResolver.attacker->maxHp, combatResolver.damageToAttacker,
-                    combatResolver.attacker->isAlly);
-        }
-        if(combatResolver.inc < (float)combatResolver.framesActive * 0.3333)
-        {
-            RenderHealthBar(200, 560, combatResolver.victim->hp,
-                    combatResolver.victim->maxHp, combatResolver.victim->isAlly);
-        }
-        else
-        {
-            RenderHealthBarDamage(200, 560, combatResolver.victim->hp,
-                    combatResolver.victim->maxHp, combatResolver.damageToVictim, 
-                    combatResolver.victim->isAlly);
-        }
-	}
+    // TODO: Add in barebones of the actual combat screen
+    if(combatResolver.inc < (float)combatResolver.framesActive * 0.6666)
+    {
+        RenderHealthBar(200, 560, combatResolver.attacker->hp,
+                combatResolver.attacker->maxHp, combatResolver.attacker->isAlly);
+    }
+    else
+    {
+        RenderHealthBarDamage(200, 560, combatResolver.attacker->hp,
+                combatResolver.attacker->maxHp, combatResolver.damageToAttacker,
+                combatResolver.attacker->isAlly);
+    }
+    if(combatResolver.inc < (float)combatResolver.framesActive * 0.3333)
+    {
+        RenderHealthBar(400, 560, combatResolver.victim->hp,
+                combatResolver.victim->maxHp, combatResolver.victim->isAlly);
+    }
+    else
+    {
+        RenderHealthBarDamage(400, 560, combatResolver.victim->hp,
+                combatResolver.victim->maxHp, combatResolver.damageToVictim, 
+                combatResolver.victim->isAlly);
+    }
+    */
 }
 
 #endif

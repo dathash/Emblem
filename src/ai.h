@@ -187,10 +187,9 @@ private:
 class AIAttackTargetCommand : public Command
 {
 public:
-    AIAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in, CombatResolver *combatResolver_in)
+    AIAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
-      map(map_in),
-      combatResolver(combatResolver_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -202,18 +201,12 @@ public:
         cursor->targeted = FindVictim(*cursor, *map);
         if(cursor->targeted)
         {
-            int dist = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
-                                         point(cursor->targeted->col, cursor->targeted->row));
-            bool counter = dist >= cursor->targeted->minRange && dist <= cursor->targeted->maxRange; 
+            int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
+                                             point(cursor->targeted->col, cursor->targeted->row));
+            SimulateCombat(cursor->selected, cursor->targeted, distance);
 
             printf("AI COMMAND | Attack Unit %d!\n",
                    cursor->targeted->id);
-
-            combatResolver->attacker = cursor->selected;
-            combatResolver->victim = cursor->targeted;
-            combatResolver->counterAttack = counter;
-
-            GlobalResolvingAction = true;
         }
 
         cursor->selected->isExhausted = true;
@@ -229,7 +222,6 @@ public:
 private:
     Cursor *cursor; 
     Tilemap *map;
-    CombatResolver *combatResolver;
 };
 
 
@@ -239,7 +231,7 @@ struct AI
     bool shouldPlan = true;
 
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Tilemap *map, CombatResolver *combatResolver)
+    void Plan(Cursor *cursor, Tilemap *map)
     {
         printf("Planning!\n");
         shouldPlan = false;
@@ -248,7 +240,7 @@ struct AI
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
         commandQueue.push(make_shared<AIMoveToClosestSquareCommand>(cursor, map));
         commandQueue.push(make_shared<AIPlaceUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map, combatResolver));
+        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map));
     }
 
     void Update()

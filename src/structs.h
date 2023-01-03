@@ -149,7 +149,16 @@ struct Unit
     // This little thing is like a vestigial organ
     // disgusting
 
+    // TODO: Remove?
     Unit(Unit &) = default;
+
+    // Damages a unit and resolves things involved with that process.
+    // Includes a clamp function for less code reuse
+    void
+    Damage(int dmg)
+    {
+        hp = clamp(hp - dmg, 0, maxHp);
+    }
 };
 
 
@@ -236,37 +245,6 @@ struct Cursor
     void Update()
     {
         sheet.Update();
-    }
-
-    bool
-    WithinViewport(int col, int row) const
-    {
-        return (col < VIEWPORT_WIDTH + viewportCol &&
-                col >= viewportCol &&
-                row < VIEWPORT_HEIGHT + viewportRow &&
-                row >= viewportRow);
-    }
-
-    // moves the cursor's viewport so that the given tile is on screen.
-    void
-    MoveViewport(int col, int row)
-    {
-        if(col >= VIEWPORT_WIDTH + viewportCol)
-        {
-            ++viewportCol;
-        }
-        else if(col < viewportCol)
-        {
-            --viewportCol;
-        }
-        else if(row >= VIEWPORT_HEIGHT + viewportRow)
-        {
-            ++viewportRow;
-        }
-        else if(row < viewportRow)
-        {
-            --viewportRow;
-        }
     }
 };
 

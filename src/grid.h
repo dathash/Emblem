@@ -6,6 +6,45 @@
 #ifndef GRID_H
 #define GRID_H
 
+// ===================================== Viewport ===============================
+// Checks if a point is within the current viewport.
+bool
+WithinViewport(int col, int row)
+{
+    return (col < VIEWPORT_WIDTH + viewportCol &&
+            col >= viewportCol &&
+            row < VIEWPORT_HEIGHT + viewportRow &&
+            row >= viewportRow);
+}
+
+// moves the cursor's viewport so that the given tile is on screen.
+// NOTE: creates side effect. Unpredictable.
+void
+MoveViewport(int col, int row)
+{
+    if(WithinViewport(col, row))
+    {
+        return;
+    }
+    if(col >= VIEWPORT_WIDTH + viewportCol)
+    {
+        ++viewportCol;
+    }
+    else if(col < viewportCol)
+    {
+        --viewportCol;
+    }
+    else if(row >= VIEWPORT_HEIGHT + viewportRow)
+    {
+        ++viewportRow;
+    }
+    else if(row < viewportRow)
+    {
+        --viewportRow;
+    }
+}
+
+
 // ========================= grid helper functions ========================
 // returns true if the position is in-bounds.
 bool
