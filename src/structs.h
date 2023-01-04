@@ -105,15 +105,15 @@ struct Unit
     int hp;
     int maxHp;
     int attack;
-    int magic = 0;
+    int magic;
     int defense;
-    int resistance = 0;
-    int healing = 0;
+    int resistance;
+    int healing;
     int minRange;
     int maxRange;
     int accuracy;
-    int avoid = 0;
-    int crit = 0;
+    int avoid;
+    int crit;
     SpriteSheet sheet;
     Texture portrait;
 
@@ -130,8 +130,10 @@ struct Unit
          Texture portrait_in,
          int id_in, bool isAlly_in, int mov_in,
          int hp_in, int maxHp_in,
-         int minRange_in, int maxRange_in,
-         int attack_in, int defense_in, int accuracy_in)
+         int attack_in, int magic_in,
+         int defense_in, int resistance_in,
+         int accuracy_in, int avoid_in, int crit_in,
+         int minRange_in, int maxRange_in)
     : name(name_in),
       sheet(sheet_in),
       portrait(portrait_in),
@@ -140,11 +142,15 @@ struct Unit
       mov(mov_in),
       hp(hp_in),
       maxHp(maxHp_in),
-      minRange(minRange_in),
-      maxRange(maxRange_in),
       attack(attack_in),
+      magic(magic_in),
       defense(defense_in),
-      accuracy(accuracy_in)
+      resistance(resistance_in),
+      accuracy(accuracy_in),
+      avoid(avoid_in),
+      crit(crit_in),
+      minRange(minRange_in),
+      maxRange(maxRange_in)
     {} // haha c++
     // This little thing is like a vestigial organ
     // disgusting
@@ -245,6 +251,29 @@ struct Cursor
     void Update()
     {
         sheet.Update();
+        quadrant = Quadrant();
+    }
+
+    // returns the current quadrant of the cursor.
+    enum quadrant
+    Quadrant()
+    {
+        int x = col - viewportCol;
+        int y = row - viewportRow;
+
+        if(x > VIEWPORT_WIDTH / 2 && y >= VIEWPORT_HEIGHT / 2)
+        {
+            return BOTTOM_RIGHT;
+        }
+        else if(x > VIEWPORT_WIDTH / 2)
+        {
+            return TOP_RIGHT;
+        }
+        else if(y >= VIEWPORT_HEIGHT / 2)
+        {
+            return BOTTOM_LEFT;
+        }
+        return TOP_LEFT;
     }
 };
 

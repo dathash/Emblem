@@ -205,11 +205,15 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                     stoi(tokens[5]),							// movement
                     stoi(tokens[6]),							// hp
                     stoi(tokens[6]),							// max hp
-                    stoi(tokens[7]),						    // short range
-                    stoi(tokens[8]),						    // long range
-                    stoi(tokens[9]),						    // attack
-                    stoi(tokens[10]),						    // defense
-                    stoi(tokens[11])						    // accuracy
+                    stoi(tokens[7]),							// attack
+                    stoi(tokens[8]),							// magic
+                    stoi(tokens[9]),							// defense
+                    stoi(tokens[10]),							// resistance
+                    stoi(tokens[11]),						    // accuracy
+                    stoi(tokens[12]),						    // avoid
+                    stoi(tokens[13]),						    // crit
+                    stoi(tokens[14]),						    // short range
+                    stoi(tokens[15])						    // long range
                 ));
 
                 // TODO: Make the ID system generate an id in a more robust way.
@@ -238,12 +242,13 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n";
-    fp << "COM Date: November 2022\n\n";
+    fp << "COM Date: January 2023\n\n";
     fp << "COM NOTE: Don't use tabs in here!\n\n";
 
-    fp << "COM <UNT <name>  <texture> <portrait> <id> <team> <mov> <hp> <max> <short> <long> <atk> <def> <hit>>\n";
+    fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long>>\n";
     for(const unique_ptr<Unit> &unit : units)
     {
+        cout << unit->name << "\n";
         fp << "UNT " << unit->name << " "
                      << unit->sheet.texture.filename << " "
                      << unit->portrait.filename << " "
@@ -251,12 +256,15 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
                      << (unit->isAlly ? "Ally" : "Enemy") << " "
                      << unit->mov << " "
                      << unit->hp << " "
-                     << unit->maxHp << " "
+                     << unit->attack << " "
+                     << unit->magic << " "
+                     << unit->defense << " "
+                     << unit->resistance << " "
+                     << unit->accuracy << " "
+                     << unit->avoid << " "
+                     << unit->crit << " "
                      << unit->minRange << " "
                      << unit->maxRange << " "
-                     << unit->attack << " "
-                     << unit->defense << " "
-                     << unit->accuracy << " "
                      << "\n";
     }
     fp.close();

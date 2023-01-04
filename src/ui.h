@@ -118,6 +118,13 @@ void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
     ImGui::SetNextWindowPos(ImVec2(10, 430));
     ImGui::SetNextWindowSize(ImVec2(150, 160));
 
+    ImVec2 lower_left = {10, 430};
+    ImVec2 top_left = {10, 10};
+
+    if(quadrant == BOTTOM_LEFT || quadrant == BOTTOM_RIGHT)
+        ImGui::SetNextWindowPos(top_left);
+    else
+        ImGui::SetNextWindowPos(lower_left);
 	//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.8);
 
 	ImGui::PushFont(uiFontLarge);
@@ -159,18 +166,6 @@ void DisplayHealthBar(int hp, int maxHp, int damage)
 	}
 	ImGui::ProgressBar(percentHealth, ImVec2(-1.0f, 0.0f));
 	ImGui::PopStyleColor();
-
-	// NOTE: An idea for an overlay.
-	/*
-	ImGui::SameLine();
-
-    ImGui::SetCursorPosX(original_cursor_position);
-
-	ImVec2 size = ImVec2(100, original_line_height);
-	ImVec2 pos = ImGui::GetCursorScreenPos();
-	ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(255, 255, 255, 100));
-	ImGui::Dummy(size);
-	*/
 }
 
 // Just display a unit's name and HP bar.
@@ -178,9 +173,21 @@ void DisplayHealthBar(int hp, int maxHp, int damage)
 void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 {
 	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(490, 10));
     ImGui::SetNextWindowSize(ImVec2(400, 120));
 
+    int x_pos = 490;
+    if(!unit.isAlly)
+        x_pos = 170;
+
+    ImVec2 top_right = ImVec2(x_pos, 10);
+    ImVec2 bottom_right = ImVec2(x_pos, 470);
+
+    if(quadrant == TOP_LEFT || quadrant == TOP_RIGHT)
+        ImGui::SetNextWindowPos(bottom_right);
+    else
+        ImGui::SetNextWindowPos(top_right);
+
+    // Logic
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin(unit.name.c_str(), NULL, wf);
     {
@@ -197,14 +204,25 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
     ImGui::End();
 }
 
-
 // Full display of unit's stats
 void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 {
 	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(470, 10));
     ImGui::SetNextWindowSize(ImVec2(420, 180));
 
+    int x_pos = 470;
+    if(!unit.isAlly)
+        x_pos = 170;
+
+    ImVec2 top_right = ImVec2(x_pos, 10);
+    ImVec2 bottom_right = ImVec2(x_pos, 410);
+
+    if(quadrant == TOP_LEFT || quadrant == TOP_RIGHT)
+        ImGui::SetNextWindowPos(bottom_right);
+    else
+        ImGui::SetNextWindowPos(top_right);
+
+    // Logic
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Stats", NULL, wf);
     {
@@ -230,13 +248,13 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 			ImGui::Text("[RES %d]", unit.resistance);
 
 
-			ImGui::Text("[HIT %d]", unit.accuracy);
+			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
-			ImGui::Text("[AVO %d]", unit.avoid);
+			ImGui::Text("[AVO %d%%]", unit.avoid);
 			ImGui::SameLine();
 			ImGui::Text("[CRT %d]", unit.crit);
 			ImGui::SameLine();
-			ImGui::Text("[Range %d-%d]", unit.minRange, unit.maxRange);
+			ImGui::Text("[Rng %d-%d]", unit.minRange, unit.maxRange);
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -246,9 +264,17 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy)
 {
 	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(450, 10));
     ImGui::SetNextWindowSize(ImVec2(440, 220));
 
+    ImVec2 top_right = {170, 10};
+    ImVec2 bottom_right = {170, 370};
+
+    if(quadrant == TOP_LEFT || quadrant == TOP_RIGHT)
+        ImGui::SetNextWindowPos(bottom_right);
+    else
+        ImGui::SetNextWindowPos(top_right);
+
+    // Logic
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Combat", NULL, wf);
     {
@@ -300,6 +326,7 @@ void DisplayOptionsMenu(ImGuiWindowFlags wf)
     ImGui::SetNextWindowPos(ImVec2(400, 300), 0, ImVec2(0.5, 0.5));
     ImGui::SetNextWindowSize(ImVec2(420, 310));
 
+    // Logic
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Options", NULL, wf);
     {

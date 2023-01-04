@@ -4,33 +4,36 @@ todo
 Alex Hartford
 
 MVP
-    New UI System
-    Cycle through possible targets when targeting instead of moving cursor.
-    Only able to attack or heal if there are targets.
+    Tweak Units
+    Multiple attacks, Crit
+    More accurate HIT calculations, with tile avoid factored in.
+    Heal self
+    BUG | AI actions don't move the viewport.
+    Fort
+
+    10 levels
     Better enemy ai
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
             Manhattan Distance doesn't have to be used by the UI as well.
         Ranged units set up for and calculate for ranged attacks
-    Conversations
-    Battle Animations
-    Level Transitions/Win Screen
-    BUG | AI actions don't move the viewport.
-    10 levels
-    Heal self.
     UI Tweaks
         Pressing R always brings up a unit's Stats page
         Pressing up or down on a unit's Stats page brings you to the next unit's
         stats page (And also moves your cursor to them)
-        * This behavior can be triggered with L button as well, allowing you to
-          cycle through available units on the battlefield. (Non-exhausted)
-    Add Mag, Res, Multiple attacks, Avoid, Crit
-    BUG | Fix the issue at the start of the player's turn where we put the
-    cursor over 0, 0, and there's a unit there, but it doesn't update the
-    interface state properly.
-    More accurate HIT calculations, with tile avoid factored in.
+        Cycle through possible targets when targeting instead of moving cursor.
+        Only able to attack or heal if there are targets.
 
 NICE
+    Shrink Tilesets to absolute necessity, also enforce consistency across all
+    tilesets.
+    Battle Animations
+    Level Transitions/Win Screen
+    Conversations
+    Audio
+        Sound Effects
+        Drum-n-bass Audio
+            Trance-like state of playing
     BUG | Flood-Fill results in duplicates sometimes (for enemies mostly)
     Polish
         Generate true arrow for movement (with bitfields)
@@ -41,24 +44,10 @@ NICE
         Enemy AI Goes for "beneficial trades"
             Higher damage output than input.
             goes for kills
-    Audio
-        Sound Effects
-        Drum-n-bass Audio
-            Trance-like state of playing
-    Easy: Make tiles global.
-    More Asserts everywhere
-    BUG | Constant Framerate seems to not work.
-        Debug without IMGUI, I think that library makes framerate constant on
-        its own.
-    Test out an items system.
-    Add some normal glyphs to the bjg font (%, <> (), {}, &)
+    Add some normal glyphs to the bjg font (<> (), {}, &)
+    BUG | Fix the issue at the start of the player's turn where we put the
+    cursor over 0, 0, and there's a unit there, but it doesn't update the
+    interface state properly.
 
 REFACTOR
-    The Grid code is a mess, but it could probably just be like 3 functions.
-    big unit storage refactor
-        remove unique ptrs. Just allocate and free the memory ourselves.
-        Open Questions:
-            * Should the Map contain all tiles, which contain all units?
-            * Should The Level contain maps and units, and units contain
-              references to their tiles?
-        I don't really know.
+    Complete Migration to the New UI System

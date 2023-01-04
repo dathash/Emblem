@@ -1,0 +1,45 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Level
+COM Date: November 2022
+
+COM NOTE: Don't use tabs in here!
+
+ATL frozen.png
+
+WDT 15
+HGT 20
+
+MST 0
+MAP 0 0 0 0 1 0 0 4 0 0 0 1 1 1 0 
+MAP 0 0 0 1 1 0 0 0 0 0 0 1 1 1 0 
+MAP 0 1 0 3 0 3 0 3 0 0 1 1 1 0 0 
+MAP 0 1 0 1 1 0 0 0 0 1 1 1 0 0 0 
+MAP 3 3 2 1 1 1 0 0 1 1 1 0 0 0 0 
+MAP 0 1 2 2 0 0 0 0 1 1 1 0 0 0 0 
+MAP 0 1 2 2 0 1 1 1 1 1 1 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 1 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
+
+COM <UNT <name> <id> <col> <row>
+UNT Darko 0 0 3 
+UNT Soren 1 0 0 
+UNT Zarathustra 2 2 2 
+UNT Thief 3 5 3 
+UNT Brute 4 4 2 
+UNT Brute 4 7 3 
+UNT Archer 5 7 5 
+UNT Thief 3 0 4 
+UNT Brute 4 2 4 
+

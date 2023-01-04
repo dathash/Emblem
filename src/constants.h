@@ -90,6 +90,15 @@ enum AIState
 
     ENEMY_TURN
 };
+
+enum quadrant
+{
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT
+};
+
 // =============================== tiles =======================================
 // TODO put global tile types here, instead of macro solution in structs.h.
 

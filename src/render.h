@@ -40,26 +40,28 @@ RenderTileTexture(const Tilemap &map, const Tile &tile,
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(int col, int row, const SpriteSheet &sheet)
+RenderSprite(int col, int row, const SpriteSheet &sheet, bool flipped = false)
 {
     SDL_Rect destination = {col * TILE_SIZE, 
                             row * TILE_SIZE, 
                             TILE_SIZE, TILE_SIZE};
     SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
-    SDL_RenderCopy(GlobalRenderer, sheet.texture.sdlTexture, &source, &destination);
+    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdlTexture, &source, &destination,
+                     0, NULL, (const SDL_RendererFlip)flipped);
 }
 
 // Renders a unit's portrait.
 void
-RenderPortrait(int x, int y, const Texture &portrait)
+RenderPortrait(int x, int y, const Texture &portrait, bool flipped)
 {
     SDL_Rect destination = {x, y, 
                             PORTRAIT_SIZE,
                             PORTRAIT_SIZE};
     SDL_Rect source = {0, 0, portrait.width, portrait.height};
 
-    SDL_RenderCopy(GlobalRenderer, portrait.sdlTexture, &source, &destination);
+    SDL_RenderCopyEx(GlobalRenderer, portrait.sdlTexture, &source, &destination, 
+                     0, NULL, (const SDL_RendererFlip)flipped);
 }
 
 // Renders a given texture at a pixel point.
@@ -259,14 +261,14 @@ Render(const Tilemap &map, const Cursor &cursor,
                 {
                     SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdlTexture, readyMod.r, readyMod.g, readyMod.b);
                 }
-                RenderSprite(screenCol, screenRow, tileToRender.occupant->sheet);
+                RenderSprite(screenCol, screenRow, tileToRender.occupant->sheet, tileToRender.occupant->isAlly);
             }
         }
     }
 
 
 // ================================= render cursor ================================================
-    RenderSprite(cursor.col - viewportCol, cursor.row - viewportRow, cursor.sheet);
+    RenderSprite(cursor.col - viewportCol, cursor.row - viewportRow, cursor.sheet, false);
 
 
 // ==================================== menus =====================================================
@@ -328,9 +330,13 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)
     {
-        // TODO: Broken because level loading can put us into degenerate gamestates
         assert(map.tiles[cursor.col][cursor.row].occupant);
-        RenderPortrait(500, 400, map.tiles[cursor.col][cursor.row].occupant->portrait);
+        int x_pos = 560;
+        if(map.tiles[cursor.col][cursor.row].occupant->isAlly)
+            x_pos = 180;
+
+        RenderPortrait(x_pos, 400, map.tiles[cursor.col][cursor.row].occupant->portrait,
+                       map.tiles[cursor.col][cursor.row].occupant->isAlly);
     }
 
     /*
