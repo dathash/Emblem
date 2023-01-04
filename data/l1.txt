@@ -5,7 +5,7 @@ COM Date: November 2022
 
 COM NOTE: Don't use tabs in here!
 
-ATL frozen.png
+ATL ruins.png
 
 WDT 15
 HGT 20

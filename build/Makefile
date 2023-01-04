@@ -16,7 +16,6 @@ $(OUT): $(OBJ)
 	@$(CC) $(FLAGS) $(INCFLAGS) $(LDFLAGS) $^ -o $@
 	@printf "\e[33mLinking\e[90m %s\e[0m\n" $@
 	@printf "\e[34mDone!\e[0m\n"
-	@rm -f ../src/emblem.o
 
 %.o: %.cpp
 	@$(CC) $(FLAGS) $(INCFLAGS) -c $< -o $@
