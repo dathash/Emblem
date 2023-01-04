@@ -208,9 +208,9 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(420, 180));
+    ImGui::SetNextWindowSize(ImVec2(440, 180));
 
-    int x_pos = 470;
+    int x_pos = 450;
     if(!unit.isAlly)
         x_pos = 170;
 
@@ -241,20 +241,19 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 			// Second line
 			ImGui::Text("[ATK %d]", unit.attack);
 			ImGui::SameLine();
-			ImGui::Text("[MAG %d]", unit.magic);
-			ImGui::SameLine();
 			ImGui::Text("[DEF %d]", unit.defense);
 			ImGui::SameLine();
+			ImGui::Text("[MAG %d]", unit.magic);
+			ImGui::SameLine();
 			ImGui::Text("[RES %d]", unit.resistance);
-
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
 			ImGui::Text("[AVO %d%%]", unit.avoid);
 			ImGui::SameLine();
-			ImGui::Text("[CRT %d]", unit.crit);
+			ImGui::Text("[CRT %d%%]", unit.crit);
 			ImGui::SameLine();
-			ImGui::Text("[Rng %d-%d]", unit.minRange, unit.maxRange);
+			ImGui::Text("[RG %d-%d]", unit.minRange, unit.maxRange);
 		ImGui::PopFont();
     }
     ImGui::End();

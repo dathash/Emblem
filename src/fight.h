@@ -50,6 +50,13 @@ int HitChance(const Unit &predator, const Unit &prey)
     return (predator.accuracy - prey.avoid);
 }
 
+// Returns the chance to crit a unit
+// CONSIDER: critical resist mechanic, like hobbit luck?
+int CritChance(const Unit &predator, const Unit &prey)
+{
+    return (predator.crit);
+}
+
 // Determines what damage a hit will do.
 int CalculateDamage(const Unit &predator, const Unit &prey)
 {
@@ -104,15 +111,19 @@ SimulateCombat(Unit *one, Unit *two, int distance)
 {
     int one_dmg = CalculateDamage(*one, *two);
     int two_dmg = CalculateDamage(*two, *one);
-    if(d100() < HitChance (*one, *two))
+    if(d100() < HitChance(*one, *two))
     {
         two->Damage(one_dmg);
+        if(d100() < CritChance(*one, *two))
+            two->Damage(one_dmg); // double the damage
     }
 
     if(two->hp > 0 && d100() < HitChance(*two, *one) &&
        (distance >= two->minRange && distance <= two->maxRange))
     {
         one->Damage(two_dmg);
+        if(d100() < CritChance(*two, *one))
+            one->Damage(two_dmg); // double the damage
     }
 
     one->isExhausted = true;

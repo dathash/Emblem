@@ -48,29 +48,28 @@ public:
             // For rendering
             MoveViewport(newCol, newRow);
 
-            // TILEINFO
-
             // change state
             const Tile *hoverTile = &map.tiles[newCol][newRow];
             if(!hoverTile->occupant)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+                return;
             }
-            else if(hoverTile->occupant->isExhausted)
+
+            if(hoverTile->occupant->isExhausted)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                return;
             }
-            else
+
+            if(hoverTile->occupant->isAlly)
             {
-                if(hoverTile->occupant->isAlly)
-                {
-                    GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-                }
-                else
-                {
-                    GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
-                }
+                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+                return;
             }
+
+            GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+            return;
         }
     }
 
@@ -101,7 +100,7 @@ public:
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
 
-        // TODO: Should I reset this when I finish using a unit, or
+        // CONSIDER: Should I reset this when I finish using a unit, or
         // when I'm about to use one?
         //cursor->path_draw = {};
 
@@ -156,43 +155,37 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
 
-        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+        if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
-            // move cursor
-            cursor->col = newCol;
-            cursor->row = newRow;
-
-            // For rendering
-            MoveViewport(newCol, newRow);
-
-            // change state
-            const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(point(newCol, newRow), map.accessible))
-            {
-                cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
-                                            cursor->col, cursor->row);
-
-                if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
-                {
-                    GlobalInterfaceState = SELECTED_OVER_GROUND;
-                }
-                else
-                {
-                    if(hoverTile->occupant->isAlly)
-                    {
-                        GlobalInterfaceState = SELECTED_OVER_ALLY;
-                    }
-                    else
-                    {
-                        GlobalInterfaceState = SELECTED_OVER_ENEMY;
-                    }
-                }
-            }
-            else
-            {
-                GlobalInterfaceState = SELECTED_OVER_INACCESSIBLE;
-            }
+            return;
         }
+
+        // move cursor
+        cursor->col = newCol;
+        cursor->row = newRow;
+        MoveViewport(newCol, newRow);
+
+        const Tile *hoverTile = &map.tiles[newCol][newRow];
+        if(!VectorHasElement(point(newCol, newRow), map.accessible))
+        {
+            GlobalInterfaceState = SELECTED_OVER_INACCESSIBLE;
+            return;
+        }
+
+        cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
+                                    cursor->col, cursor->row);
+
+        if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
+        {
+            GlobalInterfaceState = SELECTED_OVER_GROUND;
+            return;
+        }
+        if(hoverTile->occupant->isAlly)
+        {
+            GlobalInterfaceState = SELECTED_OVER_ALLY;
+            return;
+        }
+        GlobalInterfaceState = SELECTED_OVER_ENEMY;
     }
 
 private:
@@ -289,31 +282,27 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
         
-        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+        if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
-            // move cursor
-            cursor->col = newCol;
-            cursor->row = newRow;
-
-            // For rendering
-            MoveViewport(newCol, newRow);
-
-            // TILEINFO
-
-            // change state
-            const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(point(newCol, newRow), map.interactible) &&
-               hoverTile->occupant &&
-               !hoverTile->occupant->isAlly)
-            {
-                GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
-            }
-
-            else
-            {
-                GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
-            }
+            return;
         }
+        // move cursor
+        cursor->col = newCol;
+        cursor->row = newRow;
+
+        // For rendering
+        MoveViewport(newCol, newRow);
+
+        // change state
+        const Tile *hoverTile = &map.tiles[newCol][newRow];
+        if(VectorHasElement(point(newCol, newRow), map.interactible) &&
+           hoverTile->occupant &&
+           !hoverTile->occupant->isAlly)
+        {
+            GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
+            return;
+        }
+        GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
     }
 
 private:
@@ -338,28 +327,27 @@ public:
         int newCol = cursor->col + col;
         int newRow = cursor->row + row;
 
-        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+        if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
         {
-            // move cursor
-            cursor->col = newCol;
-            cursor->row = newRow;
-
-            // For rendering
-            MoveViewport(newCol, newRow);
-
-            // change state
-            const Tile *hoverTile = &map.tiles[newCol][newRow];
-            if(VectorHasElement(point(newCol, newRow), map.interactible) &&
-               hoverTile->occupant &&
-               hoverTile->occupant->isAlly)
-            {
-                GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
-            }
-            else
-            {
-                GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
-            }
+            return;
         }
+        // move cursor
+        cursor->col = newCol;
+        cursor->row = newRow;
+
+        // For rendering
+        MoveViewport(newCol, newRow);
+
+        // change state
+        const Tile *hoverTile = &map.tiles[newCol][newRow];
+        if(VectorHasElement(point(newCol, newRow), map.interactible) &&
+           hoverTile->occupant &&
+           hoverTile->occupant->isAlly)
+        {
+            GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
+            return;
+        }
+        GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
     }
 
 private:
@@ -725,7 +713,7 @@ public:
     {}
 
     virtual void Execute()
-    { 
+    {
         switch(menu.current)
         {
             case(0): // INFO
@@ -762,8 +750,6 @@ public:
                     GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
                 }
 
-                // TILEINFO
-
             } break;
             case(2): // HEAL
             {
@@ -797,8 +783,6 @@ public:
                 {
                     GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
                 }
-
-                // TILEINFO
 
             } break;
             case(3): // WAIT

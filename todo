@@ -5,11 +5,8 @@ Alex Hartford
 
 MVP
     Tweak Units
-    Multiple attacks, Crit
+    Start turn on Zarathustra
     More accurate HIT calculations, with tile avoid factored in.
-    Heal self
-    BUG | AI actions don't move the viewport.
-    Fort
 
     10 levels
     Better enemy ai
@@ -23,12 +20,14 @@ MVP
         stats page (And also moves your cursor to them)
         Cycle through possible targets when targeting instead of moving cursor.
         Only able to attack or heal if there are targets.
+    Level Transitions/Win Screen
 
 NICE
+    Heal self
+    Fort with attack bonus instead of defense?
     Shrink Tilesets to absolute necessity, also enforce consistency across all
     tilesets.
     Battle Animations
-    Level Transitions/Win Screen
     Conversations
     Audio
         Sound Effects
@@ -51,3 +50,5 @@ NICE
 
 REFACTOR
     Complete Migration to the New UI System
+
+DESIGN

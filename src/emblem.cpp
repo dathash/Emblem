@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
     float elapsedMS = 0.0f;
 
 	// Play Music
-    //ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/bach.mp3", NULL);
+    //ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/r4.wav", NULL);
 
 // ========================= game loop =========================================
     GlobalRunning = true;

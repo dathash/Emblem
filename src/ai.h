@@ -40,6 +40,9 @@ public:
             // move cursor
             cursor->col = selected->col;
             cursor->row = selected->row;
+
+            // For rendering
+            MoveViewport(cursor->col, cursor->row);
         }
         else
         {
@@ -144,6 +147,8 @@ public:
         cursor->col = targetSquare.first;
         cursor->row = targetSquare.second;
 
+        MoveViewport(targetSquare.first, targetSquare.second);
+
         GlobalAIState = FOUND_NEW_POSITION;
     }
 
@@ -184,6 +189,8 @@ private:
 };
 
 
+// TODO: Make sure this code doesn't break if the enemy attacks a unit outside
+// its current viewport.
 class AIAttackTargetCommand : public Command
 {
 public:
