@@ -174,15 +174,15 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - viewportRow, 
-                           cell.second - viewportRow, 
+                RenderTileColor(cell.first - viewportCol,
+                           cell.second - viewportRow,
                            moveColor);
             }
         }
 
         for(const point &p : cursor.path_draw)
         {
-            RenderTileColor(p.first - viewportRow, 
+            RenderTileColor(p.first - viewportCol, 
                        p.second - viewportRow, 
                        pathColor);
         }
@@ -194,35 +194,33 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - viewportRow, 
+                RenderTileColor(cell.first - viewportCol, 
                            cell.second - viewportRow, 
                            aiMoveColor);
             }
         }
     }
 
-    if(GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
-       GlobalInterfaceState == ATTACK_TARGETING_OVER_UNTARGETABLE)
+    if(GlobalInterfaceState == ATTACK_TARGETING)
     {
-        for(pair<int, int> cell : map.interactible)
+        for(pair<int, int> cell : map.attackable)
         {
             if(WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - viewportRow, 
+                RenderTileColor(cell.first - viewportCol, 
                            cell.second - viewportRow, 
                            attackColor);
             }
         }
     }
 
-    if(GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
-       GlobalInterfaceState == HEALING_TARGETING_OVER_UNTARGETABLE)
+    if(GlobalInterfaceState == HEAL_TARGETING)
     {
-        for(pair<int, int> cell : map.interactible)
+        for(pair<int, int> cell : map.healable)
         {
             if(WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - viewportRow, 
+                RenderTileColor(cell.first - viewportCol, 
                            cell.second - viewportRow, 
                            healColor);
             }
@@ -236,7 +234,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         {
             if(WithinViewport(cell.first, cell.second))
             {
-                RenderTileColor(cell.first - viewportRow, 
+                RenderTileColor(cell.first - viewportCol, 
                            cell.second - viewportRow, 
                            aiMoveColor);
             }
@@ -322,8 +320,8 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
        GlobalInterfaceState == SELECTED_OVER_ALLY ||
        GlobalInterfaceState == SELECTED_OVER_ENEMY ||
-       GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
-       GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
+       GlobalInterfaceState == ATTACK_TARGETING ||
+       GlobalInterfaceState == HEAL_TARGETING ||
        GlobalInterfaceState == UNIT_MENU_ROOT ||
 	   GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO ||

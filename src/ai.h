@@ -34,9 +34,6 @@ public:
 
         if(selected)
         {
-            printf("AI COMMAND | Move Cursor from <%d, %d> to <%d, %d>\n", 
-                cursor->col, cursor->row, selected->col, selected->row);
-
             // move cursor
             cursor->col = selected->col;
             cursor->row = selected->row;
@@ -75,9 +72,6 @@ public:
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
 
-        printf("AI COMMAND | Select Unit %d at <%d, %d>\n", 
-               cursor->selected->id, cursor->col, cursor->row);
-
         GlobalAIState = SELECTED;
     }
 private:
@@ -95,8 +89,6 @@ public:
 
     virtual void Execute()
     {
-        printf("COMMAND | Deactivate Unit %d at <%d, %d>\n",
-               cursor->selected->id, cursor->col, cursor->row);
         cursor->selected->isExhausted = true;
 
         cursor->selected->sheet.ChangeTrack(0);
@@ -140,9 +132,6 @@ public:
 			targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
 		}
 
-        printf("AI COMMAND | Move Cursor from <%d, %d> to <%d, %d>\n", 
-            cursor->col, cursor->row, targetSquare.first, targetSquare.second);
-
         // move cursor
         cursor->col = targetSquare.first;
         cursor->row = targetSquare.second;
@@ -168,10 +157,25 @@ public:
 
     virtual void Execute()
     {
-        printf("AI COMMAND | Place Unit %d at <%d, %d>\n",
-               cursor->selected->id, cursor->col, cursor->row); 
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
+
+        // Determine interactible squares
+        map->attackable.clear();
+        map->healable.clear();
+        map->attackable.clear();
+        vector<point> interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
+                                             cursor->selected->minRange, cursor->selected->maxRange);
+
+        // attack
+        for(const point &p : interactible)
+        {
+            if(map->tiles[p.first][p.second].occupant &&
+               !map->tiles[p.first][p.second].occupant->isAlly)
+            {
+                map->attackable.push_back(p);
+            }
+        }
 
         // unit has to know its position as well
         cursor->selected->col = cursor->col;
@@ -201,19 +205,12 @@ public:
 
     virtual void Execute()
     {
-        map->interactible.clear();
-        map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow,
-                                         cursor->selected->minRange, cursor->selected->maxRange);
-
         cursor->targeted = FindVictim(*cursor, *map);
         if(cursor->targeted)
         {
             int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
                                              point(cursor->targeted->col, cursor->targeted->row));
             SimulateCombat(cursor->selected, cursor->targeted, distance);
-
-            printf("AI COMMAND | Attack Unit %d!\n",
-                   cursor->targeted->id);
         }
 
         cursor->selected->isExhausted = true;
@@ -240,7 +237,6 @@ struct AI
     // Fills the command queue with the current plan.
     void Plan(Cursor *cursor, Tilemap *map)
     {
-        printf("Planning!\n");
         shouldPlan = false;
 
         commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, *map));

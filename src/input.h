@@ -49,6 +49,9 @@ HandleEvents(InputState *input)
                     case SDLK_LSHIFT:
                         input->b = true;
                         break;
+                    case SDLK_e:
+                        input->r = true;
+                        break;
                     case SDLK_w:
                         input->up = true;
                         break;
@@ -67,6 +70,15 @@ HandleEvents(InputState *input)
             {
                 switch(Event.key.keysym.sym)
                 {
+                    case SDLK_SPACE:
+                        input->a = false;
+                        break;
+                    case SDLK_LSHIFT:
+                        input->b = false;
+                        break;
+                    case SDLK_e:
+                        input->r = false;
+                        break;
                     case SDLK_w:
                         input->up = false;
                         break;
@@ -78,12 +90,6 @@ HandleEvents(InputState *input)
                         break;
                     case SDLK_d:
                         input->right = false;
-                        break;
-                    case SDLK_SPACE:
-                        input->a = false;
-                        break;
-                    case SDLK_LSHIFT:
-                        input->b = false;
                         break;
                 }
             }

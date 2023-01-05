@@ -36,7 +36,7 @@ LoadTextureImage(string path, string filename)
     SDL_Texture *texture = nullptr;
     SDL_Surface *surface = nullptr;
 
-    cout << path + filename << "\n";
+    //cout << path + filename << "\n";
     surface = IMG_Load((path + filename).c_str());
     assert(surface);
     int width = surface->w;
@@ -248,7 +248,6 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long>>\n";
     for(const unique_ptr<Unit> &unit : units)
     {
-        cout << unit->name << "\n";
         fp << "UNT " << unit->name << " "
                      << unit->sheet.texture.filename << " "
                      << unit->portrait.filename << " "

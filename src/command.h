@@ -198,9 +198,10 @@ private:
 class PlaceUnitCommand : public Command
 {
 public:
-    PlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in)
+    PlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in, Menu *menu_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      menu(menu_in)
     {}
 
     virtual void Execute()
@@ -208,11 +209,50 @@ public:
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
 
-        // unit has to know its position as well
+        // unit has to know its position as well (FOR NOW)
         cursor->selected->col = cursor->col;
         cursor->selected->row = cursor->row;
 
         cursor->selected->sheet.ChangeTrack(1);
+
+        // Determine interactible squares
+        map->attackable.clear();
+        map->healable.clear();
+        map->attackable.clear();
+        vector<point> interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
+                                             cursor->selected->minRange, cursor->selected->maxRange);
+
+        // Update unit menu with available actions
+        *menu = Menu(0, 0, {});
+
+        // attack
+        for(const point &p : interactible)
+        {
+            if(map->tiles[p.first][p.second].occupant &&
+               !map->tiles[p.first][p.second].occupant->isAlly)
+            {
+                map->attackable.push_back(p);
+            }
+        }
+        if(map->attackable.size() > 0)
+            menu->AddOption("Attack");
+
+        interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
+                                        1, 1);
+        // heal
+        for(const point &p : interactible)
+        {
+            if(map->tiles[p.first][p.second].occupant &&
+               map->tiles[p.first][p.second].occupant->isAlly &&
+               map->tiles[p.first][p.second].occupant->hp < map->tiles[p.first][p.second].occupant->maxHp)
+            {
+                map->healable.push_back(p);
+            }
+        }
+        if(map->healable.size() > 0)
+            menu->AddOption("Heal");
+
+        menu->AddOption("Wait");
 
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
@@ -220,15 +260,18 @@ public:
         // Move onto next level!
         if(map->tiles[cursor->col][cursor->row].type == OBJECTIVE)
         {
+            // TODO: Level Transitions
             printf("Objective Reached. Onto the next level!\n");
             GlobalNextLevel = true;
             GlobalTurnStart = true;
+            return;
         }
     }
 
 private:
     Cursor *cursor; 
     Tilemap *map;
+    Menu *menu;
 };
 
 
@@ -267,94 +310,70 @@ private:
 
 
 // ============================== finding target ===========================================
-class MoveAttackTargetingCommand : public Command
+class NextAttackTargetCommand : public Command
 {
 public:
-    MoveAttackTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    NextAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
-      col(col_in),
-      row(row_in),
       map(map_in)
     {}
 
     virtual void Execute()
     {
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
-        
-        if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
-        {
-            return;
-        }
+        assert(map->attackable.size() > 0);
+        if(map->attackable.size() > 1)
+            rotate(map->attackable.begin(), 
+                   map->attackable.begin() + 1, 
+                   map->attackable.end());
+        point next = map->attackable[0];
+
         // move cursor
-        cursor->col = newCol;
-        cursor->row = newRow;
+        cursor->col = next.first;
+        cursor->row = next.second;
 
         // For rendering
-        MoveViewport(newCol, newRow);
+        MoveViewport(next.first, next.second);
 
         // change state
-        const Tile *hoverTile = &map.tiles[newCol][newRow];
-        if(VectorHasElement(point(newCol, newRow), map.interactible) &&
-           hoverTile->occupant &&
-           !hoverTile->occupant->isAlly)
-        {
-            GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
-            return;
-        }
-        GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
+        GlobalInterfaceState = ATTACK_TARGETING;
     }
 
 private:
     Cursor *cursor; 
-    int col;
-    int row;
-    const Tilemap &map;
+    Tilemap *map;
 };
 
-class MoveHealingTargetingCommand : public Command
+class NextHealTargetCommand : public Command
 {
 public:
-    MoveHealingTargetingCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    NextHealTargetCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
-      col(col_in),
-      row(row_in),
       map(map_in)
     {}
 
     virtual void Execute()
     {
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
+        assert(map->healable.size() > 0);
+        if(map->attackable.size() > 1)
+            rotate(map->attackable.begin(), 
+                   map->attackable.begin() + 1,
+                   map->attackable.end());
+        point next = map->healable[0];
 
-        if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
-        {
-            return;
-        }
         // move cursor
-        cursor->col = newCol;
-        cursor->row = newRow;
+        cursor->col = next.first;
+        cursor->row = next.second;
 
         // For rendering
-        MoveViewport(newCol, newRow);
+        MoveViewport(next.first, next.second);
 
         // change state
-        const Tile *hoverTile = &map.tiles[newCol][newRow];
-        if(VectorHasElement(point(newCol, newRow), map.interactible) &&
-           hoverTile->occupant &&
-           hoverTile->occupant->isAlly)
-        {
-            GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
-            return;
-        }
-        GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
+        GlobalInterfaceState = HEAL_TARGETING;
     }
 
 private:
     Cursor *cursor; 
-    int col;
-    int row;
-    const Tilemap &map;
+    Tilemap *map;
 };
 
 class DetargetCommand : public Command
@@ -401,10 +420,10 @@ private:
     const Tilemap &map;
 };
 
-class InitiateHealingCommand : public Command
+class InitiateHealCommand : public Command
 {
 public:
-    InitiateHealingCommand(Cursor *cursor_in, const Tilemap &map_in)
+    InitiateHealCommand(Cursor *cursor_in, const Tilemap &map_in)
     : cursor(cursor_in),
       map(map_in)
     {}
@@ -491,7 +510,7 @@ public:
         cursor->targeted = nullptr;
 
         // change state
-        GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
+        GlobalInterfaceState = ATTACK_TARGETING;
     }
 
 private:
@@ -510,7 +529,7 @@ public:
         cursor->targeted = nullptr;
 
         // change state
-        GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
+        GlobalInterfaceState = HEAL_TARGETING;
     }
 
 private:
@@ -670,8 +689,6 @@ public:
 };
 
 // ============================= unit menu commands =======================
-
-
 class UpdateUnitMenuCommand : public Command
 {
 public:
@@ -706,7 +723,7 @@ private:
 class ChooseUnitMenuOptionCommand : public Command
 {
 public:
-    ChooseUnitMenuOptionCommand(Cursor *cursor_in, Tilemap *map_in, const Menu &menu_in)
+    ChooseUnitMenuOptionCommand(Cursor *cursor_in, const Tilemap &map_in, const Menu &menu_in)
     : cursor(cursor_in),
       map(map_in),
       menu(menu_in)
@@ -714,101 +731,63 @@ public:
 
     virtual void Execute()
     {
-        switch(menu.current)
+        string option = menu.optionText[menu.current];
+
+        if(option == "Attack")
         {
-            case(0): // INFO
-            {
-                GlobalInterfaceState = UNIT_INFO;
-            } break;
-            case(1): // ATTACK
-            {
-                cursor->sourceCol = cursor->col;
-                cursor->sourceRow = cursor->row;
-                map->interactible.clear();
-                map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
-                                                 cursor->selected->minRange, cursor->selected->maxRange);
-                bool initialTargetFound = false;
-                point targetSpot;
-                for(point p : map->interactible)
-                {
-                    if(map->tiles[p.first][p.second].occupant && 
-                       !map->tiles[p.first][p.second].occupant->isAlly)
-                    {
-                        initialTargetFound = true;
-                        targetSpot = p;
-                    }
-                }
-                if(initialTargetFound)
-                {
-                    cursor->targeted = map->tiles[targetSpot.first][targetSpot.second].occupant;
-                    cursor->col = targetSpot.first;
-                    cursor->row = targetSpot.second;
-                    GlobalInterfaceState = ATTACK_TARGETING_OVER_TARGET;
-                }
-                else
-                {
-                    GlobalInterfaceState = ATTACK_TARGETING_OVER_UNTARGETABLE;
-                }
+            assert(map.attackable.size());
+            cursor->sourceCol = cursor->col;
+            cursor->sourceRow = cursor->row;
 
-            } break;
-            case(2): // HEAL
-            {
-                cursor->sourceCol = cursor->col;
-                cursor->sourceRow = cursor->row;
-                // Find tiles that a unit can interact with.
-
-                map->interactible.clear();
-                map->interactible = InteractibleFrom(*map, cursor->sourceCol, cursor->sourceRow, 
-                                                     1, 1);
-                bool initialTargetFound = false;
-                point targetSpot;
-                for(point p : map->interactible)
-                {
-                    if(map->tiles[p.first][p.second].occupant && 
-                       map->tiles[p.first][p.second].occupant->isAlly &&
-                       map->tiles[p.first][p.second].occupant->hp < map->tiles[p.first][p.second].occupant->maxHp)
-                    {
-                        initialTargetFound = true;
-                        targetSpot = p;
-                    }
-                }
-                if(initialTargetFound)
-                {
-                    cursor->targeted = map->tiles[targetSpot.first][targetSpot.second].occupant;
-                    cursor->col = targetSpot.first;
-                    cursor->row = targetSpot.second;
-                    GlobalInterfaceState = HEALING_TARGETING_OVER_TARGET;
-                }
-                else
-                {
-                    GlobalInterfaceState = HEALING_TARGETING_OVER_UNTARGETABLE;
-                }
-
-            } break;
-            case(3): // WAIT
-            {
-                cursor->selected->isExhausted = true;
-
-                cursor->selected->sheet.ChangeTrack(0);
-                cursor->selected = nullptr;
-
-                cursor->selectedCol = -1;
-                cursor->selectedRow = -1;
-
-                cursor->path_draw = {};
-                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-            } break;
-            default:
-            {
-                assert(!"ChooseUnitMenuOptionCommand | How did you get here?\n");
-            } break;
+            cursor->col = map.attackable[0].first;
+            cursor->row = map.attackable[0].second;
+            GlobalInterfaceState = ATTACK_TARGETING;
+            return;
         }
+        if(option == "Heal")
+        {
+            assert(map.healable.size());
+            cursor->sourceCol = cursor->col;
+            cursor->sourceRow = cursor->row;
+
+            cursor->col = map.healable[0].first;
+            cursor->row = map.healable[0].second;
+            GlobalInterfaceState = HEAL_TARGETING;
+            return;
+        }
+
+        if(option == "Wait")
+        {
+            cursor->selected->isExhausted = true;
+
+            cursor->selected->sheet.ChangeTrack(0);
+            cursor->selected = nullptr;
+
+            cursor->selectedCol = -1;
+            cursor->selectedRow = -1;
+
+            cursor->path_draw = {};
+            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            return;
+        }
+
+        assert(!"ChooseUnitMenuOptionCommand | How did you get here?\n");
     }
 
 private:
     Cursor *cursor;
-    Tilemap *map;
+    const Tilemap &map;
     const Menu &menu;
+};
+
+class OpenUnitInfoCommand : public Command
+{
+public:
+    virtual void Execute()
+    {
+        // change state
+        GlobalInterfaceState = UNIT_INFO;
+    }
 };
 
 class BackOutOfUnitInfoCommand : public Command
@@ -817,7 +796,7 @@ public:
     virtual void Execute()
     {
         // change state
-        GlobalInterfaceState = UNIT_MENU_ROOT;
+        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 };
 
@@ -856,6 +835,10 @@ public:
             input->b = false;
             return buttonB;
         }
+        if(input->r) {
+            input->r = false;
+            return buttonR;
+        }
 
         return nullptr;
     }
@@ -868,6 +851,7 @@ public:
         BindRight(make_shared<MoveCommand>(cursor, 1, 0, map));
         BindA(make_shared<OpenGameMenuCommand>());
         BindB(make_shared<NullCommand>());
+        BindR(make_shared<NullCommand>());
     }
 
     void Update(InputState *input)
@@ -910,6 +894,10 @@ public:
     {
         buttonB = command;
     }
+    void BindR(shared_ptr<Command> command)
+    {
+        buttonR = command;
+    }
 
     // updates what the user can do with their buttons.
     // contains some state: the minimum amount.
@@ -927,6 +915,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_ENEMY):
@@ -937,6 +926,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<SelectEnemyCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
+                BindR(make_shared<SelectEnemyCommand>(cursor, map));
             } break;
 
             case(NEUTRAL_OVER_UNIT):
@@ -947,6 +937,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
+                BindR(make_shared<OpenUnitInfoCommand>());
             } break;
 
             case(NEUTRAL_OVER_DEACTIVATED_UNIT):
@@ -957,6 +948,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(SELECTED_OVER_GROUND):
@@ -965,8 +957,9 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<PlaceUnitCommand>(cursor, map));
+                BindA(make_shared<PlaceUnitCommand>(cursor, map, unitMenu));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(SELECTED_OVER_INACCESSIBLE):
@@ -977,6 +970,7 @@ public:
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(SELECTED_OVER_ALLY):
@@ -985,8 +979,9 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>()); // TODO: Move and Heal?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(SELECTED_OVER_ENEMY):
@@ -997,45 +992,28 @@ public:
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
                 BindA(make_shared<NullCommand>()); // TODO: Move and Attack?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
 
-
-            case(ATTACK_TARGETING_OVER_UNTARGETABLE):
+            case(ATTACK_TARGETING):
             {
-                BindUp(make_shared<MoveAttackTargetingCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<DetargetCommand>(cursor, map));
-            } break;
-            case(ATTACK_TARGETING_OVER_TARGET):
-            {
-                BindUp(make_shared<MoveAttackTargetingCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveAttackTargetingCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveAttackTargetingCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveAttackTargetingCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<NextAttackTargetCommand>(cursor, map));
+                BindDown(make_shared<NextAttackTargetCommand>(cursor, map));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateAttackCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
+                BindR(make_shared<NullCommand>());
             } break;
-
-            case(HEALING_TARGETING_OVER_UNTARGETABLE):
+            case(HEAL_TARGETING):
             {
-                BindUp(make_shared<MoveHealingTargetingCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
+                BindUp(make_shared<NextHealTargetCommand>(cursor, map));
+                BindDown(make_shared<NextHealTargetCommand>(cursor, map));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<InitiateHealCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
-            } break;
-            case(HEALING_TARGETING_OVER_TARGET):
-            {
-                BindUp(make_shared<MoveHealingTargetingCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveHealingTargetingCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveHealingTargetingCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveHealingTargetingCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<InitiateHealingCommand>(cursor, *map));
-                BindB(make_shared<DetargetCommand>(cursor, map));
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(PREVIEW_ATTACK):
@@ -1046,6 +1024,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<AttackCommand>(cursor));
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
             case(PREVIEW_HEALING):
             {
@@ -1055,6 +1034,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<HealCommand>(cursor));
                 BindB(make_shared<BackDownFromHealingCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(GAME_MENU_ROOT):
@@ -1065,6 +1045,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
                 BindB(make_shared<ExitGameMenuCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OUTLOOK):
             {
@@ -1074,6 +1055,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackToGameMenuCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
             {
@@ -1083,6 +1065,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackToGameMenuCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(UNIT_MENU_ROOT):
@@ -1091,8 +1074,9 @@ public:
                 BindDown(make_shared<UpdateUnitMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, map, *unitMenu));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, *map, *unitMenu));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
+                BindR(make_shared<NullCommand>());
             } break;
             case(UNIT_INFO):
             {
@@ -1102,6 +1086,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackOutOfUnitInfoCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
             case(ENEMY_INFO):
             {
@@ -1111,6 +1096,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(NO_OP):
@@ -1121,6 +1107,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
 
             default:
@@ -1142,6 +1129,7 @@ private:
     shared_ptr<Command> buttonRight;
     shared_ptr<Command> buttonA;
     shared_ptr<Command> buttonB;
+    shared_ptr<Command> buttonR;
 
     queue<shared_ptr<Command>> commandQueue = {};
 };

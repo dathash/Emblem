@@ -65,8 +65,8 @@ struct UI_State
 				GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
 				GlobalInterfaceState == SELECTED_OVER_ALLY ||
 				GlobalInterfaceState == SELECTED_OVER_ENEMY ||
-				GlobalInterfaceState == ATTACK_TARGETING_OVER_TARGET ||
-				GlobalInterfaceState == HEALING_TARGETING_OVER_TARGET ||
+				GlobalInterfaceState == ATTACK_TARGETING ||
+				GlobalInterfaceState == HEAL_TARGETING ||
 				GlobalInterfaceState == UNIT_MENU_ROOT
 			)
 		{
@@ -259,11 +259,32 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
     ImGui::End();
 }
 
+// Returns the color corresponding to the health of a unit.
+// Blue for high, red for low.
+ImU32
+GetHealthColor(int val, int max)
+{
+    if(val * 2 > max)
+        return IM_COL32(0, 0, 255, 255);
+    return IM_COL32(255, 0, 0, 255);
+}
+
+// Returns the color corresponding to the likelihood of a hit.
+// Blue for high, red for low.
+ImU32
+GetHitColor(int hit)
+{
+    if(hit > 70) // arbitrary TODO: check if there's a good way to make this feel intuitive.
+        return IM_COL32(0, 0, 255, 255);
+    return IM_COL32(255, 0, 0, 255);
+}
+
 // Displays combat preview when initiating combat
-void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy)
+void
+DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(440, 220));
+    ImGui::SetNextWindowSize(ImVec2(460, 220));
 
     ImVec2 top_right = {170, 10};
     ImVec2 bottom_right = {170, 370};
@@ -286,28 +307,64 @@ void DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &ene
             ImGui::Text("%s", ally.name.c_str());
 
 			ImGui::BeginTable("Combat", 3, ImGuiTableFlags_RowBg);
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
 				ImGui::TableNextColumn();
+
 		        ImGui::PushFont(uiFontLarge);
-				ImGui::Text("%d/%d", ally.hp, outcome.one_health);
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(ally.hp, ally.maxHp));
+				ImGui::Text("%d", ally.hp);
+				ImGui::PopStyleColor();
+                ImGui::SameLine();
+				ImGui::Text("/");
+                ImGui::SameLine();
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.one_health, ally.maxHp));
+				ImGui::Text("%d", outcome.one_health);
+				ImGui::PopStyleColor();
 				ImGui::TableNextColumn();
 		        ImGui::PopFont();
-				ImGui::Text("%d%% hit", outcome.one_hit);
+
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHitColor(outcome.one_hit));
+				ImGui::Text("%d%%", outcome.one_hit);
+				ImGui::PopStyleColor();
+                ImGui::SameLine();
+                ImGui::Text("hit");
+
 				ImGui::TableNextColumn();
 				ImGui::Text("%d%% crit", outcome.one_crit);
-				ImGui::PopStyleColor();
 
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 				ImGui::TableNextRow();
 				ImGui::TableNextColumn();
+
 		        ImGui::PushFont(uiFontLarge);
-				ImGui::Text("%d/%d", enemy.hp, outcome.two_health);
-				ImGui::TableNextColumn();
-		        ImGui::PopFont();
-				ImGui::Text("%d%% hit", outcome.two_hit);
-				ImGui::TableNextColumn();
-				ImGui::Text("%d%% crit", outcome.two_crit);
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(enemy.hp, enemy.maxHp));
+				ImGui::Text("%d", enemy.hp);
 				ImGui::PopStyleColor();
+                ImGui::SameLine();
+				ImGui::Text("/");
+                ImGui::SameLine();
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.two_health, enemy.maxHp));
+				ImGui::Text("%d", outcome.two_health);
+				ImGui::PopStyleColor();
+		        ImGui::PopFont();
+
+				ImGui::TableNextColumn();
+                if(outcome.two_hit)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, GetHitColor(outcome.two_hit));
+                    ImGui::Text("%d%%", outcome.two_hit);
+                    ImGui::PopStyleColor();
+                    ImGui::SameLine();
+                    ImGui::Text("hit");
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("%d%% crit", outcome.two_crit);
+                }
+                else  // don't display values if the enemy won't do anything.
+                {
+                    ImGui::Text("- hit");
+                    ImGui::TableNextColumn();
+                    ImGui::Text("- crit");
+                }
+
 			ImGui::EndTable();
 
             ImGui::Text("%s", enemy.name.c_str());
@@ -378,6 +435,7 @@ struct Menu
     u8 current;
 
     vector<Texture> optionTextTextures;
+    vector<string> optionText;
 
     Menu(u8 rows_in, u8 current_in, vector<string> options_in)
     : rows(rows_in),
@@ -386,7 +444,18 @@ struct Menu
         for(string s : options_in)
         {
             optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));
+            optionText.push_back(s);
         }
+    }
+
+    // Custom-build a menu based on your current options.
+    // Mostly used to dynamically display attack/heal/trade options.
+    void
+    AddOption(string s)
+    {
+        rows += 1;
+        optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));
+        optionText.push_back(s);
     }
 };
 

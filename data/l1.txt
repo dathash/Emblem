@@ -40,4 +40,11 @@ UNT Thief 3 10 9
 UNT Thief 3 11 7 
 UNT Thief 3 11 5 
 UNT Thief 3 7 5 
+UNT Thief 3 4 2 
+UNT Thief 3 2 3 
+UNT Thief 3 3 2 
+UNT Thief 3 2 1 
+UNT Thief 3 2 0 
+UNT Thief 3 3 0 
+UNT Thief 3 1 1 
 

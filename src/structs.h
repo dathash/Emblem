@@ -15,6 +15,7 @@ struct InputState
     bool right;
     bool a;
     bool b;
+    bool r;
 
 	int joystickCooldown = 0;
 };
@@ -91,7 +92,6 @@ struct SpriteSheet
 };
 
 // =================================== Gameplay ================================
-// TODO: Implement a lot of these
 struct Unit
 {
     string name;
@@ -155,9 +155,6 @@ struct Unit
     // This little thing is like a vestigial organ
     // disgusting
 
-    // TODO: Remove?
-    Unit(Unit &) = default;
-
     // Damages a unit and resolves things involved with that process.
     // Includes a clamp function for less code reuse
     void
@@ -178,7 +175,7 @@ enum TileTypes
     OBJECTIVE,
 };
 
-//TODO: There's gotta be a better way than macros to set some default tile types
+// CONSIDER: There's gotta be a better way than macros to set some default tile types
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
@@ -198,8 +195,10 @@ struct Tilemap
     int width;
     int height;
     vector<vector<Tile>> tiles;
-    vector<pair<int, int>> accessible;
-    vector<pair<int, int>> interactible;
+    vector<point> accessible;
+    vector<point> attackable;
+    vector<point> healable;
+    //vector<point> adjacent;
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 };
@@ -254,7 +253,7 @@ struct Cursor
         quadrant = Quadrant();
     }
 
-    // returns the current quadrant of the cursor.
+    // returns the current quadrant of where the cursor is on the screen.
     enum quadrant
     Quadrant()
     {

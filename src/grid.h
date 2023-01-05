@@ -255,7 +255,7 @@ point FindClosestAccessibleTile(const Tilemap &map, int col, int row)
 Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 {
     Unit *result = nullptr;
-    for(point p : map.interactible)
+    for(point p : map.attackable)
     {
         if(map.tiles[p.first][p.second].occupant && map.tiles[p.first][p.second].occupant->isAlly)
         {

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
     // Initialize Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
-    Menu unitMenu(4, 0, {"Info", "Attack", "Heal", "Wait"});
+    Menu unitMenu(1, 0, {"Wait"});
 
     // initial actor state
     InputState input = {};
