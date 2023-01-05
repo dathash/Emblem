@@ -49,14 +49,13 @@ static ma_engine GlobalMusicEngine;
 
 static bool GlobalRunning = false;
 
-// TODO: unnecessary?
-static u64 GlobalFrameNumber = 0;
 static int GlobalLevelNumber = 0;
 static bool GlobalNextLevel = false;
-static int GlobalTotalLevels = 2;
+static int GlobalTotalLevels = 4;
 
 static bool GlobalPlayerTurn = true;
 static bool GlobalTurnStart = false;
+
 static bool GlobalGamepadMode = false;
 
 static bool GlobalEditorMode = false;
@@ -69,6 +68,9 @@ static int viewportRow = 0;
 static ImFont *uiFontSmall;
 static ImFont *uiFontMedium;
 static ImFont *uiFontLarge;
+
+// TODO: unnecessary?
+static u64 GlobalFrameNumber = 0;
 
 #include "utils.h"
 #include "structs.h"
@@ -132,14 +134,11 @@ int main(int argc, char *argv[])
     while(GlobalRunning)
     {
         HandleEvents(&input);
-
 // ====================== command phase ========================================
         if(GlobalTurnStart)
         {
             for(auto const &unit : level.combatants)
-            {
                 unit->isExhausted = false;
-            }
             cursor.col = 0;
             cursor.row = 0;
             viewportCol = 0;
@@ -160,13 +159,9 @@ int main(int argc, char *argv[])
 		else
 		{
 			if(ai.shouldPlan)
-			{
 				ai.Plan(&cursor, &level.map);
-			}
 			if(!(GlobalFrameNumber % 10))
-			{
 				ai.Update();
-			}
 		}
 
 // ========================= update phase =======================================
@@ -193,22 +188,18 @@ int main(int argc, char *argv[])
 // ============================= render =========================================
         Render(level.map, cursor, gameMenu, unitMenu);
 
-// TODO: Extract this code. //////////////////
+        // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-		{
-			RenderUI(&ui, cursor, level.map);
-
+        RenderUI(&ui, cursor, level.map);
 #if DEV_MODE
-			if(GlobalEditorMode)
-				EditorPass(&units, &level);
+        if(GlobalEditorMode)
+            EditorPass(&units, &level);
 #endif
-		}
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-//////////////////////////////////////
 
         SDL_RenderPresent(GlobalRenderer);
 
@@ -219,9 +210,7 @@ int main(int argc, char *argv[])
 
 		// Set constant 60fps
         if(elapsedMS < MS_PER_FRAME)
-        {
             SDL_Delay((int)(MS_PER_FRAME - elapsedMS));
-        }
 
         startTime = SDL_GetPerformanceCounter();
         GlobalFrameNumber++;

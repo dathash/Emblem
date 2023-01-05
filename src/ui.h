@@ -48,7 +48,7 @@ struct UI_State
     {
 		// Tile Info
         if(GlobalPlayerTurn
-			// TODO: When else don't we want to see this? 
+			// CONSIDER: When else don't we want to see this? 
 			)
         {
             tile_info = true;
@@ -169,7 +169,7 @@ void DisplayHealthBar(int hp, int maxHp, int damage)
 }
 
 // Just display a unit's name and HP bar.
-// TODO: Move portrait rendering into this.
+// CONSIDER: Move portrait rendering into this.
 void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 {
 	// Window sizing
@@ -276,7 +276,7 @@ GetHealthColor(int val, int max)
 ImU32
 GetHitColor(int hit)
 {
-    if(hit > 70) // arbitrary TODO: check if there's a good way to make this feel intuitive.
+    if(hit > 70) // arbitrary | CONSIDER: check if there's a good way to make this feel intuitive.
         return IM_COL32(0, 0, 255, 255);
     return IM_COL32(255, 0, 0, 255);
 }

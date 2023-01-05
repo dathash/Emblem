@@ -8,13 +8,9 @@
 
 // ================================ Rendering ==========================================
 // Renders an individual tile to the screen, given its game coords and color.
-// TODO: Add a cool outline? Dynamic tiles like in GBA FE?
 void
 RenderTileColor(int col, int row, const SDL_Color &color)
 {
-    //TODO: Put the viewport stuff all in here, so the rest of the
-    // code doesn't have to worry about it.
-
     //assert(col >= 0 && row >= 0);
     SDL_Rect tileRect = {TILE_SIZE / 16 + col * TILE_SIZE, TILE_SIZE / 16 + row * TILE_SIZE, 
                          TILE_SIZE - (TILE_SIZE / 16) * 2, 

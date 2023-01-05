@@ -60,7 +60,7 @@ int CritChance(const Unit &predator, const Unit &prey)
 // Determines what damage a hit will do.
 int CalculateDamage(const Unit &predator, const Unit &prey)
 {
-    return clamp(predator.attack - prey.defense, 0, 100); // TODO: maximum damage???
+    return clamp(predator.attack - prey.defense, 0, 999);
 }
 
 // Simulates one unit healing another.
@@ -98,8 +98,6 @@ PredictCombat(const Unit &one, const Unit &two, int distance)
         outcome.two_crit = two.crit;
         outcome.one_health = clamp(one.hp - CalculateDamage(two, one), 0, one.maxHp);
     }
-    // TODO: Check if Fire Emblem doesn't display a possibility of
-    // enemy attack if you are guaranteed to kill them.
 
     return outcome;
 }

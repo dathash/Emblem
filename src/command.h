@@ -156,9 +156,7 @@ public:
         int newRow = cursor->row + row;
 
         if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
-        {
             return;
-        }
 
         // move cursor
         cursor->col = newCol;
@@ -996,7 +994,7 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>()); // TODO: Move and Heal?
+                BindA(make_shared<NullCommand>()); // CONSIDER: Move and Heal?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1007,7 +1005,7 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>()); // TODO: Move and Attack?
+                BindA(make_shared<NullCommand>()); // CONSIDER: Move and Attack?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
