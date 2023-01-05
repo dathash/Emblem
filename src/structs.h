@@ -198,6 +198,7 @@ struct Tilemap
     vector<point> accessible;
     vector<point> attackable;
     vector<point> healable;
+    //CONSIDER: For trading, talking, playing rock-paper scissors, haha whatever
     //vector<point> adjacent;
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;

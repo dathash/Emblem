@@ -313,18 +313,26 @@ private:
 class NextAttackTargetCommand : public Command
 {
 public:
-    NextAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in)
+    NextAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      forward(forward_in)
     {}
 
     virtual void Execute()
     {
         assert(map->attackable.size() > 0);
         if(map->attackable.size() > 1)
-            rotate(map->attackable.begin(), 
-                   map->attackable.begin() + 1, 
-                   map->attackable.end());
+        {
+            if(forward)
+                rotate(map->attackable.begin(), 
+                       map->attackable.begin() + 1,
+                       map->attackable.end());
+            else
+                rotate(map->attackable.begin(), 
+                       map->attackable.begin() + map->attackable.size() - 1,
+                       map->attackable.end());
+        }
         point next = map->attackable[0];
 
         // move cursor
@@ -341,23 +349,32 @@ public:
 private:
     Cursor *cursor; 
     Tilemap *map;
+    bool forward;
 };
 
 class NextHealTargetCommand : public Command
 {
 public:
-    NextHealTargetCommand(Cursor *cursor_in, Tilemap *map_in)
+    NextHealTargetCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      forward(forward_in)
     {}
 
     virtual void Execute()
     {
         assert(map->healable.size() > 0);
-        if(map->attackable.size() > 1)
-            rotate(map->attackable.begin(), 
-                   map->attackable.begin() + 1,
-                   map->attackable.end());
+        if(map->healable.size() > 1)
+        {
+            if(forward)
+                rotate(map->healable.begin(), 
+                       map->healable.begin() + 1,
+                       map->healable.end());
+            else
+                rotate(map->healable.begin(), 
+                       map->healable.begin() + map->healable.size() - 1,
+                       map->healable.end());
+        }
         point next = map->healable[0];
 
         // move cursor
@@ -374,6 +391,7 @@ public:
 private:
     Cursor *cursor; 
     Tilemap *map;
+    bool forward;
 };
 
 class DetargetCommand : public Command
@@ -997,8 +1015,8 @@ public:
 
             case(ATTACK_TARGETING):
             {
-                BindUp(make_shared<NextAttackTargetCommand>(cursor, map));
-                BindDown(make_shared<NextAttackTargetCommand>(cursor, map));
+                BindUp(make_shared<NextAttackTargetCommand>(cursor, map, true));
+                BindDown(make_shared<NextAttackTargetCommand>(cursor, map, false));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateAttackCommand>(cursor, *map));
@@ -1007,8 +1025,8 @@ public:
             } break;
             case(HEAL_TARGETING):
             {
-                BindUp(make_shared<NextHealTargetCommand>(cursor, map));
-                BindDown(make_shared<NextHealTargetCommand>(cursor, map));
+                BindUp(make_shared<NextHealTargetCommand>(cursor, map, true));
+                BindDown(make_shared<NextHealTargetCommand>(cursor, map, false));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateHealCommand>(cursor, *map));
@@ -1086,7 +1104,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackOutOfUnitInfoCommand>());
-                BindR(make_shared<NullCommand>());
+                BindR(make_shared<BackOutOfUnitInfoCommand>());
             } break;
             case(ENEMY_INFO):
             {
@@ -1096,7 +1114,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
-                BindR(make_shared<NullCommand>());
+                BindR(make_shared<DeselectEnemyCommand>(cursor));
             } break;
 
             case(NO_OP):

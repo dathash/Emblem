@@ -133,30 +133,23 @@ HandleEvents(InputState *input)
                     }
                 }
             }
-            else if(Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
+            else if(Event.type == SDL_JOYBUTTONDOWN)
             {
                 if(Event.jbutton.button == 0)
-                {
-                    if(Event.type == SDL_JOYBUTTONDOWN)
-                    {
-                        input->a = true;
-                    }
-                    else if(Event.type == SDL_JOYBUTTONUP)
-                    {
-                        input->a = false;
-                    }
-                }
-                if(Event.jbutton.button == 1)
-                {
-                    if(Event.type == SDL_JOYBUTTONDOWN)
-                    {
-                        input->b = true;
-                    }
-                    else if(Event.type == SDL_JOYBUTTONUP)
-                    {
-                        input->b = false;
-                    }
-                }
+                    input->a = true;
+                else if(Event.jbutton.button == 1)
+                    input->b = true;
+                else if(Event.jbutton.button == 10)
+                    input->r = true;
+            }
+            else if(Event.type == SDL_JOYBUTTONUP)
+            {
+                if(Event.jbutton.button == 0)
+                    input->a = false;
+                else if(Event.jbutton.button == 1)
+                    input->b = false;
+                else if(Event.jbutton.button == 10)
+                    input->r = false;
             }
             else if(Event.type == SDL_JOYDEVICEADDED)
             {

@@ -208,9 +208,9 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(440, 180));
+    ImGui::SetNextWindowSize(ImVec2(480, 180));
 
-    int x_pos = 450;
+    int x_pos = 410;
     if(!unit.isAlly)
         x_pos = 170;
 
@@ -246,6 +246,8 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
 			ImGui::Text("[MAG %d]", unit.magic);
 			ImGui::SameLine();
 			ImGui::Text("[RES %d]", unit.resistance);
+			ImGui::SameLine();
+			ImGui::Text("[HEAL %d]", unit.healing);
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();

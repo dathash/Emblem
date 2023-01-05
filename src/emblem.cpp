@@ -96,16 +96,11 @@ int main(int argc, char *argv[])
 
     // controller init
     SDL_Joystick *gamePad = NULL;
-    if(SDL_NumJoysticks() < 1)
-    {
-        printf("Keyboard Mode!\n");
-    }
-    else
+    if(SDL_NumJoysticks() > 0)
     {
         GlobalGamepadMode = true;
         gamePad = SDL_JoystickOpen(0);
         assert(gamePad);
-        printf("Joystick mode!\n");
     }
 
 // ================================== load =================================

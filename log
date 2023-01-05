@@ -1,7 +1,6 @@
 
 emblem
 log
-Alex Hartford
 
 Plan
 > Build a fun little game!
@@ -53,3 +52,190 @@ Dec 28  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
 Dec 29  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
 Dec 29  | 6h  | ???             | Mostly refactoring and tilesets
 Dec 30  | 6h  | 4200 lines      | UI Day! Swapped gross retained mode code to IMGUI.
+Dec 31 – Jan 4 | 22h  | 4300 lines | Read the commits.
+Jan 5   | 
+
+# Style
+## Concept
+Cool, slick.
+Fast.
+
+## Look
+neons
+akira streaking lights
+
+## Songs
+epilogue (r4 - ridge racer type 4)
+spiny desert (mario party 3)
+pokemon selection (pokemon stadium)
+    Maybe some drum corps songs?
+
+# TODO
+MVP
+    UI Tweaks
+        Pressing up or down on a unit's Stats page brings you to the next unit's
+        stats page (And also moves your cursor to them)
+    More accurate HIT calculations, with tile avoid factored in.
+
+    Tweak Units
+    10 levels
+    Better enemy ai
+        We use A* when we go after a unit, but we don't use it when choosing the
+            closest unit yet.
+            Manhattan Distance doesn't have to be used by the UI as well.
+        Ranged units set up for and calculate for ranged attacks
+    Level Transitions/Win Screen
+    Actually track enemy ranges with A button
+    Unit damage and healing ranges are displayed.
+
+NICE
+    Start turn on Zarathustra
+        BUG | Fix the issue at the start of the player's turn where we put the
+        cursor over 0, 0, and there's a unit there, but it doesn't update the
+        interface state properly.
+    Battle Animations
+    Conversations
+    Audio
+        Sound Effects
+        Drum-n-bass Audio
+            Trance-like state of playing
+    Polish
+        Generate true arrow for movement (with bitfields)
+        Placing Unit moves them smoothly to that square (A-star)
+        Draw Attack range squares
+    Enemy AI Goes for "beneficial trades"
+        Higher damage output than input.
+        goes for kills
+
+REFACTOR
+    Complete Migration to the New UI System
+    Shrink Tilesets to absolute necessity, also enforce consistency across all
+        tilesets.
+
+DESIGN
+    Fort with attack bonus instead of defense
+    Knight Moves
+    Jumping tiles
+    Misty Step
+    Area of Effect
+
+# Ideas
+## Brainstorm
+What is appealing to me about tactics games?
+    Being in Command
+    Individual Characters
+        Strong Characterization
+        Developing Relationships
+    Permadeath sacrifices
+    Gaining new team members
+    RPG Elements
+        Nurturing weak units until they're strong.
+        That's it. I pretty much think all other uses of RPG mechanics in these
+        games are a waste of time.
+        Strategy is good. Just the incessant "Level Up!" portion of Fire Emblem
+        makes me sick.
+            Big numbers != fun game.
+    The beginning of Fire Emblem games are always the best.
+    Middle of a level is best.
+        Beginning: Setting up, being overly cautious. Not good.
+        End: Ganging up on a boss. Pretty much a waste of time.
+
+    
+Ideas
+* Social Psychology game
+    Characterization is deeply ingrained into combat.
+        Characters bark, speak their minds.
+            Cowardly character doesn't like getting sent to the front lines.
+                Performs worse.
+                Over time becomes more comfortable, confident.
+            Confident character tends to overextend.
+                Enemies hit them more often.
+        Conversations mid-battle.
+
+* Text-only tactics game?
+    In D&D, the grid distracts from the moment-to-moment decisions. It makes
+    the game less exciting, not more.
+    Perhaps we could imbue a computer game with this sort of think-on-your-feet
+    decision-making.
+    Would be a lot of work to make the computer be able to communicate your
+    situation well enough. This is one area where I have 'em beat.
+
+* Deep exploration of mechanics
+    Fire Emblem reaches a point where it's all sort of the same.
+    What if we dug in to this?
+        Made mechanics that lended themselves towards extremely specific playstyles?
+        Made objectives that required modes of thinking?
+        Dropped RPG elements to make way for the new puzzle-style mechanic?
+
+## Characters
+### Commander
+Lucina
+    Mechanics
+        All based around giving allies bonuses, extra turns, extra movement, etc.
+        Alters alies' characteristics. Gives some double speed, etc.
+    Personality
+        Naive. Figuring things out.
+
+### Swordsman
+Priam
+    Mechanics
+        Strong DPS
+        Needs support to be useful.
+            High Crit, low hit?
+            Glass Cannon?
+    Personality
+        Super Cool
+        Always knows what has to be done
+
+### Lucky Charm
+Donnel
+    Mechanics
+        Weak, but when he's around, everyone gets boons.
+        Momentum-based mechanic. Every kill he gets, he doubles in
+        effectiveness.
+    Personality
+        Weak, Pitiful.
+        Becomes strong. Confident.
+        Has a role model: Priam
+
+### Archer
+Noire
+    Mechanics
+        Cripple characters, stunning from afar.
+    Personality
+        Pitiful, cracks under pressure.
+        Pushes others away.
+
+### Dancer
+
+
+### Thief
+    Mechanics
+        Hides in the shadows.
+            Literally let them hide in walls and such.
+            Flank enemies.
+            They can move, attack, then move again or hide.
+        Moves through all units.
+    Personality
+        A Historian. Like Soren.
+
+### Tank
+    Mechanics
+        Doesn't deal damage at all. Basically movable wall.
+        Able to throw allies around the battlefield.
+    Personality
+        Stoic. 
+        An enjoyer of the finer things in life.
+
+### Ouranomancer
+    Mechanics
+        Manipulates space.
+        Warps allies around the map.
+        Swaps the positioning of enemies.
+    Personality
+
+### Blaster
+    Mechanics
+        AOE. Out of control.
+        Consequences.
+    Personality
