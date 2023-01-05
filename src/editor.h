@@ -63,9 +63,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 
 		ImGui::Text("%s | %d", selected->name.c_str(), selected->id);
         ImGui::InputText("name", &(selected->name));
-		// TODO
-		// Update name
-		// Update texture sources, spritesheet.
+		// CONSIDER: Update texture sources, spritesheet.
 		ImGui::SliderInt("Mov", &selected->mov, 0, 10);
 		ImGui::SliderInt("maxHp", &selected->maxHp, 1, 20);
 		ImGui::SliderInt("atk", &selected->attack, 0, 10);
@@ -104,7 +102,6 @@ GenerateDebugPaths(const Level &level, path *path_debug)
 void
 EditorPollForKeyboardInput(point *editor_cursor)
 {
-    //TODO: Make the editor also move the viewport.
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_A)))
     {
         editor_cursor->first = max(editor_cursor->first - 1, 0);
@@ -137,7 +134,6 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 
         static bool showDebugPaths = false;
 
-        //TODO: point and click feature plz!!!
         EditorPollForKeyboardInput(&editor_cursor);
 
         ImGui::Text("Units:");
@@ -162,7 +158,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         {
             if(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant)
             {
-                // TODO: This shouldn't even have to happen. Let's get rid of combatants<> when we can.
+                // CONSIDER: This shouldn't even have to happen. Let's get rid of combatants<> when we can.
                 level->map.tiles[editor_cursor.first][editor_cursor.second].occupant->shouldDie = true;
                 level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = nullptr;
             }

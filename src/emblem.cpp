@@ -70,9 +70,6 @@ static ImFont *uiFontSmall;
 static ImFont *uiFontMedium;
 static ImFont *uiFontLarge;
 
-// TODO: definitely unnecessary.
-static quadrant quadrant;
-
 #include "utils.h"
 #include "structs.h"
 #include "load.h"

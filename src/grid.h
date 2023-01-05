@@ -326,7 +326,6 @@ PrintField(const vector<vector<point>> &field)
 vector<vector<point>>
 GetField(const Tilemap &map, int col, int row)
 {
-    //TODO: look up what this field should be called haha
     vector<vector<point>> field;
 	for(int col = 0; col < map.width; ++col)
 	{
@@ -368,7 +367,7 @@ GetField(const Tilemap &map, int col, int row)
 
         for(int i = 0; i < 4; ++i)
         {
-            // TODO: This is strange. I shouldn't have to swap them.
+            // NOTE: This is strange. I shouldn't have to swap them.
             point direction = point(-directionsRow[i], -directionsCol[i]);
             int newCol = current.first + directionsCol[i];
             int newRow = current.second + directionsRow[i];

@@ -97,7 +97,12 @@ enum quadrant
 };
 
 // =============================== tiles =======================================
-// TODO put global tile types here, instead of macro solution in structs.h.
+#define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
+#define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
+#define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
+#define DESERT_TILE {DESERT, 4, 0, nullptr, {18, 29}}
+#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
+// CONSIDER: There's gotta be a better way than macros to set some default tile types
 
 // ============================ color palette ==================================
 // Tile overlays

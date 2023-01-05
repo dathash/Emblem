@@ -6,7 +6,7 @@ A small tactical RPG. Built in C++ using SDL, ImGui, MiniAudio.
 A learning project with the following goals:
 - Finish a decently-sized game.
 - Understand the pros/cons of Functional Programming and Object Oriented Programming.
-- Become proficient in C++.
+- Become C++ wizard.
 
 ![screenshot](emblem.png)
 

@@ -654,7 +654,6 @@ public:
             menu->current = newCurrent;
         } 
     }
-    // TODO: CHANGE STATE?
 
 private:
     Menu *menu;

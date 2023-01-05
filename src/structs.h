@@ -175,13 +175,6 @@ enum TileTypes
     OBJECTIVE,
 };
 
-// CONSIDER: There's gotta be a better way than macros to set some default tile types
-#define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
-#define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
-#define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
-#define DESERT_TILE {DESERT, 4, 0, nullptr, {18, 29}}
-#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
-
 struct Tile
 {
     int type = 0;
@@ -251,12 +244,11 @@ struct Cursor
     void Update()
     {
         sheet.Update();
-        quadrant = Quadrant();
     }
 
     // returns the current quadrant of where the cursor is on the screen.
     enum quadrant
-    Quadrant()
+    Quadrant() const
     {
         int x = col - viewportCol;
         int y = row - viewportRow;

@@ -216,7 +216,7 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                     stoi(tokens[15])						    // long range
                 ));
 
-                // TODO: Make the ID system generate an id in a more robust way.
+                // CONSIDER: Make the ID system generate an id in a more robust way.
                 if(stoi(tokens[3]) > GlobalCurrentID)
                 {
                     GlobalCurrentID = stoi(tokens[3]) + 1;
@@ -301,7 +301,6 @@ SaveLevel(string filename_in, const Level &level)
     fp << "\n";
 
     fp << "COM <UNT <name> <id> <col> <row>\n";
-    // TODO: Separate allies and enemies when we save levels?
     for(const unique_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "

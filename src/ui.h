@@ -112,7 +112,7 @@ struct UI_State
     }
 };
 
-void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
+void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(10, 430));
@@ -121,7 +121,7 @@ void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
     ImVec2 lower_left = {10, 430};
     ImVec2 top_left = {10, 10};
 
-    if(quadrant == BOTTOM_LEFT || quadrant == BOTTOM_RIGHT)
+    if(quad == BOTTOM_LEFT || quad == BOTTOM_RIGHT)
         ImGui::SetNextWindowPos(top_left);
     else
         ImGui::SetNextWindowPos(lower_left);
@@ -170,7 +170,7 @@ void DisplayHealthBar(int hp, int maxHp, int damage)
 
 // Just display a unit's name and HP bar.
 // TODO: Move portrait rendering into this.
-void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
+void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(400, 120));
@@ -182,7 +182,7 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
     ImVec2 top_right = ImVec2(x_pos, 10);
     ImVec2 bottom_right = ImVec2(x_pos, 470);
 
-    if(quadrant == TOP_LEFT || quadrant == TOP_RIGHT)
+    if(quad == TOP_LEFT || quad == TOP_RIGHT)
         ImGui::SetNextWindowPos(bottom_right);
     else
         ImGui::SetNextWindowPos(top_right);
@@ -205,7 +205,7 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 }
 
 // Full display of unit's stats
-void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
+void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(480, 180));
@@ -217,7 +217,7 @@ void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit)
     ImVec2 top_right = ImVec2(x_pos, 10);
     ImVec2 bottom_right = ImVec2(x_pos, 410);
 
-    if(quadrant == TOP_LEFT || quadrant == TOP_RIGHT)
+    if(quad == TOP_LEFT || quad == TOP_RIGHT)
         ImGui::SetNextWindowPos(bottom_right);
     else
         ImGui::SetNextWindowPos(top_right);
@@ -283,7 +283,7 @@ GetHitColor(int hit)
 
 // Displays combat preview when initiating combat
 void
-DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy)
+DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(460, 220));
@@ -291,7 +291,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy)
     ImVec2 top_right = {170, 10};
     ImVec2 bottom_right = {170, 370};
 
-    if(quadrant == TOP_LEFT || quadrant == TOP_RIGHT)
+    if(quad == TOP_LEFT || quad == TOP_RIGHT)
         ImGui::SetNextWindowPos(bottom_right);
     else
         ImGui::SetNextWindowPos(top_right);
@@ -414,13 +414,13 @@ void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
 
 	if(ui->tile_info)
-		DisplayTileInfo(window_flags, map.tiles[cursor.col][cursor.row]);
+		DisplayTileInfo(window_flags, map.tiles[cursor.col][cursor.row], cursor.Quadrant());
 	if(ui->unit_blurb)
-		DisplayUnitBlurb(window_flags, *map.tiles[cursor.col][cursor.row].occupant);
+		DisplayUnitBlurb(window_flags, *map.tiles[cursor.col][cursor.row].occupant, cursor.Quadrant());
 	if(ui->unit_info)
-		DisplayUnitInfo(window_flags, *map.tiles[cursor.col][cursor.row].occupant);
+		DisplayUnitInfo(window_flags, *map.tiles[cursor.col][cursor.row].occupant, cursor.Quadrant());
 	if(ui->combat_preview)
-		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted);
+		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, cursor.Quadrant());
 	if(ui->options_menu)
 		DisplayOptionsMenu(window_flags);
 
@@ -430,7 +430,7 @@ void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
 	ImGui::PopStyleColor(3);
 }
 
-// ================================= Old UI ====================================
+// ================================= Menu ======================================
 struct Menu
 {
     u8 rows;
