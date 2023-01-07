@@ -1,6 +1,4 @@
 # Emblem
-Alex Hartford
-
 A small tactical RPG. Built in C++ using SDL, ImGui, MiniAudio.
 
 A learning project with the following goals:

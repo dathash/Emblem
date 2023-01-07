@@ -73,14 +73,14 @@ pokemon selection (pokemon stadium)
 # TODO
 MVP
     10 levels
-
-    More accurate HIT calculations, with tile avoid factored in.
-    Tweak Units
     Better enemy ai
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
             Manhattan Distance doesn't have to be used by the UI as well.
         Ranged units set up for and calculate for ranged attacks
+
+    More accurate HIT calculations, with tile avoid factored in.
+    Balance changes
     Level Transitions/Win Screen
 
 NICE
@@ -94,22 +94,13 @@ NICE
     Enemy AI
         Goes for "beneficial trades" (Higher damage output than input)
         goes for kills
-        Enemies don't always come straight for you?
+        Enemies that don't always come straight for you.
     Placing Unit moves them smoothly to that square (A-star)
     Attack and Move / Heal and Move
     Actually track enemy ranges with A button
     Unit damage and healing ranges are displayed.
-
-REFACTOR
     Shrink Tilesets to absolute necessity, also enforce consistency across all
         tilesets.
-
-DESIGN
-    Fort with attack bonus instead of defense
-    Knight Moves
-    Jumping tiles
-    Misty Step
-    Area of Effect
 
 # Ideas
 ## Brainstorm
@@ -231,3 +222,13 @@ Noire
         AOE. Out of control.
         Consequences.
     Personality
+
+## Mechanics
+Group mechanics (Units nearby eachother get bonuses)
+Leader mechanics (Genealogy stars)
+Fort with attack bonus instead of defense
+Knight Moves
+Jumping tiles
+Misty Step
+Area of Effect
+
