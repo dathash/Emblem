@@ -83,8 +83,9 @@ struct Outcome
     int two_health;
 };
 
-// Makes a worst-case combat prediction for the sake of UI display
-// when a player initiates combat.
+// Makes a worst-case combat prediction for:
+// UI display when a player initiates combat
+// AI Decision-making and target-selection
 // Returns the struct defined above.
 Outcome
 PredictCombat(const Unit &one, const Unit &two, int distance,

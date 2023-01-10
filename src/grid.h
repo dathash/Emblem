@@ -321,7 +321,7 @@ GetField(const Tilemap &map, int col, int row, bool isAlly)
             }
         }
     }
-#if 1
+#if 0
     cout << "=============================\n";
     PrintDistanceField(distances);
     PrintField(field);
@@ -341,7 +341,7 @@ PrintPath(const vector<point> path)
 }
 
 // TODO: Col and row get swapped for some reason. I put in a hotfix.
-vector<point>
+path
 GetPath(const Tilemap &map,
         int col, int row,
         int destCol, int destRow,
@@ -359,11 +359,6 @@ GetPath(const Tilemap &map,
         from = field[next.first][next.second];
         next = point(next.first + from.second,
                      next.second + from.first);
-        if(from.first == -1 && from.second == -1)
-        {
-            //assert(!"GetPath | Shouldn't get here.\n");
-            return {};
-        }
     }
     //PrintPath(path);
     return path;
@@ -396,27 +391,6 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
     return result;
 }
 
-// Finds the nearest accessible space to a given target point.
-// TODO: Do something better than manhattan distance.
-point FindClosestAccessibleTile(const Tilemap &map, int col, int row)
-{
-    int minDistance = 100;
-    int distance = 0;
-    point result;
-
-    for(point p : map.accessible)
-    {
-        distance = ManhattanDistance(point(col, row), p);
-        if(distance < minDistance)
-        {
-            result = p;
-            minDistance = distance;
-        }
-    }
-
-    return result;
-}
-
 // Finds a target for an attack.
 Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 {
@@ -438,7 +412,7 @@ Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
 void
 PrintPossibilities(const vector<pair<point, Unit *>> &v)
 {
-    cout << "Possilibites:\n";
+    cout << "Possilibities:\n";
     for(const pair<point, Unit *> &p : v)
     {
         cout << "Point: " << p.first.first << " " << p.first.second << " | ";

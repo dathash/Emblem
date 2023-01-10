@@ -113,59 +113,61 @@ public:
 
     virtual void Execute()
     {
-	// What we want:
-		// Find squares which allow the unit to attack a target.
-			// If any exist,
-				// Choose one (Advantageous)
-					// 1. Kills
-					// 2. Maximum Damage
-					// 3. High Likelihoods
-					// 4. Minimum counterattack Damage
-					// 5. Low enemy likelihoods
-			// Else:
-				// Find the nearest enemy unit by pathfinding. Shortest distance wins.
-				// Simply make progress towards them.
-		// Take that course of action.
+		// TODO: Choose Advantageous option based on simple rules.
+			// 1. Minimum Enemy Health (pretty funny way to put it.)
+			//	  Basically maximizes for kills and enemies who are already
+			//	  weakened.  Note that this can be gamed, for instance with a
+			//	  high DEF unit, get them to low health, and AI will ignore all
+			//	  other units since minimum enemy health will always be on tank.
+			// 2. High Likelihoods
+			// 3. Minimum counterattack Damage
+			// 4. Low enemy likelihoods
 
 		// =================================== Find ideal target =====================
-        Unit *target;
+        pair<point, Unit *> action = {};
 		vector<pair<point, Unit *>> possibilities = FindAttackingSquares(*map, *cursor->selected);
 
 		if(possibilities.size() == 0)
 		{
-			target = FindNearest(*cursor, *map,
-						[](const Unit &unit) -> bool
-						{
-							return unit.isAlly;
-						});
+			Unit *nearest = FindNearest(*cursor, *map,
+				[](const Unit &unit) -> bool
+				{
+					return unit.isAlly;
+				});
+			cout << "NEAREST: " << nearest->name << "\n";
+			path path_to_nearest = GetPath(*map, cursor->col, cursor->row, nearest->col, nearest->row, false);
+			cout << path_to_nearest.size() << "\n";
+			action = pair<point, Unit *>(path_to_nearest[cursor->selected->mov], NULL);
+			cout << "I can't reach any targets, but I'm heading for " <<
+					 action.first.first << " " << action.first.second << "\n";
 		}
 		else
 		{
 			PrintPossibilities(possibilities);
+			int min_health_after_attack = 999;
+			Outcome outcome;
+			//int max_odds = 0;
+			//int min_counter_dmg = 100;
+			//int min_counter_odds = 100;
+			for(const pair<point, Unit *> &poss : possibilities)
+			{
+				const point &p = poss.first;
+				Unit *t = poss.second;
+				outcome = PredictCombat(*cursor->selected, *t,
+										ManhattanDistance(p, point(t->col, t->row)),
+										map->tiles[p.first][p.second].avoid,
+										map->tiles[t->col][t->row].avoid);
+				if(outcome.two_health < min_health_after_attack)
+				{
+					action = poss;
+					min_health_after_attack = outcome.two_health;
+				}
+			}
+			cout << "My target is: " << action.second->name << ". I'm attacking from " <<
+										action.first.first << " " << action.first.second << "\n";
 		}
 
 		/*
-		cout << "My target is: " << target->name << "\n";
-
-
-		// follow the path to your destination.
-		pair<int, int> targetSquare;
-		//vector<vector<point>> field = GetField(*map, 
-		vector<point> path = GetPath(*map, cursor->col, cursor->row, target->col, target->row, false);
-		if(path.size() > cursor->selected->mov)
-		{
-			targetSquare = FindClosestAccessibleTile(*map, 
-							   path[cursor->selected->mov].first, 
-							   path[cursor->selected->mov].second);
-			cout << "I can't reach them.\n";
-		}
-		else
-		{
-			cout << "I'll reach them.\n";
-			targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
-		}
-		cout << "My target square is: " << targetSquare.first << " " << targetSquare.second << "\n";
-
 		// ================================= Perform movement ========================
         // move cursor
         cursor->col = targetSquare.first;
