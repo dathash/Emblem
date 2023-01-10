@@ -2,7 +2,6 @@
 // Author: Alex Hartford                                                                                 
 // Program: Emblem
 // File: Editor
-// Date: December 2022
 
 #ifndef EDITOR_H
 #define EDITOR_H

@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Constants
-// Date: July 2022
 
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
@@ -52,7 +51,7 @@
 
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
-#define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
+#define FOREST_TILE {FOREST, 2, 20, nullptr, {0, 6}}
 #define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
 #define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
 // CONSIDER: There's gotta be a better way than macros to set some default tile types

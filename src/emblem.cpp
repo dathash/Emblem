@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Main
-// Date: December 2022
 
 // ========================== includes =====================================
 #include <SDL.h>

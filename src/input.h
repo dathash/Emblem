@@ -1,8 +1,6 @@
-
 // Author: Alex Hartford
 // Program: Emblem
 // File: Main
-// Date: July 2022
 
 #ifndef INPUT_H
 #define INPUT_H

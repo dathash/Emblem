@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
-// File: Main
-// Date: July 2022
+// File: Load
 
 #ifndef LOAD_H
 #define LOAD_H
@@ -248,7 +247,6 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n";
-    fp << "COM Date: January 2023\n\n";
     fp << "COM NOTE: Don't use tabs in here!\n\n";
 
     fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long>>\n";

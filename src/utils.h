@@ -1,12 +1,11 @@
-
 // Author: Alex Hartford
 // Program: Emblem
 // File: Utils
-// Date: January 2023
 
 #ifndef UTILS_H
 #define UTILS_H
 
+// Returns a value clamped between min and max.
 int
 clamp(int val, int min, int max)
 {

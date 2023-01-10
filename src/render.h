@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Render
-// Date: July 2022
 
 #ifndef RENDER_H
 #define RENDER_H

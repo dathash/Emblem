@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: AI
-// Date: July 2022
 
 #ifndef AI_H
 #define AI_H
@@ -163,7 +162,6 @@ public:
         // Determine interactible squares
         map->attackable.clear();
         map->healable.clear();
-        map->attackable.clear();
         vector<point> interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
                                              cursor->selected->minRange, cursor->selected->maxRange);
 
@@ -171,7 +169,7 @@ public:
         for(const point &p : interactible)
         {
             if(map->tiles[p.first][p.second].occupant &&
-               !map->tiles[p.first][p.second].occupant->isAlly)
+               map->tiles[p.first][p.second].occupant->isAlly)
             {
                 map->attackable.push_back(p);
             }
@@ -208,6 +206,7 @@ public:
         cursor->targeted = FindVictim(*cursor, map);
         if(cursor->targeted)
         {
+            cout << "COMBAT\n";
             int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
                                              point(cursor->targeted->col, cursor->targeted->row));
             SimulateCombat(cursor->selected, cursor->targeted, distance,

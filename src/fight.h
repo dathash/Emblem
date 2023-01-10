@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Fight
-// Date: January 2023
 
 #ifndef FIGHT_H
 #define FIGHT_H

@@ -26,4 +26,10 @@ COM <UNT <name> <id> <col> <row>
 UNT Zarathustra 0 2 2 
 UNT Samson 1 1 3 
 UNT Elvira 2 1 1 
+UNT Brute 4 8 4 
+UNT Brute 4 6 6 
+UNT Brute 4 13 7 
+UNT Archer 5 8 5 
+UNT Archer 5 7 6 
+UNT Thief 3 6 1 
 

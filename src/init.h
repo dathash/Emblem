@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Init
-// Date: July 2022
 
 #ifndef INIT_H
 #define INIT_H

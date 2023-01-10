@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: UI
-// Date: December 2022
 
 #ifndef UI_H
 #define UI_H

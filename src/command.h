@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Commands
-// Date: July 2022
 
 #ifndef COMMAND_H
 #define COMMAND_H
@@ -259,16 +258,6 @@ public:
 
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
-
-        // Move onto next level!
-        if(map->tiles[cursor->col][cursor->row].type == OBJECTIVE)
-        {
-            // TODO: Level Transitions
-            printf("Objective Reached. Onto the next level!\n");
-            GlobalNextLevel = true;
-            GlobalTurnStart = true;
-            return;
-        }
     }
 
 private:
@@ -796,7 +785,19 @@ public:
             cursor->selectedRow = -1;
 
             cursor->path_draw = {};
+
+            // Move onto next level!
+            if(map.tiles[cursor->col][cursor->row].type == OBJECTIVE)
+            {
+                // TODO: Level Transitions
+                printf("Objective Reached. Onto the next level!\n");
+                GlobalNextLevel = true;
+                GlobalTurnStart = true;
+                return;
+            }
+
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+
             return;
         }
 

@@ -1,7 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
 // File: Grid Functions
-// Date: July 2022
 
 #ifndef GRID_H
 #define GRID_H

@@ -1,11 +1,9 @@
 // Author: Alex Hartford
 // Program: Emblem
-// File: Tests
-// Date: July 2022
+// File: Structs
 
 #ifndef STRUCTS_H
 #define STRUCTS_H
-
 
 struct InputState
 {
@@ -40,7 +38,7 @@ struct Texture
 
     Texture()
     {
-        printf("WARN: Default texture constructor called.\n");
+        //printf("WARN: Default texture constructor called.\n");
     }
 };
 

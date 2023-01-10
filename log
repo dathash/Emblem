@@ -72,13 +72,17 @@ pokemon selection (pokemon stadium)
 
 # TODO
 MVP
-    10 levels
+    8 levels
 
     Better enemy ai
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
             Manhattan Distance doesn't have to be used by the UI as well.
         Ranged units set up for and calculate for ranged attacks
+        Goes for "beneficial trades" (Higher damage output than input)
+        goes for kills
+        Enemies that don't always come straight for you.
+        Move towards fortified positions.
 
     More accurate HIT calculations, with tile avoid factored in.
     Balance changes
@@ -92,17 +96,14 @@ NICE
         Sound Effects
         Drum-n-bass Audio
             Trance-like state of playing
-    Enemy AI
-        Goes for "beneficial trades" (Higher damage output than input)
-        goes for kills
-        Enemies that don't always come straight for you.
     Placing Unit moves them smoothly to that square (A-star)
     Attack and Move / Heal and Move
     Actually track enemy ranges with A button?
     Unit damage and healing ranges are displayed.
-    Shrink Tilesets to absolute necessity, also enforce consistency across all
-        tilesets.
-    Isometric?
+    Shrink Tilesets to absolute necessity, also enforce consistency across them
+    for ease of plug-n-play.
+    BUG | Paths are drawn without regard for walkable squares. EX: When choosing
+    a square to place a unit, its path is drawn through an enemy.
 
 # Ideas
 ## Brainstorm
@@ -233,4 +234,4 @@ Knight Moves
 Jumping tiles
 Misty Step
 Area of Effect
-
+Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
