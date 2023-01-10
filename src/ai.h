@@ -113,29 +113,66 @@ public:
 
     virtual void Execute()
     {
-        Unit *target = FindNearest(*cursor, *map, 
-                [](const Unit &unit) -> bool
-                {
-                    return unit.isAlly;
-                });
+	// What we want:
+		// Find squares which allow the unit to attack a target.
+			// If any exist,
+				// Choose one (Advantageous)
+					// 1. Kills
+					// 2. Maximum Damage
+					// 3. High Likelihoods
+					// 4. Minimum counterattack Damage
+					// 5. Low enemy likelihoods
+			// Else:
+				// Find the nearest enemy unit by pathfinding. Shortest distance wins.
+				// Simply make progress towards them.
+		// Take that course of action.
+
+		// =================================== Find ideal target =====================
+        Unit *target;
+		vector<pair<point, Unit *>> possibilities = FindAttackingSquares(*map, *cursor->selected);
+
+		if(possibilities.size() == 0)
+		{
+			target = FindNearest(*cursor, *map,
+						[](const Unit &unit) -> bool
+						{
+							return unit.isAlly;
+						});
+		}
+		else
+		{
+			PrintPossibilities(possibilities);
+		}
+
+		/*
+		cout << "My target is: " << target->name << "\n";
+
+
+		// follow the path to your destination.
 		pair<int, int> targetSquare;
-		vector<pair<int, int>> path = GetPath(*map, cursor->col, cursor->row, target->col, target->row);
+		//vector<vector<point>> field = GetField(*map, 
+		vector<point> path = GetPath(*map, cursor->col, cursor->row, target->col, target->row, false);
 		if(path.size() > cursor->selected->mov)
 		{
 			targetSquare = FindClosestAccessibleTile(*map, 
 							   path[cursor->selected->mov].first, 
 							   path[cursor->selected->mov].second);
+			cout << "I can't reach them.\n";
 		}
 		else
 		{
+			cout << "I'll reach them.\n";
 			targetSquare = FindClosestAccessibleTile(*map, target->col, target->row);
 		}
+		cout << "My target square is: " << targetSquare.first << " " << targetSquare.second << "\n";
 
+		// ================================= Perform movement ========================
         // move cursor
         cursor->col = targetSquare.first;
         cursor->row = targetSquare.second;
 
         MoveViewport(targetSquare.first, targetSquare.second);
+		*/
 
         GlobalAIState = FOUND_NEW_POSITION;
     }
@@ -206,7 +243,6 @@ public:
         cursor->targeted = FindVictim(*cursor, map);
         if(cursor->targeted)
         {
-            cout << "COMBAT\n";
             int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
                                              point(cursor->targeted->col, cursor->targeted->row));
             SimulateCombat(cursor->selected, cursor->targeted, distance,

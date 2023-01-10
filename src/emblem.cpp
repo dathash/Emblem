@@ -47,6 +47,7 @@ static TTF_Font *GlobalFont = nullptr;
 static ma_engine GlobalMusicEngine;
 
 static bool GlobalRunning = false;
+static bool GlobalPaused = false;
 
 static int GlobalLevelNumber = 0;
 static bool GlobalNextLevel = false;
@@ -139,53 +140,56 @@ int main(int argc, char *argv[])
     {
         HandleEvents(&input);
 // ====================== command phase ========================================
-        if(GlobalTurnStart)
+        if(!GlobalPaused)
         {
-            for(auto const &unit : level.combatants)
-                unit->isExhausted = false;
-			cursor.Reset();
-			viewportCol = 0; // TODO: Now this is a lie!
-            viewportRow = 0;
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            if(GlobalTurnStart)
+            {
+                for(auto const &unit : level.combatants)
+                    unit->isExhausted = false;
+                cursor.Reset();
+                viewportCol = 0; // TODO: Now this is a lie!
+                viewportRow = 0;
+                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
-            GlobalTurnStart = false;
-            ai.clearQueue();
-            handler.clearQueue();
-        }
+                GlobalTurnStart = false;
+                ai.clearQueue();
+                handler.clearQueue();
+            }
 
-		if(GlobalPlayerTurn)
-		{
-			handler.Update(&input);
-			handler.UpdateCommands(&cursor, &level.map,
-								   &gameMenu, &unitMenu);
-		}
-		else
-		{
-			if(ai.shouldPlan)
-				ai.Plan(&cursor, &level.map);
-			if(!(GlobalFrameNumber % 10))
-				ai.Update();
-		}
+            if(GlobalPlayerTurn)
+            {
+                handler.Update(&input);
+                handler.UpdateCommands(&cursor, &level.map,
+                                       &gameMenu, &unitMenu);
+            }
+            else
+            {
+                if(ai.shouldPlan)
+                    ai.Plan(&cursor, &level.map);
+                if(!(GlobalFrameNumber % 10))
+                    ai.Update();
+            }
 
 // ========================= update phase =======================================
-        cursor.Update();
-		ui.Update();
+            cursor.Update();
+            ui.Update();
 
-        for(auto const &unit : level.combatants)
-            unit->Update();
+            for(auto const &unit : level.combatants)
+                unit->Update();
 
-        // cleanup
-        level.RemoveDeadUnits();
+            // cleanup
+            level.RemoveDeadUnits();
 
-        if(GlobalNextLevel)
-        {
-            GlobalNextLevel = false;
-            GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
-				GlobalLevelNumber + 1 : 0;
-			leaderPosition = {0, 0};
-            level = LoadLevel(levels[GlobalLevelNumber], units);
-			cursor.Reset();
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            if(GlobalNextLevel)
+            {
+                GlobalNextLevel = false;
+                GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
+                    GlobalLevelNumber + 1 : 0;
+                leaderPosition = {0, 0};
+                level = LoadLevel(levels[GlobalLevelNumber], units);
+                cursor.Reset();
+                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            }
         }
 
 // ============================= render =========================================

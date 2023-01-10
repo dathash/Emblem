@@ -170,7 +170,7 @@ public:
         }
 
         cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
-                                    cursor->col, cursor->row);
+                                    cursor->col, cursor->row, true);
 
         if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
         {

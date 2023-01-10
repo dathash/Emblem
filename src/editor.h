@@ -94,7 +94,7 @@ GenerateDebugPaths(const Level &level, path *path_debug)
     ImGui::SliderInt("drow", &destRow, 0, 10);
     if(ImGui::Button("from"))
     {
-        *path_debug = GetPath(level.map, col, row, destCol, destRow);
+        *path_debug = GetPath(level.map, col, row, destCol, destRow, true);
     }
 }
 
@@ -201,9 +201,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)
-        {
             GenerateDebugPaths(*level, &path_debug);
-        }
 
         // Render overlays to the main target
         if(path_debug.size() > 0)

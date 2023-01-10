@@ -25,6 +25,11 @@ HandleEvents(InputState *input)
         {
             GlobalRunning = false;
         }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_f)
+        {
+            // TODO: Move forward one frame? backwards????
+            GlobalPaused = !GlobalPaused;
+        }
         if(GlobalEditorMode)
         {
 // ================================= editor inputs =============================

@@ -1,6 +1,6 @@
 // Author: Alex Hartford
 // Program: Emblem
-// File: Grid Functions
+// File: Grid
 
 #ifndef GRID_H
 #define GRID_H
@@ -203,69 +203,6 @@ int ManhattanDistance(const point &one, const point &two)
     return (abs(one.first - two.first) + abs(one.second - two.second));
 }
 
-//TODO: This is still doing things naively.
-// Finds the nearest unit to the cursor, based on the given predicate expression.
-Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
-{
-    int minDistance = 100;
-    int distance = 0;
-    Unit *result = nullptr;
-    for(int col = 0; col < map.width; ++col)
-    {
-        for(int row = 0; row < map.height; ++row)
-        {
-            if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
-            {
-                distance = ManhattanDistance(point(cursor.col, cursor.row), point(col, row));
-                if(distance < minDistance)
-                {
-                    result = map.tiles[col][row].occupant;
-                    minDistance = distance;
-                }
-            }
-        }
-    }
-    return result;
-}
-
-
-// Finds the nearest accessible space to a given target point.
-// TODO: Do something better than manhattan distance.
-point FindClosestAccessibleTile(const Tilemap &map, int col, int row)
-{
-    int minDistance = 100;
-    int distance = 0;
-    point result;
-
-    for(point p : map.accessible)
-    {
-        distance = ManhattanDistance(point(col, row), p);
-        if(distance < minDistance)
-        {
-            result = p;
-            minDistance = distance;
-        }
-    }
-
-    return result;
-}
-
-// Finds a target for an attack.
-Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
-{
-    Unit *result = nullptr;
-    for(point p : map.attackable)
-    {
-        if(map.tiles[p.first][p.second].occupant && map.tiles[p.first][p.second].occupant->isAlly)
-        {
-            result = map.tiles[p.first][p.second].occupant;
-        }
-        // determine nearest enemy here
-        // (add possible enemies to a list, sort.)
-    }
-    return result;
-}
-
 void
 PrintDistanceField(const vector<vector<int>> &field)
 {
@@ -319,11 +256,11 @@ PrintField(const vector<vector<point>> &field)
 }
 
 
-// Get a field of pairs which indicate shortest paths to a specified node.
+// Get a field of directions which indicate shortest paths to a specified node.
 // Also produces a Distance Field, which indicates distance at each point.
-// Currently just prints out the distance field.
+// NOTE: Currently just prints out the distance field.
 vector<vector<point>>
-GetField(const Tilemap &map, int col, int row)
+GetField(const Tilemap &map, int col, int row, bool isAlly)
 {
     vector<vector<point>> field;
 	for(int col = 0; col < map.width; ++col)
@@ -353,7 +290,8 @@ GetField(const Tilemap &map, int col, int row)
     queue<point> unexplored;
     unexplored.push(make_pair(col, row));
     field[col][row] = point(-2, -2);
-    if(map.tiles[col][row].type == WALL)
+    if(map.tiles[col][row].type == WALL
+      || (map.tiles[col][row].occupant && map.tiles[col][row].occupant->isAlly != isAlly))
     {
         field[col][row] = point(-1, -1);
     }
@@ -383,7 +321,7 @@ GetField(const Tilemap &map, int col, int row)
             }
         }
     }
-#if 0
+#if 1
     cout << "=============================\n";
     PrintDistanceField(distances);
     PrintField(field);
@@ -406,10 +344,11 @@ PrintPath(const vector<point> path)
 vector<point>
 GetPath(const Tilemap &map,
         int col, int row,
-        int destCol, int destRow)
+        int destCol, int destRow,
+        bool isAlly)
 {
     vector<point> path;
-    vector<vector<point>> field = GetField(map, destCol, destRow);
+    vector<vector<point>> field = GetField(map, destCol, destRow, isAlly);
 
     point next = point(col, row);
 	point from = field[next.first][next.second];
@@ -422,12 +361,113 @@ GetPath(const Tilemap &map,
                      next.second + from.first);
         if(from.first == -1 && from.second == -1)
         {
+            //assert(!"GetPath | Shouldn't get here.\n");
             return {};
-            printf("HEY\n");
         }
     }
     //PrintPath(path);
     return path;
+}
+
+
+// ==================================== AI Methods =============================
+//TODO: This is still doing things naively.
+// Finds the nearest unit to the cursor, based on the given predicate expression.
+Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
+{
+    int minDistance = 100;
+    int distance = 0;
+    Unit *result = nullptr;
+    for(int col = 0; col < map.width; ++col)
+    {
+        for(int row = 0; row < map.height; ++row)
+        {
+            if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
+            {
+                distance = ManhattanDistance(point(cursor.col, cursor.row), point(col, row));
+                if(distance < minDistance)
+                {
+                    result = map.tiles[col][row].occupant;
+                    minDistance = distance;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+// Finds the nearest accessible space to a given target point.
+// TODO: Do something better than manhattan distance.
+point FindClosestAccessibleTile(const Tilemap &map, int col, int row)
+{
+    int minDistance = 100;
+    int distance = 0;
+    point result;
+
+    for(point p : map.accessible)
+    {
+        distance = ManhattanDistance(point(col, row), p);
+        if(distance < minDistance)
+        {
+            result = p;
+            minDistance = distance;
+        }
+    }
+
+    return result;
+}
+
+// Finds a target for an attack.
+Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
+{
+    Unit *result = nullptr;
+    for(point p : map.attackable)
+    {
+        if(map.tiles[p.first][p.second].occupant && map.tiles[p.first][p.second].occupant->isAlly)
+        {
+            result = map.tiles[p.first][p.second].occupant;
+        }
+        // determine nearest enemy here
+        // (add possible enemies to a list, sort.)
+    }
+    return result;
+}
+
+
+//  ================================ NEW AI METHODS ============================
+void
+PrintPossibilities(const vector<pair<point, Unit *>> &v)
+{
+    cout << "Possilibites:\n";
+    for(const pair<point, Unit *> &p : v)
+    {
+        cout << "Point: " << p.first.first << " " << p.first.second << " | ";
+        cout << p.second->name << "\n";
+    }
+}
+
+// Finds all possible squares for attacking enemies.
+// SLOW: This shouldn't have to do exhaustive search. How about going through
+// the enemy units instead?
+vector<pair<point, Unit *>>
+FindAttackingSquares(const Tilemap &map, const Unit &unit)
+{
+    vector<pair<point, Unit *>> result = {};
+    vector<point> interactible;
+
+    for(const point &p : map.accessible)
+    {
+        interactible = InteractibleFrom(map, p.first, p.second, unit.minRange, unit.maxRange);
+        for(const point &i : interactible)
+        {
+            if(map.tiles[i.first][i.second].occupant && map.tiles[i.first][i.second].occupant->isAlly)
+            {
+                result.push_back(pair<point, Unit *>(p, map.tiles[i.first][i.second].occupant));
+            }
+        }
+    }
+
+    return result;
 }
 
 #endif

@@ -273,7 +273,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp.close();
 }
 
-// saves the level to a file.
+// saves a level to a file.
 void
 SaveLevel(string filename_in, const Level &level)
 {

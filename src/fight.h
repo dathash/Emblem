@@ -85,6 +85,7 @@ struct Outcome
 
 // Makes a worst-case combat prediction for the sake of UI display
 // when a player initiates combat.
+// Returns the struct defined above.
 Outcome
 PredictCombat(const Unit &one, const Unit &two, int distance,
 			  int one_avoid_bonus, int two_avoid_bonus)
@@ -110,6 +111,7 @@ void
 SimulateCombat(Unit *one, Unit *two, int distance,
 			   int one_avoid_bonus, int two_avoid_bonus)
 {
+    cout << "COMBAT\n";
     int one_dmg = CalculateDamage(*one, *two);
     int two_dmg = CalculateDamage(*two, *one);
     if(d100() < HitChance(*one, *two, two_avoid_bonus))
