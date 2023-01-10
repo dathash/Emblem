@@ -198,19 +198,21 @@ private:
 class AIAttackTargetCommand : public Command
 {
 public:
-    AIAttackTargetCommand(Cursor *cursor_in, Tilemap *map_in)
+    AIAttackTargetCommand(Cursor *cursor_in, const Tilemap &map_in)
     : cursor(cursor_in),
       map(map_in)
     {}
 
     virtual void Execute()
     {
-        cursor->targeted = FindVictim(*cursor, *map);
+        cursor->targeted = FindVictim(*cursor, map);
         if(cursor->targeted)
         {
             int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
                                              point(cursor->targeted->col, cursor->targeted->row));
-            SimulateCombat(cursor->selected, cursor->targeted, distance);
+            SimulateCombat(cursor->selected, cursor->targeted, distance,
+                           map.tiles[cursor->selectedCol][cursor->selectedRow].avoid,
+                           map.tiles[cursor->col][cursor->row].avoid);
         }
 
         cursor->selected->isExhausted = true;
@@ -225,7 +227,7 @@ public:
 
 private:
     Cursor *cursor; 
-    Tilemap *map;
+    const Tilemap &map;
 };
 
 
@@ -243,7 +245,7 @@ struct AI
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
         commandQueue.push(make_shared<AIMoveToClosestSquareCommand>(cursor, map));
         commandQueue.push(make_shared<AIPlaceUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, map));
+        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, *map));
     }
 
     void Update()

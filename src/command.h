@@ -207,6 +207,11 @@ public:
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
 
+        if(cursor->selected->id == LEADER_ID)
+        {
+            leaderPosition = point(cursor->col, cursor->row);
+        }
+
         // unit has to know its position as well (FOR NOW)
         cursor->selected->col = cursor->col;
         cursor->selected->row = cursor->row;
@@ -285,6 +290,11 @@ public:
     {
         map->tiles[cursor->col][cursor->row].occupant = nullptr;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
+
+        if(cursor->selected->id == LEADER_ID)
+        {
+            leaderPosition = point(cursor->col, cursor->row);
+        }
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;
@@ -460,15 +470,18 @@ private:
 class AttackCommand : public Command
 {
 public:
-    AttackCommand(Cursor *cursor_in)
-    : cursor(cursor_in)
+    AttackCommand(Cursor *cursor_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      map(map_in)
     {}
 
     virtual void Execute()
     {
         int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
                                          point(cursor->targeted->col, cursor->targeted->row));
-        SimulateCombat(cursor->selected, cursor->targeted, distance);
+        SimulateCombat(cursor->selected, cursor->targeted, distance,
+                       map.tiles[cursor->selectedCol][cursor->selectedRow].avoid,
+                       map.tiles[cursor->col][cursor->row].avoid);
 
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
@@ -482,6 +495,7 @@ public:
 
 private:
     Cursor *cursor;
+    const Tilemap &map;
 };
 
 
@@ -961,9 +975,9 @@ public:
                 BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<NullCommand>());
+                BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
-                BindR(make_shared<NullCommand>());
+                BindR(make_shared<OpenUnitInfoCommand>());
             } break;
 
             case(SELECTED_OVER_GROUND):
@@ -1037,7 +1051,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<AttackCommand>(cursor));
+                BindA(make_shared<AttackCommand>(cursor, *map));
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;

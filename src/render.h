@@ -311,7 +311,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
     // Portraits
-    if(GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
+    if((GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
        GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
        GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
        GlobalInterfaceState == SELECTED_OVER_ALLY ||
@@ -323,6 +323,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == ENEMY_INFO ||
 	   GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)
+       && GlobalPlayerTurn)
     {
         assert(map.tiles[cursor.col][cursor.row].occupant);
         int x_pos = 560;

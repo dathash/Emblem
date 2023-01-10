@@ -66,15 +66,15 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		// CONSIDER: Update texture sources, spritesheet.
 		ImGui::SliderInt("Mov", &selected->mov, 0, 10);
 		ImGui::SliderInt("maxHp", &selected->maxHp, 1, 20);
-		ImGui::SliderInt("atk", &selected->attack, 0, 10);
-		ImGui::SliderInt("mag", &selected->magic, 0, 10);
-		ImGui::SliderInt("def", &selected->defense, 0, 10);
-		ImGui::SliderInt("res", &selected->resistance, 0, 10);
-		ImGui::SliderInt("acc", &selected->accuracy, 0, 100);
+		ImGui::SliderInt("atk", &selected->attack, 0, 20);
+		ImGui::SliderInt("mag", &selected->magic, 0, 20);
+		ImGui::SliderInt("def", &selected->defense, 0, 20);
+		ImGui::SliderInt("res", &selected->resistance, 0, 20);
+		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
 		ImGui::SliderInt("avo", &selected->avoid, 0, 100);
 		ImGui::SliderInt("crit", &selected->crit, 0, 100);
-		ImGui::SliderInt("min", &selected->minRange, 1, 3);
-		ImGui::SliderInt("max", &selected->maxRange, 1, 3);
+		ImGui::SliderInt("min", &selected->minRange, 1, 4);
+		ImGui::SliderInt("max", &selected->maxRange, 1, 4);
 	}
 	ImGui::End();
 }
@@ -246,6 +246,7 @@ void EditorPass(vector<unique_ptr<Unit>> *units,
         {
             *units = LoadUnits(string(DATA_PATH) + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
+			leaderPosition = {0, 0};
             *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
             cout << "Level loaded: " << levelFileName << "\n";
         }

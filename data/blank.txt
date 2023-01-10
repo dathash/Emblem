@@ -11,9 +11,6 @@ WDT 15
 HGT 10
 
 MST 0
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 4 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
@@ -21,12 +18,12 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 
 
 COM <UNT <name> <id> <col> <row>
 UNT Darko 0 0 3 
 UNT Soren 1 0 0 
 UNT Zarathustra 2 2 2 
-UNT Thief 3 9 3 
-UNT Thief 3 13 8 
-UNT Thief 3 10 8 
 

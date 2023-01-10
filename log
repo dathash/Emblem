@@ -73,6 +73,7 @@ pokemon selection (pokemon stadium)
 # TODO
 MVP
     10 levels
+
     Better enemy ai
         We use A* when we go after a unit, but we don't use it when choosing the
             closest unit yet.
@@ -84,7 +85,7 @@ MVP
     Level Transitions/Win Screen
 
 NICE
-    Start turn on Zarathustra
+    Automatic end turn when you have no units remaining.
     Battle Animations
     Conversations
     Audio
@@ -97,10 +98,11 @@ NICE
         Enemies that don't always come straight for you.
     Placing Unit moves them smoothly to that square (A-star)
     Attack and Move / Heal and Move
-    Actually track enemy ranges with A button
+    Actually track enemy ranges with A button?
     Unit damage and healing ranges are displayed.
     Shrink Tilesets to absolute necessity, also enforce consistency across all
         tilesets.
+    Isometric?
 
 # Ideas
 ## Brainstorm

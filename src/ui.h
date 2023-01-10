@@ -283,7 +283,9 @@ GetHitColor(int hit)
 
 // Displays combat preview when initiating combat
 void
-DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy, enum quadrant quad)
+DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy, 
+                                          int ally_avoid_bonus, int enemy_avoid_bonus,
+                                          enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(460, 220));
@@ -302,7 +304,8 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy, e
     {
         Outcome outcome = PredictCombat(ally, enemy, 
                           ManhattanDistance(point(ally.col, ally.row), 
-                                            point(enemy.col, enemy.row)));
+                                            point(enemy.col, enemy.row)),
+                          ally_avoid_bonus, enemy_avoid_bonus);
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
@@ -420,7 +423,10 @@ void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
 	if(ui->unit_info)
 		DisplayUnitInfo(window_flags, *map.tiles[cursor.col][cursor.row].occupant, cursor.Quadrant());
 	if(ui->combat_preview)
-		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, cursor.Quadrant());
+		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
+                                           map.tiles[cursor.selectedCol][cursor.selectedRow].avoid, 
+                                           map.tiles[cursor.col][cursor.row].avoid, 
+                                           cursor.Quadrant());
 	if(ui->options_menu)
 		DisplayOptionsMenu(window_flags);
 

@@ -225,8 +225,8 @@ struct Level
 
 struct Cursor
 {
-    int col = 1;
-    int row = 1;
+    int col = -1;
+    int row = -1;
     Unit *selected = nullptr;
     Unit *targeted = nullptr;
     int selectedCol = -1; // Where the cursor was before placing a unit
@@ -241,9 +241,20 @@ struct Cursor
     : sheet(sheet_in)
     {}
 
-    void Update()
+    void
+    Update()
     {
         sheet.Update();
+    }
+
+    // Returns the cursor to the position of the leader.
+    void
+    Reset()
+    {
+        col = leaderPosition.first;
+        row = leaderPosition.second;
+        path_draw = {};
+        //TODO: What if the leader starts outside of the 0, 0 viewport?
     }
 
     // returns the current quadrant of where the cursor is on the screen.

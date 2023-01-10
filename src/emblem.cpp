@@ -51,10 +51,10 @@ static bool GlobalRunning = false;
 
 static int GlobalLevelNumber = 0;
 static bool GlobalNextLevel = false;
-static int GlobalTotalLevels = 4;
+static int GlobalTotalLevels = 10;
 
 static bool GlobalPlayerTurn = true;
-static bool GlobalTurnStart = false;
+static bool GlobalTurnStart = true;
 
 static bool GlobalGamepadMode = false;
 
@@ -71,6 +71,8 @@ static ImFont *uiFontLarge;
 
 // TODO: unnecessary?
 static u64 GlobalFrameNumber = 0;
+
+static point leaderPosition = {0, 0};
 
 #include "utils.h"
 #include "structs.h"
@@ -104,8 +106,11 @@ int main(int argc, char *argv[])
 
 // ================================== load =================================
     vector<unique_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
-    vector<string> levels = {DATA_PATH + string("l1.txt"), DATA_PATH + string("l2.txt"),
-                             DATA_PATH + string("l3.txt"), DATA_PATH + string("l4.txt")};
+    vector<string> levels = {DATA_PATH + string("l0.txt"), DATA_PATH + string("l1.txt"),
+                             DATA_PATH + string("l2.txt"), DATA_PATH + string("l3.txt"),
+                             DATA_PATH + string("l4.txt"), DATA_PATH + string("l5.txt"),
+                             DATA_PATH + string("l6.txt"), DATA_PATH + string("l7.txt")
+							 };
     Level level = LoadLevel(levels[GlobalLevelNumber], units);
     Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
@@ -139,11 +144,10 @@ int main(int argc, char *argv[])
         {
             for(auto const &unit : level.combatants)
                 unit->isExhausted = false;
-            cursor.col = 0;
-            cursor.row = 0;
-            viewportCol = 0;
+			cursor.Reset();
+			viewportCol = 0; // TODO: Now this is a lie!
             viewportRow = 0;
-            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
             GlobalTurnStart = false;
             ai.clearQueue();
@@ -169,9 +173,7 @@ int main(int argc, char *argv[])
 		ui.Update();
 
         for(auto const &unit : level.combatants)
-        {
             unit->Update();
-        }
 
         // cleanup
         level.RemoveDeadUnits();
@@ -179,10 +181,12 @@ int main(int argc, char *argv[])
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
-            GlobalInterfaceState = NEUTRAL_OVER_GROUND; // TODO: This is a lie.
             GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
 				GlobalLevelNumber + 1 : 0;
+			leaderPosition = {0, 0};
             level = LoadLevel(levels[GlobalLevelNumber], units);
+			cursor.Reset();
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
         }
 
 // ============================= render =========================================
@@ -192,7 +196,8 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level.map);
+		if(GlobalPlayerTurn)
+			RenderUI(&ui, cursor, level.map);
 #if DEV_MODE
         if(GlobalEditorMode)
             EditorPass(&units, &level);

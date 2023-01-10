@@ -41,11 +41,22 @@
 #define SPRITES_PATH "../assets/sprites/"
 #define PORTRAITS_PATH "../assets/portraits/"
 #define TILESETS_PATH "../assets/tilesets/"
-#define INITIAL_LEVEL "l1.txt"
+#define INITIAL_LEVEL "l0.txt"
 #define INITIAL_UNITS "units.txt"
 
 #define DEFAULT_PORTRAIT "ph.png"
 #define DEFAULT_SHEET "warrior.png"
+
+// gameplay
+#define LEADER_ID 0
+
+#define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
+#define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
+#define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
+#define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
+#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
+// CONSIDER: There's gotta be a better way than macros to set some default tile types
+
 
 enum InterfaceState
 {
@@ -95,14 +106,6 @@ enum quadrant
     BOTTOM_LEFT,
     BOTTOM_RIGHT
 };
-
-// =============================== tiles =======================================
-#define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
-#define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
-#define FOREST_TILE {FOREST, 2, 10, nullptr, {0, 6}}
-#define DESERT_TILE {DESERT, 4, 0, nullptr, {18, 29}}
-#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
-// CONSIDER: There's gotta be a better way than macros to set some default tile types
 
 // ============================ color palette ==================================
 // Tile overlays

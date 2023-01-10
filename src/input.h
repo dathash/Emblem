@@ -25,7 +25,6 @@ HandleEvents(InputState *input)
         }
         if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {
-            printf("Quit Received!\n");
             GlobalRunning = false;
         }
         if(GlobalEditorMode)

@@ -156,6 +156,12 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
                     unique_ptr<Unit> unitCopy = make_unique<Unit>(*units[stoi(tokens[1])]);
                     int col = stoi(tokens[2]);
                     int row = stoi(tokens[3]);
+                    // Assign leader
+                    if(stoi(tokens[1]) == LEADER_ID)
+                    {
+                        assert(leaderPosition.first == 0 && leaderPosition.second == 0);
+                        leaderPosition = point(col, row);
+                    }
                     unitCopy->col = col;
                     unitCopy->row = row;
                     level.combatants.push_back(move(unitCopy));
@@ -254,7 +260,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
                      << unit->id << " "
                      << (unit->isAlly ? "Ally" : "Enemy") << " "
                      << unit->mov << " "
-                     << unit->hp << " "
+                     << unit->maxHp << " "
                      << unit->attack << " "
                      << unit->magic << " "
                      << unit->defense << " "

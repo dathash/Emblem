@@ -6,10 +6,13 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-// NOTE: This is a non-animation situation. I want to write the animation code
+// TODO: This is a non-animation situation. I want to write the animation code
 // separately, so that it doesn't become such a spaghetti mess. We'll see how
 // that goes.
-
+// In the end, this is a pretty pernicious problem. We need a system that can
+// predict its outcome and send out data about the process, then resolve and
+// send an actual outcome, which we then animate on-screen, and THEN update all
+// relevant fields (HP, ammunition, etc.)
 // Below is a better system, which should be implemented when animation work begins.
 /*
 struct Attack
@@ -35,7 +38,6 @@ struct Combat
     {
     }
 };
-
 */
 
 // Rolls a d100. range: 00 to 99.
@@ -45,9 +47,9 @@ int d100()
 }
 
 // Returns the chance to hit a unit
-int HitChance(const Unit &predator, const Unit &prey)
+int HitChance(const Unit &predator, const Unit &prey, int bonus)
 {
-    return (predator.accuracy - prey.avoid);
+    return (predator.accuracy - prey.avoid - bonus);
 }
 
 // Returns the chance to crit a unit
@@ -85,16 +87,17 @@ struct Outcome
 // Makes a worst-case combat prediction for the sake of UI display
 // when a player initiates combat.
 Outcome
-PredictCombat(const Unit &one, const Unit &two, int distance)
+PredictCombat(const Unit &one, const Unit &two, int distance,
+			  int one_avoid_bonus, int two_avoid_bonus)
 {
     Outcome outcome = {0, 0, one.hp, 0, 0, two.hp};
-    outcome.one_hit = HitChance(one, two);
+    outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;
     outcome.two_health = clamp(two.hp - CalculateDamage(one, two), 0, two.maxHp);
 
     if(distance >= two.minRange && distance <= two.maxRange)
     {
-        outcome.two_hit = HitChance(two, one);
+        outcome.two_hit = HitChance(two, one, one_avoid_bonus);
         outcome.two_crit = two.crit;
         outcome.one_health = clamp(one.hp - CalculateDamage(two, one), 0, one.maxHp);
     }
@@ -105,18 +108,19 @@ PredictCombat(const Unit &one, const Unit &two, int distance)
 // Simulates a single combat between a unit and their enemy.
 // Includes logic for different distances.
 void
-SimulateCombat(Unit *one, Unit *two, int distance)
+SimulateCombat(Unit *one, Unit *two, int distance,
+			   int one_avoid_bonus, int two_avoid_bonus)
 {
     int one_dmg = CalculateDamage(*one, *two);
     int two_dmg = CalculateDamage(*two, *one);
-    if(d100() < HitChance(*one, *two))
+    if(d100() < HitChance(*one, *two, two_avoid_bonus))
     {
         two->Damage(one_dmg);
         if(d100() < CritChance(*one, *two))
             two->Damage(one_dmg); // double the damage
     }
 
-    if(two->hp > 0 && d100() < HitChance(*two, *one) &&
+    if(two->hp > 0 && d100() < HitChance(*two, *one, one_avoid_bonus) &&
        (distance >= two->minRange && distance <= two->maxRange))
     {
         one->Damage(two_dmg);
