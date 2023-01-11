@@ -68,27 +68,41 @@ akira streaking lights
 epilogue (r4 - ridge racer type 4)
 quiet curves (r4 as well)
 spiny desert (mario party 3)
+Track 13 (super b-daman: battle phoenix 64)
 pokemon selection (pokemon stadium)
     Maybe some drum corps songs?
 Dark Ages 1 (Norse by Northwest - the return of the lost vikings)
 Intro Theme (Tom Clancy's Rainbow Six)
+Super Mario 64 Title Theme
 
 # TODO
 MVP
+    New Color Scheme for terminal
     8 levels
+
+Afternoon:
+    More sprites
+        Priam
+        Lon'qu
+        Olivia
+
+    Abilities
+        Heal
+        Warp
+        Explode
+        Buff
 
     Better enemy ai
         Enemies that don't always come straight for you.
-        Move towards fortified positions.
 
     More accurate HIT calculations, with tile avoid factored in.
     Level Transitions
     Win and Lose Screens
     Startup Screen
-    BUG | Enemies walk over eachother. FIX THIS FIRST THING TOMORROW MORNING.
+    BUG | Enemies in the top of the screen with no route to your units seg fault.
+    Separate buttons for viewing enemy range vs enemy stats.
 
 NICE
-    Separate buttons for viewing enemy range vs enemy stats.
     Automatic end turn when you have no units remaining.
     Battle Animations
     Conversations
@@ -96,12 +110,14 @@ NICE
         Sound Effects
         Drum-n-bass Audio
             Trance-like state of playing
-    Placing Unit moves them smoothly to that square (A-star)
-    Attack and Move / Heal and Move
-    Actually track enemy ranges with A button?
-    Unit damage and healing ranges are displayed.
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
+    Enemy Units have more complex decision-making process.
+
+POLISH
+    Placing Unit moves them smoothly to that square (A-star)
+    Attack and Move / Heal and Move
+    Unit damage and healing ranges are displayed.
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
 

@@ -49,6 +49,8 @@
 // gameplay
 #define LEADER_ID 0
 
+#define LEVEL_TIME 60
+
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 2, 20, nullptr, {0, 6}}

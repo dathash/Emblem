@@ -286,4 +286,49 @@ struct Cursor
     }
 };
 
+struct Timer
+{
+    Uint32 current = 0;
+    Uint32 last_frame = 0;
+    Uint32 end;
+    bool paused = false;
+
+    Timer(int seconds)
+    {
+        last_frame = SDL_GetTicks();
+        end = seconds * 1000;
+    }
+
+    bool
+    Update()
+    {
+        if(paused)
+            return false;
+
+        // How much time has passed this frame.
+        current += SDL_GetTicks() - last_frame;
+
+        last_frame = SDL_GetTicks();
+        if(current >= end)
+        {
+            printf("Ran out of time. Game over!\n");
+            GlobalRunning = false;
+            return true;
+        }
+        return false;
+    }
+
+    void
+    Pause()
+    {
+        paused = true;
+    }
+    void
+    Start()
+    {
+        paused = false;
+        last_frame = SDL_GetTicks();
+    }
+};
+
 #endif

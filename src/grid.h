@@ -326,24 +326,6 @@ GetField(const Tilemap &map, int col, int row, bool isAlly)
                 }
             }
         }
-
-        /*
-        // NOTE: This is a workaround.
-        // There is a weird thing to consider: We must draw paths through ally
-        // units, but not allow you to land on them. I don't know what to do about this!
-        for(int col = 0; col < map.width; ++col)
-        {
-            for(int row = 0; row < map.height; ++row)
-            {
-                if(map.tiles[col][row].occupant &&
-                   (map.tiles[col][row].occupant->isAlly == isAlly))
-                {
-                    field[col][row] = point(-1, -1);
-                    distances[col][row] = 100;
-                }
-            }
-        }
-        */
     }
 #if 0
     cout << "=============================\n";
@@ -385,6 +367,24 @@ GetPath(const Tilemap &map,
                      next.second + from.first);
     }
     return path;
+}
+
+
+// Returns the furthest point down a path that a unit could move in a round.
+// A necessary workaround due to the fact that units can move through allies
+// but cannot land on their squares.
+point
+FurthestMovementOnPath(const Tilemap &map, const path &full_path, int movement)
+{
+    for(int i = movement; i > 0; --i) // Start at the furthest square, test all.
+    {
+        if(!map.tiles[full_path[i].first][full_path[i].second].occupant)
+        {
+            return full_path[i];
+        }
+    }
+    assert(!"This will be a problem.\n");
+    return {0, 0};
 }
 
 

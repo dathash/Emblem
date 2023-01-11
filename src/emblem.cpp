@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
     Level level = LoadLevel(levels[GlobalLevelNumber], units);
     Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
+    Timer timer = Timer(LEVEL_TIME);
 
 	UI_State ui = {};
 
@@ -144,6 +145,17 @@ int main(int argc, char *argv[])
         {
             if(GlobalTurnStart)
             {
+                if(GlobalPlayerTurn)
+                {
+                    cout << "Player Start!\n";
+                    timer.Start();
+                }
+                else
+                {
+                    cout << "Enemy Start!\n";
+                    timer.Pause();
+                }
+
                 for(auto const &unit : level.combatants)
                     unit->isExhausted = false;
                 cursor.Reset();
@@ -173,6 +185,7 @@ int main(int argc, char *argv[])
 // ========================= update phase =======================================
             cursor.Update();
             ui.Update();
+            timer.Update();
 
             for(auto const &unit : level.combatants)
                 unit->Update();
@@ -182,12 +195,14 @@ int main(int argc, char *argv[])
 
             if(GlobalNextLevel)
             {
+                cout << "Here\n";
                 GlobalNextLevel = false;
                 GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
                     GlobalLevelNumber + 1 : 0;
                 leaderPosition = {0, 0};
                 level = LoadLevel(levels[GlobalLevelNumber], units);
                 cursor.Reset();
+                timer = Timer(LEVEL_TIME);
                 GlobalInterfaceState = NEUTRAL_OVER_UNIT;
             }
         }
@@ -200,7 +215,7 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		if(GlobalPlayerTurn)
-			RenderUI(&ui, cursor, level.map);
+			RenderUI(&ui, cursor, level.map, timer);
 #if DEV_MODE
         if(GlobalEditorMode)
             EditorPass(&units, &level);

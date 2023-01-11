@@ -6,7 +6,8 @@
 #define UI_H
 
 // ======================== General UI helper functions ========================
-void TextCentered(std::string text) {
+void 
+TextCentered(std::string text) {
     auto windowWidth = ImGui::GetWindowSize().x;
     auto textWidth   = ImGui::CalcTextSize(text.c_str()).x;
 
@@ -16,7 +17,8 @@ void TextCentered(std::string text) {
 
 
 // switch-case to get a ui-printable name from the tile's type enum.
-string GetTileNameString(int type)
+string 
+GetTileNameString(int type)
 {
     switch (type)
     {
@@ -43,7 +45,8 @@ struct UI_State
     bool unit_menu = false;
     bool combat_screen = false;
 
-    void Update()
+    void 
+    Update()
     {
 		// Tile Info
         if(GlobalPlayerTurn
@@ -111,7 +114,8 @@ struct UI_State
     }
 };
 
-void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
+void 
+DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(10, 430));
@@ -145,7 +149,8 @@ void DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 }
 
 // Displays a health bar, with an overlay for the damage to be done.
-void DisplayHealthBar(int hp, int maxHp, int damage)
+void 
+DisplayHealthBar(int hp, int maxHp, int damage)
 {
 	float original_cursor_position = ImGui::GetCursorPosX();
 	float original_line_height = ImGui::GetFrameHeight();
@@ -169,7 +174,8 @@ void DisplayHealthBar(int hp, int maxHp, int damage)
 
 // Just display a unit's name and HP bar.
 // CONSIDER: Move portrait rendering into this.
-void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
+void 
+DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(400, 120));
@@ -204,7 +210,8 @@ void DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 }
 
 // Full display of unit's stats
-void DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
+void 
+DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(480, 180));
@@ -378,7 +385,8 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy,
 }
 
 // Displays options menu
-void DisplayOptionsMenu(ImGuiWindowFlags wf)
+void 
+DisplayOptionsMenu(ImGuiWindowFlags wf)
 {
 	static bool bl;
 	ImGui::SetNextWindowFocus();
@@ -400,7 +408,27 @@ void DisplayOptionsMenu(ImGuiWindowFlags wf)
     ImGui::End();
 }
 
-void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
+void
+DisplayTimer(ImGuiWindowFlags wf, const Timer &timer)
+{
+    ImGui::SetNextWindowPos(ImVec2(450, 30), 0, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowSize(ImVec2(60, 50));
+
+	wf |= ImGuiWindowFlags_NoTitleBar;
+    ImGui::Begin("Timer", NULL, wf);
+    {
+        ImGui::PushFont(uiFontLarge);
+            ImGui::Text("%02d", (int)((timer.end - timer.current) * 0.001));
+        ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
+void 
+RenderUI(UI_State *ui, 
+         const Cursor &cursor, 
+         const Tilemap &map,
+         const Timer &timer)
 {
     ImGuiWindowFlags window_flags = 0;
 	window_flags |= ImGuiWindowFlags_NoCollapse;
@@ -428,6 +456,7 @@ void RenderUI(UI_State *ui, const Cursor &cursor, const Tilemap &map)
                                            cursor.Quadrant());
 	if(ui->options_menu)
 		DisplayOptionsMenu(window_flags);
+    DisplayTimer(window_flags, timer);
 
 	// cleanup
 	ImGui::PopStyleVar();

@@ -136,7 +136,9 @@ public:
 					return unit.isAlly;
 				});
 			path path_to_nearest = GetPath(*map, cursor->col, cursor->row, nearest->col, nearest->row, false);
-			action = pair<point, Unit *>(path_to_nearest[cursor->selected->mov], NULL);
+			action = pair<point, Unit *>(
+					FurthestMovementOnPath(*map, path_to_nearest, cursor->selected->mov),
+										 NULL);
 		}
 		else
 		{
