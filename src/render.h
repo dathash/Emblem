@@ -183,7 +183,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
-    if(GlobalInterfaceState == ENEMY_INFO)
+    if(GlobalInterfaceState == ENEMY_RANGE)
     {
         for(pair<int, int> cell : map.accessible)
         {

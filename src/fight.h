@@ -112,7 +112,7 @@ void
 SimulateCombat(Unit *one, Unit *two, int distance,
 			   int one_avoid_bonus, int two_avoid_bonus)
 {
-    cout << "COMBAT\n";
+    //cout << "COMBAT\n";
     int one_dmg = CalculateDamage(*one, *two);
     int two_dmg = CalculateDamage(*two, *one);
     if(d100() < HitChance(*one, *two, two_avoid_bonus))
@@ -129,9 +129,6 @@ SimulateCombat(Unit *one, Unit *two, int distance,
         if(d100() < CritChance(*two, *one))
             one->Damage(two_dmg); // double the damage
     }
-
-    one->isExhausted = true;
-    one->sheet.ChangeTrack(0);
 }
 
 #endif

@@ -147,12 +147,10 @@ int main(int argc, char *argv[])
             {
                 if(GlobalPlayerTurn)
                 {
-                    cout << "Player Start!\n";
                     timer.Start();
                 }
                 else
                 {
-                    cout << "Enemy Start!\n";
                     timer.Pause();
                 }
 
@@ -192,10 +190,10 @@ int main(int argc, char *argv[])
  
             // cleanup
             level.RemoveDeadUnits();
+            level.CheckForRemaining();
 
             if(GlobalNextLevel)
             {
-                cout << "Here\n";
                 GlobalNextLevel = false;
                 GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
                     GlobalLevelNumber + 1 : 0;

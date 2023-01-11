@@ -468,6 +468,8 @@ public:
                        map.tiles[cursor->selectedCol][cursor->selectedRow].avoid,
                        map.tiles[cursor->col][cursor->row].avoid);
 
+        cursor->selected->Deactivate();
+
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
@@ -496,8 +498,7 @@ public:
 
         SimulateHealing(cursor->selected, cursor->targeted);
 
-        cursor->selected->isExhausted = true;
-        cursor->selected->sheet.ChangeTrack(0);
+        cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
@@ -568,12 +569,6 @@ public:
         cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
-
-        map->accessible.clear();
-        map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
-                                         cursor->selectedRow, 
-                                         cursor->selected->mov,
-                                         cursor->selected->isAlly);
     }
 
 private:
@@ -600,6 +595,48 @@ public:
 
 private:
     Cursor *cursor;
+};
+
+
+class EnemyRangeCommand : public Command
+{
+public:
+    EnemyRangeCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        // change state
+        GlobalInterfaceState = ENEMY_RANGE;
+        cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
+        cursor->selectedCol = cursor->col;
+        cursor->selectedRow = cursor->row;
+
+        map->accessible.clear();
+        map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
+                                         cursor->selectedRow, 
+                                         cursor->selected->mov,
+                                         cursor->selected->isAlly);
+    }
+
+private:
+    Cursor *cursor;
+    Tilemap *map;
+};
+
+class EnemyUndoRangeCommand : public Command
+{
+public:
+    EnemyUndoRangeCommand()
+    {}
+
+    virtual void Execute()
+    {
+        // change state
+        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+    }
 };
 
 // ======================= game menu commands =========================================
@@ -680,9 +717,7 @@ public:
             } break;
             case(2): // END TURN
             {
-                GlobalInterfaceState = NO_OP;
-                GlobalPlayerTurn = false;
-                GlobalTurnStart = true;
+                EndPlayerTurn();
             } break;
         }
     }
@@ -772,14 +807,11 @@ public:
 
         if(option == "Wait")
         {
-            cursor->selected->isExhausted = true;
+            cursor->selected->Deactivate();
 
-            cursor->selected->sheet.ChangeTrack(0);
             cursor->selected = nullptr;
-
             cursor->selectedCol = -1;
             cursor->selectedRow = -1;
-
             cursor->path_draw = {};
 
             // Move onto next level!
@@ -950,7 +982,7 @@ public:
                 BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
                 BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
                 BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
-                BindA(make_shared<SelectEnemyCommand>(cursor, map));
+                BindA(make_shared<EnemyRangeCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<SelectEnemyCommand>(cursor, map));
             } break;
@@ -1121,8 +1153,18 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<DeselectEnemyCommand>(cursor));
+                BindB(make_shared<NullCommand>());
                 BindR(make_shared<DeselectEnemyCommand>(cursor));
+            } break;
+            case(ENEMY_RANGE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<EnemyUndoRangeCommand>());
+                BindR(make_shared<NullCommand>());
             } break;
 
             case(NO_OP):

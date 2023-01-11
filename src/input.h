@@ -28,6 +28,7 @@ HandleEvents(InputState *input)
         if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_f)
         {
             // TODO: Move forward one frame? backwards????
+            // TODO: Pause the timer also?
             GlobalPaused = !GlobalPaused;
         }
         if(GlobalEditorMode)

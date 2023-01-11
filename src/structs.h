@@ -5,6 +5,17 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+
+// ============================== Orphan Functions =============================
+void
+EndPlayerTurn()
+{
+    GlobalInterfaceState = NO_OP;
+    GlobalPlayerTurn = false;
+    GlobalTurnStart = true;
+}
+
+// =============================== Low-level ===================================
 struct InputState
 {
     bool up;
@@ -160,6 +171,13 @@ struct Unit
     {
         hp = clamp(hp - dmg, 0, maxHp);
     }
+
+    void
+    Deactivate()
+    {
+        isExhausted = true;
+        sheet.ChangeTrack(0);
+    }
 };
 
 
@@ -200,7 +218,8 @@ struct Level
     Tilemap map;
     vector<unique_ptr<Unit>> combatants;
 
-    void RemoveDeadUnits()
+    void
+    RemoveDeadUnits()
     {
         // Quit if Zarathustra's dead
         if(map.tiles[leaderPosition.first][leaderPosition.second].occupant->shouldDie)
@@ -220,12 +239,28 @@ struct Level
             }
         }
 
-        combatants.erase(remove_if(combatants.begin(), combatants.end(), [](auto const &u) { return u->shouldDie; }), combatants.end());
+        combatants.erase(remove_if(combatants.begin(), combatants.end(),
+                    [](auto const &u) { return u->shouldDie; }),
+                    combatants.end());
 
         for(pair<int, int> tile : tiles)
         {
             map.tiles[tile.first][tile.second].occupant = nullptr;
         }
+    }
+
+    // A mutation function that just checks if there are any units left to
+    // move, and ends the player's turn.
+    void
+    CheckForRemaining()
+    {
+        for(auto const &u : combatants)
+        {
+            if(u->isAlly && !u->isExhausted)
+                return;
+        }
+        EndPlayerTurn();
+        return;
     }
 };
 

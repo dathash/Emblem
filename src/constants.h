@@ -86,6 +86,7 @@ enum InterfaceState
     UNIT_INFO,
 
     ENEMY_INFO,
+    ENEMY_RANGE,
 
     NO_OP,
 };

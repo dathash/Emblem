@@ -74,6 +74,7 @@ pokemon selection (pokemon stadium)
 Dark Ages 1 (Norse by Northwest - the return of the lost vikings)
 Intro Theme (Tom Clancy's Rainbow Six)
 Super Mario 64 Title Theme
+Tripod (Bomberman Hero)
 
 # TODO
 MVP
@@ -100,10 +101,8 @@ Afternoon:
     Win and Lose Screens
     Startup Screen
     BUG | Enemies in the top of the screen with no route to your units seg fault.
-    Separate buttons for viewing enemy range vs enemy stats.
 
 NICE
-    Automatic end turn when you have no units remaining.
     Battle Animations
     Conversations
     Audio
