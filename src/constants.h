@@ -92,10 +92,8 @@ enum AIState
 {
     FINDING_NEXT,
     SELECTED,
-    FOUND_NEW_POSITION,
-    PLACED,
 
-    ENEMY_TURN
+    PLAYER_TURN
 };
 
 enum quadrant

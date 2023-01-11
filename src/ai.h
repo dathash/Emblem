@@ -7,7 +7,7 @@
 
 void EndAITurn()
 {
-    GlobalAIState = ENEMY_TURN;
+    GlobalAIState = PLAYER_TURN;
     GlobalPlayerTurn = true;
     GlobalTurnStart = true;
 }
@@ -103,10 +103,10 @@ private:
 };
 
 
-class AIMoveToClosestSquareCommand : public Command
+class AIPerformUnitActionCommand : public Command
 {
 public:
-    AIMoveToClosestSquareCommand(Cursor *cursor_in, Tilemap *map_in)
+    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
       map(map_in)
     {}
@@ -122,6 +122,7 @@ public:
 			// 2. High Likelihoods
 			// 3. Minimum counterattack Damage
 			// 4. Low enemy likelihoods
+		// Right now, we just pick minimum enemy health.
 
 		// =================================== Find ideal target =====================
         pair<point, Unit *> action = {};
@@ -134,16 +135,11 @@ public:
 				{
 					return unit.isAlly;
 				});
-			cout << "NEAREST: " << nearest->name << "\n";
 			path path_to_nearest = GetPath(*map, cursor->col, cursor->row, nearest->col, nearest->row, false);
-			cout << path_to_nearest.size() << "\n";
 			action = pair<point, Unit *>(path_to_nearest[cursor->selected->mov], NULL);
-			cout << "I can't reach any targets, but I'm heading for " <<
-					 action.first.first << " " << action.first.second << "\n";
 		}
 		else
 		{
-			PrintPossibilities(possibilities);
 			int min_health_after_attack = 999;
 			Outcome outcome;
 			//int max_odds = 0;
@@ -163,58 +159,19 @@ public:
 					min_health_after_attack = outcome.two_health;
 				}
 			}
-			cout << "My target is: " << action.second->name << ". I'm attacking from " <<
-										action.first.first << " " << action.first.second << "\n";
 		}
 
-		/*
 		// ================================= Perform movement ========================
         // move cursor
-        cursor->col = targetSquare.first;
-        cursor->row = targetSquare.second;
+        cursor->col = action.first.first;
+        cursor->row = action.first.second;
 
-        MoveViewport(targetSquare.first, targetSquare.second);
-		*/
+        MoveViewport(cursor->col, cursor->row);
 
-        GlobalAIState = FOUND_NEW_POSITION;
-    }
-
-private:
-    Cursor *cursor;
-    Tilemap *map;
-};
-
-
-class AIPlaceUnitCommand : public Command
-{
-public:
-    AIPlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in)
-    : cursor(cursor_in),
-      map(map_in)
-    {}
-
-    virtual void Execute()
-    {
+		// ================================= Place Unit ==============================
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
 
-        // Determine interactible squares
-        map->attackable.clear();
-        map->healable.clear();
-        vector<point> interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
-                                             cursor->selected->minRange, cursor->selected->maxRange);
-
-        // attack
-        for(const point &p : interactible)
-        {
-            if(map->tiles[p.first][p.second].occupant &&
-               map->tiles[p.first][p.second].occupant->isAlly)
-            {
-                map->attackable.push_back(p);
-            }
-        }
-
-        // unit has to know its position as well
         cursor->selected->col = cursor->col;
         cursor->selected->row = cursor->row;
 
@@ -222,34 +179,15 @@ public:
         cursor->sourceRow = cursor->row;
 
         cursor->selected->sheet.ChangeTrack(1);
-    }
 
-private:
-    Cursor *cursor; 
-    Tilemap *map;
-};
-
-
-// TODO: Make sure this code doesn't break if the enemy attacks a unit outside
-// its current viewport.
-class AIAttackTargetCommand : public Command
-{
-public:
-    AIAttackTargetCommand(Cursor *cursor_in, const Tilemap &map_in)
-    : cursor(cursor_in),
-      map(map_in)
-    {}
-
-    virtual void Execute()
-    {
-        cursor->targeted = FindVictim(*cursor, map);
-        if(cursor->targeted)
+		// ================================= Perform Attack ==============================
+        if(action.second)
         {
             int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
-                                             point(cursor->targeted->col, cursor->targeted->row));
-            SimulateCombat(cursor->selected, cursor->targeted, distance,
-                           map.tiles[cursor->selectedCol][cursor->selectedRow].avoid,
-                           map.tiles[cursor->col][cursor->row].avoid);
+                                             point(action.second->col, action.second->row));
+            SimulateCombat(cursor->selected, action.second, distance,
+                           map->tiles[cursor->selectedCol][cursor->selectedRow].avoid,
+                           map->tiles[cursor->col][cursor->row].avoid);
         }
 
         cursor->selected->isExhausted = true;
@@ -263,10 +201,9 @@ public:
     }
 
 private:
-    Cursor *cursor; 
-    const Tilemap &map;
+    Cursor *cursor;
+    Tilemap *map;
 };
-
 
 // ============================== struct ====================================
 struct AI
@@ -280,9 +217,7 @@ struct AI
 
         commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, *map));
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIMoveToClosestSquareCommand>(cursor, map));
-        commandQueue.push(make_shared<AIPlaceUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIAttackTargetCommand>(cursor, *map));
+        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, map));
     }
 
     void Update()

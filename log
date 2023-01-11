@@ -71,24 +71,21 @@ spiny desert (mario party 3)
 pokemon selection (pokemon stadium)
     Maybe some drum corps songs?
 Dark Ages 1 (Norse by Northwest - the return of the lost vikings)
+Intro Theme (Tom Clancy's Rainbow Six)
 
 # TODO
 MVP
     8 levels
 
     Better enemy ai
-        We use A* when we go after a unit, but we don't use it when choosing the
-            closest unit yet.
-            Manhattan Distance doesn't have to be used by the UI as well.
-        Ranged units set up for and calculate for ranged attacks
-        Goes for "beneficial trades" (Higher damage output than input)
-        goes for kills
         Enemies that don't always come straight for you.
         Move towards fortified positions.
 
     More accurate HIT calculations, with tile avoid factored in.
-    Balance changes
-    Level Transitions/Win Screen
+    Level Transitions
+    Win and Lose Screens
+    Startup Screen
+    BUG | Enemies walk over eachother. FIX THIS FIRST THING TOMORROW MORNING.
 
 NICE
     Separate buttons for viewing enemy range vs enemy stats.

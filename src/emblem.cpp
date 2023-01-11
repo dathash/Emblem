@@ -39,7 +39,7 @@ typedef vector<point> path;
 
 // ============================= globals ===================================
 static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-static AIState GlobalAIState = ENEMY_TURN;
+static AIState GlobalAIState = PLAYER_TURN;
 
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 
             for(auto const &unit : level.combatants)
                 unit->Update();
-
+ 
             // cleanup
             level.RemoveDeadUnits();
 

@@ -290,8 +290,7 @@ GetField(const Tilemap &map, int col, int row, bool isAlly)
     queue<point> unexplored;
     unexplored.push(make_pair(col, row));
     field[col][row] = point(-2, -2);
-    if(map.tiles[col][row].type == WALL
-      || (map.tiles[col][row].occupant && map.tiles[col][row].occupant->isAlly != isAlly))
+    if(map.tiles[col][row].type == WALL)
     {
         field[col][row] = point(-1, -1);
     }
@@ -312,7 +311,14 @@ GetField(const Tilemap &map, int col, int row, bool isAlly)
             {
                 int newCost = distances[current.first][current.second]
                               + map.tiles[newCol][newRow].penalty;
-                if(newCost < distances[newCol][newRow])
+
+                if(map.tiles[newCol][newRow].occupant &&
+                   (map.tiles[newCol][newRow].occupant->isAlly != isAlly))
+                {
+                    newCost = 100;
+                }
+                
+                else if(newCost < distances[newCol][newRow])
                 {
                     field[newCol][newRow] = direction;
                     distances[newCol][newRow] = newCost;
@@ -320,6 +326,24 @@ GetField(const Tilemap &map, int col, int row, bool isAlly)
                 }
             }
         }
+
+        /*
+        // NOTE: This is a workaround.
+        // There is a weird thing to consider: We must draw paths through ally
+        // units, but not allow you to land on them. I don't know what to do about this!
+        for(int col = 0; col < map.width; ++col)
+        {
+            for(int row = 0; row < map.height; ++row)
+            {
+                if(map.tiles[col][row].occupant &&
+                   (map.tiles[col][row].occupant->isAlly == isAlly))
+                {
+                    field[col][row] = point(-1, -1);
+                    distances[col][row] = 100;
+                }
+            }
+        }
+        */
     }
 #if 0
     cout << "=============================\n";
@@ -351,7 +375,7 @@ GetPath(const Tilemap &map,
     vector<vector<point>> field = GetField(map, destCol, destRow, isAlly);
 
     point next = point(col, row);
-	point from = field[next.first][next.second];
+    point from = field[next.first][next.second];
     while(!(from.first == -2 && from.second == -2) &&
           !(from.first == -1 && from.second == -1))
     {
@@ -360,51 +384,7 @@ GetPath(const Tilemap &map,
         next = point(next.first + from.second,
                      next.second + from.first);
     }
-    //PrintPath(path);
     return path;
-}
-
-
-// ==================================== AI Methods =============================
-//TODO: This is still doing things naively.
-// Finds the nearest unit to the cursor, based on the given predicate expression.
-Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
-{
-    int minDistance = 100;
-    int distance = 0;
-    Unit *result = nullptr;
-    for(int col = 0; col < map.width; ++col)
-    {
-        for(int row = 0; row < map.height; ++row)
-        {
-            if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
-            {
-                distance = ManhattanDistance(point(cursor.col, cursor.row), point(col, row));
-                if(distance < minDistance)
-                {
-                    result = map.tiles[col][row].occupant;
-                    minDistance = distance;
-                }
-            }
-        }
-    }
-    return result;
-}
-
-// Finds a target for an attack.
-Unit *FindVictim(const Cursor &cursor, const Tilemap &map)
-{
-    Unit *result = nullptr;
-    for(point p : map.attackable)
-    {
-        if(map.tiles[p.first][p.second].occupant && map.tiles[p.first][p.second].occupant->isAlly)
-        {
-            result = map.tiles[p.first][p.second].occupant;
-        }
-        // determine nearest enemy here
-        // (add possible enemies to a list, sort.)
-    }
-    return result;
 }
 
 
@@ -443,5 +423,31 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit)
 
     return result;
 }
+
+//TODO: This is still doing things naively.
+// Finds the nearest unit to the cursor, based on the given predicate expression.
+Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
+{
+    int minDistance = 100;
+    int distance = 0;
+    Unit *result = nullptr;
+    for(int col = 0; col < map.width; ++col)
+    {
+        for(int row = 0; row < map.height; ++row)
+        {
+            if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
+            {
+                distance = ManhattanDistance(point(cursor.col, cursor.row), point(col, row));
+                if(distance < minDistance)
+                {
+                    result = map.tiles[col][row].occupant;
+                    minDistance = distance;
+                }
+            }
+        }
+    }
+    return result;
+}
+
 
 #endif

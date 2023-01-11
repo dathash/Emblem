@@ -202,6 +202,14 @@ struct Level
 
     void RemoveDeadUnits()
     {
+        // Quit if Zarathustra's dead
+        if(map.tiles[leaderPosition.first][leaderPosition.second].occupant->shouldDie)
+        {
+            printf("Zarathustra died. Game over!\n");
+            GlobalRunning = false;
+            return;
+        }
+
         vector<pair<int, int>> tiles;
 
         for(auto const &u : combatants)
