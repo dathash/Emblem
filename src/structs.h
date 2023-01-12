@@ -166,8 +166,8 @@ struct Unit
     int hp;
     int maxHp;
     int attack;
+    int ability;
     int defense;
-    int healing;
     int minRange;
     int maxRange;
     int accuracy;
@@ -191,7 +191,7 @@ struct Unit
          Texture portrait_in,
          int id_in, bool isAlly_in, int mov_in,
          int hp_in, int maxHp_in,
-         int attack_in, int defense_in,
+         int attack_in, int ability_in, int defense_in,
          int accuracy_in, int avoid_in, int crit_in,
          int minRange_in, int maxRange_in,
          AIBehavior ai_behavior_in)
@@ -204,6 +204,7 @@ struct Unit
       hp(hp_in),
       maxHp(maxHp_in),
       attack(attack_in),
+      ability(ability_in),
       defense(defense_in),
       accuracy(accuracy_in),
       avoid(avoid_in),

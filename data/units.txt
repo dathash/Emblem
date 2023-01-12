@@ -2,10 +2,10 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Units
 
-COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <def> <acc> <avo> <crit> <short> <long> <ai>>
-UNT Zarathustra lord.png lucina.png 0 Ally 5 20 5 1 90 10 10 1 1 0 
-UNT Samson donnel.png donnel.png 1 Ally 5 10 4 3 90 0 0 1 1 0 
-UNT Elvira soren.png noire.png 2 Ally 7 3 8 0 100 30 30 3 3 0 
-UNT Thief thief.png ph.png 3 Enemy 6 3 3 0 100 20 50 1 1 1 
-UNT Brute brute.png ph.png 4 Enemy 3 6 6 1 75 0 0 1 1 1 
-UNT Archer archer.png ph.png 5 Enemy 3 4 4 1 100 0 0 2 2 1 
+COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <abi> <def> <acc> <avo> <crit> <short> <long> <ai>>
+UNT Zarathustra lord.png lucina.png 0 Ally 5 8 5 2 1 90 10 10 1 1 0 
+UNT Samson donnel.png donnel.png 1 Ally 5 10 4 4 3 90 0 0 1 1 0 
+UNT Elvira soren.png noire.png 2 Ally 7 3 8 2 0 100 30 30 3 3 0 
+UNT Thief thief.png ph.png 3 Enemy 6 3 3 0 0 100 20 50 1 1 1 
+UNT Brute brute.png ph.png 4 Enemy 3 6 6 0 1 75 0 0 1 1 1 
+UNT Archer archer.png ph.png 5 Enemy 3 4 4 0 1 100 0 0 2 2 1 

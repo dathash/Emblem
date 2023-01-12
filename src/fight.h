@@ -68,7 +68,7 @@ int CalculateDamage(const Unit &predator, const Unit &prey)
 void SimulateHealing(Unit *one, Unit *two)
 {
     // one -> two
-    int healing = one->healing;
+    int healing = one->ability;
     two->hp = min(healing + two->hp, two->maxHp);
 }
 

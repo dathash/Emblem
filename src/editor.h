@@ -31,6 +31,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 				3,
 				3,
 				3,
+				3,
                 NO_BEHAVIOR
 			));
 			cout << "Created Unit: " << GlobalCurrentID - 1 << "\n";
@@ -65,6 +66,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		ImGui::SliderInt("Mov", &selected->mov, 0, 10);
 		ImGui::SliderInt("maxHp", &selected->maxHp, 1, 20);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
+		ImGui::SliderInt("abi", &selected->ability, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
 		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
 		ImGui::SliderInt("avo", &selected->avoid, 0, 100);

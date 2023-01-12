@@ -249,7 +249,7 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::SameLine();
 			ImGui::Text("[DEF %d]", unit.defense);
 			ImGui::SameLine();
-			ImGui::Text("[HEAL %d]", unit.healing);
+			ImGui::Text("[ABI %d]", unit.ability);
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
