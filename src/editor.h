@@ -155,9 +155,23 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         ImGui::SameLine();
         if(ImGui::Button("remove"))
         {
-            if(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant)
+            Unit *map_ptr = level->map.tiles[editor_cursor.first][editor_cursor.second].occupant;
+            if(map_ptr)
             {
-                // CONSIDER: This shouldn't even have to happen. Let's get rid of combatants<> when we can.
+                // NOTE: This is the biggest hack haha don't do this at home kids
+                // Basically, it looks through the combatants and uses the
+                // address of their pointers to determine which unit to remove.
+                // Better solutions include:
+                // * Using an ID system per level, allowing for fast lookups as well.
+                // * Literally anything else.
+                level->combatants.erase(
+                        remove_if(level->combatants.begin(), level->combatants.end(),
+                                [map_ptr](const unique_ptr<Unit> &u)
+                                {
+                                    return (map_ptr == u.get());
+                                }),
+                            level->combatants.end());
+
                 level->map.tiles[editor_cursor.first][editor_cursor.second].occupant->shouldDie = true;
                 level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = nullptr;
             }

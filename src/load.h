@@ -169,6 +169,7 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
         }
     }
     fp.close();
+    level.timer = Timer(LEVEL_TIME);
 
 	return level;
 }

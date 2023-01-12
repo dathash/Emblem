@@ -1,44 +1,31 @@
 COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
-COM Date: November 2022
-
-COM NOTE: Don't use tabs in here!
 
 ATL ruins.png
 
 WDT 15
-HGT 20
-
-MST 0
-MAP 0 0 0 0 1 0 0 4 0 0 0 1 1 1 0 
-MAP 0 0 0 1 1 0 0 0 0 0 0 1 1 1 0 
-MAP 0 1 0 3 0 3 0 3 0 0 1 1 1 0 0 
-MAP 0 1 0 1 1 0 0 0 0 1 1 1 0 0 0 
-MAP 3 3 2 1 1 1 0 0 1 1 1 0 0 0 0 
-MAP 0 1 2 2 0 0 0 0 1 1 1 0 0 0 0 
-MAP 0 1 2 2 0 1 1 1 1 1 1 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 1 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 
+HGT 10
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 4 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 
+MAP 0 0 0 1 1 1 0 0 0 1 0 0 1 1 1 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 1 1 1 0 0 
+MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <id> <col> <row>
-UNT Darko 1 0 3 
-UNT Soren 2 0 0 
 UNT Zarathustra 0 2 2 
-UNT Thief 3 10 9 
-UNT Thief 3 11 7 
-UNT Thief 3 11 5 
-UNT Thief 3 7 5 
-UNT Thief 3 2 3 
+UNT Brute 4 8 4 
+UNT Brute 4 6 6 
+UNT Brute 4 13 7 
+UNT Archer 5 8 5 
+UNT Archer 5 7 6 
+UNT Archer 5 11 5 
+UNT Brute 4 11 1 
+UNT Samson 1 2 6 
+UNT Elvira 2 3 8 
 

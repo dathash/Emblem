@@ -21,6 +21,55 @@ struct InputState
 	int joystickCooldown = 0;
 };
 
+struct Timer
+{
+    Uint32 current = 0;
+    Uint32 last_frame = 0;
+    Uint32 end;
+    bool paused = false;
+
+    Timer(int seconds)
+    {
+        last_frame = SDL_GetTicks();
+        end = seconds * 1000;
+    }
+
+    Timer()
+    {} // NOTE: This is c++ weirdness. I'm sure I could figure it out if I
+       // gave it a few minutes.
+
+    bool
+    Update()
+    {
+        if(paused)
+            return false;
+
+        int since_last_frame = SDL_GetTicks() - last_frame;
+
+        if(since_last_frame > 30) // Quick hack to fix pausing
+            since_last_frame = 30; // TODO: Really fix this someday
+
+        current += since_last_frame;
+
+        last_frame = SDL_GetTicks();
+        if(current >= end)
+            return true;
+        return false;
+    }
+
+    void
+    Pause()
+    {
+        paused = true;
+    }
+    void
+    Start()
+    {
+        paused = false;
+        last_frame = SDL_GetTicks();
+    }
+};
+
 // ================================= Rendering =================================
 struct Texture
 {
@@ -229,6 +278,7 @@ struct Level
 {
     Tilemap map;
     vector<unique_ptr<Unit>> combatants;
+    Timer timer;
 
     void
     RemoveDeadUnits()
@@ -280,6 +330,11 @@ struct Level
         // cleanup functions
         RemoveDeadUnits();
         CheckForRemaining();
+        if(timer.Update())
+        {
+            printf("Ran out of time. Game over!\n");
+            GlobalRunning = false;
+        }
     }
 };
 
@@ -337,51 +392,6 @@ struct Cursor
             return BOTTOM_LEFT;
         }
         return TOP_LEFT;
-    }
-};
-
-struct Timer
-{
-    Uint32 current = 0;
-    Uint32 last_frame = 0;
-    Uint32 end;
-    bool paused = false;
-
-    Timer(int seconds)
-    {
-        last_frame = SDL_GetTicks();
-        end = seconds * 1000;
-    }
-
-    bool
-    Update()
-    {
-        if(paused)
-            return false;
-
-        int since_last_frame = SDL_GetTicks() - last_frame;
-
-        if(since_last_frame > 30) // Quick hack to fix pausing
-            since_last_frame = 30; // TODO: Really fix this someday
-
-        current += since_last_frame;
-
-        last_frame = SDL_GetTicks();
-        if(current >= end)
-            return true;
-        return false;
-    }
-
-    void
-    Pause()
-    {
-        paused = true;
-    }
-    void
-    Start()
-    {
-        paused = false;
-        last_frame = SDL_GetTicks();
     }
 };
 

@@ -108,8 +108,9 @@ int main(int argc, char *argv[])
     }
 
 // ================================== load =================================
-    // Level
     vector<unique_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
+
+    // Level
     vector<string> levels = {DATA_PATH + string("l0.txt"), DATA_PATH + string("l1.txt"),
                              DATA_PATH + string("l2.txt"), DATA_PATH + string("l3.txt"),
                              DATA_PATH + string("l4.txt"), DATA_PATH + string("l5.txt"),
@@ -119,7 +120,6 @@ int main(int argc, char *argv[])
     Level level = LoadLevel(levels[level_index], units);
     Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
-    Timer timer = Timer(LEVEL_TIME);
 
 	UI_State ui = {};
 
@@ -150,11 +150,11 @@ int main(int argc, char *argv[])
         {
             if(GlobalPlayerTurn)
             {
-                timer.Start();
+                level.timer.Start();
             }
             else
             {
-                timer.Pause();
+                level.timer.Pause();
             }
 
             for(auto const &unit : level.combatants)
@@ -176,7 +176,6 @@ int main(int argc, char *argv[])
             leaderPosition = {0, 0};
             level = LoadLevel(levels[level_index], units);
             cursor.Reset();
-            timer = Timer(LEVEL_TIME);
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
         }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
@@ -192,11 +191,6 @@ int main(int argc, char *argv[])
             cursor.Update();
             ui.Update();
             level.Update();
-            if(timer.Update())
-            {
-                printf("Ran out of time. Game over!\n");
-                GlobalRunning = false;
-            }
 
             for(auto const &unit : level.combatants)
                 unit->Update();
@@ -210,7 +204,7 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		if(GlobalPlayerTurn)
-			RenderUI(&ui, cursor, level.map, timer);
+			RenderUI(&ui, cursor, level.map, level.timer);
 #if DEV_MODE
         if(GlobalEditorMode)
             EditorPass(&units, &level);

@@ -92,7 +92,8 @@ MVP
         Buff
 
     Better enemy ai
-        Enemies that don't always come straight for you.
+        Enemies don't always come straight for you.
+        * Bresenham's line plus a certain distance (maybe 7 tiles?)
 
     Level Transitions
     Win and Lose Screens
@@ -102,6 +103,7 @@ MVP
     * Should be able to do this in the same way we cycle units when selecting a
       victim for an attack in command.h
     End turn quickly somehow when you're just moving Zarathustra to the goal?
+    Make level editing easy by starting the game with a level select screen.
 
 NICE
     Battle Animations

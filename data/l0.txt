@@ -26,5 +26,4 @@ UNT Brute 4 6 6
 UNT Brute 4 13 7 
 UNT Archer 5 8 5 
 UNT Archer 5 7 6 
-UNT Thief 3 6 1 
 
