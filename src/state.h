@@ -23,6 +23,14 @@ EndPlayerTurn()
 }
 
 // Very impure.
+void EndAITurn()
+{
+    GlobalAIState = PLAYER_TURN;
+    GlobalPlayerTurn = true;
+    GlobalTurnStart = true;
+}
+
+// Very impure.
 void
 NextLevel()
 {

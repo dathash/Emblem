@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
         //////////////// TO BE EXTRICATED //////////////////
         if(GlobalRestart)
         {
+            GlobalRestart = false;
             --level_index;
             NextLevel();
         }
@@ -161,11 +162,14 @@ int main(int argc, char *argv[])
             GlobalNextLevel = false;
             level_index = (level_index + 1 < TOTAL_LEVELS) ? level_index + 1 : 0;
             level = LoadLevel(levels[level_index], units);
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            GlobalPlayerTurn = true;
+            GlobalTurnStart = true;
         }
 
         if(GlobalTurnStart)
         {
+            GlobalTurnStart = false;
+
             if(GlobalPlayerTurn)
             {
                 level.timer.Start();
@@ -182,7 +186,6 @@ int main(int argc, char *argv[])
             viewportRow = 0;
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
-            GlobalTurnStart = false;
             ai.clearQueue();
             handler.clearQueue();
         }

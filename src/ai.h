@@ -5,13 +5,6 @@
 #ifndef AI_H
 #define AI_H
 
-void EndAITurn()
-{
-    GlobalAIState = PLAYER_TURN;
-    GlobalPlayerTurn = true;
-    GlobalTurnStart = true;
-}
-
 // ============================= ai commands ================================
 class AIFindNextUnitCommand : public Command
 {

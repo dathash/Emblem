@@ -78,15 +78,9 @@ Tripod (Bomberman Hero)
 
 # TODO
 MVP
-    Better enemy AI
-        Enemies don't always come straight for you.
-        * Bresenham's line plus a certain distance (maybe 7 tiles?)
-        Some enemies post up
-        Some enemies flee? Idk but we should be able to give them whatever
-                pattern we want.
-
     Remove Magic at least. Maybe even avoid. or damage. haha. no seriously.
-    Restart level bricks the game.
+    BUG | Restart level bricks the game.
+    Rip out the viewport code (for now).
 
     8 levels
 
@@ -124,6 +118,9 @@ NICE
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
     Enemy Units have more complex decision-making process.
+    Better enemy AI
+        Pursuing Enemies only come for you when you get near.
+        * Bresenham's line plus a certain distance (maybe 7 tiles?)
 
 POLISH
     Placing Unit moves them smoothly to that square (A-star)
