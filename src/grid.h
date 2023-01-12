@@ -428,7 +428,7 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit)
 
 //TODO: This is still doing things naively.
 // Finds the nearest unit to the cursor, based on the given predicate expression.
-Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const Unit &))
+Unit *FindNearest(const point &p, const Tilemap &map, bool predicate(const Unit &))
 {
     int minDistance = 100;
     int distance = 0;
@@ -439,7 +439,7 @@ Unit *FindNearest(const Cursor &cursor, const Tilemap &map, bool predicate(const
         {
             if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
             {
-                distance = ManhattanDistance(point(cursor.col, cursor.row), point(col, row));
+                distance = ManhattanDistance(p, point(col, row));
                 if(distance < minDistance)
                 {
                     result = map.tiles[col][row].occupant;

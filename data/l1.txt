@@ -18,14 +18,11 @@ MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <id> <col> <row>
-UNT Zarathustra 0 2 2 
-UNT Brute 4 8 4 
-UNT Brute 4 6 6 
-UNT Brute 4 13 7 
-UNT Archer 5 8 5 
-UNT Archer 5 7 6 
-UNT Archer 5 11 5 
-UNT Brute 4 11 1 
-UNT Samson 1 2 6 
-UNT Elvira 2 3 8 
+UNT Brute 4 8 4 1
+UNT Brute 4 6 6 1
+UNT Archer 5 11 5 2
+UNT Brute 4 11 1 1
+UNT Samson 1 2 6 0
+UNT Elvira 2 3 8 0
+UNT Zarathustra 0 1 7 0
 

@@ -1,16 +1,11 @@
 COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
-COM Date: November 2022
-
-COM NOTE: Don't use tabs in here!
 
 ATL ruins.png
 
 WDT 15
 HGT 10
-
-MST 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
@@ -19,11 +14,11 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 
 
 COM <UNT <name> <id> <col> <row>
-UNT Darko 1 0 3 
-UNT Soren 2 0 0 
-UNT Zarathustra 0 2 2 
+UNT Zarathustra 0 2 2 0
+UNT Samson 1 1 3 0
+UNT Elvira 2 1 1 0
 

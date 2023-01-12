@@ -30,5 +30,12 @@ NextLevel()
     GlobalTurnStart = true;
 }
 
+// Very impure.
+void
+RestartLevel()
+{
+    GlobalRestart = true;
+}
+
 
 #endif

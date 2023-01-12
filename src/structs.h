@@ -62,6 +62,7 @@ struct Timer
     {
         paused = true;
     }
+
     void
     Start()
     {
@@ -115,7 +116,8 @@ struct SpriteSheet
     }
 
     // called each frame
-    void Update()
+    void
+    Update()
     {
         counter++;
         if(!(counter % speed))
@@ -133,7 +135,8 @@ struct SpriteSheet
     }
 
     // switches the sprite to the next animation track
-    void ChangeTrack(int track_in)
+    void
+    ChangeTrack(int track_in)
     {
         assert(track_in < tracks && track_in >= 0);
         this->track = track_in;
@@ -142,6 +145,14 @@ struct SpriteSheet
 };
 
 // =================================== Gameplay ================================
+enum AIBehavior
+{
+    NO_BEHAVIOR,
+    PURSUE,
+    BOLSTER,
+    FLEE
+};
+
 struct Unit
 {
     string name;
@@ -166,8 +177,10 @@ struct Unit
     int crit;
     SpriteSheet sheet;
     Texture portrait;
+    AIBehavior ai_behavior = NO_BEHAVIOR;
 
-    void Update()
+    void
+    Update()
     {
         sheet.Update();
 		if(hp <= 0)
@@ -183,7 +196,8 @@ struct Unit
          int attack_in, int magic_in,
          int defense_in, int resistance_in,
          int accuracy_in, int avoid_in, int crit_in,
-         int minRange_in, int maxRange_in)
+         int minRange_in, int maxRange_in,
+         AIBehavior ai_behavior_in)
     : name(name_in),
       sheet(sheet_in),
       portrait(portrait_in),
@@ -200,10 +214,12 @@ struct Unit
       avoid(avoid_in),
       crit(crit_in),
       minRange(minRange_in),
-      maxRange(maxRange_in)
+      maxRange(maxRange_in),
+      ai_behavior(ai_behavior_in)
     {} // haha c++
     // This little thing is like a vestigial organ
     // disgusting
+
 
     // Damages a unit and resolves things involved with that process.
     // Includes a clamp function for less code reuse
@@ -220,7 +236,8 @@ struct Unit
         sheet.ChangeTrack(0);
     }
 
-    void Activate()
+    void
+    Activate()
     {
         isExhausted = false;
     }
@@ -280,32 +297,43 @@ struct Level
     vector<unique_ptr<Unit>> combatants;
     Timer timer;
 
+    // Returns the position of the leader.
+    point
+    Leader()
+    {
+        for(const unique_ptr<Unit> &unit : combatants)
+        {
+            if(unit->id == LEADER_ID)
+                return point(unit->col, unit->row);
+        }
+        assert(!"ERROR Level.Leader(): No leader!\n");
+    }
+
     void
     RemoveDeadUnits()
     {
+        point leaderPosition = Leader();
         // Quit if Zarathustra's dead
         if(map.tiles[leaderPosition.first][leaderPosition.second].occupant->shouldDie)
         {
             printf("Zarathustra died. Game over!\n");
-            GlobalRunning = false;
+            RestartLevel();
             return;
         }
 
-        vector<pair<int, int>> tiles;
-
-        for(auto const &u : combatants)
+        // REFACTOR: This could be so much simpler.
+        vector<point> tiles;
+        for(const unique_ptr<Unit> &unit : combatants)
         {
-            if(u->shouldDie)
-            {
-                tiles.push_back(pair<int, int>(u->col, u->row)); 
-            }
+            if(unit->shouldDie)
+                tiles.push_back(point(unit->col, unit->row));
         }
 
         combatants.erase(remove_if(combatants.begin(), combatants.end(),
                     [](auto const &u) { return u->shouldDie; }),
                     combatants.end());
 
-        for(pair<int, int> tile : tiles)
+        for(point tile : tiles)
         {
             map.tiles[tile.first][tile.second].occupant = nullptr;
         }
@@ -325,7 +353,8 @@ struct Level
         return;
     }
 
-    void Update()
+    void
+    Update()
     {
         // cleanup functions
         RemoveDeadUnits();
@@ -362,12 +391,12 @@ struct Cursor
         sheet.Update();
     }
 
-    // Returns the cursor to the position of the leader.
+    // Places the cursor at a position.
     void
-    Reset()
+    PlaceAt(const point &p)
     {
-        col = leaderPosition.first;
-        row = leaderPosition.second;
+        col = p.first;
+        row = p.second;
         path_draw = {};
         //TODO: What if the leader starts outside of the 0, 0 viewport?
     }

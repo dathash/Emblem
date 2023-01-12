@@ -156,14 +156,10 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
             unique_ptr<Unit> unitCopy = make_unique<Unit>(*units[stoi(tokens[1])]);
             int col = stoi(tokens[2]);
             int row = stoi(tokens[3]);
-            // Assign leader
-            if(stoi(tokens[1]) == LEADER_ID)
-            {
-                assert(leaderPosition.first == 0 && leaderPosition.second == 0);
-                leaderPosition = point(col, row);
-            }
+
             unitCopy->col = col;
             unitCopy->row = row;
+            unitCopy->ai_behavior = (AIBehavior)stoi(tokens[4]);
             level.combatants.push_back(move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
         }
@@ -200,7 +196,7 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                 units.push_back(make_unique<Unit>(
                     tokens[0],									// name
                     SpriteSheet(LoadTextureImage(SPRITES_PATH, tokens[1]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(PORTRAITS_PATH, tokens[2]), // portrait
+                    LoadTextureImage(PORTRAITS_PATH, tokens[2]),// portrait
                     stoi(tokens[3]),							// id
                     tokens[4] == "Ally" ? true : false,			// team
                     stoi(tokens[5]),							// movement
@@ -214,7 +210,8 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                     stoi(tokens[12]),						    // avoid
                     stoi(tokens[13]),						    // crit
                     stoi(tokens[14]),						    // short range
-                    stoi(tokens[15])						    // long range
+                    stoi(tokens[15]),						    // long range
+                    (AIBehavior)stoi(tokens[16])                            // ai behavior
                 ));
 
                 // CONSIDER: Make the ID system generate an id in a more robust way.
@@ -244,7 +241,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long>>\n";
+    fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long> <ai>>\n";
     for(const unique_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << " "
@@ -263,6 +260,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
                      << unit->crit << " "
                      << unit->minRange << " "
                      << unit->maxRange << " "
+                     << unit->ai_behavior << " "
                      << "\n";
     }
     fp.close();
@@ -296,13 +294,14 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "COM <UNT <name> <id> <col> <row>\n";
+    fp << "COM <UNT <name> <id> <col> <row> <ai>\n";
     for(const unique_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "
                      << unit->id << " "
                      << unit->col << " "
                      << unit->row << " "
+                     << unit->ai_behavior << " "
                      << "\n";
     }
     fp << "\n";

@@ -205,9 +205,6 @@ public:
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
 
-        if(cursor->selected->id == LEADER_ID)
-            leaderPosition = point(cursor->col, cursor->row);
-
         // unit has to know its position as well (FOR NOW)
         cursor->selected->col = cursor->col;
         cursor->selected->row = cursor->row;
@@ -276,9 +273,6 @@ public:
     {
         map->tiles[cursor->col][cursor->row].occupant = nullptr;
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
-
-        if(cursor->selected->id == LEADER_ID)
-            leaderPosition = point(cursor->selectedCol, cursor->selectedRow);
 
         cursor->col = cursor->selectedCol;
         cursor->row = cursor->selectedRow;

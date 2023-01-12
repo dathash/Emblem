@@ -322,7 +322,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == ENEMY_INFO ||
 	   GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)
-       && GlobalPlayerTurn)
+       && GlobalPlayerTurn && !GlobalEditorMode)
     {
         assert(map.tiles[cursor.col][cursor.row].occupant);
         int x_pos = 560;

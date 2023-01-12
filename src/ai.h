@@ -25,7 +25,7 @@ public:
     {
         // find a unit that hasn't acted yet.
         Unit *selected = nullptr;
-        selected = FindNearest(*cursor, map,
+        selected = FindNearest(point(cursor->col, cursor->row), map,
                 [](const Unit &unit) -> bool
                 {
                     return !unit.isAlly && !unit.isExhausted;
@@ -101,6 +101,103 @@ private:
     Cursor *cursor; 
 };
 
+// Scans the map and determines the best course of action to take.
+// Uses techniques specified by the unit's ai_behavior field.
+pair<point, Unit *>
+GetAction(const Unit &unit, const Tilemap &map)
+{
+    pair<point, Unit *> action = {};
+    vector<pair<point, Unit *>> possibilities = FindAttackingSquares(map, unit);
+
+    switch(unit.ai_behavior)
+    {
+        case NO_BEHAVIOR:
+        {
+            cout << "WARN AIPerformUnitActionCommand: This AI Unit has no behavior specified.\n";
+        } break;
+        case PURSUE:
+        {
+            if(possibilities.size() == 0) // No enemies to attack in range.
+            {
+                Unit *nearest = FindNearest(point(unit.col, unit.row), map,
+                    [](const Unit &unit) -> bool
+                    {
+                        return unit.isAlly;
+                    });
+                path path_to_nearest = GetPath(map, unit.col, unit.row, nearest->col, nearest->row, false);
+                action = pair<point, Unit *>(
+                        FurthestMovementOnPath(map, path_to_nearest, unit.mov),
+                                             NULL);
+            }
+            else
+            {
+                int min_health_after_attack = 999;
+                Outcome outcome;
+                //int max_odds = 0;
+                //int min_counter_dmg = 100;
+                //int min_counter_odds = 100;
+                for(const pair<point, Unit *> &poss : possibilities)
+                {
+                    const point &p = poss.first;
+                    Unit *t = poss.second;
+                    outcome = PredictCombat(unit, *t,
+                                            ManhattanDistance(p, point(t->col, t->row)),
+                                            map.tiles[p.first][p.second].avoid,
+                                            map.tiles[t->col][t->row].avoid);
+                    if(outcome.two_health < min_health_after_attack)
+                    {
+                        action = poss;
+                        min_health_after_attack = outcome.two_health;
+                    }
+                }
+            }
+        } break;
+        case BOLSTER:
+        {
+            if(possibilities.size() == 0) // No enemies to attack in range.
+            {
+                action = {point(unit.col, unit.row),
+                          NULL};
+            }
+            else
+            {
+                int min_health_after_attack = 999;
+                Outcome outcome;
+
+                action = {point(unit.col, unit.row),
+                          NULL};
+                for(const pair<point, Unit *> &poss : possibilities)
+                {
+                    if(poss.first.first == unit.col && poss.first.second == unit.row)
+                    {
+                        const point &p = poss.first;
+                        Unit *t = poss.second;
+                        outcome = PredictCombat(unit, *t,
+                                                ManhattanDistance(p, point(t->col, t->row)),
+                                                map.tiles[p.first][p.second].avoid,
+                                                map.tiles[t->col][t->row].avoid);
+                        if(outcome.two_health < min_health_after_attack)
+                        {
+                            action = poss;
+                            min_health_after_attack = outcome.two_health;
+                        }
+                    }
+                }
+            }
+        } break;
+        case FLEE:
+        {
+            action = {point(unit.col, unit.row),
+                      NULL};
+        } break;
+
+        default:
+        {
+            assert(!"Shouldn't get here!\n");
+        } break;
+    }
+    return action;
+}
 
 class AIPerformUnitActionCommand : public Command
 {
@@ -112,64 +209,16 @@ public:
 
     virtual void Execute()
     {
-		// TODO: Choose Advantageous option based on simple rules.
-			// 1. Minimum Enemy Health (pretty funny way to put it.)
-			//	  Basically maximizes for kills and enemies who are already
-			//	  weakened.  Note that this can be gamed, for instance with a
-			//	  high DEF unit, get them to low health, and AI will ignore all
-			//	  other units since minimum enemy health will always be on tank.
-			// 2. High Likelihoods
-			// 3. Minimum counterattack Damage
-			// 4. Low enemy likelihoods
-		// Right now, we just pick minimum enemy health.
+        // Find target
+        pair<point, Unit *> action = GetAction(*cursor->selected, *map);
+        assert(!(action.first == point(0, 0)));
 
-		// =================================== Find ideal target =====================
-        pair<point, Unit *> action = {};
-		vector<pair<point, Unit *>> possibilities = FindAttackingSquares(*map, *cursor->selected);
-
-		if(possibilities.size() == 0)
-		{
-			Unit *nearest = FindNearest(*cursor, *map,
-				[](const Unit &unit) -> bool
-				{
-					return unit.isAlly;
-				});
-			path path_to_nearest = GetPath(*map, cursor->col, cursor->row, nearest->col, nearest->row, false);
-			action = pair<point, Unit *>(
-					FurthestMovementOnPath(*map, path_to_nearest, cursor->selected->mov),
-										 NULL);
-		}
-		else
-		{
-			int min_health_after_attack = 999;
-			Outcome outcome;
-			//int max_odds = 0;
-			//int min_counter_dmg = 100;
-			//int min_counter_odds = 100;
-			for(const pair<point, Unit *> &poss : possibilities)
-			{
-				const point &p = poss.first;
-				Unit *t = poss.second;
-				outcome = PredictCombat(*cursor->selected, *t,
-										ManhattanDistance(p, point(t->col, t->row)),
-										map->tiles[p.first][p.second].avoid,
-										map->tiles[t->col][t->row].avoid);
-				if(outcome.two_health < min_health_after_attack)
-				{
-					action = poss;
-					min_health_after_attack = outcome.two_health;
-				}
-			}
-		}
-
-		// ================================= Perform movement ========================
         // move cursor
         cursor->col = action.first.first;
         cursor->row = action.first.second;
-
         MoveViewport(cursor->col, cursor->row);
 
-		// ================================= Place Unit ==============================
+        // place unit
         map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
         map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
 
@@ -181,7 +230,7 @@ public:
 
         cursor->selected->sheet.ChangeTrack(1);
 
-		// ================================= Perform Attack ==============================
+        // perform attack
         if(action.second)
         {
             int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
@@ -191,12 +240,14 @@ public:
                            map->tiles[cursor->col][cursor->row].avoid);
         }
 
+        // resolution
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
         cursor->row = cursor->sourceRow;
 
+        // change state
         GlobalAIState = FINDING_NEXT;
     }
 

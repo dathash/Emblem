@@ -389,7 +389,6 @@ void
 DisplayOptionsMenu(ImGuiWindowFlags wf)
 {
 	static bool bl;
-	ImGui::SetNextWindowFocus();
 	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(400, 300), 0, ImVec2(0.5, 0.5));
     ImGui::SetNextWindowSize(ImVec2(420, 310));
@@ -430,6 +429,9 @@ RenderUI(UI_State *ui,
          const Tilemap &map,
          const Timer &timer)
 {
+    if(GlobalEditorMode)
+        return;
+
     ImGuiWindowFlags window_flags = 0;
 	window_flags |= ImGuiWindowFlags_NoCollapse;
 	window_flags |= ImGuiWindowFlags_NoInputs;

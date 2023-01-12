@@ -78,6 +78,16 @@ Tripod (Bomberman Hero)
 
 # TODO
 MVP
+    Better enemy AI
+        Enemies don't always come straight for you.
+        * Bresenham's line plus a certain distance (maybe 7 tiles?)
+        Some enemies post up
+        Some enemies flee? Idk but we should be able to give them whatever
+                pattern we want.
+
+    Remove Magic at least. Maybe even avoid. or damage. haha. no seriously.
+    Restart level bricks the game.
+
     8 levels
 
     More sprites
@@ -91,10 +101,6 @@ MVP
         Explode
         Buff
 
-    Better enemy ai
-        Enemies don't always come straight for you.
-        * Bresenham's line plus a certain distance (maybe 7 tiles?)
-
     Level Transitions
     Win and Lose Screens
     Startup Screen
@@ -104,6 +110,9 @@ MVP
       victim for an attack in command.h
     End turn quickly somehow when you're just moving Zarathustra to the goal?
     Make level editing easy by starting the game with a level select screen.
+    BUG | allow editors to move Zarathustra's position manually
+    Make just Zarathustra finish levels
+    You can win levels just by killing all enemy units? Consider this design idea.
 
 NICE
     Battle Animations
@@ -128,9 +137,12 @@ QA
     When the player's turn start, something flashes on the screen.
     * I'm pretty sure I caused this when I went on my big refactor. Check it out
       at your leisure.
+    Sometimes enemies end up moving to 0, 0 instead of their intended
+    destination, even when the tile is a wall.
 
 REFACTOR
     Change points to its own class with col and row semantics
+    * Switch everything over to this.
     remove selectedCol from cursor (DRY)
     Take junk out of main
 

@@ -49,18 +49,24 @@ static ma_engine GlobalMusicEngine;
 
 //// STATE //////////////////////
 // TODO: consolidate
-// Ideal System:
+// Necessary State:
 // * Running
 // * Editor / Paused
+// * PlayerTurn ? (We could maybe just store this in the InterfaceState at any
+//                 given time)
+// Transitories:
 // * StartPlayerTurn
 // * StartEnemyTurn
-// * MainPlayerTurn
-// * MainEnemyTurn
 // * Resetting
+// * Next Level
+// * Animating
 static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
-static bool GlobalNextLevel = false;
 static bool GlobalPlayerTurn = true;
+
+// Transitory
+static bool GlobalNextLevel = false;
+static bool GlobalRestart = false;
 static bool GlobalTurnStart = true;
 
 static unsigned int GlobalInterfaceState;
@@ -72,8 +78,6 @@ static unsigned int GlobalAIState;
 static int viewportCol = 0;
 static int viewportRow = 0;
 static int GlobalCurrentID = 0;
-static point leaderPosition = {0, 0};
-
 
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that my game includes.
@@ -146,6 +150,20 @@ int main(int argc, char *argv[])
         HandleEvents(&input, gamepad);
 // ====================== command phase ========================================
         //////////////// TO BE EXTRICATED //////////////////
+        if(GlobalRestart)
+        {
+            --level_index;
+            NextLevel();
+        }
+
+        if(GlobalNextLevel)
+        {
+            GlobalNextLevel = false;
+            level_index = (level_index + 1 < TOTAL_LEVELS) ? level_index + 1 : 0;
+            level = LoadLevel(levels[level_index], units);
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        }
+
         if(GlobalTurnStart)
         {
             if(GlobalPlayerTurn)
@@ -159,7 +177,7 @@ int main(int argc, char *argv[])
 
             for(auto const &unit : level.combatants)
                 unit->Activate();
-            cursor.Reset();
+            cursor.PlaceAt(level.Leader());
             viewportCol = 0; // TODO: Now this is a lie!
             viewportRow = 0;
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
@@ -167,16 +185,6 @@ int main(int argc, char *argv[])
             GlobalTurnStart = false;
             ai.clearQueue();
             handler.clearQueue();
-        }
-
-        if(GlobalNextLevel)
-        {
-            GlobalNextLevel = false;
-            level_index = (level_index + 1 < TOTAL_LEVELS) ? level_index + 1 : 0;
-            leaderPosition = {0, 0};
-            level = LoadLevel(levels[level_index], units);
-            cursor.Reset();
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
         }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
 
@@ -186,13 +194,14 @@ int main(int argc, char *argv[])
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
                                    &gameMenu, &unitMenu);
+
             ai.Update(&cursor, &level.map);
 
             cursor.Update();
             ui.Update();
             level.Update();
 
-            for(auto const &unit : level.combatants)
+            for(const unique_ptr<Unit> &unit : level.combatants)
                 unit->Update();
         }
 

@@ -32,7 +32,8 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 				3,
 				3,
 				3,
-				3
+				3,
+                NO_BEHAVIOR
 			));
 			cout << "Created Unit: " << GlobalCurrentID - 1 << "\n";
 			++GlobalCurrentID;
@@ -74,6 +75,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		ImGui::SliderInt("crit", &selected->crit, 0, 100);
 		ImGui::SliderInt("min", &selected->minRange, 1, 4);
 		ImGui::SliderInt("max", &selected->maxRange, 1, 4);
+		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 3);
 	}
 	ImGui::End();
 }
@@ -134,17 +136,18 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         static bool showDebugPaths = false;
 
         EditorPollForKeyboardInput(&editor_cursor);
+        Tile *hover_tile = &level->map.tiles[editor_cursor.first][editor_cursor.second];
 
         ImGui::Text("Units:");
         if(ImGui::Button("add"))
         {
-            if(!(level->map.tiles[editor_cursor.first][editor_cursor.second].occupant ||
-                 level->map.tiles[editor_cursor.first][editor_cursor.second].type == WALL))
+            if(!(hover_tile->occupant ||
+                 hover_tile->type == WALL))
             {
                 level->combatants.push_back(make_unique<Unit>(*units[selectedIndex]));
                 level->combatants.back()->col = editor_cursor.first;
                 level->combatants.back()->row = editor_cursor.second;
-                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = level->combatants.back().get();
+                hover_tile->occupant = level->combatants.back().get();
             }
             else
             {
@@ -155,7 +158,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         ImGui::SameLine();
         if(ImGui::Button("remove"))
         {
-            Unit *map_ptr = level->map.tiles[editor_cursor.first][editor_cursor.second].occupant;
+            Unit *map_ptr = hover_tile->occupant;
             if(map_ptr)
             {
                 // NOTE: This is the biggest hack haha don't do this at home kids
@@ -172,8 +175,8 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
                                 }),
                             level->combatants.end());
 
-                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant->shouldDie = true;
-                level->map.tiles[editor_cursor.first][editor_cursor.second].occupant = nullptr;
+                hover_tile->occupant->shouldDie = true;
+                hover_tile->occupant = nullptr;
             }
             else
             {
@@ -181,36 +184,51 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
             }
         }
 
+        if(hover_tile->occupant)
+        {
+            ImGui::Text("Over unit.");
+            ImGui::SameLine();
+            ImGui::Text("Behavior: %d", level->map.tiles[editor_cursor.first][editor_cursor.second].occupant->ai_behavior);
+        }
+
+        ImGui::Text("AI Behavior");
+		if(ImGui::Button("NONE"))
+            hover_tile->occupant->ai_behavior = NO_BEHAVIOR;
+        ImGui::SameLine();
+		if(ImGui::Button("PURSUE"))
+            hover_tile->occupant->ai_behavior = PURSUE;
+        ImGui::SameLine();
+		if(ImGui::Button("BOLSTER"))
+            hover_tile->occupant->ai_behavior = BOLSTER;
+        ImGui::SameLine();
+		if(ImGui::Button("FLEE"))
+            hover_tile->occupant->ai_behavior = FLEE;
+
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
         if(ImGui::Button("none"))
         {
-            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
-                FLOOR_TILE;
+            *hover_tile = FLOOR_TILE;
         }
         ImGui::SameLine();
         if(ImGui::Button("wall"))
         {
-            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
-                WALL_TILE;
+            *hover_tile = WALL_TILE;
         }
         ImGui::SameLine();
         if(ImGui::Button("frst"))
         {
-            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
-                FOREST_TILE;
+            *hover_tile = FOREST_TILE;
         }
 
         if(ImGui::Button("dsrt"))
         {
-            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
-                DESERT_TILE;
+            *hover_tile = DESERT_TILE;
         }
         ImGui::SameLine();
         if(ImGui::Button("obj"))
         {
-            level->map.tiles[editor_cursor.first][editor_cursor.second] = 
-                OBJECTIVE_TILE;
+            *hover_tile = OBJECTIVE_TILE;
         }
 
         ImGui::Checkbox("debug paths", &showDebugPaths);
@@ -235,14 +253,31 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 	ImGui::End();
 }
 
+void
+GlobalsViewer()
+{
+    ImGui::Begin("Globals");
+    {
+        ImGui::Text("State");
+        ImGui::Checkbox("GlobalRunning", &GlobalRunning);
+        ImGui::Checkbox("GlobalPlayerTurn", &GlobalPlayerTurn);
+        ImGui::Checkbox("GlobalEditorMode", &GlobalEditorMode);
+        ImGui::Text("%02d | STATE", GlobalInterfaceState);
+        ImGui::Text("%02d | AI", GlobalAIState);
+    }
+    ImGui::End();
+}
+
 // Renders all imgui stuff.
 // Contains static variables that might trip some stuff up, just a heads up.
-void EditorPass(vector<unique_ptr<Unit>> *units,
-                Level *level)
+void
+EditorPass(vector<unique_ptr<Unit>> *units,
+           Level *level)
 {
     // Internal variables
     static bool showUnitEditor = true;
     static bool showLevelEditor = true;
+    static bool showGlobals = false;
 
     static char fileName[128] = INITIAL_UNITS;
     static char levelFileName[128] = INITIAL_LEVEL;
@@ -257,7 +292,6 @@ void EditorPass(vector<unique_ptr<Unit>> *units,
         {
             *units = LoadUnits(string(DATA_PATH) + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
-			leaderPosition = {0, 0};
             *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
             cout << "Level loaded: " << levelFileName << "\n";
         }
@@ -276,20 +310,18 @@ void EditorPass(vector<unique_ptr<Unit>> *units,
 
         ImGui::Checkbox("Unit Editor", &showUnitEditor);
         ImGui::Checkbox("Level Editor", &showLevelEditor);
+        ImGui::Checkbox("Globals", &showGlobals);
 
         ImGui::Text("avg %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
     ImGui::End();
 
     if(showUnitEditor)
-    {
         UnitEditor(units);
-    }
-    
     if(showLevelEditor)
-    {
         LevelEditor(level, *units);
-    }
+    if(showGlobals)
+        GlobalsViewer();
 
 	// debug
 	ImGui::ShowStyleEditor();
