@@ -819,8 +819,7 @@ public:
             {
                 // TODO: Level Transitions
                 printf("Objective Reached. Onto the next level!\n");
-                GlobalNextLevel = true;
-                GlobalTurnStart = true;
+                NextLevel();
                 return;
             }
 
@@ -914,6 +913,9 @@ public:
 
     void Update(InputState *input)
     {
+        if(!GlobalPlayerTurn)
+            return;
+
         shared_ptr<Command> newCommand = HandleInput(input);
         if(newCommand)
         {
@@ -963,6 +965,9 @@ public:
     void UpdateCommands(Cursor *cursor, Tilemap *map,
                         Menu *gameMenu, Menu *unitMenu)
     {
+        if(!GlobalPlayerTurn)
+            return;
+
         switch(GlobalInterfaceState)
         {
             case(NEUTRAL_OVER_GROUND):

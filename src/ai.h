@@ -192,8 +192,7 @@ public:
                            map->tiles[cursor->col][cursor->row].avoid);
         }
 
-        cursor->selected->isExhausted = true;
-        cursor->selected->sheet.ChangeTrack(0);
+        cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->col = cursor->sourceCol;
@@ -210,28 +209,31 @@ private:
 // ============================== struct ====================================
 struct AI
 {
-    bool shouldPlan = true;
+    int frame = 0;
 
     // Fills the command queue with the current plan.
     void Plan(Cursor *cursor, Tilemap *map)
     {
-        shouldPlan = false;
-
         commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, *map));
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
         commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, map));
     }
 
-    void Update()
+    // Passes the args through to plan.
+    void Update(Cursor *cursor, Tilemap *map)
     {
-        if(!commandQueue.empty())
+        if(GlobalPlayerTurn)
+            return;
+
+        if(commandQueue.empty())
+            Plan(cursor, map);
+
+        ++frame;
+        // Every __ frames.
+        if(!(frame % AI_ACTION_SPEED))
         {
             commandQueue.front()->Execute();
             commandQueue.pop();
-        }
-        else
-        {
-            shouldPlan = true;
         }
     }
 

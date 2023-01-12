@@ -5,6 +5,8 @@
 #ifndef GRID_H
 #define GRID_H
 
+#include <queue>
+
 // ===================================== Viewport ===============================
 // Checks if a point is within the current viewport.
 bool

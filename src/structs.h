@@ -5,15 +5,7 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-
-// ============================== Orphan Functions =============================
-void
-EndPlayerTurn()
-{
-    GlobalInterfaceState = NO_OP;
-    GlobalPlayerTurn = false;
-    GlobalTurnStart = true;
-}
+#include <vector>
 
 // =============================== Low-level ===================================
 struct InputState
@@ -77,7 +69,7 @@ struct SpriteSheet
     void Update()
     {
         counter++;
-        if(counter % speed == 0)
+        if(!(counter % speed))
         {
             int newFrame = frame + 1;
             if(newFrame >= frames)
@@ -178,6 +170,11 @@ struct Unit
         isExhausted = true;
         sheet.ChangeTrack(0);
     }
+
+    void Activate()
+    {
+        isExhausted = false;
+    }
 };
 
 
@@ -261,6 +258,13 @@ struct Level
         }
         EndPlayerTurn();
         return;
+    }
+
+    void Update()
+    {
+        // cleanup functions
+        RemoveDeadUnits();
+        CheckForRemaining();
     }
 };
 

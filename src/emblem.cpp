@@ -3,23 +3,19 @@
 // File: Main
 
 // ========================== includes =====================================
+// Library includes
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+// Local external files
 #define MINIAUDIO_IMPLEMENTATION
-#include <miniaudio.h>
+#include "miniaudio.h"
 
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_sdlrenderer.h"
-
-#include <memory>
-#include <string>
-#include <vector>
-#include <queue>
-#include <assert.h>
 
 using namespace std;
 
@@ -35,46 +31,55 @@ typedef uint64_t u64;
 typedef pair<int, int> point;
 typedef vector<point> path;
 
-#include "constants.h"
-
 // ============================= globals ===================================
-static InterfaceState GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-static AIState GlobalAIState = PLAYER_TURN;
-
+// SDL
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static TTF_Font *GlobalFont = nullptr;
-static ma_engine GlobalMusicEngine;
 
-static bool GlobalRunning = false;
-static bool GlobalPaused = false;
-
-static int GlobalLevelNumber = 0;
-static bool GlobalNextLevel = false;
-static int GlobalTotalLevels = 10;
-
-static bool GlobalPlayerTurn = true;
-static bool GlobalTurnStart = true;
-
-static bool GlobalGamepadMode = false;
-
-static bool GlobalEditorMode = false;
-static int GlobalCurrentID = 0;
-
-static int viewportCol = 0;
-static int viewportRow = 0;
-
-// TODO: unnecessary?
+// IMGUI
 static ImFont *uiFontSmall;
 static ImFont *uiFontMedium;
 static ImFont *uiFontLarge;
 
-// TODO: unnecessary?
-static u64 GlobalFrameNumber = 0;
+// MINIAUDIO
+static ma_engine GlobalMusicEngine;
 
+
+//// STATE //////////////////////
+// TODO: consolidate
+// Ideal System:
+// * Running
+// * Editor / Paused
+// * StartPlayerTurn
+// * StartEnemyTurn
+// * MainPlayerTurn
+// * MainEnemyTurn
+// * Resetting
+static bool GlobalRunning = false;
+static bool GlobalEditorMode = false;
+static bool GlobalNextLevel = false;
+static bool GlobalPlayerTurn = true;
+static bool GlobalTurnStart = true;
+
+static unsigned int GlobalInterfaceState;
+static unsigned int GlobalAIState;
+////////////////////////////////
+
+// TODO: unnecessary?
+static int viewportCol = 0;
+static int viewportRow = 0;
+static int GlobalCurrentID = 0;
 static point leaderPosition = {0, 0};
 
+
+// ================================= my includes ===============================
+// NOTE: This is a unity build. This is all that my game includes.
+//       There are no includes in the header files.
+//       There are no circular dependencies.
+#include "constants.h"
 #include "utils.h"
+#include "state.h"
 #include "structs.h"
 #include "load.h"
 #include "init.h"
@@ -89,120 +94,108 @@ static point leaderPosition = {0, 0};
 
 int main(int argc, char *argv[])
 {
-// ================================== init =================================
     srand(time(NULL));
 
     if(!Initialize())
         assert(!"Initialization Failed\n");
 
     // controller init
-    SDL_Joystick *gamePad = NULL;
+    SDL_Joystick *gamepad = NULL;
     if(SDL_NumJoysticks() > 0)
     {
-        GlobalGamepadMode = true;
-        gamePad = SDL_JoystickOpen(0);
-        assert(gamePad);
+        gamepad = SDL_JoystickOpen(0);
+        assert(gamepad);
     }
 
 // ================================== load =================================
+    // Level
     vector<unique_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
     vector<string> levels = {DATA_PATH + string("l0.txt"), DATA_PATH + string("l1.txt"),
                              DATA_PATH + string("l2.txt"), DATA_PATH + string("l3.txt"),
                              DATA_PATH + string("l4.txt"), DATA_PATH + string("l5.txt"),
                              DATA_PATH + string("l6.txt"), DATA_PATH + string("l7.txt")
 							 };
-    Level level = LoadLevel(levels[GlobalLevelNumber], units);
+    int level_index = 0;
+    Level level = LoadLevel(levels[level_index], units);
     Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
     Timer timer = Timer(LEVEL_TIME);
 
 	UI_State ui = {};
 
-    // Initialize Menus
+    // Menus
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(1, 0, {"Wait"});
 
-    // initial actor state
+    // Actor state
     InputState input = {};
     InputHandler handler(&cursor, level.map);
     AI ai;
 
-    // frame timer
-    u64 startTime = SDL_GetPerformanceCounter();
-    u64 endTime = 0;
-    float elapsedMS = 0.0f;
+    GlobalInterfaceState = NO_OP;
+    GlobalAIState = PLAYER_TURN;
 
 	// Play Music
     //ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/r4.wav", NULL);
 
-// ========================= game loop =========================================
+    // Initialize state
     GlobalRunning = true;
+// ========================= game loop =========================================
     while(GlobalRunning)
     {
-        HandleEvents(&input);
+        HandleEvents(&input, gamepad);
 // ====================== command phase ========================================
-        if(!GlobalPaused)
+        //////////////// TO BE EXTRICATED //////////////////
+        if(GlobalTurnStart)
         {
-            if(GlobalTurnStart)
-            {
-                if(GlobalPlayerTurn)
-                {
-                    timer.Start();
-                }
-                else
-                {
-                    timer.Pause();
-                }
-
-                for(auto const &unit : level.combatants)
-                    unit->isExhausted = false;
-                cursor.Reset();
-                viewportCol = 0; // TODO: Now this is a lie!
-                viewportRow = 0;
-                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-
-                GlobalTurnStart = false;
-                ai.clearQueue();
-                handler.clearQueue();
-            }
-
             if(GlobalPlayerTurn)
             {
-                handler.Update(&input);
-                handler.UpdateCommands(&cursor, &level.map,
-                                       &gameMenu, &unitMenu);
+                timer.Start();
             }
             else
             {
-                if(ai.shouldPlan)
-                    ai.Plan(&cursor, &level.map);
-                if(!(GlobalFrameNumber % 10))
-                    ai.Update();
+                timer.Pause();
             }
 
+            for(auto const &unit : level.combatants)
+                unit->Activate();
+            cursor.Reset();
+            viewportCol = 0; // TODO: Now this is a lie!
+            viewportRow = 0;
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+
+            GlobalTurnStart = false;
+            ai.clearQueue();
+            handler.clearQueue();
+        }
+
+        if(GlobalNextLevel)
+        {
+            GlobalNextLevel = false;
+            level_index = (level_index + 1 < TOTAL_LEVELS) ? level_index + 1 : 0;
+            leaderPosition = {0, 0};
+            level = LoadLevel(levels[level_index], units);
+            cursor.Reset();
+            timer = Timer(LEVEL_TIME);
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        }
+        //////////////// ABOVE TO BE EXTRICATED //////////////////
+
 // ========================= update phase =======================================
+        if(!GlobalEditorMode)
+        {
+            handler.Update(&input);
+            handler.UpdateCommands(&cursor, &level.map,
+                                   &gameMenu, &unitMenu);
+            ai.Update(&cursor, &level.map);
+
             cursor.Update();
             ui.Update();
-            timer.Update();
+            timer.Update(); 
+            level.Update();
 
             for(auto const &unit : level.combatants)
                 unit->Update();
- 
-            // cleanup
-            level.RemoveDeadUnits();
-            level.CheckForRemaining();
-
-            if(GlobalNextLevel)
-            {
-                GlobalNextLevel = false;
-                GlobalLevelNumber = (GlobalLevelNumber + 1 < GlobalTotalLevels) ? 
-                    GlobalLevelNumber + 1 : 0;
-                leaderPosition = {0, 0};
-                level = LoadLevel(levels[GlobalLevelNumber], units);
-                cursor.Reset();
-                timer = Timer(LEVEL_TIME);
-                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-            }
         }
 
 // ============================= render =========================================
@@ -224,17 +217,6 @@ int main(int argc, char *argv[])
 
         SDL_RenderPresent(GlobalRenderer);
 
-// =========================== timing ============================================
-        endTime = SDL_GetPerformanceCounter();
-        elapsedMS = ((endTime - startTime) / 
-					 (float)SDL_GetPerformanceFrequency() * 1000.0f);
-
-		// Set constant 60fps
-        if(elapsedMS < MS_PER_FRAME)
-            SDL_Delay((int)(MS_PER_FRAME - elapsedMS));
-
-        startTime = SDL_GetPerformanceCounter();
-        GlobalFrameNumber++;
     } // End Game Loop
 
     Close();

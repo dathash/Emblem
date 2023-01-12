@@ -7,7 +7,7 @@
 
 // Handles all SDL Events, including key presses.
 void
-HandleEvents(InputState *input)
+HandleEvents(InputState *input, SDL_Joystick *gamepad) 
 {
     if(input->joystickCooldown)
     {
@@ -24,12 +24,6 @@ HandleEvents(InputState *input)
         if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {
             GlobalRunning = false;
-        }
-        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_f)
-        {
-            // TODO: Move forward one frame? backwards????
-            // TODO: Pause the timer also?
-            GlobalPaused = !GlobalPaused;
         }
         if(GlobalEditorMode)
         {
@@ -157,12 +151,12 @@ HandleEvents(InputState *input)
             else if(Event.type == SDL_JOYDEVICEADDED)
             {
                 printf("Gamepad connected!\n");
-                GlobalGamepadMode = true;
+                gamepad = SDL_JoystickOpen(0);
             }
             else if(Event.type == SDL_JOYDEVICEREMOVED)
             {
                 printf("Gamepad removed!\n");
-                GlobalGamepadMode = false;
+                gamepad = SDL_JoystickOpen(0);
             }
         }
     }

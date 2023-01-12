@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 // ============================== loading data =================================
 // Loads a Texture displaying the given text in the given color.

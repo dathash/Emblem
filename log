@@ -78,10 +78,8 @@ Tripod (Bomberman Hero)
 
 # TODO
 MVP
-    New Color Scheme for terminal
     8 levels
 
-Afternoon:
     More sprites
         Priam
         Lon'qu
@@ -101,6 +99,9 @@ Afternoon:
     Win and Lose Screens
     Startup Screen
     BUG | Enemies in the top of the screen with no route to your units seg fault.
+    Cycle units with L trigger.
+    * Should be able to do this in the same way we cycle units when selecting a
+      victim for an attack in command.h
 
 NICE
     Battle Animations
@@ -119,6 +120,12 @@ POLISH
     Unit damage and healing ranges are displayed.
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
+
+QA
+    Controller added mid-game doesn't register joystick, only buttons.
+    When the player's turn start, something flashes on the screen.
+    * I'm pretty sure I caused this when I went on my big refactor. Check it out
+      at your leisure.
 
 # Ideas
 ## Brainstorm
@@ -250,3 +257,10 @@ Jumping tiles
 Misty Step
 Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
+
+## Design
+Replayability
+* Curated rooms, enemies, etc. but randomized order.
+  * Like Into the Breach
+* Randomized recruits inbetween levels.
+  * Like Auto-chess

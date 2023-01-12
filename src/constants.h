@@ -35,6 +35,7 @@
 
 // animation
 #define ANIMATION_SPEED 10
+#define AI_ACTION_SPEED 15
 
 #define DATA_PATH "../data/"
 #define SPRITES_PATH "../assets/sprites/"
@@ -49,6 +50,8 @@
 // gameplay
 #define LEADER_ID 0
 
+#define TOTAL_LEVELS 10
+
 #define LEVEL_TIME 60
 
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
@@ -56,8 +59,6 @@
 #define FOREST_TILE {FOREST, 2, 20, nullptr, {0, 6}}
 #define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
 #define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
-// CONSIDER: There's gotta be a better way than macros to set some default tile types
-
 
 enum InterfaceState
 {
