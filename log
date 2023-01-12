@@ -78,9 +78,10 @@ Tripod (Bomberman Hero)
 
 # TODO
 MVP
-    Rip out the viewport code (for now).
-
     8 levels
+
+    Win and Lose Screens
+    Level Transitions
 
     More sprites
         Priam
@@ -92,14 +93,14 @@ MVP
         Warp
         Explode
         Buff
+        Boost
+        Shield
 
-    Level Transitions
-    Win and Lose Screens
     Startup Screen
     BUG | Enemies in the top of the screen with no route to your units seg fault.
     Make level editing easy by starting the game with a level select screen.
+
     Make just Zarathustra finish levels
-    You can win levels just by killing all enemy units? Consider this design idea.
 
 NICE
     Battle Animations
@@ -139,6 +140,8 @@ REFACTOR
     * Switch everything over to this.
     remove selectedCol from cursor (DRY)
     Take junk out of main
+    Rip out the viewport code (for now). It needs some serious reconsideration.
+
 
 # Ideas
 ## Brainstorm
@@ -265,11 +268,14 @@ Noire
 Group mechanics (Units nearby eachother get bonuses)
 Leader mechanics (Genealogy stars)
 Fort with attack bonus instead of defense
-Knight Moves
-Jumping tiles
+Knight Moves?
+Jumping tiles in general?
+Boost teammate units over stuff?
 Misty Step
 Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
+
+Some levels objective is to kill all the enemies?
 
 ## Design
 Replayability
@@ -277,3 +283,4 @@ Replayability
   * Like Into the Breach
 * Randomized recruits inbetween levels.
   * Like Auto-chess
+

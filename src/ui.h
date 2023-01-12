@@ -285,7 +285,7 @@ GetHitColor(int hit)
 
 // Displays combat preview when initiating combat
 void
-DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy, 
+DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
                                           int ally_avoid_bonus, int enemy_avoid_bonus,
                                           enum quadrant quad)
 {
@@ -304,10 +304,18 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy,
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Combat", NULL, wf);
     {
-        Outcome outcome = PredictCombat(ally, enemy,
-                          ManhattanDistance(point(ally.col, ally.row),
-                                            point(enemy.col, enemy.row)),
-                          ally_avoid_bonus, enemy_avoid_bonus);
+        Outcome outcome;
+        if(ally.isAlly == target.isAlly)
+        {
+            outcome = PredictHealing(ally, target);
+        }
+        else
+        {
+            outcome = PredictCombat(ally, target,
+                      ManhattanDistance(point(ally.col, ally.row),
+                                        point(target.col, target.row)),
+                      ally_avoid_bonus, enemy_avoid_bonus);
+        }
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
@@ -342,13 +350,13 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy,
 				ImGui::TableNextColumn();
 
 		        ImGui::PushFont(uiFontLarge);
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(enemy.hp, enemy.maxHp));
-				ImGui::Text("%d", enemy.hp);
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(target.hp, target.maxHp));
+				ImGui::Text("%d", target.hp);
 				ImGui::PopStyleColor();
                 ImGui::SameLine();
 				ImGui::Text("/");
                 ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.two_health, enemy.maxHp));
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.two_health, target.maxHp));
 				ImGui::Text("%d", outcome.two_health);
 				ImGui::PopStyleColor();
 		        ImGui::PopFont();
@@ -374,7 +382,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy,
 
 			ImGui::EndTable();
 
-            ImGui::Text("%s", enemy.name.c_str());
+            ImGui::Text("%s", target.name.c_str());
 		ImGui::PopFont();
     }
     ImGui::End();
