@@ -148,7 +148,23 @@ int main(int argc, char *argv[])
     while(GlobalRunning)
     {
         HandleEvents(&input, gamepad);
-// ====================== command phase ========================================
+// ========================= update phase =======================================
+        if(!GlobalEditorMode)
+        {
+            handler.Update(&input);
+            handler.UpdateCommands(&cursor, &level.map,
+                                   &gameMenu, &unitMenu);
+
+            ai.Update(&cursor, &level.map);
+
+            cursor.Update();
+            ui.Update();
+            level.Update();
+
+            for(const unique_ptr<Unit> &unit : level.combatants)
+                unit->Update();
+        }
+// ====================== state resolution phase ===============================
         //////////////// TO BE EXTRICATED //////////////////
         if(GlobalRestart)
         {
@@ -190,23 +206,6 @@ int main(int argc, char *argv[])
             handler.clearQueue();
         }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
-
-// ========================= update phase =======================================
-        if(!GlobalEditorMode)
-        {
-            handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level.map,
-                                   &gameMenu, &unitMenu);
-
-            ai.Update(&cursor, &level.map);
-
-            cursor.Update();
-            ui.Update();
-            level.Update();
-
-            for(const unique_ptr<Unit> &unit : level.combatants)
-                unit->Update();
-        }
 
 // ============================= render =========================================
         Render(level.map, cursor, gameMenu, unitMenu);

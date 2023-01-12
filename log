@@ -79,7 +79,6 @@ Tripod (Bomberman Hero)
 # TODO
 MVP
     Remove Magic at least. Maybe even avoid. or damage. haha. no seriously.
-    BUG | Restart level bricks the game.
     Rip out the viewport code (for now).
 
     8 levels
@@ -99,12 +98,7 @@ MVP
     Win and Lose Screens
     Startup Screen
     BUG | Enemies in the top of the screen with no route to your units seg fault.
-    Cycle units with L trigger.
-    * Should be able to do this in the same way we cycle units when selecting a
-      victim for an attack in command.h
-    End turn quickly somehow when you're just moving Zarathustra to the goal?
     Make level editing easy by starting the game with a level select screen.
-    BUG | allow editors to move Zarathustra's position manually
     Make just Zarathustra finish levels
     You can win levels just by killing all enemy units? Consider this design idea.
 
@@ -128,6 +122,10 @@ POLISH
     Unit damage and healing ranges are displayed.
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
+    Cycle units with L trigger.
+    * Should be able to do this in the same way we cycle units when selecting a
+      victim for an attack in command.h
+    End turn quickly somehow when you're just moving Zarathustra to the goal?
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.

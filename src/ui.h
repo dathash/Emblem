@@ -249,10 +249,6 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::SameLine();
 			ImGui::Text("[DEF %d]", unit.defense);
 			ImGui::SameLine();
-			ImGui::Text("[MAG %d]", unit.magic);
-			ImGui::SameLine();
-			ImGui::Text("[RES %d]", unit.resistance);
-			ImGui::SameLine();
 			ImGui::Text("[HEAL %d]", unit.healing);
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);

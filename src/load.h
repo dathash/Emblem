@@ -203,15 +203,13 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                     stoi(tokens[6]),							// hp
                     stoi(tokens[6]),							// max hp
                     stoi(tokens[7]),							// attack
-                    stoi(tokens[8]),							// magic
-                    stoi(tokens[9]),							// defense
-                    stoi(tokens[10]),							// resistance
-                    stoi(tokens[11]),						    // accuracy
-                    stoi(tokens[12]),						    // avoid
-                    stoi(tokens[13]),						    // crit
-                    stoi(tokens[14]),						    // short range
-                    stoi(tokens[15]),						    // long range
-                    (AIBehavior)stoi(tokens[16])                            // ai behavior
+                    stoi(tokens[8]),							// defense
+                    stoi(tokens[9]),						    // accuracy
+                    stoi(tokens[10]),						    // avoid
+                    stoi(tokens[11]),						    // crit
+                    stoi(tokens[12]),						    // short range
+                    stoi(tokens[13]),						    // long range
+                    (AIBehavior)stoi(tokens[14])                            // ai behavior
                 ));
 
                 // CONSIDER: Make the ID system generate an id in a more robust way.
@@ -241,7 +239,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long> <ai>>\n";
+    fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <def> <acc> <avo> <crit> <short> <long> <ai>>\n";
     for(const unique_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << " "
@@ -252,9 +250,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
                      << unit->mov << " "
                      << unit->maxHp << " "
                      << unit->attack << " "
-                     << unit->magic << " "
                      << unit->defense << " "
-                     << unit->resistance << " "
                      << unit->accuracy << " "
                      << unit->avoid << " "
                      << unit->crit << " "

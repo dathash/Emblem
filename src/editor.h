@@ -31,8 +31,6 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 				3,
 				3,
 				3,
-				3,
-				3,
                 NO_BEHAVIOR
 			));
 			cout << "Created Unit: " << GlobalCurrentID - 1 << "\n";
@@ -67,9 +65,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		ImGui::SliderInt("Mov", &selected->mov, 0, 10);
 		ImGui::SliderInt("maxHp", &selected->maxHp, 1, 20);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
-		ImGui::SliderInt("mag", &selected->magic, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
-		ImGui::SliderInt("res", &selected->resistance, 0, 20);
 		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
 		ImGui::SliderInt("avo", &selected->avoid, 0, 100);
 		ImGui::SliderInt("crit", &selected->crit, 0, 100);
@@ -137,6 +133,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 
         EditorPollForKeyboardInput(&editor_cursor);
         Tile *hover_tile = &level->map.tiles[editor_cursor.first][editor_cursor.second];
+        // TODO: This doesn't account for when we're outside the viewport. FIX!!!
 
         ImGui::Text("Units:");
         if(ImGui::Button("add"))

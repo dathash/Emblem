@@ -166,9 +166,7 @@ struct Unit
     int hp;
     int maxHp;
     int attack;
-    int magic;
     int defense;
-    int resistance;
     int healing;
     int minRange;
     int maxRange;
@@ -193,8 +191,7 @@ struct Unit
          Texture portrait_in,
          int id_in, bool isAlly_in, int mov_in,
          int hp_in, int maxHp_in,
-         int attack_in, int magic_in,
-         int defense_in, int resistance_in,
+         int attack_in, int defense_in,
          int accuracy_in, int avoid_in, int crit_in,
          int minRange_in, int maxRange_in,
          AIBehavior ai_behavior_in)
@@ -207,9 +204,7 @@ struct Unit
       hp(hp_in),
       maxHp(maxHp_in),
       attack(attack_in),
-      magic(magic_in),
       defense(defense_in),
-      resistance(resistance_in),
       accuracy(accuracy_in),
       avoid(avoid_in),
       crit(crit_in),
@@ -362,7 +357,7 @@ struct Level
         if(timer.Update())
         {
             printf("Ran out of time. Game over!\n");
-            GlobalRunning = false;
+            RestartLevel();
         }
     }
 };
