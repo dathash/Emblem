@@ -7,7 +7,7 @@
 
 #include <vector>
 
-// =============================== Low-level ===================================
+// =============================== small-time ===================================
 struct InputState
 {
     bool up;
@@ -208,6 +208,21 @@ struct Tilemap
     //vector<point> adjacent;
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
+
+    // This is for if we want to allow editors to change size of levels midway
+    // through editing. Not super important, but it's here.
+    //void
+    //Resize()
+    //{
+    //    level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
+    //    for(int col = 0; col < level.map.width; ++col)
+    //    {
+    //        for(int row = 0; row < level.map.height; ++row)
+    //        {
+    //            level.map.tiles[col][row] = {};
+    //        }
+    //    }
+    //}
 };
 
 struct Level
@@ -247,7 +262,7 @@ struct Level
     }
 
     // A mutation function that just checks if there are any units left to
-    // move, and ends the player's turn.
+    // move, and ends the player's turn if there aren't.
     void
     CheckForRemaining()
     {
@@ -344,16 +359,16 @@ struct Timer
         if(paused)
             return false;
 
-        // How much time has passed this frame.
-        current += SDL_GetTicks() - last_frame;
+        int since_last_frame = SDL_GetTicks() - last_frame;
+
+        if(since_last_frame > 30) // Quick hack to fix pausing
+            since_last_frame = 30; // TODO: Really fix this someday
+
+        current += since_last_frame;
 
         last_frame = SDL_GetTicks();
         if(current >= end)
-        {
-            printf("Ran out of time. Game over!\n");
-            GlobalRunning = false;
             return true;
-        }
         return false;
     }
 

@@ -308,8 +308,8 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &enemy,
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Combat", NULL, wf);
     {
-        Outcome outcome = PredictCombat(ally, enemy, 
-                          ManhattanDistance(point(ally.col, ally.row), 
+        Outcome outcome = PredictCombat(ally, enemy,
+                          ManhattanDistance(point(ally.col, ally.row),
                                             point(enemy.col, enemy.row)),
                           ally_avoid_bonus, enemy_avoid_bonus);
 
@@ -451,7 +451,7 @@ RenderUI(UI_State *ui,
 		DisplayUnitInfo(window_flags, *map.tiles[cursor.col][cursor.row].occupant, cursor.Quadrant());
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
-                                           map.tiles[cursor.selectedCol][cursor.selectedRow].avoid, 
+                                           map.tiles[cursor.selected->col][cursor.selected->row].avoid,
                                            map.tiles[cursor.col][cursor.row].avoid, 
                                            cursor.Quadrant());
 	if(ui->options_menu)

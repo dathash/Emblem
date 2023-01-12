@@ -93,7 +93,6 @@ public:
         cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
-        map->accessible.clear();
         map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
                                          cursor->selectedRow, 
                                          cursor->selected->mov,
@@ -614,7 +613,6 @@ public:
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
 
-        map->accessible.clear();
         map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
                                          cursor->selectedRow, 
                                          cursor->selected->mov,

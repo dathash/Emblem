@@ -1,7 +1,6 @@
 COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
-COM Date: November 2022
 
 COM NOTE: Don't use tabs in here!
 
@@ -20,7 +19,7 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 COM <UNT <name> <id> <col> <row>
 UNT Darko 0 0 3 

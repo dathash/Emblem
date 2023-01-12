@@ -6,7 +6,6 @@
 #define LOAD_H
 
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 // ============================== loading data =================================
@@ -79,100 +78,95 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 
     ifstream fp;
     fp.open(filename_in);
-    if(fp.is_open())
+    if(!fp.is_open())
     {
-        while(getline(fp, line))
-        {
-            if(!line.empty())
-            {
-                type = line.substr(0, 3);
-                rest = line.substr(4);
-				tokens = split(rest, ' ');
+        assert(!"ERROR LoadLevel: File could not be opened!\n");
+    }
 
-                if(type == "ATL")
+    while(getline(fp, line))
+    {
+        if(line.empty())
+            continue;
+
+        type = line.substr(0, 3);
+        rest = line.substr(4);
+        tokens = split(rest, ' ');
+
+        if(type == "ATL")
+        {
+            level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
+        }
+        else if(type == "WDT")
+        {
+            level.map.width = stoi(rest);
+        }
+        else if(type == "HGT")
+        {
+            level.map.height = stoi(rest);
+            level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
+            for(int col = 0; col < level.map.width; ++col)
+            {
+                for(int row = 0; row < level.map.height; ++row)
                 {
-                    level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
+                    level.map.tiles[col][row] = {};
                 }
-				else if(type == "WDT")
-				{
-					level.map.width = stoi(rest);
-				}
-				else if(type == "HGT")
-				{
-					level.map.height = stoi(rest);
-				}
-				else if(type == "MST")
-				{
-					level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
-                    for(int col = 0; col < level.map.width; ++col)
-                    {
-                        for(int row = 0; row < level.map.height; ++row)
-                        {
-                            level.map.tiles[col][row] = {};
-                        }
-                    }
-				}
-				else if(type == "MAP")
-				{
-					for(int col = 0; col < level.map.width; ++col)
-					{
-						switch(stoi(tokens[col]))
-						{
-							case(FLOOR):
-							{
-                                level.map.tiles[col][mapRow] = 
-                                    FLOOR_TILE;
-							} break;
-							case(WALL):
-							{
-                                level.map.tiles[col][mapRow] = 
-                                    WALL_TILE;
-							} break;
-							case(FOREST):
-							{
-                                level.map.tiles[col][mapRow] = 
-                                    FOREST_TILE;
-							} break;
-							case(DESERT):
-							{
-                                level.map.tiles[col][mapRow] = 
-                                    DESERT_TILE;
-							} break;
-							case(OBJECTIVE):
-							{
-                                level.map.tiles[col][mapRow] = 
-                                    OBJECTIVE_TILE;
-							} break;
-							default:
-							{
-                                cout << "ERROR: Unhandled tile type in loader!\n";
-							} break;
-						}
-					}
-					++mapRow;
-				}
-				else if(type == "UNT")
-				{
-                    unique_ptr<Unit> unitCopy = make_unique<Unit>(*units[stoi(tokens[1])]);
-                    int col = stoi(tokens[2]);
-                    int row = stoi(tokens[3]);
-                    // Assign leader
-                    if(stoi(tokens[1]) == LEADER_ID)
-                    {
-                        assert(leaderPosition.first == 0 && leaderPosition.second == 0);
-                        leaderPosition = point(col, row);
-                    }
-                    unitCopy->col = col;
-                    unitCopy->row = row;
-                    level.combatants.push_back(move(unitCopy));
-                    level.map.tiles[col][row].occupant = level.combatants.back().get();
-				}
             }
         }
-    }
-    else
-    {
-        printf("LoadLevel ERROR\n");
+        else if(type == "MAP")
+        {
+            for(int col = 0; col < level.map.width; ++col)
+            {
+                switch(stoi(tokens[col]))
+                {
+                    case(FLOOR):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            FLOOR_TILE;
+                    } break;
+                    case(WALL):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            WALL_TILE;
+                    } break;
+                    case(FOREST):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            FOREST_TILE;
+                    } break;
+                    case(DESERT):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            DESERT_TILE;
+                    } break;
+                    case(OBJECTIVE):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            OBJECTIVE_TILE;
+                    } break;
+                    default:
+                    {
+                        cout << "ERROR: Unhandled tile type in loader!\n";
+                    } break;
+                }
+            }
+            ++mapRow;
+        }
+        else if(type == "UNT")
+        {
+            unique_ptr<Unit> unitCopy = make_unique<Unit>(*units[stoi(tokens[1])]);
+            int col = stoi(tokens[2]);
+            int row = stoi(tokens[3]);
+            // Assign leader
+            if(stoi(tokens[1]) == LEADER_ID)
+            {
+                assert(leaderPosition.first == 0 && leaderPosition.second == 0);
+                leaderPosition = point(col, row);
+            }
+            unitCopy->col = col;
+            unitCopy->row = row;
+            level.combatants.push_back(move(unitCopy));
+            level.map.tiles[col][row].occupant = level.combatants.back().get();
+        }
     }
     fp.close();
 
@@ -247,8 +241,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";
-    fp << "COM File: Units\n";
-    fp << "COM NOTE: Don't use tabs in here!\n\n";
+    fp << "COM File: Units\n\n";
 
     fp << "COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <mag> <def> <res> <acc> <avo> <crit> <short> <long>>\n";
     for(const unique_ptr<Unit> &unit : units)
@@ -284,16 +277,13 @@ SaveLevel(string filename_in, const Level &level)
     
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";
-    fp << "COM File: Level\n";
-    fp << "COM Date: November 2022\n\n";
-    fp << "COM NOTE: Don't use tabs in here!\n\n";
+    fp << "COM File: Level\n\n";
 
     fp << "ATL " << level.map.atlas.filename << "\n\n";
 
     // Save Map Data
     fp << "WDT " << level.map.width << "\n";
-    fp << "HGT " << level.map.height << "\n\n";
-    fp << "MST 0\n";
+    fp << "HGT " << level.map.height << "\n";
     for(int row = 0; row < level.map.height; ++row)
     {
         fp << "MAP ";

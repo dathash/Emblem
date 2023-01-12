@@ -94,7 +94,6 @@ MVP
     Better enemy ai
         Enemies that don't always come straight for you.
 
-    More accurate HIT calculations, with tile avoid factored in.
     Level Transitions
     Win and Lose Screens
     Startup Screen
@@ -102,6 +101,7 @@ MVP
     Cycle units with L trigger.
     * Should be able to do this in the same way we cycle units when selecting a
       victim for an attack in command.h
+    End turn quickly somehow when you're just moving Zarathustra to the goal?
 
 NICE
     Battle Animations
@@ -126,6 +126,11 @@ QA
     When the player's turn start, something flashes on the screen.
     * I'm pretty sure I caused this when I went on my big refactor. Check it out
       at your leisure.
+
+REFACTOR
+    Change points to its own class with col and row semantics
+    remove selectedCol from cursor (DRY)
+    Take junk out of main
 
 # Ideas
 ## Brainstorm

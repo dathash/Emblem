@@ -65,7 +65,6 @@ public:
         cursor->selectedCol = cursor->col;
         cursor->selectedRow = cursor->row;
 
-        map->accessible.clear();
         map->accessible = AccessibleFrom(*map, cursor->selectedCol,
                                          cursor->selectedRow,
                                          cursor->selected->mov,

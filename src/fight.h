@@ -91,6 +91,8 @@ Outcome
 PredictCombat(const Unit &one, const Unit &two, int distance,
 			  int one_avoid_bonus, int two_avoid_bonus)
 {
+    cout << one_avoid_bonus << "\n";
+    cout << two_avoid_bonus << "\n";
     Outcome outcome = {0, 0, one.hp, 0, 0, two.hp};
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;

@@ -50,7 +50,7 @@
 // gameplay
 #define LEADER_ID 0
 
-#define TOTAL_LEVELS 10
+#define TOTAL_LEVELS 8
 
 #define LEVEL_TIME 60
 

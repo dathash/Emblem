@@ -17,6 +17,8 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_sdlrenderer.h"
 
+#include <iostream>
+
 using namespace std;
 
 typedef int8_t int8;
@@ -45,7 +47,6 @@ static ImFont *uiFontLarge;
 // MINIAUDIO
 static ma_engine GlobalMusicEngine;
 
-
 //// STATE //////////////////////
 // TODO: consolidate
 // Ideal System:
@@ -66,7 +67,8 @@ static unsigned int GlobalInterfaceState;
 static unsigned int GlobalAIState;
 ////////////////////////////////
 
-// TODO: unnecessary?
+// TODO: Refactor these to only be where they need to be.
+// Pretty sure none of them have to be globals.
 static int viewportCol = 0;
 static int viewportRow = 0;
 static int GlobalCurrentID = 0;
@@ -75,8 +77,6 @@ static point leaderPosition = {0, 0};
 
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that my game includes.
-//       There are no includes in the header files.
-//       There are no circular dependencies.
 #include "constants.h"
 #include "utils.h"
 #include "state.h"
@@ -191,8 +191,12 @@ int main(int argc, char *argv[])
 
             cursor.Update();
             ui.Update();
-            timer.Update(); 
             level.Update();
+            if(timer.Update())
+            {
+                printf("Ran out of time. Game over!\n");
+                GlobalRunning = false;
+            }
 
             for(auto const &unit : level.combatants)
                 unit->Update();
