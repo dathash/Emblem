@@ -90,7 +90,6 @@ public:
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
 
-        // change state
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -116,7 +115,6 @@ public:
 
         cursor->path_draw = {};
 
-        // change state
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 
@@ -200,7 +198,7 @@ public:
         // Update unit menu with available actions
         *menu = Menu(0, 0, {});
 
-        // attack
+        // for attacking
         for(const position &p : interactible)
         {
             if(map->tiles[p.col][p.row].occupant &&
@@ -213,7 +211,7 @@ public:
             menu->AddOption("Attack");
 
         interactible = InteractibleFrom(*map, cursor->pos, 1, 1);
-        // heal
+        // for healing
         for(const position &p : interactible)
         {
             if(map->tiles[p.col][p.row].occupant &&
@@ -256,11 +254,9 @@ public:
 
         cursor->path_draw = {};
 
-        // unit has to know its position as well
         cursor->selected->pos = cursor->pos;
         cursor->selected->sheet.ChangeTrack(0);
 
-        // change state
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -283,17 +279,17 @@ public:
     virtual void Execute()
     {
         assert(map->attackable.size() > 0);
-        if(map->attackable.size() > 1)
-        {
-            if(forward)
-                rotate(map->attackable.begin(), 
-                       map->attackable.begin() + 1,
-                       map->attackable.end());
-            else
-                rotate(map->attackable.begin(), 
-                       map->attackable.begin() + map->attackable.size() - 1,
-                       map->attackable.end());
-        }
+        if(map->attackable.size() == 1)
+            return;
+
+        if(forward)
+            rotate(map->attackable.begin(), 
+                   map->attackable.begin() + 1,
+                   map->attackable.end());
+        else
+            rotate(map->attackable.begin(), 
+                   map->attackable.begin() + map->attackable.size() - 1,
+                   map->attackable.end());
         position next = map->attackable[0];
 
         // move cursor
@@ -301,9 +297,6 @@ public:
 
         // For rendering
         MoveViewport(next);
-
-        // change state
-        GlobalInterfaceState = ATTACK_TARGETING;
     }
 
 private:
@@ -324,17 +317,17 @@ public:
     virtual void Execute()
     {
         assert(map->healable.size() > 0);
-        if(map->healable.size() > 1)
-        {
-            if(forward)
-                rotate(map->healable.begin(), 
-                       map->healable.begin() + 1,
-                       map->healable.end());
-            else
-                rotate(map->healable.begin(), 
-                       map->healable.begin() + map->healable.size() - 1,
-                       map->healable.end());
-        }
+        if(map->healable.size() == 1)
+            return;
+
+        if(forward)
+            rotate(map->healable.begin(), 
+                   map->healable.begin() + 1,
+                   map->healable.end());
+        else
+            rotate(map->healable.begin(), 
+                   map->healable.begin() + map->healable.size() - 1,
+                   map->healable.end());
         position next = map->healable[0];
 
         // move cursor
@@ -342,9 +335,6 @@ public:
 
         // For rendering
         MoveViewport(next);
-
-        // change state
-        GlobalInterfaceState = HEAL_TARGETING;
     }
 
 private:
@@ -365,7 +355,6 @@ public:
     { 
         cursor->pos = cursor->source;
 
-        // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
 
@@ -387,7 +376,6 @@ public:
     {
         cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
 
-        // change state
         GlobalInterfaceState = PREVIEW_ATTACK;
     }
 
@@ -408,7 +396,6 @@ public:
     {
         cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
 
-        // change state
         GlobalInterfaceState = PREVIEW_HEALING;
     }
 
@@ -468,7 +455,6 @@ public:
 
         cursor->path_draw = {};
 
-        // change state
         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
     }
 
@@ -486,8 +472,8 @@ public:
     virtual void Execute()
     {
         cursor->targeted = nullptr;
+        cursor->source = {-1, -1};
 
-        // change state
         GlobalInterfaceState = ATTACK_TARGETING;
     }
 
@@ -505,8 +491,8 @@ public:
     virtual void Execute()
     {
         cursor->targeted = nullptr;
+        cursor->source = {-1, -1};
 
-        // change state
         GlobalInterfaceState = HEAL_TARGETING;
     }
 
@@ -526,10 +512,10 @@ public:
 
     virtual void Execute()
     {
-        // change state
-        GlobalInterfaceState = ENEMY_INFO;
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
         cursor->redo = cursor->pos;
+
+        GlobalInterfaceState = ENEMY_INFO;
     }
 
 private:
@@ -548,8 +534,8 @@ public:
     {
         cursor->pos = cursor->redo;
         cursor->selected = nullptr;
+        cursor->redo = {-1, -1};
 
-        // change state
         GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
     }
 
@@ -568,14 +554,14 @@ public:
 
     virtual void Execute()
     {
-        // change state
-        GlobalInterfaceState = ENEMY_RANGE;
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
         cursor->redo = cursor->pos;
 
         map->accessible = AccessibleFrom(*map, cursor->redo,
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
+
+        GlobalInterfaceState = ENEMY_RANGE;
     }
 
 private:
@@ -591,7 +577,6 @@ public:
 
     virtual void Execute()
     {
-        // change state
         GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
     }
 };
@@ -604,7 +589,6 @@ public:
 
     virtual void Execute()
     { 
-        // change state
         GlobalInterfaceState = GAME_MENU_ROOT;
     }
 };
@@ -615,42 +599,9 @@ public:
 
     virtual void Execute()
     { 
-        // change state
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 };
-
-
-class UpdateGameMenuCommand : public Command
-{
-public:
-    UpdateGameMenuCommand(Menu *menu_in, int direction_in)
-    : menu(menu_in),
-      direction(direction_in)
-    {}
-
-    virtual void Execute()
-    { 
-        int newCurrent = menu->current + direction;
-        if(newCurrent >= menu->rows)
-        {
-            menu->current = 0;
-        }
-        else if(newCurrent < 0)
-        {
-            menu->current = menu->rows - 1;
-        }
-        else
-        {
-            menu->current = newCurrent;
-        } 
-    }
-
-private:
-    Menu *menu;
-    int direction;
-};
-
 
 class ChooseGameMenuOptionCommand : public Command
 {
@@ -661,7 +612,6 @@ public:
 
     virtual void Execute()
     { 
-        // change state
         switch(menu->current)
         {
             case(0): // OUTLOOK
@@ -689,16 +639,15 @@ public:
 
     virtual void Execute()
     { 
-        // change state
         GlobalInterfaceState = GAME_MENU_ROOT;
     }
 };
 
 // ============================= unit menu commands =======================
-class UpdateUnitMenuCommand : public Command
+class UpdateMenuCommand : public Command
 {
 public:
-    UpdateUnitMenuCommand(Menu *menu_in, int direction_in)
+    UpdateMenuCommand(Menu *menu_in, int direction_in)
     : menu(menu_in),
       direction(direction_in)
     {}
@@ -707,17 +656,11 @@ public:
     { 
         int newCurrent = menu->current + direction;
         if(newCurrent >= menu->rows)
-        {
             menu->current = 0;
-        }
         else if(newCurrent < 0)
-        {
             menu->current = menu->rows - 1;
-        }
         else
-        {
             menu->current = newCurrent;
-        } 
     }
 
 private:
@@ -794,7 +737,6 @@ class OpenUnitInfoCommand : public Command
 public:
     virtual void Execute()
     {
-        // change state
         GlobalInterfaceState = UNIT_INFO;
     }
 };
@@ -804,7 +746,6 @@ class BackOutOfUnitInfoCommand : public Command
 public:
     virtual void Execute()
     {
-        // change state
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 };
@@ -1054,8 +995,8 @@ public:
 
             case(GAME_MENU_ROOT):
             {
-                BindUp(make_shared<UpdateGameMenuCommand>(gameMenu, -1));
-                BindDown(make_shared<UpdateGameMenuCommand>(gameMenu, 1));
+                BindUp(make_shared<UpdateMenuCommand>(gameMenu, -1));
+                BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
@@ -1085,8 +1026,8 @@ public:
 
             case(UNIT_MENU_ROOT):
             {
-                BindUp(make_shared<UpdateUnitMenuCommand>(unitMenu, -1));
-                BindDown(make_shared<UpdateUnitMenuCommand>(unitMenu, 1));
+                BindUp(make_shared<UpdateMenuCommand>(unitMenu, -1));
+                BindDown(make_shared<UpdateMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, *map, *unitMenu));

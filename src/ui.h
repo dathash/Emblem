@@ -472,13 +472,13 @@ RenderUI(UI_State *ui,
 // ================================= Menu ======================================
 struct Menu
 {
-    u8 rows;
-    u8 current;
+    uint8_t rows;
+    uint8_t current;
 
     vector<Texture> optionTextTextures;
     vector<string> optionText;
 
-    Menu(u8 rows_in, u8 current_in, vector<string> options_in)
+    Menu(uint8_t rows_in, uint8_t current_in, vector<string> options_in)
     : rows(rows_in),
       current(current_in)
     {
