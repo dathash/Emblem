@@ -26,29 +26,24 @@ public:
 class MoveCommand : public Command
 {
 public:
-    MoveCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    MoveCommand(Cursor *cursor_in, const Tilemap &map_in, direction dir_in)
     : cursor(cursor_in),
-      col(col_in),
-      row(row_in),
-      map(map_in)
+      map(map_in),
+      dir(dir_in)
     {}
 
     virtual void Execute()
     {
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
+        position new_pos = cursor->pos + dir;
 
-        if(IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+        if(IsValidBoundsPosition(map.width, map.height, new_pos))
         {
             // move cursor
-            cursor->col = newCol;
-            cursor->row = newRow;
-
-            // For rendering
-            MoveViewport(newCol, newRow);
+            cursor->pos = new_pos;
+            MoveViewport(new_pos);
 
             // change state
-            const Tile *hoverTile = &map.tiles[newCol][newRow];
+            const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
             if(!hoverTile->occupant)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_GROUND;
@@ -74,9 +69,8 @@ public:
 
 private: 
     Cursor *cursor;
-    int col;
-    int row;
     const Tilemap &map;
+    direction dir;
 };
 
 
@@ -90,17 +84,11 @@ public:
 
     virtual void Execute()
     {
-        cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
-        cursor->selectedCol = cursor->col;
-        cursor->selectedRow = cursor->row;
-        map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
-                                         cursor->selectedRow, 
+        cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
+        cursor->redo = cursor->pos;
+        map->accessible = AccessibleFrom(*map, cursor->redo,
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
-
-        // CONSIDER: Should I reset this when I finish using a unit, or
-        // when I'm about to use one?
-        //cursor->path_draw = {};
 
         // change state
         GlobalInterfaceState = SELECTED_OVER_GROUND;
@@ -123,8 +111,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->col = cursor->selectedCol;
-        cursor->row = cursor->selectedRow;
+        cursor->pos = cursor->redo;
         cursor->selected = nullptr;
 
         cursor->path_draw = {};
@@ -141,35 +128,31 @@ private:
 class MoveSCommand : public Command
 {
 public:
-    MoveSCommand(Cursor *cursor_in, int col_in, int row_in, const Tilemap &map_in)
+    MoveSCommand(Cursor *cursor_in, const Tilemap &map_in, direction dir_in)
     : cursor(cursor_in),
-      col(col_in),
-      row(row_in),
-      map(map_in)
+      map(map_in),
+      dir(dir_in)
     {}
 
     virtual void Execute()
     {
-        int newCol = cursor->col + col;
-        int newRow = cursor->row + row;
+        position new_pos = {cursor->pos.col + dir.col, cursor->pos.row + dir.row};
 
-        if(!IsValidBoundsPosition(map.width, map.height, newCol, newRow))
+        if(!IsValidBoundsPosition(map.width, map.height, new_pos))
             return;
 
         // move cursor
-        cursor->col = newCol;
-        cursor->row = newRow;
-        MoveViewport(newCol, newRow);
+        cursor->pos = new_pos;
+        MoveViewport(new_pos);
 
-        const Tile *hoverTile = &map.tiles[newCol][newRow];
-        if(!VectorHasElement(point(newCol, newRow), map.accessible))
+        const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
+        if(!VectorHasElement(new_pos, map.accessible))
         {
             GlobalInterfaceState = SELECTED_OVER_INACCESSIBLE;
             return;
         }
 
-        cursor->path_draw = GetPath(map, cursor->selectedCol, cursor->selectedRow,
-                                    cursor->col, cursor->row, true);
+        cursor->path_draw = GetPath(map, cursor->redo, cursor->pos, true);
 
         if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
         {
@@ -186,9 +169,8 @@ public:
 
 private:
     Cursor *cursor; 
-    int col;
-    int row;
     const Tilemap &map;
+    direction dir;
 };
 
 class PlaceUnitCommand : public Command
@@ -202,30 +184,27 @@ public:
 
     virtual void Execute()
     {
-        map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = nullptr;
-        map->tiles[cursor->col][cursor->row].occupant = cursor->selected;
+        map->tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;
+        map->tiles[cursor->pos.col][cursor->pos.row].occupant = cursor->selected;
 
-        // unit has to know its position as well (FOR NOW)
-        cursor->selected->col = cursor->col;
-        cursor->selected->row = cursor->row;
-
+        cursor->selected->pos = cursor->pos;
         cursor->selected->sheet.ChangeTrack(1);
 
         // Determine interactible squares
         map->attackable.clear();
         map->healable.clear();
         map->attackable.clear();
-        vector<point> interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
+        vector<position> interactible = InteractibleFrom(*map, cursor->pos,
                                              cursor->selected->minRange, cursor->selected->maxRange);
 
         // Update unit menu with available actions
         *menu = Menu(0, 0, {});
 
         // attack
-        for(const point &p : interactible)
+        for(const position &p : interactible)
         {
-            if(map->tiles[p.first][p.second].occupant &&
-               !map->tiles[p.first][p.second].occupant->isAlly)
+            if(map->tiles[p.col][p.row].occupant &&
+               !map->tiles[p.col][p.row].occupant->isAlly)
             {
                 map->attackable.push_back(p);
             }
@@ -233,14 +212,13 @@ public:
         if(map->attackable.size() > 0)
             menu->AddOption("Attack");
 
-        interactible = InteractibleFrom(*map, cursor->col, cursor->row, 
-                                        1, 1);
+        interactible = InteractibleFrom(*map, cursor->pos, 1, 1);
         // heal
-        for(const point &p : interactible)
+        for(const position &p : interactible)
         {
-            if(map->tiles[p.first][p.second].occupant &&
-               map->tiles[p.first][p.second].occupant->isAlly &&
-               map->tiles[p.first][p.second].occupant->hp < map->tiles[p.first][p.second].occupant->maxHp)
+            if(map->tiles[p.col][p.row].occupant &&
+               map->tiles[p.col][p.row].occupant->isAlly &&
+               map->tiles[p.col][p.row].occupant->hp < map->tiles[p.col][p.row].occupant->maxHp)
             {
                 map->healable.push_back(p);
             }
@@ -271,18 +249,15 @@ public:
 
     virtual void Execute()
     {
-        map->tiles[cursor->col][cursor->row].occupant = nullptr;
-        map->tiles[cursor->selectedCol][cursor->selectedRow].occupant = cursor->selected;
+        map->tiles[cursor->pos.col][cursor->pos.row].occupant = nullptr;
+        map->tiles[cursor->redo.col][cursor->redo.row].occupant = cursor->selected;
 
-        cursor->col = cursor->selectedCol;
-        cursor->row = cursor->selectedRow;
+        cursor->pos = cursor->redo;
 
         cursor->path_draw = {};
 
         // unit has to know its position as well
-        cursor->selected->col = cursor->col;
-        cursor->selected->row = cursor->row;
-
+        cursor->selected->pos = cursor->pos;
         cursor->selected->sheet.ChangeTrack(0);
 
         // change state
@@ -319,14 +294,13 @@ public:
                        map->attackable.begin() + map->attackable.size() - 1,
                        map->attackable.end());
         }
-        point next = map->attackable[0];
+        position next = map->attackable[0];
 
         // move cursor
-        cursor->col = next.first;
-        cursor->row = next.second;
+        cursor->pos = next;
 
         // For rendering
-        MoveViewport(next.first, next.second);
+        MoveViewport(next);
 
         // change state
         GlobalInterfaceState = ATTACK_TARGETING;
@@ -361,14 +335,13 @@ public:
                        map->healable.begin() + map->healable.size() - 1,
                        map->healable.end());
         }
-        point next = map->healable[0];
+        position next = map->healable[0];
 
         // move cursor
-        cursor->col = next.first;
-        cursor->row = next.second;
+        cursor->pos = next;
 
         // For rendering
-        MoveViewport(next.first, next.second);
+        MoveViewport(next);
 
         // change state
         GlobalInterfaceState = HEAL_TARGETING;
@@ -390,8 +363,7 @@ public:
 
     virtual void Execute()
     { 
-        cursor->col = cursor->sourceCol;
-        cursor->row = cursor->sourceRow;
+        cursor->pos = cursor->source;
 
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
@@ -413,7 +385,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
+        cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
 
         // change state
         GlobalInterfaceState = PREVIEW_ATTACK;
@@ -434,7 +406,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->targeted = map.tiles[cursor->col][cursor->row].occupant;
+        cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
 
         // change state
         GlobalInterfaceState = PREVIEW_HEALING;
@@ -455,18 +427,18 @@ public:
 
     virtual void Execute()
     {
-        int distance = ManhattanDistance(point(cursor->selected->col, cursor->selected->row),
-                                         point(cursor->targeted->col, cursor->targeted->row));
+        // TODO: Replace all cursor->xxx->pos with cursor->xxx.
+        int distance = ManhattanDistance(cursor->selected->pos,
+                                         cursor->targeted->pos);
         SimulateCombat(cursor->selected, cursor->targeted, distance,
-                       map.tiles[cursor->selectedCol][cursor->selectedRow].avoid,
-                       map.tiles[cursor->col][cursor->row].avoid);
+                       map.tiles[cursor->redo.col][cursor->redo.row].avoid,
+                       map.tiles[cursor->pos.col][cursor->pos.row].avoid);
 
         cursor->selected->Deactivate();
 
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
-        cursor->col = cursor->sourceCol;
-        cursor->row = cursor->sourceRow;
+        cursor->pos = cursor->source;
 
         cursor->path_draw = {};
 
@@ -494,8 +466,7 @@ public:
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
-        cursor->col = cursor->sourceCol;
-        cursor->row = cursor->sourceRow;
+        cursor->pos = cursor->source;
 
         cursor->path_draw = {};
 
@@ -559,9 +530,8 @@ public:
     {
         // change state
         GlobalInterfaceState = ENEMY_INFO;
-        cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
-        cursor->selectedCol = cursor->col;
-        cursor->selectedRow = cursor->row;
+        cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
+        cursor->redo = cursor->pos;
     }
 
 private:
@@ -578,8 +548,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->col = cursor->selectedCol;
-        cursor->row = cursor->selectedRow;
+        cursor->pos = cursor->redo;
         cursor->selected = nullptr;
 
         // change state
@@ -603,12 +572,11 @@ public:
     {
         // change state
         GlobalInterfaceState = ENEMY_RANGE;
-        cursor->selected = map->tiles[cursor->col][cursor->row].occupant;
-        cursor->selectedCol = cursor->col;
-        cursor->selectedRow = cursor->row;
+        cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
+        cursor->redo.col = cursor->pos.col;
+        cursor->redo.row = cursor->pos.row;
 
-        map->accessible = AccessibleFrom(*map, cursor->selectedCol, 
-                                         cursor->selectedRow, 
+        map->accessible = AccessibleFrom(*map, cursor->redo,
                                          cursor->selected->mov,
                                          cursor->selected->isAlly);
     }
@@ -777,22 +745,18 @@ public:
         if(option == "Attack")
         {
             assert(map.attackable.size());
-            cursor->sourceCol = cursor->col;
-            cursor->sourceRow = cursor->row;
+            cursor->source = cursor->pos;
 
-            cursor->col = map.attackable[0].first;
-            cursor->row = map.attackable[0].second;
+            cursor->pos = map.attackable[0];
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
         }
         if(option == "Heal")
         {
             assert(map.healable.size());
-            cursor->sourceCol = cursor->col;
-            cursor->sourceRow = cursor->row;
+            cursor->source = cursor->pos;
 
-            cursor->col = map.healable[0].first;
-            cursor->row = map.healable[0].second;
+            cursor->pos = map.healable[0];
             GlobalInterfaceState = HEAL_TARGETING;
             return;
         }
@@ -802,12 +766,11 @@ public:
             cursor->selected->Deactivate();
 
             cursor->selected = nullptr;
-            cursor->selectedCol = -1;
-            cursor->selectedRow = -1;
+            cursor->redo = {-1, -1};
             cursor->path_draw = {};
 
             // Move onto next level!
-            if(map.tiles[cursor->col][cursor->row].type == OBJECTIVE)
+            if(map.tiles[cursor->pos.col][cursor->pos.row].type == OBJECTIVE)
             {
                 // TODO: Level Transitions
                 printf("Objective Reached. Onto the next level!\n");
@@ -894,10 +857,10 @@ public:
 
     InputHandler(Cursor *cursor, const Tilemap &map)
     {
-        BindUp(make_shared<MoveCommand>(cursor, 0, -1, map));
-        BindDown(make_shared<MoveCommand>(cursor, 0, 1, map));
-        BindLeft(make_shared<MoveCommand>(cursor, -1, 0, map));
-        BindRight(make_shared<MoveCommand>(cursor, 1, 0, map));
+        BindUp(make_shared<MoveCommand>(cursor, map, direction(0, -1)));
+        BindDown(make_shared<MoveCommand>(cursor, map, direction(0, 1)));
+        BindLeft(make_shared<MoveCommand>(cursor, map, direction(-1, 0)));
+        BindRight(make_shared<MoveCommand>(cursor, map, direction(1, 0)));
         BindA(make_shared<OpenGameMenuCommand>());
         BindB(make_shared<NullCommand>());
         BindR(make_shared<NullCommand>());
@@ -964,10 +927,10 @@ public:
         {
             case(NEUTRAL_OVER_GROUND):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -975,10 +938,10 @@ public:
 
             case(NEUTRAL_OVER_ENEMY):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<EnemyRangeCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<SelectEnemyCommand>(cursor, map));
@@ -986,10 +949,10 @@ public:
 
             case(NEUTRAL_OVER_UNIT):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<OpenUnitInfoCommand>());
@@ -997,10 +960,10 @@ public:
 
             case(NEUTRAL_OVER_DEACTIVATED_UNIT):
             {
-                BindUp(make_shared<MoveCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<OpenUnitInfoCommand>());
@@ -1008,10 +971,10 @@ public:
 
             case(SELECTED_OVER_GROUND):
             {
-                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveSCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveSCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveSCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<PlaceUnitCommand>(cursor, map, unitMenu));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindR(make_shared<NullCommand>());
@@ -1019,10 +982,10 @@ public:
 
             case(SELECTED_OVER_INACCESSIBLE):
             {
-                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveSCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveSCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveSCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindR(make_shared<NullCommand>());
@@ -1030,10 +993,10 @@ public:
 
             case(SELECTED_OVER_ALLY):
             {
-                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveSCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveSCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveSCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<NullCommand>()); // CONSIDER: Move and Heal?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindR(make_shared<NullCommand>());
@@ -1041,10 +1004,10 @@ public:
 
             case(SELECTED_OVER_ENEMY):
             {
-                BindUp(make_shared<MoveSCommand>(cursor, 0, -1, *map));
-                BindDown(make_shared<MoveSCommand>(cursor, 0, 1, *map));
-                BindLeft(make_shared<MoveSCommand>(cursor, -1, 0, *map));
-                BindRight(make_shared<MoveSCommand>(cursor, 1, 0, *map));
+                BindUp(make_shared<MoveSCommand>(cursor, *map, direction(0, -1)));
+                BindDown(make_shared<MoveSCommand>(cursor, *map, direction(0, 1)));
+                BindLeft(make_shared<MoveSCommand>(cursor, *map, direction(-1, 0)));
+                BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<NullCommand>()); // CONSIDER: Move and Attack?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindR(make_shared<NullCommand>());

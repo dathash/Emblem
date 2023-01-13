@@ -8,10 +8,10 @@
 // ================================ Rendering ==========================================
 // Renders an individual tile to the screen, given its game coords and color.
 void
-RenderTileColor(int col, int row, const SDL_Color &color)
+RenderTileColor(const position &pos, const SDL_Color &color)
 {
     //assert(col >= 0 && row >= 0);
-    SDL_Rect tileRect = {TILE_SIZE / 16 + col * TILE_SIZE, TILE_SIZE / 16 + row * TILE_SIZE, 
+    SDL_Rect tileRect = {TILE_SIZE / 16 + pos.col * TILE_SIZE, TILE_SIZE / 16 + pos.row * TILE_SIZE, 
                          TILE_SIZE - (TILE_SIZE / 16) * 2, 
                          TILE_SIZE - (TILE_SIZE / 16) * 2};
 
@@ -24,21 +24,21 @@ RenderTileColor(int col, int row, const SDL_Color &color)
 // Renders an individual tile to the screen, given its game coords and tile (for texture).
 void
 RenderTileTexture(const Tilemap &map, const Tile &tile,
-                  int col, int row)
+                  const position &pos)
 {
-    SDL_Rect destination = {col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-    SDL_Rect source = {tile.atlas_index.first * map.atlas_tile_size, 
-                       tile.atlas_index.second * map.atlas_tile_size, 
+    SDL_Rect destination = {pos.col * TILE_SIZE, pos.row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+    SDL_Rect source = {tile.atlas_index.col * map.atlas_tile_size, 
+                       tile.atlas_index.row * map.atlas_tile_size, 
                        map.atlas_tile_size, map.atlas_tile_size};
     SDL_RenderCopy(GlobalRenderer, map.atlas.sdlTexture, &source, &destination);
 }
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(int col, int row, const SpriteSheet &sheet, bool flipped = false)
+RenderSprite(const position &pos, const SpriteSheet &sheet, bool flipped = false)
 {
-    SDL_Rect destination = {col * TILE_SIZE, 
-                            row * TILE_SIZE, 
+    SDL_Rect destination = {pos.col * TILE_SIZE, 
+                            pos.row * TILE_SIZE, 
                             TILE_SIZE, TILE_SIZE};
     SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
@@ -152,10 +152,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int row = viewportRow; row < VIEWPORT_HEIGHT + viewportRow; ++row)
         {
-            int screenCol = col - viewportCol;
-            int screenRow = row - viewportRow;
+            position screen_pos = {col - viewportCol, row - viewportRow};
             const Tile &tile = map.tiles[col][row];
-            RenderTileTexture(map, tile, screenCol, screenRow);
+            RenderTileTexture(map, tile, screen_pos);
         }
     }
 
@@ -165,32 +164,33 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == SELECTED_OVER_ALLY ||
        GlobalInterfaceState == SELECTED_OVER_ENEMY)
     {
-        for(pair<int, int> cell : map.accessible)
+        for(const position &cell : map.accessible)
         {
-            if(WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell))
             {
-                RenderTileColor(cell.first - viewportCol,
-                           cell.second - viewportRow,
-                           moveColor);
+                RenderTileColor(
+                        {cell.col - viewportCol, cell.row - viewportRow},
+                        moveColor
+                        );
             }
         }
 
-        for(const point &p : cursor.path_draw)
+        for(const position &p : cursor.path_draw)
         {
-            RenderTileColor(p.first - viewportCol, 
-                       p.second - viewportRow, 
+            RenderTileColor({p.col - viewportCol, 
+                       p.row - viewportRow}, 
                        pathColor);
         }
     }
 
     if(GlobalInterfaceState == ENEMY_RANGE)
     {
-        for(pair<int, int> cell : map.accessible)
+        for(const position &cell : map.accessible)
         {
-            if(WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell))
             {
-                RenderTileColor(cell.first - viewportCol, 
-                           cell.second - viewportRow, 
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
                            aiMoveColor);
             }
         }
@@ -198,12 +198,12 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     if(GlobalInterfaceState == ATTACK_TARGETING)
     {
-        for(pair<int, int> cell : map.attackable)
+        for(const position &cell : map.attackable)
         {
-            if(WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell))
             {
-                RenderTileColor(cell.first - viewportCol, 
-                           cell.second - viewportRow, 
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
                            attackColor);
             }
         }
@@ -211,12 +211,12 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     if(GlobalInterfaceState == HEAL_TARGETING)
     {
-        for(pair<int, int> cell : map.healable)
+        for(const position &cell : map.healable)
         {
-            if(WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell))
             {
-                RenderTileColor(cell.first - viewportCol, 
-                           cell.second - viewportRow, 
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
                            healColor);
             }
         }
@@ -225,12 +225,12 @@ Render(const Tilemap &map, const Cursor &cursor,
 // ================================ ai visualization  =============================
     if(GlobalAIState == SELECTED)
     {
-        for(pair<int, int> cell : map.accessible)
+        for(const position &cell : map.accessible)
         {
-            if(WithinViewport(cell.first, cell.second))
+            if(WithinViewport(cell))
             {
-                RenderTileColor(cell.first - viewportCol, 
-                           cell.second - viewportRow, 
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
                            aiMoveColor);
             }
         }
@@ -241,8 +241,6 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(int row = viewportRow; row < VIEWPORT_HEIGHT + viewportRow; ++row)
         {
-            int screenCol = col - viewportCol;
-            int screenRow = row - viewportRow;
             const Tile &tileToRender = map.tiles[col][row];
             if(tileToRender.occupant)
             {
@@ -254,14 +252,15 @@ Render(const Tilemap &map, const Cursor &cursor,
                 {
                     SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdlTexture, readyMod.r, readyMod.g, readyMod.b);
                 }
-                RenderSprite(screenCol, screenRow, tileToRender.occupant->sheet, tileToRender.occupant->isAlly);
+                position screen_pos = {col - viewportCol, row - viewportRow};
+                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->isAlly);
             }
         }
     }
 
 
 // ================================= render cursor ================================================
-    RenderSprite(cursor.col - viewportCol, cursor.row - viewportRow, cursor.sheet, false);
+    RenderSprite(cursor.pos - position(viewportCol, viewportRow), cursor.sheet, false);
 
 
 // ==================================== menus =====================================================
@@ -324,13 +323,13 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == PREVIEW_HEALING)
        && GlobalPlayerTurn && !GlobalEditorMode)
     {
-        assert(map.tiles[cursor.col][cursor.row].occupant);
+        assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
         int x_pos = 560;
-        if(map.tiles[cursor.col][cursor.row].occupant->isAlly)
+        if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->isAlly)
             x_pos = 180;
 
-        RenderPortrait(x_pos, 400, map.tiles[cursor.col][cursor.row].occupant->portrait,
-                       map.tiles[cursor.col][cursor.row].occupant->isAlly);
+        RenderPortrait(x_pos, 400, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
+                       map.tiles[cursor.pos.col][cursor.pos.row].occupant->isAlly);
     }
 
     /*

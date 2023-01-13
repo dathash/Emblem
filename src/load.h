@@ -157,8 +157,8 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
             int col = stoi(tokens[2]);
             int row = stoi(tokens[3]);
 
-            unitCopy->col = col;
-            unitCopy->row = row;
+            unitCopy->pos.col = col;
+            unitCopy->pos.row = row;
             unitCopy->ai_behavior = (AIBehavior)stoi(tokens[4]);
             level.combatants.push_back(move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
@@ -297,8 +297,8 @@ SaveLevel(string filename_in, const Level &level)
     {
         fp << "UNT " << unit->name << " "
                      << unit->id << " "
-                     << unit->col << " "
-                     << unit->row << " "
+                     << unit->pos.col << " "
+                     << unit->pos.row << " "
                      << unit->ai_behavior << " "
                      << "\n";
     }

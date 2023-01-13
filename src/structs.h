@@ -158,8 +158,7 @@ struct Unit
     string name;
     int id;
     bool isAlly;
-    int col = 0;
-    int row = 0;
+    position pos = {0, 0};
     bool isExhausted = false;
     bool shouldDie = false;
     int mov;
@@ -256,16 +255,16 @@ struct Tile
     int penalty = 1;
     int avoid = 0;
     Unit *occupant = nullptr;
-    point atlas_index = {0, 16};
+    position atlas_index = {0, 16};
 };
 struct Tilemap
 {
     int width;
     int height;
     vector<vector<Tile>> tiles;
-    vector<point> accessible;
-    vector<point> attackable;
-    vector<point> healable;
+    vector<position> accessible;
+    vector<position> attackable;
+    vector<position> healable;
     //CONSIDER: For trading, talking, playing rock-paper scissors, haha whatever
     //vector<point> adjacent;
     Texture atlas;
@@ -294,13 +293,13 @@ struct Level
     Timer timer;
 
     // Returns the position of the leader.
-    point
+    position
     Leader()
     {
         for(const unique_ptr<Unit> &unit : combatants)
         {
             if(unit->id == LEADER_ID)
-                return point(unit->col, unit->row);
+                return unit->pos;
         }
         assert(!"ERROR Level.Leader(): No leader!\n");
     }
@@ -308,9 +307,9 @@ struct Level
     void
     RemoveDeadUnits()
     {
-        point leaderPosition = Leader();
+        position leaderPosition = Leader();
         // Quit if Zarathustra's dead
-        if(map.tiles[leaderPosition.first][leaderPosition.second].occupant->shouldDie)
+        if(map.tiles[leaderPosition.col][leaderPosition.row].occupant->shouldDie)
         {
             printf("Zarathustra died. Game over!\n");
             RestartLevel();
@@ -318,20 +317,20 @@ struct Level
         }
 
         // REFACTOR: This could be so much simpler.
-        vector<point> tiles;
+        vector<position> tiles;
         for(const unique_ptr<Unit> &unit : combatants)
         {
             if(unit->shouldDie)
-                tiles.push_back(point(unit->col, unit->row));
+                tiles.push_back(unit->pos);
         }
 
         combatants.erase(remove_if(combatants.begin(), combatants.end(),
                     [](auto const &u) { return u->shouldDie; }),
                     combatants.end());
 
-        for(point tile : tiles)
+        for(position tile : tiles)
         {
-            map.tiles[tile.first][tile.second].occupant = nullptr;
+            map.tiles[tile.col][tile.row].occupant = nullptr;
         }
     }
 
@@ -365,14 +364,11 @@ struct Level
 
 struct Cursor
 {
-    int col = -1;
-    int row = -1;
+    position pos = {-1, -1};
     Unit *selected = nullptr;
+    position redo = {-1, -1}; // Where the cursor was before placing a unit
     Unit *targeted = nullptr;
-    int selectedCol = -1; // Where the cursor was before placing a unit
-    int selectedRow = -1;
-    int sourceCol = -1; // Where the cursor was before choosing a target
-    int sourceRow = -1;
+    position source = {-1, -1}; // Where the cursor was before choosing a target
 
     SpriteSheet sheet;
     path path_draw = {};
@@ -389,10 +385,9 @@ struct Cursor
 
     // Places the cursor at a position.
     void
-    PlaceAt(const point &p)
+    PlaceAt(const position &pos_in)
     {
-        col = p.first;
-        row = p.second;
+        pos = pos_in;
         path_draw = {};
         //TODO: What if the leader starts outside of the 0, 0 viewport?
     }
@@ -401,8 +396,8 @@ struct Cursor
     enum quadrant
     Quadrant() const
     {
-        int x = col - viewportCol;
-        int y = row - viewportRow;
+        int x = pos.col - viewportCol;
+        int y = pos.row - viewportRow;
 
         if(x > VIEWPORT_WIDTH / 2 && y >= VIEWPORT_HEIGHT / 2)
         {

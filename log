@@ -112,10 +112,11 @@ NICE
             Trance-like state of playing
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
-    Enemy Units have more complex decision-making process.
     Better enemy AI
         Pursuing Enemies only come for you when you get near.
         * Bresenham's line plus a certain distance (maybe 7 tiles?)
+        Enemy Units have more complex decision-making process.
+        * More factors like accuracy and whether they will die in the process.
 
 POLISH
     Placing Unit moves them smoothly to that square (A-star)

@@ -312,8 +312,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
         else
         {
             outcome = PredictCombat(ally, target,
-                      ManhattanDistance(point(ally.col, ally.row),
-                                        point(target.col, target.row)),
+                      ManhattanDistance(ally.pos, target.pos),
                       ally_avoid_bonus, enemy_avoid_bonus);
         }
 
@@ -450,15 +449,15 @@ RenderUI(UI_State *ui,
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
 
 	if(ui->tile_info)
-		DisplayTileInfo(window_flags, map.tiles[cursor.col][cursor.row], cursor.Quadrant());
+		DisplayTileInfo(window_flags, map.tiles[cursor.pos.col][cursor.pos.row], cursor.Quadrant());
 	if(ui->unit_blurb)
-		DisplayUnitBlurb(window_flags, *map.tiles[cursor.col][cursor.row].occupant, cursor.Quadrant());
+		DisplayUnitBlurb(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, cursor.Quadrant());
 	if(ui->unit_info)
-		DisplayUnitInfo(window_flags, *map.tiles[cursor.col][cursor.row].occupant, cursor.Quadrant());
+		DisplayUnitInfo(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, cursor.Quadrant());
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
-                                           map.tiles[cursor.selected->col][cursor.selected->row].avoid,
-                                           map.tiles[cursor.col][cursor.row].avoid, 
+                                           map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,
+                                           map.tiles[cursor.pos.col][cursor.pos.row].avoid, 
                                            cursor.Quadrant());
 	if(ui->options_menu)
 		DisplayOptionsMenu(window_flags);

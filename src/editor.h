@@ -82,45 +82,43 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 void 
 GenerateDebugPaths(const Level &level, path *path_debug)
 {
-    static int col = 0;
-    static int row = 0;
-    static int destCol = 0;
-    static int destRow = 0;
+    static position start = {0, 0};
+    static position end = {0, 0};
     ImGui::Text("From:");
-    ImGui::SliderInt("fcol", &col, 0, 10);
-    ImGui::SliderInt("frow", &row, 0, 10);
+    ImGui::SliderInt("fcol", &start.col, 0, 10);
+    ImGui::SliderInt("frow", &start.row, 0, 10);
     ImGui::Text("To:");
-    ImGui::SliderInt("dcol", &destCol, 0, 10);
-    ImGui::SliderInt("drow", &destRow, 0, 10);
+    ImGui::SliderInt("dcol", &end.col, 0, 10);
+    ImGui::SliderInt("drow", &end.row, 0, 10);
     if(ImGui::Button("from"))
     {
-        *path_debug = GetPath(level.map, col, row, destCol, destRow, true);
+        *path_debug = GetPath(level.map, start, end, true);
     }
 }
 
 void
-EditorPollForKeyboardInput(point *editor_cursor)
+EditorPollForKeyboardInput(position *editor_cursor)
 {
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_A)))
     {
-        editor_cursor->first = max(editor_cursor->first - 1, 0);
+        editor_cursor->col = max(editor_cursor->col - 1, 0);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
     {
-        editor_cursor->first = min(editor_cursor->first + 1, 100);
+        editor_cursor->col = min(editor_cursor->col + 1, 100);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
     {
-        editor_cursor->second = max(editor_cursor->second - 1, 0);
+        editor_cursor->row = max(editor_cursor->row - 1, 0);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
     {
-        editor_cursor->second = min(editor_cursor->second + 1, 100);
+        editor_cursor->row = min(editor_cursor->row + 1, 100);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_R)))
     {
         // NOTE: This is temporary, just puts the cursor smack dab in the middle.
-        *editor_cursor = point(viewportCol + 7, viewportRow + 5);
+        *editor_cursor = position(viewportCol + 7, viewportRow + 5);
     }
 }
 
@@ -128,13 +126,13 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 {
 	ImGui::Begin("level editor");
 	{
-        static point editor_cursor = pair<int, int>(0, 0);
+        static position editor_cursor = {0, 0};
         static path path_debug = {};
 
         static bool showDebugPaths = false;
 
         EditorPollForKeyboardInput(&editor_cursor);
-        Tile *hover_tile = &level->map.tiles[editor_cursor.first][editor_cursor.second];
+        Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
         // TODO: This doesn't account for when we're outside the viewport. FIX!!!
 
         ImGui::Text("Units:");
@@ -144,8 +142,8 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
                  hover_tile->type == WALL))
             {
                 level->combatants.push_back(make_unique<Unit>(*units[selectedIndex]));
-                level->combatants.back()->col = editor_cursor.first;
-                level->combatants.back()->row = editor_cursor.second;
+                level->combatants.back()->pos.col = editor_cursor.col;
+                level->combatants.back()->pos.row = editor_cursor.row;
                 hover_tile->occupant = level->combatants.back().get();
             }
             else
@@ -187,7 +185,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         {
             ImGui::Text("Over unit.");
             ImGui::SameLine();
-            ImGui::Text("Behavior: %d", level->map.tiles[editor_cursor.first][editor_cursor.second].occupant->ai_behavior);
+            ImGui::Text("Behavior: %d", level->map.tiles[editor_cursor.col][editor_cursor.row].occupant->ai_behavior);
         }
 
         ImGui::Text("AI Behavior");
@@ -237,16 +235,16 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         // Render overlays to the main target
         if(path_debug.size() > 0)
         {
-            for(pair<int, int> point : path_debug)
+            for(const position &p : path_debug)
             {
-                RenderTileColor(point.first - viewportCol,
-                           point.second - viewportRow,
+                RenderTileColor({p.col - viewportCol,
+                                 p.row - viewportRow},
                            healColor);
             }
         }
 
-        RenderTileColor(editor_cursor.first - viewportCol,
-                   editor_cursor.second - viewportRow,
+        RenderTileColor({editor_cursor.col - viewportCol,
+                   editor_cursor.row - viewportRow},
                    editorColor);
 	}
 	ImGui::End();
