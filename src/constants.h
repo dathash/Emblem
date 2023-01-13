@@ -52,7 +52,7 @@
 
 #define TOTAL_LEVELS 8
 
-#define LEVEL_TIME 60
+#define LEVEL_TIME 99
 
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
@@ -79,7 +79,7 @@ enum InterfaceState
     PREVIEW_ATTACK,
     PREVIEW_HEALING,
 
-    GAME_MENU_ROOT,
+    GAME_MENU,
     GAME_MENU_OUTLOOK,
     GAME_MENU_OPTIONS,
 
@@ -88,6 +88,8 @@ enum InterfaceState
 
     ENEMY_INFO,
     ENEMY_RANGE,
+
+    LEVEL_MENU,
 
     NO_OP,
 };

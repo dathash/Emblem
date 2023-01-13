@@ -141,7 +141,7 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
 // Renders the scene from the given game state.
 void
 Render(const Tilemap &map, const Cursor &cursor, 
-       const Menu &gameMenu, const Menu &unitMenu)
+       const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -265,7 +265,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 
 // ==================================== menus =====================================================
     // Game Menu
-    if(GlobalInterfaceState == GAME_MENU_ROOT)
+    if(GlobalInterfaceState == GAME_MENU)
     {
         for(int i = 0; i < gameMenu.rows; ++i)
         {
@@ -302,6 +302,27 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
 
         SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
+        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
+        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
+        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
+    }
+
+    if(GlobalInterfaceState == LEVEL_MENU)
+    {
+        for(int i = 0; i < levelMenu.rows; ++i)
+        {
+            SDL_Rect menuRect = {650, 140 + i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &menuRect);
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
+
+            RenderText(levelMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
+        }
+
+        SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * levelMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
         SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
         SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);

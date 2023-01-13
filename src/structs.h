@@ -290,7 +290,6 @@ struct Level
 {
     Tilemap map;
     vector<unique_ptr<Unit>> combatants;
-    Timer timer;
 
     // Returns the position of the leader.
     position
@@ -354,11 +353,6 @@ struct Level
         // cleanup functions
         RemoveDeadUnits();
         CheckForRemaining();
-        if(timer.Update())
-        {
-            printf("Ran out of time. Game over!\n");
-            RestartLevel();
-        }
     }
 };
 

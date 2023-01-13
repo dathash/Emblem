@@ -589,7 +589,7 @@ public:
 
     virtual void Execute()
     { 
-        GlobalInterfaceState = GAME_MENU_ROOT;
+        GlobalInterfaceState = GAME_MENU;
     }
 };
 
@@ -639,7 +639,7 @@ public:
 
     virtual void Execute()
     { 
-        GlobalInterfaceState = GAME_MENU_ROOT;
+        GlobalInterfaceState = GAME_MENU;
     }
 };
 
@@ -712,18 +712,14 @@ public:
             // Move onto next level!
             if(map.tiles[cursor->pos.col][cursor->pos.row].type == OBJECTIVE)
             {
-                // TODO: Level Transitions
-                printf("Objective Reached. Onto the next level!\n");
-                NextLevel();
+                GlobalLevelTimer.Pause();
+                GlobalInterfaceState = LEVEL_MENU;
                 return;
             }
-
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-
-            return;
         }
 
-        assert(!"ChooseUnitMenuOptionCommand | How did you get here?\n");
+        assert(!"ERROR ChooseUnitMenuOptionCommand | How did you get here?\n");
     }
 
 private:
@@ -748,6 +744,35 @@ public:
     {
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
+};
+
+class ChooseLevelMenuOptionCommand : public Command
+{
+public:
+    ChooseLevelMenuOptionCommand(const Menu &menu_in)
+    : menu(menu_in)
+    {}
+
+    virtual void Execute()
+    {
+        string option = menu.optionText[menu.current];
+
+        if(option == "Next")
+        {
+            NextLevel();
+            return;
+        }
+        if(option == "Redo")
+        {
+            RestartLevel();
+            return;
+        }
+
+        assert(!"ERROR ChooseLevelMenuOptionCommand | How did you get here?\n");
+    }
+
+private:
+    const Menu &menu;
 };
 
 // ============================== Input Handler ================================
@@ -856,7 +881,8 @@ public:
     // contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map,
-                        Menu *gameMenu, Menu *unitMenu)
+                        Menu *gameMenu, Menu *unitMenu,
+                        Menu *levelMenu)
     {
         if(!GlobalPlayerTurn)
             return;
@@ -993,7 +1019,7 @@ public:
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(GAME_MENU_ROOT):
+            case(GAME_MENU):
             {
                 BindUp(make_shared<UpdateMenuCommand>(gameMenu, -1));
                 BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
@@ -1062,6 +1088,17 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<EnemyUndoRangeCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(LEVEL_MENU):
+            {
+                BindUp(make_shared<UpdateMenuCommand>(levelMenu, -1));
+                BindDown(make_shared<UpdateMenuCommand>(levelMenu, 1));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu));
+                BindB(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 

@@ -67,6 +67,7 @@ static bool GlobalTurnStart = true;
 
 static unsigned int GlobalInterfaceState;
 static unsigned int GlobalAIState;
+
 ////////////////////////////////
 
 // TODO: Refactor these to only be where they need to be.
@@ -81,6 +82,8 @@ static int GlobalCurrentID = 0;
 #include "utils.h"
 #include "state.h"
 #include "structs.h"
+// TODO: Figure out how to fix this forward declaration
+static Timer GlobalLevelTimer = Timer(LEVEL_TIME);
 #include "load.h"
 #include "init.h"
 #include "input.h"
@@ -124,6 +127,7 @@ int main(int argc, char *argv[])
 
     Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
     Menu unitMenu(1, 0, {"Wait"});
+    Menu levelMenu(2, 0, {"Next", "Redo"});
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
@@ -146,13 +150,15 @@ int main(int argc, char *argv[])
         {
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
-                                   &gameMenu, &unitMenu);
+                                   &gameMenu, &unitMenu, &levelMenu);
 
             ai.Update(&cursor, &level.map);
 
             cursor.Update();
             ui.Update();
             level.Update();
+            if(GlobalLevelTimer.Update())
+                RestartLevel();
 
             for(const unique_ptr<Unit> &unit : level.combatants)
                 unit->Update();
@@ -172,6 +178,7 @@ int main(int argc, char *argv[])
             GlobalNextLevel = false;
             level_index = (level_index + 1 < TOTAL_LEVELS) ? level_index + 1 : 0;
             level = LoadLevel(levels[level_index], units);
+            GlobalLevelTimer = Timer(LEVEL_TIME);
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
         }
@@ -181,9 +188,9 @@ int main(int argc, char *argv[])
             GlobalTurnStart = false;
 
             if(GlobalPlayerTurn)
-                level.timer.Start();
+                GlobalLevelTimer.Start();
             else
-                level.timer.Pause();
+                GlobalLevelTimer.Pause();
 
             for(auto const &unit : level.combatants)
                 unit->Activate();
@@ -198,14 +205,14 @@ int main(int argc, char *argv[])
         //////////////// ABOVE TO BE EXTRICATED //////////////////
 
         // Render
-        Render(level.map, cursor, gameMenu, unitMenu);
+        Render(level.map, cursor, gameMenu, unitMenu, levelMenu);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		if(GlobalPlayerTurn)
-			RenderUI(&ui, cursor, level.map, level.timer);
+			RenderUI(&ui, cursor, level.map);
 
 #if DEV_MODE
         if(GlobalEditorMode)

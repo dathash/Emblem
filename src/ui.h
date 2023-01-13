@@ -429,8 +429,7 @@ DisplayTimer(ImGuiWindowFlags wf, const Timer &timer)
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
-         const Tilemap &map,
-         const Timer &timer)
+         const Tilemap &map)
 {
     if(GlobalEditorMode)
         return;
@@ -461,7 +460,7 @@ RenderUI(UI_State *ui,
                                            cursor.Quadrant());
 	if(ui->options_menu)
 		DisplayOptionsMenu(window_flags);
-    DisplayTimer(window_flags, timer);
+    DisplayTimer(window_flags, GlobalLevelTimer);
 
 	// cleanup
 	ImGui::PopStyleVar();
