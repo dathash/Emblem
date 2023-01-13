@@ -89,14 +89,15 @@ MVP
         Olivia
 
     Abilities
-        Heal
-        Warp
-        Explode
-        Buff
-        Boost
-        Shield
+    * Create a system where a unit possesses one of the following.
+        (x) Heal
+        ( ) Warp
+        ( ) Swap
+        ( ) Explode
+        ( ) Boost
+        ( ) Buff
+        ( ) Shield
 
-    Startup Screen
     BUG | Enemies in the top of the screen with no route to your units seg fault.
     Make level editing easy by starting the game with a level select screen.
 
@@ -126,6 +127,7 @@ POLISH
     * Should be able to do this in the same way we cycle units when selecting a
       victim for an attack in command.h
     End turn quickly somehow when you're just moving Zarathustra to the goal?
+    Startup Screen
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.
