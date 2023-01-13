@@ -105,7 +105,7 @@ EditorPollForKeyboardInput(position *editor_cursor)
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
     {
-        editor_cursor->col = min(editor_cursor->col + 1, 100);
+        editor_cursor->col = min(editor_cursor->col + 1, VIEWPORT_WIDTH - 1);
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
     {
@@ -113,9 +113,9 @@ EditorPollForKeyboardInput(position *editor_cursor)
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
     {
-        editor_cursor->row = min(editor_cursor->row + 1, 100);
+        editor_cursor->row = min(editor_cursor->row + 1, VIEWPORT_HEIGHT - 1);
     }
-    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_R)))
+    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_E)))
     {
         // NOTE: This is temporary, just puts the cursor smack dab in the middle.
         *editor_cursor = position(viewportCol + 7, viewportRow + 5);
@@ -133,7 +133,6 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
 
         EditorPollForKeyboardInput(&editor_cursor);
         Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
-        // TODO: This doesn't account for when we're outside the viewport. FIX!!!
 
         ImGui::Text("Units:");
         if(ImGui::Button("add"))

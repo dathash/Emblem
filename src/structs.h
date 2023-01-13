@@ -158,7 +158,7 @@ struct Unit
     string name;
     int id;
     bool isAlly;
-    position pos = {0, 0};
+    position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
     bool isExhausted = false;
     bool shouldDie = false;
     int mov;
@@ -389,7 +389,7 @@ struct Cursor
     {
         pos = pos_in;
         path_draw = {};
-        //TODO: What if the leader starts outside of the 0, 0 viewport?
+        MoveViewport(pos_in);
     }
 
     // returns the current quadrant of where the cursor is on the screen.

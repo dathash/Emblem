@@ -50,4 +50,41 @@ clamp(int val, int min, int max)
     return val;
 }
 
+// ===================================== Viewport ===============================
+// Checks if a point is within the current viewport.
+bool
+WithinViewport(const position &p)
+{
+    return (p.col < VIEWPORT_WIDTH + viewportCol &&
+            p.col >= viewportCol &&
+            p.row < VIEWPORT_HEIGHT + viewportRow &&
+            p.row >= viewportRow);
+}
+
+// moves the cursor's viewport so that the given tile is on screen.
+// Very Impure
+void
+MoveViewport(const position &p)
+{
+    if(WithinViewport(p))
+        return;
+
+    if(p.col >= VIEWPORT_WIDTH + viewportCol)
+    {
+        ++viewportCol;
+    }
+    else if(p.col < viewportCol)
+    {
+        --viewportCol;
+    }
+    else if(p.row >= VIEWPORT_HEIGHT + viewportRow)
+    {
+        ++viewportRow;
+    }
+    else if(p.row < viewportRow)
+    {
+        --viewportRow;
+    }
+}
+
 #endif

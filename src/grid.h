@@ -7,44 +7,6 @@
 
 #include <queue>
 
-// ===================================== Viewport ===============================
-// Checks if a point is within the current viewport.
-bool
-WithinViewport(const position &p)
-{
-    return (p.col < VIEWPORT_WIDTH + viewportCol &&
-            p.col >= viewportCol &&
-            p.row < VIEWPORT_HEIGHT + viewportRow &&
-            p.row >= viewportRow);
-}
-
-// moves the cursor's viewport so that the given tile is on screen.
-// NOTE: creates side effect. Unpredictable.
-void
-MoveViewport(const position &p)
-{
-    if(WithinViewport(p))
-        return;
-
-    if(p.col >= VIEWPORT_WIDTH + viewportCol)
-    {
-        ++viewportCol;
-    }
-    else if(p.col < viewportCol)
-    {
-        --viewportCol;
-    }
-    else if(p.row >= VIEWPORT_HEIGHT + viewportRow)
-    {
-        ++viewportRow;
-    }
-    else if(p.row < viewportRow)
-    {
-        --viewportRow;
-    }
-}
-
-
 // ========================= grid helper functions ========================
 // returns true if the position is in-bounds.
 bool
@@ -429,9 +391,9 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit)
     return result;
 }
 
-//TODO: This is still doing things naively.
 // Finds the nearest unit to the cursor, based on the given predicate expression.
-Unit *FindNearest(const Tilemap &map, const position &origin, bool predicate(const Unit &))
+Unit *FindNearest(const Tilemap &map, const position &origin, 
+                  bool predicate(const Unit &), bool isAlly)
 {
     int minDistance = 100;
     int distance = 0;
@@ -442,7 +404,7 @@ Unit *FindNearest(const Tilemap &map, const position &origin, bool predicate(con
         {
             if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
             {
-                distance = ManhattanDistance(origin, position(col, row));
+                distance = GetPath(map, origin, position(col, row), isAlly).size();
                 if(distance < minDistance)
                 {
                     result = map.tiles[col][row].occupant;

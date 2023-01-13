@@ -22,7 +22,7 @@ public:
                 [](const Unit &unit) -> bool
                 {
                     return !unit.isAlly && !unit.isExhausted;
-                });
+                }, false);
 
         if(selected)
         {
@@ -112,7 +112,7 @@ GetAction(const Unit &unit, const Tilemap &map)
                     [](const Unit &unit) -> bool
                     {
                         return unit.isAlly;
-                    });
+                    }, false);
                 path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
                 action = pair<position, Unit *>(
                         FurthestMovementOnPath(map, path_to_nearest, unit.mov),
@@ -152,8 +152,6 @@ GetAction(const Unit &unit, const Tilemap &map)
                 int min_health_after_attack = 999;
                 Outcome outcome;
 
-                // TODO: Move this repeated stuff out into a function.
-                // Something like "Makeanalysisofpossibilities()"
                 action = {unit.pos, NULL};
                 for(const pair<position, Unit *> &poss : possibilities)
                 {

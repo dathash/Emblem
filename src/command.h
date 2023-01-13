@@ -427,11 +427,9 @@ public:
 
     virtual void Execute()
     {
-        // TODO: Replace all cursor->xxx->pos with cursor->xxx.
-        int distance = ManhattanDistance(cursor->selected->pos,
-                                         cursor->targeted->pos);
+        int distance = ManhattanDistance(cursor->source, cursor->pos);
         SimulateCombat(cursor->selected, cursor->targeted, distance,
-                       map.tiles[cursor->redo.col][cursor->redo.row].avoid,
+                       map.tiles[cursor->source.col][cursor->source.row].avoid,
                        map.tiles[cursor->pos.col][cursor->pos.row].avoid);
 
         cursor->selected->Deactivate();
@@ -573,8 +571,7 @@ public:
         // change state
         GlobalInterfaceState = ENEMY_RANGE;
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
-        cursor->redo.col = cursor->pos.col;
-        cursor->redo.row = cursor->pos.row;
+        cursor->redo = cursor->pos;
 
         map->accessible = AccessibleFrom(*map, cursor->redo,
                                          cursor->selected->mov,
