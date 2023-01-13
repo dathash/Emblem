@@ -98,7 +98,6 @@ MVP
         ( ) Buff
         ( ) Shield
 
-    BUG | Enemies in the top of the screen with no route to your units seg fault.
     Make level editing easy by starting the game with a level select screen.
 
     Make just Zarathustra finish levels
@@ -110,13 +109,13 @@ NICE
         Sound Effects
         Drum-n-bass Audio
             Trance-like state of playing
-    Shrink Tilesets to absolute necessity, also enforce consistency across them
-    for ease of plug-n-play.
     Better enemy AI
         Pursuing Enemies only come for you when you get near.
         * Bresenham's line plus a certain distance (maybe 7 tiles?)
         Enemy Units have more complex decision-making process.
         * More factors like accuracy and whether they will die in the process.
+    Shrink Tilesets to absolute necessity, also enforce consistency across them
+    for ease of plug-n-play.
 
 POLISH
     Placing Unit moves them smoothly to that square (A-star)
@@ -129,19 +128,19 @@ POLISH
       victim for an attack in command.h
     End turn quickly somehow when you're just moving Zarathustra to the goal?
     Startup Screen
+    Create polished tilemaps with Tiled and overlay them onto the in-game maps.
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.
-    When the player's turn start, something flashes on the screen.
+    When the player's turn starts, something flashes on the screen.
     * I'm pretty sure I caused this when I went on my big refactor. Check it out
       at your leisure.
     Sometimes enemies end up moving to 0, 0 instead of their intended
     destination, even when the tile is a wall.
+    BUG | Enemies in the top of the screen with no route to your units seg fault.
 
 REFACTOR
-    Change points to its own class with col and row semantics
-    * Switch everything over to this.
-    remove selectedCol from cursor (DRY)
+    remove redo from cursor (DRY)?
     Take junk out of main
     Rip out the viewport code (for now). It needs some serious reconsideration.
 
