@@ -69,72 +69,10 @@ RenderText(const Texture &texture, int x, int y)
 }
 
 // Renders a Health Bar
+// TODO: Rework
 void
 RenderHealthBar(int x, int y, int hp, int maxHp, bool allyColor)
 {
-    SDL_Rect healthRect;
-    for(int i = 0; i < maxHp; ++i)
-    {
-        SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
-        if(i < hp)
-        {
-            if(allyColor)
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, allyHealthBarColor.r, allyHealthBarColor.g, allyHealthBarColor.b, allyHealthBarColor.a);
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, enemyHealthBarColor.r, enemyHealthBarColor.g, enemyHealthBarColor.b, enemyHealthBarColor.a);
-            }
-        }
-        else
-        {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarLostColor.r, healthBarLostColor.g, healthBarLostColor.b, healthBarLostColor.a);
-        }
-        SDL_RenderFillRect(GlobalRenderer, &healthRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
-        SDL_RenderDrawRect(GlobalRenderer, &healthRect);
-    }
-}
-
-// Renders a Health Bar, with a damage amount taken out of it.
-void
-RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
-{
-    SDL_Rect healthRect;
-    for(int i = 0; i < maxHp; ++i)
-    {
-        SDL_Rect healthRect = {x + HEALTH_TICK_WIDTH * i, y, HEALTH_TICK_WIDTH, HEALTH_TICK_HEIGHT};
-        if(i < hp - Dmg)
-        {
-            if(allyColor)
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, allyHealthBarColor.r, allyHealthBarColor.g, allyHealthBarColor.b, allyHealthBarColor.a);
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, enemyHealthBarColor.r, enemyHealthBarColor.g, enemyHealthBarColor.b, enemyHealthBarColor.a);
-            }
-        }
-        else if(i < hp)
-        {
-            if(allyColor)
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, allyHealthBarLosingColor.r, allyHealthBarLosingColor.g, allyHealthBarLosingColor.b, allyHealthBarLosingColor.a);
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(GlobalRenderer, enemyHealthBarLosingColor.r, enemyHealthBarColor.g, enemyHealthBarLosingColor.b, enemyHealthBarLosingColor.a);
-            }
-        }
-        else
-        {
-            SDL_SetRenderDrawColor(GlobalRenderer, healthBarLostColor.r, healthBarLostColor.g, healthBarLostColor.b, healthBarLostColor.a);
-        }
-        SDL_RenderFillRect(GlobalRenderer, &healthRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
-        SDL_RenderDrawRect(GlobalRenderer, &healthRect);
-    }
 }
 
 

@@ -77,8 +77,6 @@ Tripod (Bomberman Hero)
 
 # TODO
 PROTOTYPE
-    Make level editing easy by starting the game with a level select screen.
-
     16 levels
 
     Retain your party condition through levels
@@ -94,6 +92,9 @@ PROTOTYPE
         ( ) Shield
 
     Win Screen
+    Units have health bars below or above their sprites
+
+    Swap hard-coded ids for string hashes!
 
 0.1
     Make just Leader finish levels
@@ -117,6 +118,10 @@ PROTOTYPE
     End turn with a button
     Tutorial
 
+    Placing Unit moves them smoothly to that square (A-star)
+
+    Unit damage and healing ranges are displayed.
+
 NICE
     Better enemy AI
         Pursuing Enemies only come for you when you get near.
@@ -128,13 +133,12 @@ NICE
     Swap Noire and Donnel's Colors
 
 POLISH
-    Placing Unit moves them smoothly to that square (A-star)
-
-    Unit damage and healing ranges are displayed.
-
     Switch Options menu to internal system.
     * Music Volume
     * Resolution?
+      * This would require constructing some kind of anchor system, which would
+        be an enormous amount of work. If we want to allow for variable
+        resolutions, we will need to probably use Qt or something similar.
     * Quit
 
     Look into pixel squishing problems
@@ -150,12 +154,12 @@ POLISH
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.
+    The Next-Level code is so flimsy...
+    So is the Game Over code.
 
 REFACTOR
-    remove redo from cursor (DRY)?
     Take junk out of main
     Rip out the viewport code (for now). It needs some serious reconsideration.
-    Swap hard-coded ids for string hashes!
 
 # Ideas
 ## Brainstorm

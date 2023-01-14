@@ -7,7 +7,7 @@
 
 // ======================== General UI helper functions ========================
 void 
-TextCentered(std::string text) {
+TextCentered(string text) {
     auto windowWidth = ImGui::GetWindowSize().x;
     auto textWidth   = ImGui::CalcTextSize(text.c_str()).x;
 
@@ -63,9 +63,6 @@ struct UI_State
     void 
     Update()
     {
-        if(!GlobalPlayerTurn)
-            Clear(); // SLOW
-
 		// Tile Info
         if(
            !(GlobalInterfaceState == LEVEL_MENU ||
@@ -378,6 +375,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     ImGui::SetNextWindowPos(ImVec2(260, 440));
     ImGui::Begin("health1", NULL, wf);
     {
+        //TextCentered(string text)
         ImGui::Text("%d", ally.health);
         ImGui::PushFont(uiFontMedium);
         ImGui::Text("HP");
@@ -389,6 +387,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     ImGui::SetNextWindowPos(ImVec2(510, 440));
     ImGui::Begin("health2", NULL, wf);
     {
+        
         ImGui::Text("%d", target.health);
         ImGui::PushFont(uiFontMedium);
         ImGui::Text("HP");
@@ -443,6 +442,8 @@ RenderUI(UI_State *ui,
          const Tilemap &map)
 {
     if(GlobalEditorMode)
+        return;
+    if(!GlobalPlayerTurn)
         return;
 
     ImGuiWindowFlags window_flags = 0;

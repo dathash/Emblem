@@ -53,7 +53,8 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 			sprintf(buffer, "%d", i);
 			if (ImGui::Button(buffer))
 				selectedIndex = i;
-			ImGui::SameLine();
+            if(i % 7 || i == 0)
+                ImGui::SameLine();
 		}
 		ImGui::NewLine();
 
@@ -278,7 +279,7 @@ GlobalsViewer()
 // Contains static variables that might trip some stuff up, just a heads up.
 void
 EditorPass(vector<unique_ptr<Unit>> *units,
-           Level *level)
+           Level *level, const vector<string> &levels)
 {
     // Internal variables
     static bool showUnitEditor = true;
@@ -312,6 +313,15 @@ EditorPass(vector<unique_ptr<Unit>> *units,
         {
             SaveLevel(string(DATA_PATH) + string(levelFileName), *level);
             cout << "Level saved: " << levelFileName << "\n";
+        }
+
+        if(ImGui::Button("TEST"))
+            *level = LoadLevel(string(DATA_PATH) + string("test.txt"), *units);
+
+        for(const string &s : levels)
+        {
+            if(ImGui::Button(s.c_str()))
+                *level = LoadLevel(s, *units);
         }
 
         ImGui::Checkbox("Unit Editor", &showUnitEditor);

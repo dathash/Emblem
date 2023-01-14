@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 // ================================== load =================================
     vector<unique_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
 
-    vector<string> levels = {DATA_PATH + string("test.txt"), DATA_PATH + string("l1.txt"),
+    vector<string> levels = {DATA_PATH + string("l0.txt"), DATA_PATH + string("l1.txt"),
                              DATA_PATH + string("l2.txt"), DATA_PATH + string("l3.txt"),
                              DATA_PATH + string("l4.txt"), DATA_PATH + string("l5.txt"),
                              DATA_PATH + string("l6.txt"), DATA_PATH + string("l7.txt")
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
-            level_index = (level_index + 1 < TOTAL_LEVELS) ? level_index + 1 : 0;
+            level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
             level = LoadLevel(levels[level_index], units);
             GlobalLevelTimer = Timer(LEVEL_TIME);
             GlobalPlayerTurn = true;
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 
 #if DEV_MODE
         if(GlobalEditorMode)
-            EditorPass(&units, &level);
+            EditorPass(&units, &level, levels);
 #endif
 
 		ImGui::EndFrame();

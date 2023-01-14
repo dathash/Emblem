@@ -31,9 +31,6 @@
 #define MENU_ROW_HEIGHT 50
 #define CONVERSATION_WRAP 840
 
-#define HEALTH_TICK_HEIGHT 40
-#define HEALTH_TICK_WIDTH 15
-
 // animation
 #define ANIMATION_SPEED 10
 #define AI_ACTION_SPEED 15
@@ -48,12 +45,10 @@
 #define INITIAL_UNITS "units.txt"
 
 #define DEFAULT_PORTRAIT "ph.png"
-#define DEFAULT_SHEET "warrior.png"
+#define DEFAULT_SHEET "thief.png"
 
 // gameplay
 #define LEADER_ID 0
-
-#define TOTAL_LEVELS 8
 
 #define LEVEL_TIME 99
 
