@@ -93,6 +93,8 @@ enum InterfaceState
 
     LEVEL_MENU,
 
+    CONVERSATION,
+
     NO_OP,
 };
 
@@ -132,7 +134,7 @@ const SDL_Color outlineColor = {85, 70, 31, 255};
 const SDL_Color uiAltColor = {60, 100, 30, 255};
 const SDL_Color enemyColor = {150, 60, 30, 255};
 const SDL_Color uiTextColor = {0, 0, 0, 255};
-const SDL_Color uiSelectorColor = {121, 100, 43, 100};
+const SDL_Color uiSelectorColor = {119, 100, 55, 100};
 const SDL_Color black = {0, 0, 0, 255};
 
 // Combat

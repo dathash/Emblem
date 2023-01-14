@@ -144,20 +144,16 @@ int main(int argc, char *argv[])
 
 	UI_State ui = {};
 
-    Menu gameMenu(3, 0, {"Outlook", "Options", "End Turn"});
-    Menu unitMenu(1, 0, {"Wait"});
-    Menu levelMenu(2, 0, {"Next", "Redo"});
+    Menu game_menu({"Outlook", "Options", "End Turn"});
+    Menu unit_menu({"Wait"});
+    Menu level_menu({"Next", "Redo", "Conv"});
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
     AI ai;
 
-    Conversation conv = LoadConversation(CONVERSATIONS_PATH, "test.txt", 
-                        *level.combatants[0], *level.combatants[1]);
-    for(const sentence &s : conv.prose)
-    {
-        cout << s.first << " | " << s.second << "\n";
-    }
+    Conversation conversation = LoadConversation(CONVERSATIONS_PATH, "test.txt", 
+                                *level.combatants[0], *level.combatants[1]);
 
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
@@ -176,7 +172,8 @@ int main(int argc, char *argv[])
         {
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
-                                   &gameMenu, &unitMenu, &levelMenu);
+                                   &game_menu, &unit_menu, &level_menu,
+                                   &conversation);
 
             ai.Update(&cursor, &level.map);
 
@@ -231,7 +228,7 @@ int main(int argc, char *argv[])
         //////////////// ABOVE TO BE EXTRICATED //////////////////
 
         // Render
-        Render(level.map, cursor, gameMenu, unitMenu, levelMenu);
+        Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

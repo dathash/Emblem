@@ -141,7 +141,8 @@ RenderHealthBarDamage(int x, int y, int hp, int maxHp, int Dmg, bool allyColor)
 // Renders the scene from the given game state.
 void
 Render(const Tilemap &map, const Cursor &cursor, 
-       const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu)
+       const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu,
+       const Conversation &conversation)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -352,6 +353,37 @@ Render(const Tilemap &map, const Cursor &cursor,
 
         RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
+    }
+
+    if(GlobalInterfaceState == CONVERSATION)
+    {
+        RenderPortrait(50, 0, conversation.one.portrait,
+                       true);
+        RenderPortrait(500, 0, conversation.two.portrait,
+                       false);
+
+        SDL_Rect conv_rect = {20, 400, 860, 180};
+        SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+        SDL_RenderFillRect(GlobalRenderer, &conv_rect);
+        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_RenderDrawRect(GlobalRenderer, &conv_rect);
+
+        SDL_Rect name_rect;
+        if(conversation.Speaker() == SPEAKER_ONE)
+        {
+            name_rect = {20, 400, 300, 40};
+        }
+        else
+        {
+            name_rect = {580, 400, 300, 40};
+        }
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, 255);
+        SDL_RenderFillRect(GlobalRenderer, &name_rect);
+        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+        SDL_RenderDrawRect(GlobalRenderer, &name_rect);
+
+        RenderText(conversation.speaker_texture, name_rect.x + 10, 400);
+        RenderText(conversation.words_texture, 30, 440);
     }
 
     /*

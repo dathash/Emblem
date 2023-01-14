@@ -93,6 +93,13 @@ struct Texture
     {
         //printf("WARN: Default texture constructor called.\n");
     }
+
+    ~Texture()
+    {
+        //TODO: This causes some funny stuff to happen!
+        //      But I think it has to be called. Look into this.
+        //SDL_DestroyTexture(sdl_texture);
+    }
 };
 
 struct Spritesheet
@@ -418,17 +425,58 @@ enum Speaker
 };
 typedef pair<Speaker, string> sentence;
 
+// CIRCULAR
+Texture LoadTextureText(string, SDL_Color);
+
 struct Conversation
 {
     const Unit &one;
     const Unit &two;
     vector<sentence> prose;
+    int current = 0;
+    Texture words_texture;
+    Texture speaker_texture;
 
     Conversation(const Unit &one_in, const Unit &two_in)
     : one(one_in),
       two(two_in),
       prose({})
-    {}
+    {
+    }
+
+    string
+    Words() const
+    {
+        return prose[current].second;
+    }
+
+    Speaker
+    Speaker() const
+    {
+        return prose[current].first;
+    }
+
+    void
+    ReloadTextures()
+    {
+        words_texture = LoadTextureText(Words(), black);
+        if(Speaker() == SPEAKER_ONE)
+            speaker_texture = LoadTextureText(one.name, black);
+        if(Speaker() == SPEAKER_TWO)
+            speaker_texture = LoadTextureText(two.name, black);
+    }
+
+    void
+    Next()
+    {
+        ++current;
+    }
+
+    void
+    First()
+    {
+        current = 0;
+    }
 };
 
 #endif

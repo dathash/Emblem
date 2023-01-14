@@ -49,6 +49,7 @@ LoadConversation(string path, string filename,
         }
     }
     fp.close();
+    conversation.ReloadTextures();
 
     return conversation;
 }

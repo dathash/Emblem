@@ -44,13 +44,15 @@ struct UI_State
     bool options_menu = false;
     bool unit_menu = false;
     bool combat_screen = false;
+    bool timer = false;
 
     void 
     Update()
     {
 		// Tile Info
-        if(GlobalPlayerTurn
-			// CONSIDER: When else don't we want to see this? 
+        if(GlobalPlayerTurn &&
+           !(GlobalInterfaceState == LEVEL_MENU ||
+             GlobalInterfaceState == CONVERSATION)
 			)
         {
             tile_info = true;
@@ -58,6 +60,19 @@ struct UI_State
         else
         {
             tile_info = false;
+        }
+
+        // Timer
+        if(GlobalPlayerTurn &&
+           !(GlobalInterfaceState == LEVEL_MENU ||
+             GlobalInterfaceState == CONVERSATION)
+          )
+        {
+            timer = true;
+        }
+        else
+        {
+            timer = false;
         }
 
 		// Unit Blurb
@@ -460,7 +475,8 @@ RenderUI(UI_State *ui,
                                            cursor.Quadrant());
 	if(ui->options_menu)
 		DisplayOptionsMenu(window_flags);
-    DisplayTimer(window_flags, GlobalLevelTimer);
+    if(ui->timer)
+        DisplayTimer(window_flags, GlobalLevelTimer);
 
 	// cleanup
 	ImGui::PopStyleVar();
@@ -471,21 +487,19 @@ RenderUI(UI_State *ui,
 // ================================= Menu ======================================
 struct Menu
 {
-    int rows;
-    int current;
+    int rows = 0;
+    int current = 0;
 
     vector<Texture> optionTextTextures;
     vector<string> optionText;
 
-    Menu(int rows_in, int current_in, vector<string> options_in)
-    : rows(rows_in),
-      current(current_in)
+    Menu(vector<string> options_in)
     {
-        assert(rows_in >= 0 && current_in >= 0);
         for(string s : options_in)
         {
             optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));
             optionText.push_back(s);
+            rows += 1;
         }
     }
 

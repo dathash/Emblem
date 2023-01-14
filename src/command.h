@@ -196,7 +196,7 @@ public:
                                              cursor->selected->min_range, cursor->selected->max_range);
 
         // Update unit menu with available actions
-        *menu = Menu(0, 0, {});
+        *menu = Menu({});
 
         // for attacking
         for(const position &p : interactible)
@@ -767,12 +767,43 @@ public:
             RestartLevel();
             return;
         }
+        if(option == "Conv")
+        {
+            GlobalInterfaceState = CONVERSATION;
+            return;
+        }
 
         assert(!"ERROR ChooseLevelMenuOptionCommand | How did you get here?\n");
     }
 
 private:
     const Menu &menu;
+};
+
+class NextSentenceCommand : public Command
+{
+public:
+    NextSentenceCommand(Conversation *conversation_in)
+    : conversation(conversation_in)
+    {}
+
+    virtual void Execute()
+    {
+        conversation->Next();
+        if(conversation->current >= conversation->prose.size())
+        {
+            conversation->First();
+            //TODO: Conversations are a one-time thing, so remove them from the menu.
+            //      While we're at it, make a vector of conversations per level
+            //      and create a new menu in level_menu which displays possible
+            //      conversations.
+            GlobalInterfaceState = LEVEL_MENU;
+        }
+        conversation->ReloadTextures();
+    }
+
+private:
+    Conversation *conversation;
 };
 
 // ============================== Input Handler ================================
@@ -882,7 +913,7 @@ public:
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map,
                         Menu *gameMenu, Menu *unitMenu,
-                        Menu *levelMenu)
+                        Menu *levelMenu, Conversation *conversation)
     {
         if(!GlobalPlayerTurn)
             return;
@@ -1098,6 +1129,17 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu));
+                BindB(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(CONVERSATION):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NextSentenceCommand>(conversation));
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
