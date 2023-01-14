@@ -38,6 +38,7 @@
 #define AI_ACTION_SPEED 15
 
 #define DATA_PATH "../data/"
+#define CONVERSATIONS_PATH "../data/conversations/"
 #define SPRITES_PATH "../assets/sprites/"
 #define THUMBS_PATH "../assets/portraits/thumbs/"
 #define FULLS_PATH "../assets/portraits/fulls/"

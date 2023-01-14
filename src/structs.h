@@ -409,4 +409,26 @@ struct Cursor
     }
 };
 
+
+// ===================================== Animation =============================
+enum Speaker
+{
+    SPEAKER_ONE,
+    SPEAKER_TWO
+};
+typedef pair<Speaker, string> sentence;
+
+struct Conversation
+{
+    const Unit &one;
+    const Unit &two;
+    vector<sentence> prose;
+
+    Conversation(const Unit &one_in, const Unit &two_in)
+    : one(one_in),
+      two(two_in),
+      prose({})
+    {}
+};
+
 #endif

@@ -9,9 +9,53 @@
 #include <vector>
 
 // ============================== loading data =================================
+Conversation
+LoadConversation(string path, string filename,
+                 const Unit &one, const Unit &two)
+{
+    Conversation conversation = {one, two};
+
+    string line;
+	string type;
+	string rest;
+
+    ifstream fp;
+    fp.open(path + filename);
+    if(!fp.is_open())
+        assert(!"ERROR LoadConversation: File could not be opened.\n");
+
+    while(getline(fp, line))
+    {
+        if(line.empty())
+            continue;
+
+        type = line.substr(0, 3);
+        rest = line.substr(4);
+
+        if(type == "ONE")
+        {
+            conversation.prose.push_back(sentence(SPEAKER_ONE, rest));
+        }
+        else if(type == "TWO")
+        {
+            conversation.prose.push_back(sentence(SPEAKER_TWO, rest));
+        }
+        else if(type == "COM")
+        {
+        }
+        else
+        {
+            cout << "WARN LoadConversation: Unrecognized line type in " << filename << ".\n";
+        }
+    }
+    fp.close();
+
+    return conversation;
+}
+
 // Loads a Texture displaying the given text in the given color.
 Texture
-LoadTextureText(std::string text, SDL_Color color)
+LoadTextureText(string text, SDL_Color color)
 {
     SDL_Texture *texture = nullptr;
     SDL_Surface *surface = nullptr;
@@ -79,9 +123,7 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
     ifstream fp;
     fp.open(filename_in);
     if(!fp.is_open())
-    {
         assert(!"ERROR LoadLevel: File could not be opened!\n");
-    }
 
     while(getline(fp, line))
     {

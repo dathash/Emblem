@@ -152,6 +152,13 @@ int main(int argc, char *argv[])
     InputHandler handler(&cursor, level.map);
     AI ai;
 
+    Conversation conv = LoadConversation(CONVERSATIONS_PATH, "test.txt", 
+                        *level.combatants[0], *level.combatants[1]);
+    for(const sentence &s : conv.prose)
+    {
+        cout << s.first << " | " << s.second << "\n";
+    }
+
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
 
