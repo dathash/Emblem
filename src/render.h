@@ -30,19 +30,19 @@ RenderTileTexture(const Tilemap &map, const Tile &tile,
     SDL_Rect source = {tile.atlas_index.col * map.atlas_tile_size, 
                        tile.atlas_index.row * map.atlas_tile_size, 
                        map.atlas_tile_size, map.atlas_tile_size};
-    SDL_RenderCopy(GlobalRenderer, map.atlas.sdlTexture, &source, &destination);
+    SDL_RenderCopy(GlobalRenderer, map.atlas.sdl_texture, &source, &destination);
 }
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(const position &pos, const SpriteSheet &sheet, bool flipped = false)
+RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false)
 {
     SDL_Rect destination = {pos.col * TILE_SIZE, 
                             pos.row * TILE_SIZE, 
                             TILE_SIZE, TILE_SIZE};
     SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
-    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdlTexture, &source, &destination,
+    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdl_texture, &source, &destination,
                      0, NULL, (const SDL_RendererFlip)flipped);
 }
 
@@ -55,7 +55,7 @@ RenderPortrait(int x, int y, const Texture &portrait, bool flipped)
                             PORTRAIT_SIZE};
     SDL_Rect source = {0, 0, portrait.width, portrait.height};
 
-    SDL_RenderCopyEx(GlobalRenderer, portrait.sdlTexture, &source, &destination, 
+    SDL_RenderCopyEx(GlobalRenderer, portrait.sdl_texture, &source, &destination, 
                      0, NULL, (const SDL_RendererFlip)flipped);
 }
 
@@ -65,7 +65,7 @@ void
 RenderText(const Texture &texture, int x, int y)
 {
     SDL_Rect destination = {x, y, texture.width, texture.height};
-    SDL_RenderCopy(GlobalRenderer, texture.sdlTexture, NULL, &destination);
+    SDL_RenderCopy(GlobalRenderer, texture.sdl_texture, NULL, &destination);
 }
 
 // Renders a Health Bar
@@ -244,16 +244,16 @@ Render(const Tilemap &map, const Cursor &cursor,
             const Tile &tileToRender = map.tiles[col][row];
             if(tileToRender.occupant)
             {
-                if(tileToRender.occupant->isExhausted)
+                if(tileToRender.occupant->is_exhausted)
                 {
-                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdlTexture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
+                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
                 }
                 else
                 {
-                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdlTexture, readyMod.r, readyMod.g, readyMod.b);
+                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
                 }
                 position screen_pos = {col - viewportCol, row - viewportRow};
-                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->isAlly);
+                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally);
             }
         }
     }
@@ -344,13 +344,14 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == PREVIEW_HEALING)
        && GlobalPlayerTurn && !GlobalEditorMode)
     {
+        //cout << cursor.pos << "\n"; // TODO: There's an unlucky seg fault here. Investigate when exiting editor mode.
         assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
         int x_pos = 560;
-        if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->isAlly)
+        if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)
             x_pos = 180;
 
-        RenderPortrait(x_pos, 400, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
-                       map.tiles[cursor.pos.col][cursor.pos.row].occupant->isAlly);
+        RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
+                       map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
 
     /*
@@ -359,24 +360,24 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(combatResolver.inc < (float)combatResolver.framesActive * 0.6666)
     {
         RenderHealthBar(200, 560, combatResolver.attacker->hp,
-                combatResolver.attacker->maxHp, combatResolver.attacker->isAlly);
+                combatResolver.attacker->maxHp, combatResolver.attacker->is_ally);
     }
     else
     {
         RenderHealthBarDamage(200, 560, combatResolver.attacker->hp,
                 combatResolver.attacker->maxHp, combatResolver.damageToAttacker,
-                combatResolver.attacker->isAlly);
+                combatResolver.attacker->is_ally);
     }
     if(combatResolver.inc < (float)combatResolver.framesActive * 0.3333)
     {
         RenderHealthBar(400, 560, combatResolver.victim->hp,
-                combatResolver.victim->maxHp, combatResolver.victim->isAlly);
+                combatResolver.victim->maxHp, combatResolver.victim->is_ally);
     }
     else
     {
         RenderHealthBarDamage(400, 560, combatResolver.victim->hp,
                 combatResolver.victim->maxHp, combatResolver.damageToVictim, 
-                combatResolver.victim->isAlly);
+                combatResolver.victim->is_ally);
     }
     */
 }

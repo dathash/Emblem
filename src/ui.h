@@ -150,11 +150,11 @@ DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 
 // Displays a health bar, with an overlay for the damage to be done.
 void 
-DisplayHealthBar(int hp, int maxHp, int damage)
+DisplayHealthBar(int health, int max_health, int damage)
 {
 	float original_cursor_position = ImGui::GetCursorPosX();
 	float original_line_height = ImGui::GetFrameHeight();
-	float percentHealth = (((float)hp - damage) / (float)maxHp);
+	float percentHealth = (((float)health - damage) / (float)max_health);
 	percentHealth = (0 < percentHealth ? percentHealth : 0);
 	if(percentHealth > 0.66)
 	{
@@ -172,7 +172,7 @@ DisplayHealthBar(int hp, int maxHp, int damage)
 	ImGui::PopStyleColor();
 }
 
-// Just display a unit's name and HP bar.
+// Just display a unit's name and health bar.
 // CONSIDER: Move portrait rendering into this.
 void 
 DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
@@ -181,7 +181,7 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
     ImGui::SetNextWindowSize(ImVec2(400, 120));
 
     int x_pos = 490;
-    if(!unit.isAlly)
+    if(!unit.is_ally)
         x_pos = 170;
 
     ImVec2 top_right = ImVec2(x_pos, 10);
@@ -199,11 +199,11 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
 
-			DisplayHealthBar(unit.hp, unit.maxHp, 0);
+			DisplayHealthBar(unit.health, unit.max_health, 0);
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
-			ImGui::Text("%d / %d", unit.hp, unit.maxHp);
+			ImGui::Text("%d / %d", unit.health, unit.max_health);
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -217,7 +217,7 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
     ImGui::SetNextWindowSize(ImVec2(480, 180));
 
     int x_pos = 410;
-    if(!unit.isAlly)
+    if(!unit.is_ally)
         x_pos = 170;
 
     ImVec2 top_right = ImVec2(x_pos, 10);
@@ -237,12 +237,12 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::Text("%s", unit.name.c_str());
 
 			ImGui::SameLine();
-			ImGui::Text("[%d/%d]", unit.hp, unit.maxHp);	
+			ImGui::Text("[%d/%d]", unit.health, unit.max_health);
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
 
-			DisplayHealthBar(unit.hp, unit.maxHp, 0);
+			DisplayHealthBar(unit.health, unit.max_health, 0);
 
 			// Second line
 			ImGui::Text("[ATK %d]", unit.attack);
@@ -257,7 +257,7 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::SameLine();
 			ImGui::Text("[CRT %d%%]", unit.crit);
 			ImGui::SameLine();
-			ImGui::Text("[RG %d-%d]", unit.minRange, unit.maxRange);
+			ImGui::Text("[RG %d-%d]", unit.min_range, unit.max_range);
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -305,7 +305,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     ImGui::Begin("Combat", NULL, wf);
     {
         Outcome outcome;
-        if(ally.isAlly == target.isAlly)
+        if(target.is_ally)
         {
             outcome = PredictHealing(ally, target);
         }
@@ -324,13 +324,13 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 				ImGui::TableNextColumn();
 
 		        ImGui::PushFont(uiFontLarge);
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(ally.hp, ally.maxHp));
-				ImGui::Text("%d", ally.hp);
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(ally.health, ally.max_health));
+				ImGui::Text("%d", ally.health);
 				ImGui::PopStyleColor();
                 ImGui::SameLine();
 				ImGui::Text("/");
                 ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.one_health, ally.maxHp));
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.one_health, ally.max_health));
 				ImGui::Text("%d", outcome.one_health);
 				ImGui::PopStyleColor();
 				ImGui::TableNextColumn();
@@ -349,13 +349,13 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 				ImGui::TableNextColumn();
 
 		        ImGui::PushFont(uiFontLarge);
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(target.hp, target.maxHp));
-				ImGui::Text("%d", target.hp);
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(target.health, target.max_health));
+				ImGui::Text("%d", target.health);
 				ImGui::PopStyleColor();
                 ImGui::SameLine();
 				ImGui::Text("/");
                 ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.two_health, target.maxHp));
+				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.two_health, target.max_health));
 				ImGui::Text("%d", outcome.two_health);
 				ImGui::PopStyleColor();
 		        ImGui::PopFont();
@@ -471,16 +471,17 @@ RenderUI(UI_State *ui,
 // ================================= Menu ======================================
 struct Menu
 {
-    uint8_t rows;
-    uint8_t current;
+    int rows;
+    int current;
 
     vector<Texture> optionTextTextures;
     vector<string> optionText;
 
-    Menu(uint8_t rows_in, uint8_t current_in, vector<string> options_in)
+    Menu(int rows_in, int current_in, vector<string> options_in)
     : rows(rows_in),
       current(current_in)
     {
+        assert(rows_in >= 0 && current_in >= 0);
         for(string s : options_in)
         {
             optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));

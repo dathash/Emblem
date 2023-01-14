@@ -73,7 +73,7 @@ AccessibleFrom(const Tilemap &map, position origin, int max, bool sourceIsAlly)
             {
                 int newCost;
                 if(map.tiles[new_pos.col][new_pos.row].occupant && 
-                   map.tiles[new_pos.col][new_pos.row].occupant->isAlly != sourceIsAlly)
+                   map.tiles[new_pos.col][new_pos.row].occupant->is_ally != sourceIsAlly)
                 {
                     newCost = 100;
                 }
@@ -225,7 +225,7 @@ PrintField(const vector<vector<position>> &field)
 // Also produces a Distance Field, which indicates distance at each point.
 // NOTE: Currently just prints out the distance field.
 vector<vector<direction>>
-GetField(const Tilemap &map, position origin, bool isAlly)
+GetField(const Tilemap &map, position origin, bool is_ally)
 {
     vector<vector<direction>> field;
 	for(int col = 0; col < map.width; ++col)
@@ -278,7 +278,7 @@ GetField(const Tilemap &map, position origin, bool isAlly)
                               + map.tiles[new_pos.col][new_pos.row].penalty;
 
                 if(map.tiles[new_pos.col][new_pos.row].occupant &&
-                   (map.tiles[new_pos.col][new_pos.row].occupant->isAlly != isAlly))
+                   (map.tiles[new_pos.col][new_pos.row].occupant->is_ally != is_ally))
                 {
                     newCost = 100;
                 }
@@ -307,20 +307,20 @@ PrintPath(const path &path_in)
     cout << "PATH:\n";
     for(const position &pos : path_in)
     {
-        cout << pos;
+        cout << pos << "\n";
     }
 }
 
 // Given a start and end position, returns the shortest path between them,
-// taking into account a given "isAlly" value to determine impassible unit tiles.
+// taking into account a given "is_ally" value to determine impassible unit tiles.
 path
 GetPath(const Tilemap &map,
         position start,
         position destination,
-        bool isAlly)
+        bool is_ally)
 {
     path path_result;
-    vector<vector<position>> field = GetField(map, destination, isAlly);
+    vector<vector<position>> field = GetField(map, destination, is_ally);
 
     position next = start;
     direction from = field[next.col][next.row];
@@ -343,6 +343,7 @@ GetPath(const Tilemap &map,
 position
 FurthestMovementOnPath(const Tilemap &map, const path &path_in, int movement)
 {
+    assert(path_in.size());
     for(int i = movement; i > 0; --i) // Start at the furthest square, test all.
     {
         if(!map.tiles[path_in[i].col][path_in[i].row].occupant)
@@ -378,10 +379,10 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit)
 
     for(const position &pos : map.accessible)
     {
-        interactible = InteractibleFrom(map, pos, unit.minRange, unit.maxRange);
+        interactible = InteractibleFrom(map, pos, unit.min_range, unit.max_range);
         for(const position &i : interactible)
         {
-            if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->isAlly)
+            if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->is_ally)
             {
                 result.push_back(pair<position, Unit *>(pos, map.tiles[i.col][i.row].occupant));
             }
@@ -393,7 +394,7 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit)
 
 // Finds the nearest unit to the cursor, based on the given predicate expression.
 Unit *FindNearest(const Tilemap &map, const position &origin, 
-                  bool predicate(const Unit &), bool isAlly)
+                  bool predicate(const Unit &), bool is_ally)
 {
     int minDistance = 100;
     int distance = 0;
@@ -404,7 +405,7 @@ Unit *FindNearest(const Tilemap &map, const position &origin,
         {
             if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
             {
-                distance = GetPath(map, origin, position(col, row), isAlly).size();
+                distance = GetPath(map, origin, position(col, row), is_ally).size();
                 if(distance < minDistance)
                 {
                     result = map.tiles[col][row].occupant;

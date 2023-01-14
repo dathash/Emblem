@@ -2,6 +2,25 @@
 // Program: Emblem
 // File: Main
 
+/* Style Guide
+ * GlobalVariable;
+ * local_variable;
+ *
+ * struct Name
+ * {
+ *     field_name;
+ * };
+ *
+ * type
+ * FunctionName()
+ * {
+ *     ...;
+ *     return;
+ * }
+ *
+ * everything else, just go nuts.
+ */
+
 // ========================== includes =====================================
 // Library includes (Linked in on the machine)
 #include <SDL.h>
@@ -120,7 +139,7 @@ int main(int argc, char *argv[])
 							 };
     int level_index = 0;
     Level level = LoadLevel(levels[level_index], units);
-    Cursor cursor(SpriteSheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
+    Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
 
 	UI_State ui = {};

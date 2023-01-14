@@ -194,13 +194,13 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
                 tokens = split(rest, ' ');
                 units.push_back(make_unique<Unit>(
                     tokens[0],									// name
-                    SpriteSheet(LoadTextureImage(SPRITES_PATH, tokens[1]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(PORTRAITS_PATH, tokens[2]),// portrait
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[1]), 32, ANIMATION_SPEED), // path to texture
+                    LoadTextureImage(FULLS_PATH, tokens[2]),// portrait
                     stoi(tokens[3]),							// id
                     tokens[4] == "Ally" ? true : false,			// team
                     stoi(tokens[5]),							// movement
-                    stoi(tokens[6]),							// hp
-                    stoi(tokens[6]),							// max hp
+                    stoi(tokens[6]),							// health
+                    stoi(tokens[6]),							// max health
                     stoi(tokens[7]),							// attack
                     stoi(tokens[8]),							// attack
                     stoi(tokens[9]),							// defense
@@ -246,17 +246,17 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
                      << unit->sheet.texture.filename << " "
                      << unit->portrait.filename << " "
                      << unit->id << " "
-                     << (unit->isAlly ? "Ally" : "Enemy") << " "
-                     << unit->mov << " "
-                     << unit->maxHp << " "
+                     << (unit->is_ally ? "Ally" : "Enemy") << " "
+                     << unit->movement << " "
+                     << unit->max_health << " "
                      << unit->attack << " "
                      << unit->ability << " "
                      << unit->defense << " "
                      << unit->accuracy << " "
                      << unit->avoid << " "
                      << unit->crit << " "
-                     << unit->minRange << " "
-                     << unit->maxRange << " "
+                     << unit->min_range << " "
+                     << unit->max_range << " "
                      << unit->ai_behavior << " "
                      << "\n";
     }

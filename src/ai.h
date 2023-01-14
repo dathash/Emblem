@@ -21,7 +21,7 @@ public:
         selected = FindNearest(map, cursor->pos,
                 [](const Unit &unit) -> bool
                 {
-                    return !unit.isAlly && !unit.isExhausted;
+                    return !unit.is_ally && !unit.is_exhausted;
                 }, false);
 
         if(selected)
@@ -57,8 +57,8 @@ public:
         cursor->redo = cursor->pos;
 
         map->accessible = AccessibleFrom(*map, cursor->redo,
-                                         cursor->selected->mov,
-                                         cursor->selected->isAlly);
+                                         cursor->selected->movement,
+                                         cursor->selected->is_ally);
 
         GlobalAIState = SELECTED;
     }
@@ -77,7 +77,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->selected->isExhausted = true;
+        cursor->selected->is_exhausted = true;
 
         cursor->selected->sheet.ChangeTrack(0);
         cursor->selected = nullptr;
@@ -111,12 +111,15 @@ GetAction(const Unit &unit, const Tilemap &map)
                 Unit *nearest = FindNearest(map, unit.pos,
                     [](const Unit &unit) -> bool
                     {
-                        return unit.isAlly;
+                        return unit.is_ally;
                     }, false);
                 path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
-                action = pair<position, Unit *>(
-                        FurthestMovementOnPath(map, path_to_nearest, unit.mov),
-                                             NULL);
+                if(path_to_nearest.size())
+                    action = pair<position, Unit *>(
+                            FurthestMovementOnPath(map, path_to_nearest, unit.movement),
+                                                 NULL);
+                else
+                    action = {unit.pos, NULL};
             }
             else
             {

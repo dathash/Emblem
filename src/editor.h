@@ -17,8 +17,8 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		{
 			units->push_back(make_unique<Unit>(
 				string("DEFAULT"),
-				SpriteSheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
-				LoadTextureImage(PORTRAITS_PATH, string(DEFAULT_PORTRAIT)),
+				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
+				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
 				GlobalCurrentID,
 				true,
 				3,
@@ -63,16 +63,16 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		ImGui::Text("%s | %d", selected->name.c_str(), selected->id);
         ImGui::InputText("name", &(selected->name));
 		// CONSIDER: Update texture sources, spritesheet.
-		ImGui::SliderInt("Mov", &selected->mov, 0, 10);
-		ImGui::SliderInt("maxHp", &selected->maxHp, 1, 20);
+		ImGui::SliderInt("mov", &selected->movement, 0, 10);
+		ImGui::SliderInt("hp", &selected->max_health, 1, 20);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
 		ImGui::SliderInt("abi", &selected->ability, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
 		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
 		ImGui::SliderInt("avo", &selected->avoid, 0, 100);
 		ImGui::SliderInt("crit", &selected->crit, 0, 100);
-		ImGui::SliderInt("min", &selected->minRange, 1, 4);
-		ImGui::SliderInt("max", &selected->maxRange, 1, 4);
+		ImGui::SliderInt("min", &selected->min_range, 1, 4);
+		ImGui::SliderInt("max", &selected->max_range, 1, 4);
 		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 3);
 	}
 	ImGui::End();
@@ -171,7 +171,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
                                 }),
                             level->combatants.end());
 
-                hover_tile->occupant->shouldDie = true;
+                hover_tile->occupant->should_die = true;
                 hover_tile->occupant = nullptr;
             }
             else

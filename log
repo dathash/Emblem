@@ -53,7 +53,6 @@ Dec 29  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
 Dec 29  | 6h  | ???             | Mostly refactoring and tilesets
 Dec 30  | 6h  | 4200 lines      | UI Day! Swapped gross retained mode code to IMGUI.
 Dec 31 – Jan 4 | 22h  | 4300 lines | Read the commits.
-Jan 5   | 
 
 # Style
 ## Concept
@@ -78,16 +77,18 @@ Tripod (Bomberman Hero)
 
 # TODO
 MVP
-    8 levels
+    16 levels
 
+    Inbetween Levels | Metagame
+    * Revive dead units?
+    * Recruit new units?
     Win and Lose Screens
-
-    Switch Options menu to internal system.
-
-    More sprites
-        Priam
-        Lon'qu
-        Olivia
+    RPG Mechanics
+    * Boosted stats?
+    * New abilities?
+    * Improved abilities?
+    * Experience points?
+    * Levels?
 
     Abilities
     * Create a system where a unit possesses one of the following.
@@ -102,14 +103,16 @@ MVP
     Make level editing easy by starting the game with a level select screen.
 
     Make just Zarathustra finish levels
-
-NICE
+    Level win when you kill all units
     Battle Animations
     Conversations
+    Tutorial
     Audio
         Sound Effects
         Drum-n-bass Audio
             Trance-like state of playing
+
+NICE
     Better enemy AI
         Pursuing Enemies only come for you when you get near.
         * Bresenham's line plus a certain distance (maybe 7 tiles?)
@@ -120,31 +123,30 @@ NICE
 
 POLISH
     Placing Unit moves them smoothly to that square (A-star)
-    Attack and Move / Heal and Move
+
     Unit damage and healing ranges are displayed.
+
+    Switch Options menu to internal system.
+    * Music Volume
+    * Resolution?
+    * Quit
+
+    Attack and Move
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
     Cycle units with L trigger.
     * Should be able to do this in the same way we cycle units when selecting a
       victim for an attack in command.h
-    End turn quickly somehow when you're just moving Zarathustra to the goal?
     Startup Screen
     Create polished tilemaps with Tiled and overlay them onto the in-game maps.
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.
-    When the player's turn starts, something flashes on the screen.
-    * I'm pretty sure I caused this when I went on my big refactor. Check it out
-      at your leisure.
-    Sometimes enemies end up moving to 0, 0 instead of their intended
-    destination, even when the tile is a wall.
-    BUG | Enemies in the top of the screen with no route to your units seg fault.
 
 REFACTOR
     remove redo from cursor (DRY)?
     Take junk out of main
     Rip out the viewport code (for now). It needs some serious reconsideration.
-
 
 # Ideas
 ## Brainstorm

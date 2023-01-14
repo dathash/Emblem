@@ -50,13 +50,13 @@ public:
                 return;
             }
 
-            if(hoverTile->occupant->isExhausted)
+            if(hoverTile->occupant->is_exhausted)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
                 return;
             }
 
-            if(hoverTile->occupant->isAlly)
+            if(hoverTile->occupant->is_ally)
             {
                 GlobalInterfaceState = NEUTRAL_OVER_UNIT;
                 return;
@@ -87,8 +87,8 @@ public:
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
         cursor->redo = cursor->pos;
         map->accessible = AccessibleFrom(*map, cursor->redo,
-                                         cursor->selected->mov,
-                                         cursor->selected->isAlly);
+                                         cursor->selected->movement,
+                                         cursor->selected->is_ally);
 
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
@@ -157,7 +157,7 @@ public:
             GlobalInterfaceState = SELECTED_OVER_GROUND;
             return;
         }
-        if(hoverTile->occupant->isAlly)
+        if(hoverTile->occupant->is_ally)
         {
             GlobalInterfaceState = SELECTED_OVER_ALLY;
             return;
@@ -193,7 +193,7 @@ public:
         map->healable.clear();
         map->attackable.clear();
         vector<position> interactible = InteractibleFrom(*map, cursor->pos,
-                                             cursor->selected->minRange, cursor->selected->maxRange);
+                                             cursor->selected->min_range, cursor->selected->max_range);
 
         // Update unit menu with available actions
         *menu = Menu(0, 0, {});
@@ -202,7 +202,7 @@ public:
         for(const position &p : interactible)
         {
             if(map->tiles[p.col][p.row].occupant &&
-               !map->tiles[p.col][p.row].occupant->isAlly)
+               !map->tiles[p.col][p.row].occupant->is_ally)
             {
                 map->attackable.push_back(p);
             }
@@ -215,8 +215,8 @@ public:
         for(const position &p : interactible)
         {
             if(map->tiles[p.col][p.row].occupant &&
-               map->tiles[p.col][p.row].occupant->isAlly &&
-               map->tiles[p.col][p.row].occupant->hp < map->tiles[p.col][p.row].occupant->maxHp)
+               map->tiles[p.col][p.row].occupant->is_ally &&
+               map->tiles[p.col][p.row].occupant->health < map->tiles[p.col][p.row].occupant->max_health)
             {
                 map->healable.push_back(p);
             }
@@ -558,8 +558,8 @@ public:
         cursor->redo = cursor->pos;
 
         map->accessible = AccessibleFrom(*map, cursor->redo,
-                                         cursor->selected->mov,
-                                         cursor->selected->isAlly);
+                                         cursor->selected->movement,
+                                         cursor->selected->is_ally);
 
         GlobalInterfaceState = ENEMY_RANGE;
     }
@@ -582,7 +582,6 @@ public:
 };
 
 // ======================= game menu commands =========================================
-
 class OpenGameMenuCommand : public Command
 {
 public:
@@ -717,6 +716,7 @@ public:
                 return;
             }
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            return;
         }
 
         assert(!"ERROR ChooseUnitMenuOptionCommand | How did you get here?\n");

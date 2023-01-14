@@ -23,7 +23,7 @@
 #define SCREEN_WIDTH 1120
 #define SCREEN_HEIGHT 800
 
-#define PORTRAIT_SIZE 300
+#define PORTRAIT_SIZE 400
 #define SPRITE_SIZE 32
 #define ATLAS_TILE_SIZE 16
 
@@ -39,7 +39,8 @@
 
 #define DATA_PATH "../data/"
 #define SPRITES_PATH "../assets/sprites/"
-#define PORTRAITS_PATH "../assets/portraits/"
+#define THUMBS_PATH "../assets/portraits/thumbs/"
+#define FULLS_PATH "../assets/portraits/fulls/"
 #define TILESETS_PATH "../assets/tilesets/"
 #define INITIAL_LEVEL "l0.txt"
 #define INITIAL_UNITS "units.txt"

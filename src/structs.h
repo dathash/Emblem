@@ -74,15 +74,15 @@ struct Timer
 // ================================= Rendering =================================
 struct Texture
 {
-    SDL_Texture *sdlTexture;
+    SDL_Texture *sdl_texture;
     string filename;
     string dir;
     int width;
     int height;
 
-    Texture(SDL_Texture *sdlTexture_in, string dir_in, string filename_in, int width_in, int height_in)
+    Texture(SDL_Texture *sdl_texture_in, string dir_in, string filename_in, int width_in, int height_in)
     {
-        this->sdlTexture = sdlTexture_in;
+        this->sdl_texture = sdl_texture_in;
         this->width = width_in;
         this->height = height_in;
         this->dir = dir_in;
@@ -95,7 +95,7 @@ struct Texture
     }
 };
 
-struct SpriteSheet
+struct Spritesheet
 {
     Texture texture;
     int size    = SPRITE_SIZE;
@@ -106,7 +106,7 @@ struct SpriteSheet
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
 
-    SpriteSheet(Texture texture_in, int size_in, int speed_in)
+    Spritesheet(Texture texture_in, int size_in, int speed_in)
     : texture(texture_in),
       size(size_in),
       speed(speed_in)
@@ -122,14 +122,14 @@ struct SpriteSheet
         counter++;
         if(!(counter % speed))
         {
-            int newFrame = frame + 1;
-            if(newFrame >= frames)
+            int new_frame = frame + 1;
+            if(new_frame >= frames)
             {
                 this->frame = 0;
             }
             else
             {
-                this->frame = newFrame;
+                this->frame = new_frame;
             }
         }
     }
@@ -157,22 +157,22 @@ struct Unit
 {
     string name;
     int id;
-    bool isAlly;
+    bool is_ally;
     position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
-    bool isExhausted = false;
-    bool shouldDie = false;
-    int mov;
-    int hp;
-    int maxHp;
+    bool is_exhausted = false;
+    bool should_die = false;
+    int movement;
+    int health;
+    int max_health;
     int attack;
     int ability;
     int defense;
-    int minRange;
-    int maxRange;
+    int min_range;
+    int max_range;
     int accuracy;
     int avoid;
     int crit;
-    SpriteSheet sheet;
+    Spritesheet sheet;
     Texture portrait;
     AIBehavior ai_behavior = NO_BEHAVIOR;
 
@@ -180,36 +180,36 @@ struct Unit
     Update()
     {
         sheet.Update();
-		if(hp <= 0)
+		if(health <= 0)
 		{
-			shouldDie = true;
+			should_die = true;
 		}
     }
 
-    Unit(string name_in, SpriteSheet sheet_in,
+    Unit(string name_in, Spritesheet sheet_in,
          Texture portrait_in,
-         int id_in, bool isAlly_in, int mov_in,
-         int hp_in, int maxHp_in,
+         int id_in, bool is_ally_in, int movement_in,
+         int health_in, int max_health_in,
          int attack_in, int ability_in, int defense_in,
          int accuracy_in, int avoid_in, int crit_in,
-         int minRange_in, int maxRange_in,
+         int min_range_in, int max_range_in,
          AIBehavior ai_behavior_in)
     : name(name_in),
       sheet(sheet_in),
       portrait(portrait_in),
       id(id_in),
-      isAlly(isAlly_in),
-      mov(mov_in),
-      hp(hp_in),
-      maxHp(maxHp_in),
+      is_ally(is_ally_in),
+      movement(movement_in),
+      health(health_in),
+      max_health(max_health_in),
       attack(attack_in),
       ability(ability_in),
       defense(defense_in),
       accuracy(accuracy_in),
       avoid(avoid_in),
       crit(crit_in),
-      minRange(minRange_in),
-      maxRange(maxRange_in),
+      min_range(min_range_in),
+      max_range(max_range_in),
       ai_behavior(ai_behavior_in)
     {} // haha c++
     // This little thing is like a vestigial organ
@@ -219,22 +219,22 @@ struct Unit
     // Damages a unit and resolves things involved with that process.
     // Includes a clamp function for less code reuse
     void
-    Damage(int dmg)
+    Damage(int damage)
     {
-        hp = clamp(hp - dmg, 0, maxHp);
+        health = clamp(health - damage, 0, max_health);
     }
 
     void
     Deactivate()
     {
-        isExhausted = true;
+        is_exhausted = true;
         sheet.ChangeTrack(0);
     }
 
     void
     Activate()
     {
-        isExhausted = false;
+        is_exhausted = false;
     }
 };
 
@@ -306,11 +306,11 @@ struct Level
     void
     RemoveDeadUnits()
     {
-        position leaderPosition = Leader();
+        position leader_pos = Leader();
         // Quit if Zarathustra's dead
-        if(map.tiles[leaderPosition.col][leaderPosition.row].occupant->shouldDie)
+        if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
         {
-            printf("Zarathustra died. Game over!\n");
+            printf("Leader died. Game over!\n");
             RestartLevel();
             return;
         }
@@ -319,12 +319,12 @@ struct Level
         vector<position> tiles;
         for(const unique_ptr<Unit> &unit : combatants)
         {
-            if(unit->shouldDie)
+            if(unit->should_die)
                 tiles.push_back(unit->pos);
         }
 
         combatants.erase(remove_if(combatants.begin(), combatants.end(),
-                    [](auto const &u) { return u->shouldDie; }),
+                    [](auto const &u) { return u->should_die; }),
                     combatants.end());
 
         for(position tile : tiles)
@@ -340,7 +340,7 @@ struct Level
     {
         for(auto const &u : combatants)
         {
-            if(u->isAlly && !u->isExhausted)
+            if(u->is_ally && !u->is_exhausted)
                 return;
         }
         EndPlayerTurn();
@@ -364,10 +364,10 @@ struct Cursor
     Unit *targeted = nullptr;
     position source = {-1, -1}; // Where the cursor was before choosing a target
 
-    SpriteSheet sheet;
+    Spritesheet sheet;
     path path_draw = {};
 
-    Cursor(SpriteSheet sheet_in)
+    Cursor(Spritesheet sheet_in)
     : sheet(sheet_in)
     {}
 
