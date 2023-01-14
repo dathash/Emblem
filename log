@@ -83,8 +83,6 @@ PROTOTYPE
 
     Retain your party condition through levels
 
-    Win and Lose Screens
-
     Abilities
     * Create a system where a unit possesses one of the following.
         (x) Heal
@@ -94,6 +92,8 @@ PROTOTYPE
         ( ) Boost
         ( ) Buff
         ( ) Shield
+
+    Win Screen
 
 0.1
     Make just Leader finish levels
@@ -116,7 +116,6 @@ PROTOTYPE
             Trance-like state of playing
     End turn with a button
     Tutorial
-    Wrapping Text in Conversations
 
 NICE
     Better enemy AI
@@ -126,6 +125,7 @@ NICE
         * More factors like accuracy and whether they will die in the process.
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
+    Swap Noire and Donnel's Colors
 
 POLISH
     Placing Unit moves them smoothly to that square (A-star)
@@ -136,6 +136,8 @@ POLISH
     * Music Volume
     * Resolution?
     * Quit
+
+    Look into pixel squishing problems
 
     Attack and Move
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
@@ -153,6 +155,7 @@ REFACTOR
     remove redo from cursor (DRY)?
     Take junk out of main
     Rip out the viewport code (for now). It needs some serious reconsideration.
+    Swap hard-coded ids for string hashes!
 
 # Ideas
 ## Brainstorm

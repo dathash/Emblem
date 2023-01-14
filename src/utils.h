@@ -92,4 +92,19 @@ MoveViewport(const position &p)
     }
 }
 
+// ================================= Library ===================================
+ImU32
+SdlToImColor(SDL_Color in)
+{
+    return IM_COL32(in.r, in.g, in.b, in.a);
+}
+
+/* TODO
+SDL_Color
+ImToSdlColor(ImU32 in)
+{
+    return {in.r, in.g, in.b, in.a};
+}
+*/
+
 #endif

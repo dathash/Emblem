@@ -4,14 +4,14 @@ COM File: Units
 
 COM <UNT <name> <texture> <portrait> <id> <team> <mov> <hp> <atk> <abi> <def> <acc> <avo> <crit> <short> <long> <ai>>
 UNT Lucina lucina.png lucina_full.png 0 Ally 5 8 5 2 1 90 10 10 1 1 0 
-UNT Donnel donnel.png donnel_full.png 1 Ally 5 10 4 4 3 90 0 0 1 1 0 
+UNT Priam priam.png priam_full.png 1 Ally 3 8 5 5 5 100 0 20 1 1 0 
 UNT Noire noire.png noire_full.png 2 Ally 7 3 8 2 0 100 30 30 3 3 0 
-UNT Flavia flavia.png flavia_full.png 3 Ally 5 9 7 0 4 80 10 0 1 1 0 
-UNT Lon'qu lonqu.png lonqu_full.png 4 Ally 8 4 4 3 0 120 50 50 2 1 0 
-UNT Olivia olivia.png olivia_full.png 5 Ally 4 5 1 8 0 60 30 0 1 1 0 
-UNT Priam priam.png priam_full.png 6 Ally 3 8 5 5 5 100 0 20 1 1 0 
-UNT Tharja tharja.png tharja_full.png 7 Ally 5 7 2 12 0 100 20 20 2 3 0 
-UNT Tiki tiki.png tiki_full.png 8 Ally 3 7 0 10 8 60 0 0 1 1 0 
+UNT Donnel donnel.png donnel_full.png 3 Ally 5 10 4 4 3 90 0 0 1 1 0 
+UNT Olivia olivia.png olivia_full.png 4 Ally 4 5 1 8 0 60 30 0 1 1 0 
+UNT Tiki tiki.png tiki_full.png 5 Ally 3 7 0 10 8 60 0 0 1 1 0 
+UNT Flavia flavia.png flavia_full.png 6 Ally 5 9 7 0 4 80 10 0 1 1 0 
+UNT Lon'qu lonqu.png lonqu_full.png 7 Ally 8 4 4 3 0 120 50 50 2 1 0 
+UNT Tharja tharja.png tharja_full.png 8 Ally 5 7 2 12 0 100 20 20 2 3 0 
 UNT Thief thief.png ph.png 9 Enemy 6 3 3 0 0 100 20 50 1 1 1 
 UNT Brute brute.png ph.png 10 Enemy 3 6 6 0 1 75 0 0 1 1 1 
 UNT Archer archer.png ph.png 11 Enemy 3 4 4 0 1 100 0 0 2 2 1 

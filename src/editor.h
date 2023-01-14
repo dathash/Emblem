@@ -212,7 +212,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
         if(ImGui::Button("wall"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = FLOOR_TILE;
+            *hover_tile = WALL_TILE;
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();

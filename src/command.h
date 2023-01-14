@@ -472,7 +472,6 @@ public:
     virtual void Execute()
     {
         cursor->targeted = nullptr;
-        cursor->source = {-1, -1};
 
         GlobalInterfaceState = ATTACK_TARGETING;
     }
@@ -780,6 +779,7 @@ private:
     const Menu &menu;
 };
 
+// ================================== Conversations ============================
 class NextSentenceCommand : public Command
 {
 public:
@@ -804,6 +804,31 @@ public:
 
 private:
     Conversation *conversation;
+};
+
+// ================================= Game Over =================================
+class QuitGameCommand : public Command
+{
+public:
+    QuitGameCommand()
+    {}
+
+    virtual void Execute()
+    {
+        GlobalRunning = false;
+    }
+};
+
+class RestartGameCommand : public Command
+{
+public:
+    RestartGameCommand()
+    {}
+
+    virtual void Execute()
+    {
+        RestartLevel();
+    }
 };
 
 // ============================== Input Handler ================================
@@ -1141,6 +1166,17 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NextSentenceCommand>(conversation));
                 BindB(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(GAME_OVER):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<RestartGameCommand>());
+                BindB(make_shared<QuitGameCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 

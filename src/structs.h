@@ -313,13 +313,15 @@ struct Level
     void
     RemoveDeadUnits()
     {
-        position leader_pos = Leader();
-        // Quit if Zarathustra's dead
-        if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
+        if(GlobalInterfaceState != GAME_OVER)
         {
-            printf("Leader died. Game over!\n");
-            RestartLevel();
-            return;
+            position leader_pos = Leader();
+            // Quit if Leader is dead
+            if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
+            {
+                GlobalInterfaceState = GAME_OVER;
+                return;
+            }
         }
 
         // REFACTOR: This could be so much simpler.
@@ -426,7 +428,7 @@ enum Speaker
 typedef pair<Speaker, string> sentence;
 
 // CIRCULAR
-Texture LoadTextureText(string, SDL_Color);
+Texture LoadTextureText(string, SDL_Color, int);
 
 struct Conversation
 {
@@ -459,11 +461,11 @@ struct Conversation
     void
     ReloadTextures()
     {
-        words_texture = LoadTextureText(Words(), black);
+        words_texture = LoadTextureText(Words(), black, CONVERSATION_WRAP);
         if(Speaker() == SPEAKER_ONE)
-            speaker_texture = LoadTextureText(one.name, black);
+            speaker_texture = LoadTextureText(one.name, black, 0);
         if(Speaker() == SPEAKER_TWO)
-            speaker_texture = LoadTextureText(two.name, black);
+            speaker_texture = LoadTextureText(two.name, black, 0);
     }
 
     void
@@ -476,6 +478,37 @@ struct Conversation
     First()
     {
         current = 0;
+    }
+};
+
+
+// ================================= Menu ======================================
+struct Menu
+{
+    int rows = 0;
+    int current = 0;
+
+    vector<Texture> optionTextTextures;
+    vector<string> optionText;
+
+    Menu(vector<string> options_in)
+    {
+        for(string s : options_in)
+        {
+            optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor, 0));
+            optionText.push_back(s);
+            rows += 1;
+        }
+    }
+
+    // Custom-build a menu based on your current options.
+    // Mostly used to dynamically display attack/heal/trade options.
+    void
+    AddOption(string s)
+    {
+        rows += 1;
+        optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor, 0));
+        optionText.push_back(s);
     }
 };
 

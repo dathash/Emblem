@@ -55,14 +55,18 @@ LoadConversation(string path, string filename,
 }
 
 // Loads a Texture displaying the given text in the given color.
+// Now with wrapping, set by the line_length parameter
 Texture
-LoadTextureText(string text, SDL_Color color)
+LoadTextureText(string text, SDL_Color color, int line_length)
 {
     SDL_Texture *texture = nullptr;
     SDL_Surface *surface = nullptr;
 
     assert(GlobalFont);
-    surface = TTF_RenderText_Solid(GlobalFont, text.c_str(), color);
+    surface = TTF_RenderText_Solid_Wrapped(GlobalFont,
+                                           text.c_str(),
+                                           color,
+                                           (Uint32)line_length);
     assert(surface);
     int width = surface->w;
     int height = surface->h;

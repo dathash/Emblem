@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
             ui.Update();
             level.Update();
             if(GlobalLevelTimer.Update())
-                RestartLevel();
+                GlobalInterfaceState = GAME_OVER;
 
             for(const unique_ptr<Unit> &unit : level.combatants)
                 unit->Update();
@@ -225,6 +225,12 @@ int main(int argc, char *argv[])
             ai.clearQueue();
             handler.clearQueue();
         }
+
+        if(GlobalInterfaceState == GAME_OVER)
+        {
+            GlobalPlayerTurn = true;
+            ai.clearQueue();
+        }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
 
         // Render
@@ -234,8 +240,7 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-		if(GlobalPlayerTurn)
-			RenderUI(&ui, cursor, level.map);
+        RenderUI(&ui, cursor, level.map);
 
 #if DEV_MODE
         if(GlobalEditorMode)

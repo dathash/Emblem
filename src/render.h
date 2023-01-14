@@ -340,9 +340,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == HEAL_TARGETING ||
        GlobalInterfaceState == UNIT_MENU_ROOT ||
 	   GlobalInterfaceState == UNIT_INFO ||
-	   GlobalInterfaceState == ENEMY_INFO ||
-	   GlobalInterfaceState == PREVIEW_ATTACK ||
-	   GlobalInterfaceState == PREVIEW_HEALING)
+	   GlobalInterfaceState == ENEMY_INFO)
        && GlobalPlayerTurn && !GlobalEditorMode)
     {
         //cout << cursor.pos << "\n"; // TODO: There's an unlucky seg fault here. Investigate when exiting editor mode.
@@ -354,6 +352,16 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
+
+    // Portraits
+    if(GlobalInterfaceState == PREVIEW_ATTACK ||
+	   GlobalInterfaceState == PREVIEW_HEALING)
+    {
+        assert(cursor.selected);
+
+        RenderPortrait(30, 0, cursor.selected->portrait, true);
+        RenderPortrait(430, 0, cursor.targeted->portrait, false);
+}
 
     if(GlobalInterfaceState == CONVERSATION)
     {

@@ -77,12 +77,12 @@ CalculateHealing(const Unit &healer, const Unit &healee)
 // For return in function below.
 struct Outcome
 {
+    int one_attack;
     int one_hit;
     int one_crit;
-    int one_health;
+    int two_attack;
     int two_hit;
     int two_crit;
-    int two_health;
 };
 
 // =============================== Attacking =====================================
@@ -94,16 +94,16 @@ Outcome
 PredictCombat(const Unit &one, const Unit &two, int distance,
 			  int one_avoid_bonus, int two_avoid_bonus)
 {
-    Outcome outcome = {0, 0, one.health, 0, 0, two.health};
+    Outcome outcome = {};
+    outcome.one_attack = CalculateDamage(one, two);
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;
-    outcome.two_health = clamp(two.health - CalculateDamage(one, two), 0, two.max_health);
 
     if(distance >= two.min_range && distance <= two.max_range)
     {
+        outcome.two_attack = CalculateDamage(two, one);
         outcome.two_hit = HitChance(two, one, one_avoid_bonus);
         outcome.two_crit = two.crit;
-        outcome.one_health = clamp(one.health - CalculateDamage(two, one), 0, one.max_health);
     }
 
     return outcome;
@@ -138,10 +138,10 @@ SimulateCombat(Unit *one, Unit *two, int distance,
 // Displays the outcome of one unit healing another.
 Outcome PredictHealing(const Unit &one, const Unit &two)
 {
-    Outcome outcome = {0, 0, one.health, 0, 0, two.health};
+    Outcome outcome = {};
+    outcome.one_attack = CalculateHealing(one, two);
     outcome.one_hit = 100;
     outcome.one_crit = 0;
-    outcome.two_health = clamp(two.health + CalculateHealing(one, two), 0, two.max_health);
 
     return outcome;
 }

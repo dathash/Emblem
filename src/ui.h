@@ -41,18 +41,37 @@ struct UI_State
     bool unit_info = false;
     bool combat_preview = false;
     bool game_menu = false;
-    bool options_menu = false;
+    bool game_over = false;
     bool unit_menu = false;
     bool combat_screen = false;
     bool timer = false;
 
+    void
+    Clear()
+    {
+        tile_info = false;
+        unit_blurb = false;
+        unit_info = false;
+        combat_preview = false;
+        game_menu = false;
+        game_over = false;
+        unit_menu = false;
+        combat_screen = false;
+        timer = false;
+    }
+
     void 
     Update()
     {
+        if(!GlobalPlayerTurn)
+            Clear(); // SLOW
+
 		// Tile Info
-        if(GlobalPlayerTurn &&
+        if(
            !(GlobalInterfaceState == LEVEL_MENU ||
-             GlobalInterfaceState == CONVERSATION)
+             GlobalInterfaceState == CONVERSATION ||
+             GlobalInterfaceState == PREVIEW_ATTACK ||
+             GlobalInterfaceState == PREVIEW_HEALING)
 			)
         {
             tile_info = true;
@@ -63,7 +82,7 @@ struct UI_State
         }
 
         // Timer
-        if(GlobalPlayerTurn &&
+        if(
            !(GlobalInterfaceState == LEVEL_MENU ||
              GlobalInterfaceState == CONVERSATION)
           )
@@ -85,7 +104,7 @@ struct UI_State
 				GlobalInterfaceState == ATTACK_TARGETING ||
 				GlobalInterfaceState == HEAL_TARGETING ||
 				GlobalInterfaceState == UNIT_MENU_ROOT
-			)
+            )
 		{
 			unit_blurb = true;
 		}
@@ -118,13 +137,13 @@ struct UI_State
 			combat_preview = false;
 		}
 
-		if(GlobalInterfaceState == GAME_MENU_OPTIONS)
+		if(GlobalInterfaceState == GAME_OVER)
 		{
-			options_menu = true;
+			game_over = true;
 		}
 		else
 		{
-			options_menu = false;
+			game_over = false;
 		}
     }
 };
@@ -260,11 +279,17 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			DisplayHealthBar(unit.health, unit.max_health, 0);
 
 			// Second line
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
 			ImGui::Text("[ATK %d]", unit.attack);
+            ImGui::PopStyleColor();
 			ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
 			ImGui::Text("[DEF %d]", unit.defense);
+            ImGui::PopStyleColor();
 			ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
 			ImGui::Text("[ABI %d]", unit.ability);
+            ImGui::PopStyleColor();
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
@@ -301,125 +326,96 @@ GetHitColor(int hit)
 // Displays combat preview when initiating combat
 void
 DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
-                                          int ally_avoid_bonus, int enemy_avoid_bonus,
-                                          enum quadrant quad)
+                                          int ally_avoid_bonus, int enemy_avoid_bonus)
 {
-	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(460, 220));
-
-    ImVec2 top_right = {170, 10};
-    ImVec2 bottom_right = {170, 370};
-
-    if(quad == TOP_LEFT || quad == TOP_RIGHT)
-        ImGui::SetNextWindowPos(bottom_right);
-    else
-        ImGui::SetNextWindowPos(top_right);
-
-    // Logic
-	ImGui::PushFont(uiFontLarge);
-    ImGui::Begin("Combat", NULL, wf);
+    // Predict the outcome
+    Outcome outcome;
+    if(target.is_ally)
     {
-        Outcome outcome;
-        if(target.is_ally)
-        {
-            outcome = PredictHealing(ally, target);
-        }
-        else
-        {
-            outcome = PredictCombat(ally, target,
-                      ManhattanDistance(ally.pos, target.pos),
-                      ally_avoid_bonus, enemy_avoid_bonus);
-        }
+        outcome = PredictHealing(ally, target);
+    }
+    else
+    {
+        outcome = PredictCombat(ally, target,
+                  ManhattanDistance(ally.pos, target.pos),
+                  ally_avoid_bonus, enemy_avoid_bonus);
+    }
 
-		ImGui::PopFont();
+	// Window sizing
+    ImGui::SetNextWindowSize(ImVec2(200, 200));
+    ImGui::SetNextWindowPos(ImVec2(50, 400));
+
+    // Render
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin(ally.name.c_str(), NULL, wf);
+    {
+
 		ImGui::PushFont(uiFontMedium);
-            ImGui::Text("%s", ally.name.c_str());
-
-			ImGui::BeginTable("Combat", 3, ImGuiTableFlags_RowBg);
-				ImGui::TableNextColumn();
-
-		        ImGui::PushFont(uiFontLarge);
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(ally.health, ally.max_health));
-				ImGui::Text("%d", ally.health);
-				ImGui::PopStyleColor();
-                ImGui::SameLine();
-				ImGui::Text("/");
-                ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.one_health, ally.max_health));
-				ImGui::Text("%d", outcome.one_health);
-				ImGui::PopStyleColor();
-				ImGui::TableNextColumn();
-		        ImGui::PopFont();
-
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHitColor(outcome.one_hit));
-				ImGui::Text("%d%%", outcome.one_hit);
-				ImGui::PopStyleColor();
-                ImGui::SameLine();
-                ImGui::Text("hit");
-
-				ImGui::TableNextColumn();
-				ImGui::Text("%d%% crit", outcome.one_crit);
-
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-
-		        ImGui::PushFont(uiFontLarge);
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(target.health, target.max_health));
-				ImGui::Text("%d", target.health);
-				ImGui::PopStyleColor();
-                ImGui::SameLine();
-				ImGui::Text("/");
-                ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_Text, GetHealthColor(outcome.two_health, target.max_health));
-				ImGui::Text("%d", outcome.two_health);
-				ImGui::PopStyleColor();
-		        ImGui::PopFont();
-
-				ImGui::TableNextColumn();
-                if(outcome.two_hit)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, GetHitColor(outcome.two_hit));
-                    ImGui::Text("%d%%", outcome.two_hit);
-                    ImGui::PopStyleColor();
-                    ImGui::SameLine();
-                    ImGui::Text("hit");
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("%d%% crit", outcome.two_crit);
-                }
-                else  // don't display values if the enemy won't do anything.
-                {
-                    ImGui::Text("- hit");
-                    ImGui::TableNextColumn();
-                    ImGui::Text("- crit");
-                }
-
-			ImGui::EndTable();
-
-            ImGui::Text("%s", target.name.c_str());
-		ImGui::PopFont();
+            ImGui::Text("%d atk", outcome.one_attack);
+            ImGui::Text("%d%% hit", outcome.one_hit);
+            ImGui::Text("%d%% crit", outcome.one_crit);
+        ImGui::PopFont();
     }
     ImGui::End();
+
+    ImGui::SetNextWindowSize(ImVec2(200, 200));
+    ImGui::SetNextWindowPos(ImVec2(620, 400));
+
+    ImGui::Begin(target.name.c_str(), NULL, wf);
+    {
+		ImGui::PushFont(uiFontMedium);
+            ImGui::Text("%d atk", outcome.two_attack);
+            ImGui::Text("%d%% hit", outcome.two_hit);
+            ImGui::Text("%d%% crit", outcome.two_crit);
+        ImGui::PopFont();
+    }
+    ImGui::End();
+
+    // Health Window
+	wf |= ImGuiWindowFlags_NoTitleBar;
+
+    ImGui::SetNextWindowSize(ImVec2(100, 100));
+    ImGui::SetNextWindowPos(ImVec2(260, 440));
+    ImGui::Begin("health1", NULL, wf);
+    {
+        ImGui::Text("%d", ally.health);
+        ImGui::PushFont(uiFontMedium);
+        ImGui::Text("HP");
+        ImGui::PopFont();
+    }
+    ImGui::End();
+
+    ImGui::SetNextWindowSize(ImVec2(100, 100));
+    ImGui::SetNextWindowPos(ImVec2(510, 440));
+    ImGui::Begin("health2", NULL, wf);
+    {
+        ImGui::Text("%d", target.health);
+        ImGui::PushFont(uiFontMedium);
+        ImGui::Text("HP");
+        ImGui::PopFont();
+    }
+    ImGui::End();
+
+	ImGui::PopFont(); // Large
 }
 
 // Displays options menu
 void 
-DisplayOptionsMenu(ImGuiWindowFlags wf)
+DisplayGameOver(ImGuiWindowFlags wf)
 {
-	static bool bl;
 	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(400, 300), 0, ImVec2(0.5, 0.5));
     ImGui::SetNextWindowSize(ImVec2(420, 310));
 
     // Logic
 	ImGui::PushFont(uiFontLarge);
-    ImGui::Begin("Options", NULL, wf);
+    ImGui::Begin("Game Over", NULL, wf);
     {
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
-			ImGui::Checkbox("checkbox1", &bl);
-			ImGui::Checkbox("checkbox2", &bl);
-			ImGui::Checkbox("checkbox3", &bl);
+            ImGui::Text("You lost.");
+            ImGui::Text("[SPACE] to retry");
+            ImGui::Text("[SHIFT] to quit");
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -471,47 +467,16 @@ RenderUI(UI_State *ui,
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
                                            map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,
-                                           map.tiles[cursor.pos.col][cursor.pos.row].avoid, 
-                                           cursor.Quadrant());
-	if(ui->options_menu)
-		DisplayOptionsMenu(window_flags);
+                                           map.tiles[cursor.pos.col][cursor.pos.row].avoid);
     if(ui->timer)
         DisplayTimer(window_flags, GlobalLevelTimer);
+    if(ui->game_over)
+        DisplayGameOver(window_flags);
 
 	// cleanup
 	ImGui::PopStyleVar();
 
 	ImGui::PopStyleColor(3);
 }
-
-// ================================= Menu ======================================
-struct Menu
-{
-    int rows = 0;
-    int current = 0;
-
-    vector<Texture> optionTextTextures;
-    vector<string> optionText;
-
-    Menu(vector<string> options_in)
-    {
-        for(string s : options_in)
-        {
-            optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));
-            optionText.push_back(s);
-            rows += 1;
-        }
-    }
-
-    // Custom-build a menu based on your current options.
-    // Mostly used to dynamically display attack/heal/trade options.
-    void
-    AddOption(string s)
-    {
-        rows += 1;
-        optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor));
-        optionText.push_back(s);
-    }
-};
 
 #endif

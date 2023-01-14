@@ -136,10 +136,11 @@ GetAction(const Unit &unit, const Tilemap &map)
                                             ManhattanDistance(p, target->pos),
                                             map.tiles[p.col][p.row].avoid,
                                             map.tiles[target->pos.col][target->pos.row].avoid);
-                    if(outcome.two_health < min_health_after_attack)
+                    int health_remaining = clamp(target->health - outcome.two_attack, 0, target->health);
+                    if(health_remaining < min_health_after_attack)
                     {
                         action = poss;
-                        min_health_after_attack = outcome.two_health;
+                        min_health_after_attack = health_remaining;
                     }
                 }
             }
@@ -166,10 +167,11 @@ GetAction(const Unit &unit, const Tilemap &map)
                                                 ManhattanDistance(p, target->pos),
                                                 map.tiles[p.col][p.row].avoid,
                                                 map.tiles[target->pos.col][target->pos.row].avoid);
-                        if(outcome.two_health < min_health_after_attack)
+                        int health_remaining = clamp(target->health - outcome.two_attack, 0, target->health);
+                        if(health_remaining < min_health_after_attack)
                         {
                             action = poss;
-                            min_health_after_attack = outcome.two_health;
+                            min_health_after_attack = health_remaining;
                         }
                     }
                 }

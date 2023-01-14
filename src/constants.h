@@ -29,6 +29,7 @@
 
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
+#define CONVERSATION_WRAP 840
 
 #define HEALTH_TICK_HEIGHT 40
 #define HEALTH_TICK_WIDTH 15
@@ -96,6 +97,8 @@ enum InterfaceState
     CONVERSATION,
 
     NO_OP,
+
+    GAME_OVER,
 };
 
 enum AIState
@@ -116,26 +119,34 @@ enum quadrant
 
 // ============================ color palette ==================================
 // Tile overlays
-const SDL_Color moveColor = {100, 100, 180, 100};
-const SDL_Color pathColor = {150, 150, 150, 100};
-const SDL_Color aiMoveColor = {150, 0, 0, 100};
-const SDL_Color attackColor = {250, 0, 0, 100};
-const SDL_Color healColor = {0, 255, 0, 100};
+const SDL_Color moveColor =     {100, 100, 180, 100};
+const SDL_Color pathColor =     {150, 150, 150, 100};
+const SDL_Color aiMoveColor =   {150, 0, 0, 100};
+const SDL_Color attackColor =   {250, 0, 0, 100};
+const SDL_Color healColor =     {0, 255, 0, 100};
 
-const SDL_Color exhaustedMod = {50, 0, 50, 0};
-const SDL_Color readyMod = {255, 255, 255, 0};
+const SDL_Color exhaustedMod =  {50, 0, 50, 0};
+const SDL_Color readyMod =      {255, 255, 255, 0};
 
-const SDL_Color editorColor = {255, 255, 0, 100};
+const SDL_Color editorColor =   {255, 255, 0, 100};
 
 // UI
-const SDL_Color backgroundColor = {165, 179, 201, 255};
-const SDL_Color uiColor = {255, 224, 137, 255};
-const SDL_Color outlineColor = {85, 70, 31, 255};
-const SDL_Color uiAltColor = {60, 100, 30, 255};
-const SDL_Color enemyColor = {150, 60, 30, 255};
-const SDL_Color uiTextColor = {0, 0, 0, 255};
-const SDL_Color uiSelectorColor = {119, 100, 55, 100};
-const SDL_Color black = {0, 0, 0, 255};
+const SDL_Color backgroundColor =   {165, 179, 201, 255};
+const SDL_Color uiColor =           {255, 224, 137, 255};
+const SDL_Color outlineColor =      {85, 70, 31, 255};
+const SDL_Color uiAltColor =        {60, 100, 30, 255};
+const SDL_Color enemyColor =        {150, 60, 30, 255};
+const SDL_Color uiTextColor =       {0, 0, 0, 255};
+const SDL_Color uiSelectorColor =   {119, 100, 55, 100};
+const SDL_Color black =             {0, 0, 0, 255};
+
+// Palette Colors
+const SDL_Color red =       {205, 35, 67, 255};
+const SDL_Color darkRed =   {94, 1, 18, 255};
+const SDL_Color green =     {101, 204, 55, 255};
+const SDL_Color darkGreen = {21, 85, 51, 255};
+const SDL_Color blue =      {42, 101, 205, 255};
+const SDL_Color darkBlue =  {22, 50, 125, 255};
 
 // Combat
 const SDL_Color allyHealthBarColor = {10, 10, 200, 255};
