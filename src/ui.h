@@ -27,6 +27,7 @@ GetTileNameString(int type)
     case FOREST: return "Forest";
     case DESERT: return "Swamp";
     case OBJECTIVE: return "Goal";
+    case SPAWN: return "Spawn";
 	default:
 		assert(!"ERROR: Unhandled Tile name string in UI.\n");
 		return "";

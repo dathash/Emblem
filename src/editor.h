@@ -234,6 +234,13 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             *hover_tile = OBJECTIVE_TILE;
             hover_tile->occupant = tmp;
         }
+        ImGui::SameLine();
+        if(ImGui::Button("spwn"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = SPAWN_TILE;
+            hover_tile->occupant = tmp;
+        }
 
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)

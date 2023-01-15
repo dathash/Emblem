@@ -218,31 +218,48 @@ struct Tilemap
     vector<position> accessible;
     vector<position> attackable;
     vector<position> healable;
-    //CONSIDER: For trading, talking, playing rock-paper scissors, haha whatever
     //vector<point> adjacent;
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 
-    // This is for if we want to allow editors to change size of levels midway
-    // through editing. Not super important, but it's here.
-    //void
-    //Resize()
-    //{
-    //    level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
-    //    for(int col = 0; col < level.map.width; ++col)
-    //    {
-    //        for(int row = 0; row < level.map.height; ++row)
-    //        {
-    //            level.map.tiles[col][row] = {};
-    //        }
-    //    }
-    //}
+    position
+    GetNextSpawnLocation()
+    {
+        for(int col = 0; col < width; ++col)
+        {
+            for(int row = 0; row < height; ++row)
+            {
+                if(tiles[col][row].type == SPAWN &&
+                   !tiles[col][row].occupant)
+                {
+                    return position(col, row);
+                }
+            }
+        }
+        assert(!"ERROR GetNextSpawnLocation: No spawn locations available.");
+    }
 };
 
 struct Level
 {
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
+
+    // Puts a piece on the board
+    void
+    AddCombatant(shared_ptr<Unit> newcomer, const position &pos)
+    {
+        newcomer->pos = pos;
+        combatants.push_back(newcomer);
+        assert(!map.tiles[pos.col][pos.row].occupant);
+        map.tiles[pos.col][pos.row].occupant = newcomer.get();
+    }
+
+    // Scans the whole board to find the next available spawn point
+    void
+    GetNextSpawnLocation()
+    {
+    }
 
     // Returns the position of the leader.
     position

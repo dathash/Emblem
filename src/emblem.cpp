@@ -56,7 +56,6 @@ static ImFont *uiFontLarge;
 static ma_engine GlobalMusicEngine;
 
 //// STATE //////////////////////
-//
 // Necessary State:
 // * Running
 // * Editor / Paused
@@ -190,15 +189,34 @@ int main(int argc, char *argv[])
         if(GlobalRestart)
         {
             GlobalRestart = false;
-            --level_index;
-            NextLevel();
+            level = LoadLevel(levels[level_index], units);
+            GlobalLevelTimer = Timer(LEVEL_TIME);
+            GlobalPlayerTurn = true;
+            GlobalTurnStart = true;
         }
 
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
+            vector<shared_ptr<Unit>> party = {};
+
+            // Persistence (Naive)
+            for(shared_ptr<Unit> unit : level.combatants)
+            {
+                if(unit->is_ally && 
+                   unit->ID() != LEADER_ID)
+                    party.push_back(unit);
+            }
+
             level = LoadLevel(levels[level_index], units);
+
+            // Persistence (Naive)
+            for(shared_ptr<Unit> unit : party)
+            {
+                level.AddCombatant(unit, level.map.GetNextSpawnLocation());
+            }
+
             GlobalLevelTimer = Timer(LEVEL_TIME);
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;

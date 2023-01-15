@@ -80,8 +80,6 @@ PROTOTYPE
     16 levels
     Stop using unique_ptrs
 
-    Retain your party condition through levels
-
     Abilities
     * Create a system where a unit possesses one of the following.
         (x) Heal

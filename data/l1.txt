@@ -13,22 +13,15 @@ MAP 0 0 0 1 1 1 0 0 0 1 0 0 1 1 1
 MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
 MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
 MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
-MAP 0 0 0 0 0 1 0 0 0 1 1 1 1 0 0 
-MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
+MAP 0 5 5 5 0 1 0 0 0 1 1 1 1 0 0 
+MAP 0 5 0 5 0 1 0 0 0 0 0 0 0 0 0 
+MAP 0 5 5 5 0 1 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Noire 2 6 0 
-UNT Lucina 1 7 0 
+UNT Noire 1 9 0 
+UNT Lucina 2 7 0 
 UNT Brute  8 4 1 
 UNT Brute 6 6 1 
 UNT Archer 11 5 2 
 UNT Brute 11 2 2 
 UNT Brute 10 2 2 
-UNT Thief 1 1 1 
-UNT Brute 0 6 1 
-UNT Brute 0 7 1 
-UNT Brute 0 8 1 
-UNT Brute 2 8 1 
-UNT Brute 1 8 1 
-
