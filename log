@@ -78,7 +78,6 @@ Tripod (Bomberman Hero)
 # TODO
 PROTOTYPE
     16 levels
-    Stop using unique_ptrs
 
     Abilities
     * Create a system where a unit possesses one of the following.
@@ -92,8 +91,7 @@ PROTOTYPE
 
     Win Screen
     Units have health bars below or above their sprites
-
-    Swap hard-coded ids for string hashes!
+    *HUGE QA and Balancing Pass*
 
 0.1
     Make just Leader finish levels
