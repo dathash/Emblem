@@ -129,13 +129,13 @@ int main(int argc, char *argv[])
 // ================================== load =================================
     vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
 
-    vector<string> levels = {DATA_PATH + string("l0.txt"), DATA_PATH + string("l1.txt"),
-                             DATA_PATH + string("l2.txt"), DATA_PATH + string("l3.txt"),
-                             DATA_PATH + string("l4.txt"), DATA_PATH + string("l5.txt"),
-                             DATA_PATH + string("l6.txt"), DATA_PATH + string("l7.txt")
+    vector<string> levels = {string("l0.txt"), string("l1.txt"),
+                             string("l2.txt"), string("l3.txt"),
+                             string("l4.txt"), string("l5.txt"),
+                             string("l6.txt"), string("l7.txt")
 							 };
     int level_index = 0;
-    Level level = LoadLevel(levels[level_index], units);
+    Level level = LoadLevel(DATA_PATH + levels[level_index], units);
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
 
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
         if(GlobalRestart)
         {
             GlobalRestart = false;
-            level = LoadLevel(levels[level_index], units);
+            level = LoadLevel(DATA_PATH + levels[level_index], units);
             GlobalLevelTimer = Timer(LEVEL_TIME);
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
                     party.push_back(unit);
             }
 
-            level = LoadLevel(levels[level_index], units);
+            level = LoadLevel(DATA_PATH + levels[level_index], units);
 
             // Persistence (Naive)
             for(shared_ptr<Unit> unit : party)

@@ -301,9 +301,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
 
         if(ImGui::Button("Load"))
         {
-            *units = LoadUnits(string(DATA_PATH) + string(fileName));
+            *units = LoadUnits(DATA_PATH + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
-            *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
+            *level = LoadLevel(DATA_PATH + string(levelFileName), *units);
             ReloadLevel();
             cout << "Level loaded: " << levelFileName << "\n";
         }
@@ -320,19 +320,24 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             cout << "Level saved: " << levelFileName << "\n";
         }
 
-        if(ImGui::Button("TEST"))
+        if(ImGui::Button("Test Zone"))
         {
-            *level = LoadLevel(string(DATA_PATH) + string("test.txt"), *units);
+            *level = LoadLevel(DATA_PATH + string("test.txt"), *units);
+            sprintf(levelFileName, "test.txt");
             ReloadLevel();
         }
 
+        int wrap = 0;
         for(const string &s : levels)
         {
             if(ImGui::Button(s.c_str()))
             {
-                *level = LoadLevel(s, *units);
+                *level = LoadLevel(DATA_PATH + s, *units);
+                sprintf(levelFileName, "%s", s.c_str());
                 ReloadLevel();
             }
+            if(++wrap % 4)
+                ImGui::SameLine();
         }
 
         ImGui::Checkbox("Unit Editor", &showUnitEditor);

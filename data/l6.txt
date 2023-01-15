@@ -19,4 +19,4 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 COM <UNT <name> <col> <row> <ai>
 UNT Lucina 2 2 0
-UNT Priam 1 3 0
+UNT Priam 0 4 0

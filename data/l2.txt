@@ -19,7 +19,7 @@ MAP 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 
 COM <UNT <name> <col> <row> <ai>
 UNT Lucina 3 2 0 
-UNT Tharja 1 2 0 
+UNT Tharja 1 1 0 
 UNT Archer 8 3 2 
 UNT Archer 8 1 2 
 UNT Archer 10 2 2 
