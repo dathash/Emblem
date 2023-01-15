@@ -48,7 +48,7 @@
 #define DEFAULT_SHEET "thief.png"
 
 // gameplay
-#define LEADER_ID 0
+#define LEADER_ID hash<string>{}("Lucina")
 
 #define LEVEL_TIME 99
 

@@ -152,7 +152,7 @@ public:
 
         cursor->path_draw = GetPath(map, cursor->redo, cursor->pos, true);
 
-        if(!hoverTile->occupant || hoverTile->occupant->id == cursor->selected->id)
+        if(!hoverTile->occupant || hoverTile->occupant->ID() == cursor->selected->ID())
         {
             GlobalInterfaceState = SELECTED_OVER_GROUND;
             return;

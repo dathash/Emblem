@@ -17,14 +17,14 @@ MAP 1 1 0 0 0 0 0 0 0 0 0 0 3 4 1
 MAP 1 1 1 1 1 0 0 0 0 0 0 0 3 3 3 
 MAP 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 
 
-COM <UNT <name> <id> <col> <row> <ai>
-UNT Brute 10 13 7 2 
-UNT Brute 10 8 4 1 
-UNT Brute 10 6 6 1 
-UNT Thief 9 7 1 1 
-UNT Archer 11 8 5 2 
-UNT Archer 11 7 6 2 
-UNT Lucina 0 2 2 0 
-UNT Donnel 3 3 1 0 
-UNT Tharja 8 1 1 0 
+COM <UNT <name> <col> <row> <ai>
+UNT Brute 13 7 2 
+UNT Brute 8 4 1 
+UNT Brute 6 6 1 
+UNT Thief 7 1 1 
+UNT Archer 8 5 2 
+UNT Archer 7 6 2 
+UNT Lucina 2 2 0 
+UNT Donnel 3 1 0 
+UNT Tharja 1 1 0 
 

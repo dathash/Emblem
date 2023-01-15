@@ -17,14 +17,14 @@ MAP 1 1 0 0 0 0 0 0 0 0 0 3 3 3 1
 MAP 1 1 1 1 1 0 0 0 0 0 3 3 3 3 3 
 MAP 1 0 1 1 1 1 1 1 1 1 3 3 3 3 3 
 
-COM <UNT <name> <id> <col> <row> <ai>
-UNT Lucina 0 1 1 0 
-UNT Priam 1 2 1 0 
-UNT Noire 2 3 1 0 
-UNT Donnel 3 4 1 0 
-UNT Olivia 4 5 1 0 
-UNT Tiki 5 6 1 0 
-UNT Flavia 6 7 1 0 
-UNT Lon'qu 7 8 1 0 
-UNT Tharja 8 9 1 0 
+COM <UNT <name> <col> <row> <ai>
+UNT Lucina 1 1 0 
+UNT Priam 2 1 0 
+UNT Noire 3 1 0 
+UNT Donnel 4 1 0 
+UNT Olivia 5 1 0 
+UNT Tiki 6 1 0 
+UNT Flavia 7 1 0 
+UNT Lon'qu 8 1 0 
+UNT Tharja 9 1 0 
 

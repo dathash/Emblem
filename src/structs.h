@@ -163,7 +163,6 @@ enum AIBehavior
 struct Unit
 {
     string name;
-    int id;
     bool is_ally;
     position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
     bool is_exhausted = false;
@@ -183,6 +182,13 @@ struct Unit
     Texture portrait;
     AIBehavior ai_behavior = NO_BEHAVIOR;
 
+
+    size_t
+    ID()
+    {
+        return hash<string>{}(name);
+    }
+
     void
     Update()
     {
@@ -195,7 +201,7 @@ struct Unit
 
     Unit(string name_in, Spritesheet sheet_in,
          Texture portrait_in,
-         int id_in, bool is_ally_in, int movement_in,
+         bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
          int attack_in, int ability_in, int defense_in,
          int accuracy_in, int avoid_in, int crit_in,
@@ -204,7 +210,6 @@ struct Unit
     : name(name_in),
       sheet(sheet_in),
       portrait(portrait_in),
-      id(id_in),
       is_ally(is_ally_in),
       movement(movement_in),
       health(health_in),
@@ -304,7 +309,7 @@ struct Level
     {
         for(const unique_ptr<Unit> &unit : combatants)
         {
-            if(unit->id == LEADER_ID)
+            if(unit->ID() == LEADER_ID)
                 return unit->pos;
         }
         assert(!"ERROR Level.Leader(): No leader!\n");

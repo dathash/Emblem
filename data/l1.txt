@@ -17,19 +17,19 @@ MAP 0 0 0 0 0 1 0 0 0 1 1 1 1 0 0
 MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
 
-COM <UNT <name> <id> <col> <row> <ai>
-UNT Priam 1 2 6 0 
-UNT Noire 2 3 8 0 
-UNT Lucina 0 1 7 0 
-UNT Brute 10 8 4 1 
-UNT Brute 10 6 6 1 
-UNT Archer 11 11 5 2 
-UNT Brute 10 11 2 2 
-UNT Brute 10 10 2 2 
-UNT Thief 9 1 1 1 
-UNT Brute 10 0 6 1 
-UNT Brute 10 0 7 1 
-UNT Brute 10 0 8 1 
-UNT Brute 10 2 8 1 
-UNT Brute 10 1 8 1 
+COM <UNT <name> <col> <row> <ai>
+UNT Priam 2 6 0 
+UNT Noire 3 8 0 
+UNT Lucina 1 7 0 
+UNT Brute  8 4 1 
+UNT Brute 6 6 1 
+UNT Archer 11 5 2 
+UNT Brute 11 2 2 
+UNT Brute 10 2 2 
+UNT Thief 1 1 1 
+UNT Brute 0 6 1 
+UNT Brute 0 7 1 
+UNT Brute 0 8 1 
+UNT Brute 2 8 1 
+UNT Brute 1 8 1 
 

@@ -90,10 +90,8 @@ static unsigned int GlobalAIState;
 ////////////////////////////////
 
 // TODO: Refactor these to only be where they need to be.
-//       Pretty sure none of them have to be globals.
 static int viewportCol = 0;
 static int viewportRow = 0;
-static int GlobalCurrentID = 0;
 
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that the game includes.
@@ -116,6 +114,7 @@ static Timer GlobalLevelTimer = Timer(LEVEL_TIME);
 
 int main(int argc, char *argv[])
 {
+    cout << hash<string>{}("Lucina") << "\n";
     srand(time(NULL));
 
     if(!Initialize())

@@ -16,10 +16,9 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		if(ImGui::Button("create"))
 		{
 			units->push_back(make_unique<Unit>(
-				string("DEFAULT"),
+				string("DEFAULT_CHANGE"),
 				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
 				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				GlobalCurrentID,
 				true,
 				3,
 				3,
@@ -34,8 +33,6 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 				3,
                 NO_BEHAVIOR
 			));
-			cout << "Created Unit: " << GlobalCurrentID - 1 << "\n";
-			++GlobalCurrentID;
 		}
 		ImGui::SameLine();
 		if(ImGui::Button("destroy"))
@@ -61,7 +58,7 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 		assert(selectedIndex < units->size());
 		Unit *selected = (*units)[selectedIndex].get();
 
-		ImGui::Text("%s | %d", selected->name.c_str(), selected->id);
+		ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("name", &(selected->name));
 		// CONSIDER: Update texture sources, spritesheet.
 		ImGui::SliderInt("mov", &selected->movement, 0, 10);
