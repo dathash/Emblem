@@ -114,7 +114,8 @@ vector<string> split(const string &text, char sep) {
 }
 
 // loads a level from a file.
-Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
+Level
+LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
 {
     string line;
 	string type;
@@ -190,6 +191,11 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
                         level.map.tiles[col][mapRow] = 
                             OBJECTIVE_TILE;
                     } break;
+                    case(SPAWN):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            SPAWN_TILE;
+                    } break;
                     default:
                     {
                         cout << "ERROR: Unhandled tile type in loader!\n";
@@ -200,12 +206,12 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
         }
         else if(type == "UNT")
         {
-            unique_ptr<Unit> unitCopy;
-            for(const unique_ptr<Unit> &unit : units)
+            shared_ptr<Unit> unitCopy;
+            for(const shared_ptr<Unit> &unit : units)
             {
                 if(hash<string>{}(tokens[0]) == unit->ID())
                 {
-                    unitCopy = make_unique<Unit>(*unit);
+                    unitCopy = make_shared<Unit>(*unit);
                 }
             }
             assert(unitCopy);
@@ -225,14 +231,15 @@ Level LoadLevel(string filename_in, const vector<unique_ptr<Unit>> &units)
 }
 
 // loads units from a file. returns a vector of them.
-vector<unique_ptr<Unit>> LoadUnits(string filename_in)
+vector<shared_ptr<Unit>>
+LoadUnits(string filename_in)
 {
     string line;
 	string type;
 	string rest;
 	vector<string> tokens;
 
-	vector<unique_ptr<Unit>> units;
+	vector<shared_ptr<Unit>> units;
 
     ifstream fp;
     fp.open(filename_in);
@@ -247,7 +254,7 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
             if(type == "UNT")
             {
                 tokens = split(rest, ' ');
-                units.push_back(make_unique<Unit>(
+                units.push_back(make_shared<Unit>(
                     tokens[0],									// name
                     Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[1]), 32, ANIMATION_SPEED), // path to texture
                     LoadTextureImage(FULLS_PATH, tokens[2]),// portrait
@@ -277,7 +284,7 @@ vector<unique_ptr<Unit>> LoadUnits(string filename_in)
 
 // saves the units to a file.
 void
-SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
+SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
 {
     ofstream fp;
     fp.open(filename_in);
@@ -288,7 +295,7 @@ SaveUnits(string filename_in, const vector<unique_ptr<Unit>> &units)
     fp << "COM File: Units\n\n";
 
     fp << "COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <abi> <def> <acc> <avo> <crit> <short> <long> <ai>>\n";
-    for(const unique_ptr<Unit> &unit : units)
+    for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << " "
                      << unit->sheet.texture.filename << " "
@@ -339,7 +346,7 @@ SaveLevel(string filename_in, const Level &level)
     fp << "\n";
 
     fp << "COM <UNT <name> <col> <row> <ai>\n";
-    for(const unique_ptr<Unit> &unit : level.combatants)
+    for(const shared_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "
                      << unit->pos.col << " "

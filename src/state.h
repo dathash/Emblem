@@ -13,7 +13,6 @@
 // * What to do if we're editing the stage.
 
 // Function called by commands to end the player's turn.
-// Very impure.
 void
 EndPlayerTurn()
 {
@@ -22,15 +21,14 @@ EndPlayerTurn()
     GlobalTurnStart = true;
 }
 
-// Very impure.
-void EndAITurn()
+void
+EndAITurn()
 {
     GlobalAIState = PLAYER_TURN;
     GlobalPlayerTurn = true;
     GlobalTurnStart = true;
 }
 
-// Very impure.
 void
 NextLevel()
 {
@@ -38,11 +36,19 @@ NextLevel()
     GlobalTurnStart = true;
 }
 
-// Very impure.
 void
 RestartLevel()
 {
     GlobalRestart = true;
+}
+
+void
+ReloadLevel()
+{
+    GlobalLevelTimer = Timer(LEVEL_TIME);
+    GlobalAIState = PLAYER_TURN;
+    GlobalPlayerTurn = true;
+    GlobalTurnStart = true;
 }
 
 

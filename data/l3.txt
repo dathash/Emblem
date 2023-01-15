@@ -17,8 +17,6 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
-COM <UNT <name> <col> <row>
+COM <UNT <name> <col> <row> <ai>
 UNT Lucina 2 2 0
-UNT Donnel 1 3 0
-UNT Tharja 1 1 0
-
+UNT Priam 3 3 0

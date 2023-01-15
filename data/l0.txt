@@ -26,5 +26,3 @@ UNT Archer 8 5 2
 UNT Archer 7 6 2 
 UNT Lucina 2 2 0 
 UNT Donnel 3 1 0 
-UNT Tharja 1 1 0 
-

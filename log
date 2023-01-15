@@ -78,6 +78,7 @@ Tripod (Bomberman Hero)
 # TODO
 PROTOTYPE
     16 levels
+    Stop using unique_ptrs
 
     Retain your party condition through levels
 

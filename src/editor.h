@@ -9,13 +9,14 @@
 #if DEV_MODE
 
 static uint8_t selectedIndex = 0;
-void UnitEditor(vector<unique_ptr<Unit>> *units)
+void
+UnitEditor(vector<shared_ptr<Unit>> *units)
 {
 	ImGui::Begin("unit editor");
 	{
 		if(ImGui::Button("create"))
 		{
-			units->push_back(make_unique<Unit>(
+			units->push_back(make_shared<Unit>(
 				string("DEFAULT_CHANGE"),
 				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
 				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
@@ -60,7 +61,6 @@ void UnitEditor(vector<unique_ptr<Unit>> *units)
 
 		ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("name", &(selected->name));
-		// CONSIDER: Update texture sources, spritesheet.
 		ImGui::SliderInt("mov", &selected->movement, 0, 10);
 		ImGui::SliderInt("hp", &selected->max_health, 1, 20);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
@@ -120,7 +120,7 @@ EditorPollForKeyboardInput(position *editor_cursor)
     }
 }
 
-void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
+void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 {
 	ImGui::Begin("level editor");
 	{
@@ -138,7 +138,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
             if(!(hover_tile->occupant ||
                  hover_tile->type == WALL))
             {
-                level->combatants.push_back(make_unique<Unit>(*units[selectedIndex]));
+                level->combatants.push_back(make_shared<Unit>(*units[selectedIndex]));
                 level->combatants.back()->pos.col = editor_cursor.col;
                 level->combatants.back()->pos.row = editor_cursor.row;
                 hover_tile->occupant = level->combatants.back().get();
@@ -163,7 +163,7 @@ void LevelEditor(Level *level, const vector<unique_ptr<Unit>> &units)
                 // * Literally anything else.
                 level->combatants.erase(
                         remove_if(level->combatants.begin(), level->combatants.end(),
-                                [map_ptr](const unique_ptr<Unit> &u)
+                                [map_ptr](const shared_ptr<Unit> &u)
                                 {
                                     return (map_ptr == u.get());
                                 }),
@@ -275,7 +275,7 @@ GlobalsViewer()
 // Renders all imgui stuff.
 // Contains static variables that might trip some stuff up, just a heads up.
 void
-EditorPass(vector<unique_ptr<Unit>> *units,
+EditorPass(vector<shared_ptr<Unit>> *units,
            Level *level, const vector<string> &levels)
 {
     // Internal variables
@@ -297,6 +297,7 @@ EditorPass(vector<unique_ptr<Unit>> *units,
             *units = LoadUnits(string(DATA_PATH) + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
             *level = LoadLevel(string(DATA_PATH) + string(levelFileName), *units);
+            ReloadLevel();
             cout << "Level loaded: " << levelFileName << "\n";
         }
         ImGui::SameLine();
@@ -313,12 +314,18 @@ EditorPass(vector<unique_ptr<Unit>> *units,
         }
 
         if(ImGui::Button("TEST"))
+        {
             *level = LoadLevel(string(DATA_PATH) + string("test.txt"), *units);
+            ReloadLevel();
+        }
 
         for(const string &s : levels)
         {
             if(ImGui::Button(s.c_str()))
+            {
                 *level = LoadLevel(s, *units);
+                ReloadLevel();
+            }
         }
 
         ImGui::Checkbox("Unit Editor", &showUnitEditor);

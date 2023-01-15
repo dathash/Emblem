@@ -57,6 +57,7 @@
 #define FOREST_TILE {FOREST, 2, 40, nullptr, {0, 6}}
 #define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
 #define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
+#define SPAWN_TILE {SPAWN, 1, 0, nullptr, {31, 15}}
 
 enum InterfaceState
 {
@@ -110,6 +111,16 @@ enum quadrant
     TOP_RIGHT,
     BOTTOM_LEFT,
     BOTTOM_RIGHT
+};
+
+enum TileTypes
+{
+    FLOOR,
+    WALL,
+    FOREST,
+    DESERT,
+    OBJECTIVE,
+    SPAWN
 };
 
 // ============================ color palette ==================================

@@ -4,11 +4,11 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
-ONE What's the big deal?
+ONE This is a test.
 TWO What are you talking about?
-ONE Sorry, I didn't mean to shout. It's just that... well, you've been looking at me like that all week.
-ONE It's getting... unsettling. What sorts of thoughts are going through your head?
-TWO Same as you, I think.
-ONE Huh.
-TWO I've got to go.
-TWO Farewell!
+ONE This line is extremely long. You can tell it is long by the way that it is. Goodbye..
+TWO This is... unsettling. What the hell?
+ONE C
+TWO Huh.
+ONE I've got to go.
+TWO Later??? [WHAT THE HELL]

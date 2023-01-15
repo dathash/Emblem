@@ -18,8 +18,7 @@ MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Priam 2 6 0 
-UNT Noire 3 8 0 
+UNT Noire 2 6 0 
 UNT Lucina 1 7 0 
 UNT Brute  8 4 1 
 UNT Brute 6 6 1 

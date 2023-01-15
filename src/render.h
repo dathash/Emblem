@@ -281,7 +281,6 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == ENEMY_INFO)
        && GlobalPlayerTurn && !GlobalEditorMode)
     {
-        //cout << cursor.pos << "\n"; // TODO: There's an unlucky seg fault here. Investigate when exiting editor mode.
         assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
         int x_pos = 560;
         if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)

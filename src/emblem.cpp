@@ -97,10 +97,10 @@ static int viewportRow = 0;
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
 #include "utils.h"
-#include "state.h"
-#include "structs.h"
 // TODO: Figure out how to fix this forward declaration
 static Timer GlobalLevelTimer = Timer(LEVEL_TIME);
+#include "state.h"
+#include "structs.h"
 #include "load.h"
 #include "init.h"
 #include "input.h"
@@ -114,7 +114,6 @@ static Timer GlobalLevelTimer = Timer(LEVEL_TIME);
 
 int main(int argc, char *argv[])
 {
-    cout << hash<string>{}("Lucina") << "\n";
     srand(time(NULL));
 
     if(!Initialize())
@@ -129,7 +128,7 @@ int main(int argc, char *argv[])
     }
 
 // ================================== load =================================
-    vector<unique_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
+    vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
 
     vector<string> levels = {DATA_PATH + string("l0.txt"), DATA_PATH + string("l1.txt"),
                              DATA_PATH + string("l2.txt"), DATA_PATH + string("l3.txt"),
@@ -151,8 +150,8 @@ int main(int argc, char *argv[])
     InputHandler handler(&cursor, level.map);
     AI ai;
 
-    Conversation conversation = LoadConversation(CONVERSATIONS_PATH, "test.txt", 
-                                *level.combatants[0], *level.combatants[1]);
+    Conversation conversation = LoadConversation(CONVERSATIONS_PATH, "test.txt",
+                                                 *units[0], *units[1]);
 
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
@@ -182,7 +181,7 @@ int main(int argc, char *argv[])
             if(GlobalLevelTimer.Update())
                 GlobalInterfaceState = GAME_OVER;
 
-            for(const unique_ptr<Unit> &unit : level.combatants)
+            for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
         }
 
