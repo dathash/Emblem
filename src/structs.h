@@ -348,6 +348,10 @@ struct Cursor
     Update()
     {
         sheet.Update();
+        if(!WithinViewport(pos))
+        {
+            MoveViewport(pos);
+        }
     }
 
     // Places the cursor at a position.

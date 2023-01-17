@@ -78,11 +78,11 @@ Tripod (Bomberman Hero)
 # TODO
 PROTOTYPE
     16 levels
-    Enemies need to treat their own units as walls in a sort of sense
 
     Win Screen
 
     AI Movement Pattern:
+    Enemies need to treat their own units as walls in a sort of sense
     * Waits until you're within a certain number of squares (probably like 5),
       then pursues
     * Bolsters until attacked, then changes to Pursue.

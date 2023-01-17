@@ -95,29 +95,24 @@ GenerateDebugPaths(const Level &level, path *path_debug)
 }
 
 void
-EditorPollForKeyboardInput(position *editor_cursor)
+EditorPollForKeyboardInput(position *editor_cursor, int width, int height)
 {
+    position desired_move = *editor_cursor;
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_A)))
-    {
-        editor_cursor->col = max(editor_cursor->col - 1, 0);
-    }
+        desired_move = desired_move + position(-1, 0);
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
-    {
-        editor_cursor->col = min(editor_cursor->col + 1, VIEWPORT_WIDTH - 1) + viewportCol;
-    }
+        desired_move = desired_move + position(1, 0);
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
-    {
-        editor_cursor->row = max(editor_cursor->row - 1, 0);
-    }
+        desired_move = desired_move + position(0, -1);
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
+        desired_move = desired_move + position(0, 1);
+
+    desired_move = clamp(desired_move, position(0, 0), position(width-1, height-1));
+    if(!WithinViewport(desired_move))
     {
-        editor_cursor->row = min(editor_cursor->row + 1, VIEWPORT_HEIGHT - 1) + viewportRow;
+        MoveViewport(desired_move);
     }
-    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_E)))
-    {
-        // NOTE: This is temporary, just puts the cursor smack dab in the middle.
-        *editor_cursor = position(viewportCol + 7, viewportRow + 5);
-    }
+    *editor_cursor = desired_move;
 }
 
 void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
@@ -129,7 +124,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 
         static bool showDebugPaths = false;
 
-        EditorPollForKeyboardInput(&editor_cursor);
+        EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
         Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
 
         ImGui::Text("Units:");

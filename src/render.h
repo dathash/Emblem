@@ -73,6 +73,7 @@ void
 RenderHealthBar(const position &p, int hp, int maxHp)
 {
     float ratio = (float)hp / maxHp;
+    SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
 
     SDL_Rect bar_rect = {p.col * TILE_SIZE + 7, 
                             p.row * TILE_SIZE + 50,
@@ -84,7 +85,7 @@ RenderHealthBar(const position &p, int hp, int maxHp)
     SDL_SetRenderDrawColor(GlobalRenderer, darkGray.r, darkGray.g, darkGray.b, darkGray.a);
     SDL_RenderFillRect(GlobalRenderer, &bar_rect);
 
-    SDL_SetRenderDrawColor(GlobalRenderer, green.r, green.g, green.b, green.a);
+    SDL_SetRenderDrawColor(GlobalRenderer, healthColor.r, healthColor.g, healthColor.b, healthColor.a);
     SDL_RenderFillRect(GlobalRenderer, &health_rect);
 
     SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);

@@ -40,7 +40,6 @@ public:
         {
             // move cursor
             cursor->pos = new_pos;
-            MoveViewport(new_pos);
 
             // change state
             const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
@@ -141,7 +140,6 @@ public:
 
         // move cursor
         cursor->pos = new_pos;
-        MoveViewport(new_pos);
 
         const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
         if(!VectorHasElement(new_pos, map.accessible))
@@ -301,9 +299,6 @@ public:
 
         // move cursor
         cursor->pos = next;
-
-        // For rendering
-        MoveViewport(next);
     }
 
 private:
@@ -339,9 +334,6 @@ public:
 
         // move cursor
         cursor->pos = next;
-
-        // For rendering
-        MoveViewport(next);
     }
 
 private:

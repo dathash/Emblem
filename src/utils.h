@@ -56,7 +56,6 @@ struct Timer
 };
 
 
-
 struct position
 {
     position() {}
@@ -106,6 +105,23 @@ clamp(int val, int min, int max)
     else if(val > max)
         return max;
     return val;
+}
+
+position
+clamp(const position &pos, const position &min, const position &max)
+{
+    position result = pos;
+    if(pos.col <= min.col)
+        result.col = min.col;
+    else if(pos.col > max.col)
+        result.col = max.col;
+
+    if(pos.row <= min.row)
+        result.row = min.row;
+    else if(pos.row > max.row)
+        result.row = max.row;
+
+    return result;
 }
 
 // ===================================== Viewport ===============================
@@ -165,8 +181,36 @@ SetViewport(const position &p, int width, int height)
 }
 
 // ================================= Library ===================================
+SDL_Color
+LerpColors(const SDL_Color &one, const SDL_Color &two, float ratio)
+{
+    return {
+            (Uint8)(one.r * (1.0 - ratio) + (two.r * ratio)),
+            (Uint8)(one.g * (1.0 - ratio) + (two.g * ratio)),
+            (Uint8)(one.b * (1.0 - ratio) + (two.b * ratio)),
+            (Uint8)(one.a * (1.0 - ratio) + (two.a * ratio))
+            };
+}
+
+SDL_Color
+PiecewiseColors(const SDL_Color &one, const SDL_Color &two, float ratio)
+{
+    if(ratio > 0.5)
+        return one;
+    return two;
+}
+SDL_Color
+PiecewiseColors(const SDL_Color &one, const SDL_Color &two, const SDL_Color &three, float ratio)
+{
+    if(ratio < 0.33)
+        return one;
+    else if(ratio < 0.66)
+        return two;
+    return three;
+}
+
 ImU32
-SdlToImColor(SDL_Color in)
+SdlToImColor(const SDL_Color &in)
 {
     return IM_COL32(in.r, in.g, in.b, in.a);
 }
