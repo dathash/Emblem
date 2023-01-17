@@ -198,6 +198,12 @@ public:
         // Update unit menu with available actions
         *menu = Menu({});
 
+        if(map->tiles[cursor->pos.col][cursor->pos.row].type == OBJECTIVE &&
+           cursor->selected->ID() == LEADER_ID)
+        {
+            menu->AddOption("Capture");
+        }
+
         // for attacking
         for(const position &p : interactible)
         {
@@ -680,6 +686,20 @@ public:
     {
         string option = menu.optionText[menu.current];
 
+        if(option == "Capture")
+        {
+            cursor->selected->Deactivate();
+
+            cursor->selected = nullptr;
+            cursor->redo = {-1, -1};
+            cursor->path_draw = {};
+
+            // Move onto next level!
+            GlobalLevelTimer.Pause();
+            GlobalInterfaceState = LEVEL_MENU;
+            return;
+        }
+
         if(option == "Attack")
         {
             assert(map.attackable.size());
@@ -707,13 +727,6 @@ public:
             cursor->redo = {-1, -1};
             cursor->path_draw = {};
 
-            // Move onto next level!
-            if(map.tiles[cursor->pos.col][cursor->pos.row].type == OBJECTIVE)
-            {
-                GlobalLevelTimer.Pause();
-                GlobalInterfaceState = LEVEL_MENU;
-                return;
-            }
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
             return;
         }

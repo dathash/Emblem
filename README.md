@@ -1,5 +1,5 @@
 # Emblem
-A small tactical RPG. Built in C++ using SDL, ImGui, MiniAudio.
+A micro-tactics RPG. Built in C++ using SDL, ImGui, MiniAudio.
 
 A learning project with the following goals:
 - Finish a game.
