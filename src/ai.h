@@ -30,7 +30,7 @@ public:
             cursor->pos = selected->pos;
 
             // For rendering
-            MoveViewport(cursor->pos);
+            SetViewport(cursor->pos, map.width, map.height);
         }
         else
         {
@@ -206,7 +206,7 @@ public:
 
         // move cursor
         cursor->pos = action.first;
-        MoveViewport(cursor->pos);
+        SetViewport(cursor->pos, map->width, map->height);
 
         // place unit
         map->tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;

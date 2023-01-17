@@ -96,8 +96,6 @@ static int viewportRow = 0;
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
 #include "utils.h"
-// TODO: Figure out how to fix this forward declaration
-static Timer GlobalLevelTimer = Timer(LEVEL_TIME);
 #include "state.h"
 #include "structs.h"
 #include "load.h"
@@ -177,8 +175,6 @@ int main(int argc, char *argv[])
             cursor.Update();
             ui.Update();
             level.Update();
-            if(GlobalLevelTimer.Update())
-                GlobalInterfaceState = GAME_OVER;
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
@@ -190,7 +186,6 @@ int main(int argc, char *argv[])
         {
             GlobalRestart = false;
             level = LoadLevel(DATA_PATH + levels[level_index], units);
-            GlobalLevelTimer = Timer(LEVEL_TIME);
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
         }
@@ -217,7 +212,6 @@ int main(int argc, char *argv[])
                 level.AddCombatant(unit, level.map.GetNextSpawnLocation());
             }
 
-            GlobalLevelTimer = Timer(LEVEL_TIME);
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
         }
@@ -226,16 +220,10 @@ int main(int argc, char *argv[])
         {
             GlobalTurnStart = false;
 
-            if(GlobalPlayerTurn)
-                GlobalLevelTimer.Start();
-            else
-                GlobalLevelTimer.Pause();
-
             for(auto const &unit : level.combatants)
                 unit->Activate();
             cursor.PlaceAt(level.Leader());
-            viewportCol = 0;
-            viewportRow = 0;
+            SetViewport(cursor.pos, level.map.width, level.map.height);
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
             ai.clearQueue();

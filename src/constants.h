@@ -57,7 +57,7 @@
 #define FOREST_TILE {FOREST, 2, 40, nullptr, {0, 6}}
 #define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
 #define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
-#define SPAWN_TILE {SPAWN, 1, 0, nullptr, {31, 15}}
+#define SPAWN_TILE {SPAWN, 1, 0, nullptr, {14, 1}}
 
 enum InterfaceState
 {
@@ -153,6 +153,9 @@ const SDL_Color green =     {101, 204, 55, 255};
 const SDL_Color darkGreen = {21, 85, 51, 255};
 const SDL_Color blue =      {42, 101, 205, 255};
 const SDL_Color darkBlue =  {22, 50, 125, 255};
+
+const SDL_Color yellow =  {200, 200, 50, 255};
+const SDL_Color darkGray =  {100, 100, 100, 255};
 
 // Combat
 const SDL_Color allyHealthBarColor = {10, 10, 200, 255};

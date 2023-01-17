@@ -78,7 +78,7 @@ Tripod (Bomberman Hero)
 # TODO
 PROTOTYPE
     16 levels
-    Units have health bars below or above their sprites
+    Enemies need to treat their own units as walls in a sort of sense
 
     Win Screen
 

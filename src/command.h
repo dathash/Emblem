@@ -191,7 +191,7 @@ public:
         // Determine interactible squares
         map->attackable.clear();
         map->healable.clear();
-        map->attackable.clear();
+        map->range.clear();
         vector<position> interactible = InteractibleFrom(*map, cursor->pos,
                                              cursor->selected->min_range, cursor->selected->max_range);
 
@@ -207,6 +207,7 @@ public:
         // for attacking
         for(const position &p : interactible)
         {
+            map->range.push_back(p);
             if(map->tiles[p.col][p.row].occupant &&
                !map->tiles[p.col][p.row].occupant->is_ally)
             {
@@ -695,7 +696,6 @@ public:
             cursor->path_draw = {};
 
             // Move onto next level!
-            GlobalLevelTimer.Pause();
             GlobalInterfaceState = LEVEL_MENU;
             return;
         }

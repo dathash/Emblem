@@ -45,7 +45,6 @@ RestartLevel()
 void
 ReloadLevel()
 {
-    GlobalLevelTimer = Timer(LEVEL_TIME);
     GlobalAIState = PLAYER_TURN;
     GlobalPlayerTurn = true;
     GlobalTurnStart = true;

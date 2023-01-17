@@ -119,7 +119,7 @@ WithinViewport(const position &p)
             p.row >= viewportRow);
 }
 
-// moves the cursor's viewport so that the given tile is on screen.
+// moves the cursor's viewport once so that the given tile is on screen.
 // Very Impure
 void
 MoveViewport(const position &p)
@@ -143,6 +143,25 @@ MoveViewport(const position &p)
     {
         --viewportRow;
     }
+}
+
+// Sets the viewport to have the point p inside of it.
+// Meant to be called at the start of the level.
+void
+SetViewport(const position &p, int width, int height)
+{
+    if(WithinViewport(p))
+        return;
+
+    position viewport_grid_position = 
+    {
+        p.col / VIEWPORT_WIDTH,
+        p.row / VIEWPORT_HEIGHT
+    };
+    viewportCol = clamp(viewport_grid_position.col * VIEWPORT_WIDTH,
+                        0, width - VIEWPORT_WIDTH);
+    viewportRow = clamp(viewport_grid_position.row * VIEWPORT_HEIGHT,
+                        0, height - VIEWPORT_HEIGHT);
 }
 
 // ================================= Library ===================================

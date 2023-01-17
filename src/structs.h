@@ -218,6 +218,7 @@ struct Tilemap
     vector<position> accessible;
     vector<position> attackable;
     vector<position> healable;
+    vector<position> range;
     //vector<point> adjacent;
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
@@ -355,7 +356,6 @@ struct Cursor
     {
         pos = pos_in;
         path_draw = {};
-        MoveViewport(pos_in);
     }
 
     // returns the current quadrant of where the cursor is on the screen.

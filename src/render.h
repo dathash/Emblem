@@ -69,10 +69,26 @@ RenderText(const Texture &texture, int x, int y)
 }
 
 // Renders a Health Bar
-// TODO: Rework
 void
-RenderHealthBar(int x, int y, int hp, int maxHp, bool allyColor)
+RenderHealthBar(const position &p, int hp, int maxHp)
 {
+    float ratio = (float)hp / maxHp;
+
+    SDL_Rect bar_rect = {p.col * TILE_SIZE + 7, 
+                            p.row * TILE_SIZE + 50,
+                            50, 8};
+    SDL_Rect health_rect = {p.col * TILE_SIZE + 7,
+                            p.row * TILE_SIZE + 50,
+                            (int)(50 * ratio), 8};
+
+    SDL_SetRenderDrawColor(GlobalRenderer, darkGray.r, darkGray.g, darkGray.b, darkGray.a);
+    SDL_RenderFillRect(GlobalRenderer, &bar_rect);
+
+    SDL_SetRenderDrawColor(GlobalRenderer, green.r, green.g, green.b, green.a);
+    SDL_RenderFillRect(GlobalRenderer, &health_rect);
+
+    SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
+    SDL_RenderDrawRect(GlobalRenderer, &bar_rect);
 }
 
 
@@ -94,6 +110,8 @@ Render(const Tilemap &map, const Cursor &cursor,
             position screen_pos = {col - viewportCol, row - viewportRow};
             const Tile &tile = map.tiles[col][row];
             RenderTileTexture(map, tile, screen_pos);
+            if(tile.type == SPAWN && GlobalEditorMode)
+                RenderTileColor(screen_pos, yellow);
         }
     }
 
@@ -137,7 +155,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     if(GlobalInterfaceState == ATTACK_TARGETING)
     {
-        for(const position &cell : map.attackable)
+        for(const position &cell : map.range)
         {
             if(WithinViewport(cell))
             {
@@ -146,17 +164,37 @@ Render(const Tilemap &map, const Cursor &cursor,
                            attackColor);
             }
         }
+
+        for(const position &cell : map.attackable)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           yellow);
+            }
+        }
     }
 
     if(GlobalInterfaceState == HEAL_TARGETING)
     {
-        for(const position &cell : map.healable)
+        for(const position &cell : map.range)
         {
             if(WithinViewport(cell))
             {
                 RenderTileColor({cell.col - viewportCol, 
                            cell.row - viewportRow}, 
                            healColor);
+            }
+        }
+
+        for(const position &cell : map.healable)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           yellow);
             }
         }
     }
@@ -193,6 +231,7 @@ Render(const Tilemap &map, const Cursor &cursor,
                 }
                 position screen_pos = {col - viewportCol, row - viewportRow};
                 RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally);
+                RenderHealthBar(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
             }
         }
     }

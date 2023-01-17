@@ -45,7 +45,6 @@ struct UI_State
     bool game_over = false;
     bool unit_menu = false;
     bool combat_screen = false;
-    bool timer = false;
 
     void
     Clear()
@@ -58,7 +57,6 @@ struct UI_State
         game_over = false;
         unit_menu = false;
         combat_screen = false;
-        timer = false;
     }
 
     void 
@@ -77,19 +75,6 @@ struct UI_State
         else
         {
             tile_info = false;
-        }
-
-        // Timer
-        if(
-           !(GlobalInterfaceState == LEVEL_MENU ||
-             GlobalInterfaceState == CONVERSATION)
-          )
-        {
-            timer = true;
-        }
-        else
-        {
-            timer = false;
         }
 
 		// Unit Blurb
@@ -421,22 +406,6 @@ DisplayGameOver(ImGuiWindowFlags wf)
     ImGui::End();
 }
 
-void
-DisplayTimer(ImGuiWindowFlags wf, const Timer &timer)
-{
-    ImGui::SetNextWindowPos(ImVec2(450, 30), 0, ImVec2(0.5, 0.5));
-    ImGui::SetNextWindowSize(ImVec2(60, 50));
-
-	wf |= ImGuiWindowFlags_NoTitleBar;
-    ImGui::Begin("Timer", NULL, wf);
-    {
-        ImGui::PushFont(uiFontLarge);
-            ImGui::Text("%02d", (int)((timer.end - timer.current) * 0.001));
-        ImGui::PopFont();
-    }
-    ImGui::End();
-}
-
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
@@ -470,8 +439,6 @@ RenderUI(UI_State *ui,
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
                                            map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,
                                            map.tiles[cursor.pos.col][cursor.pos.row].avoid);
-    if(ui->timer)
-        DisplayTimer(window_flags, GlobalLevelTimer);
     if(ui->game_over)
         DisplayGameOver(window_flags);
 

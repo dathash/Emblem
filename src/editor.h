@@ -62,7 +62,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("name", &(selected->name));
 		ImGui::SliderInt("mov", &selected->movement, 0, 10);
-		ImGui::SliderInt("hp", &selected->max_health, 1, 20);
+		ImGui::SliderInt("hp", &selected->max_health, 1, 50);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
 		ImGui::SliderInt("abi", &selected->ability, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
@@ -103,7 +103,7 @@ EditorPollForKeyboardInput(position *editor_cursor)
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
     {
-        editor_cursor->col = min(editor_cursor->col + 1, VIEWPORT_WIDTH - 1);
+        editor_cursor->col = min(editor_cursor->col + 1, VIEWPORT_WIDTH - 1) + viewportCol;
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_W)))
     {
@@ -111,7 +111,7 @@ EditorPollForKeyboardInput(position *editor_cursor)
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_S)))
     {
-        editor_cursor->row = min(editor_cursor->row + 1, VIEWPORT_HEIGHT - 1);
+        editor_cursor->row = min(editor_cursor->row + 1, VIEWPORT_HEIGHT - 1) + viewportRow;
     }
     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_E)))
     {
