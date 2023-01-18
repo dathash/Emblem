@@ -263,14 +263,15 @@ LoadUnits(string filename_in)
                     stoi(tokens[5]),							// health
                     stoi(tokens[5]),							// max health
                     stoi(tokens[6]),							// attack
-                    stoi(tokens[7]),							// attack
+                    stoi(tokens[7]),							// ability
                     stoi(tokens[8]),							// defense
-                    stoi(tokens[9]),						    // accuracy
-                    stoi(tokens[10]),						    // avoid
-                    stoi(tokens[11]),						    // crit
-                    stoi(tokens[12]),						    // short range
-                    stoi(tokens[13]),						    // long range
-                    (AIBehavior)stoi(tokens[14])                // ai behavior
+                    stoi(tokens[9]),							// speed
+                    stoi(tokens[10]),						    // accuracy
+                    stoi(tokens[11]),						    // avoid
+                    stoi(tokens[12]),						    // crit
+                    stoi(tokens[13]),						    // short range
+                    stoi(tokens[14]),						    // long range
+                    (AIBehavior)stoi(tokens[15])                // ai behavior
                 ));
             }
         }
@@ -306,6 +307,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->attack << " "
                      << unit->ability << " "
                      << unit->defense << " "
+                     << unit->speed << " "
                      << unit->accuracy << " "
                      << unit->avoid << " "
                      << unit->crit << " "

@@ -314,8 +314,6 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
        GlobalInterfaceState == SELECTED_OVER_ALLY ||
        GlobalInterfaceState == SELECTED_OVER_ENEMY ||
-       GlobalInterfaceState == ATTACK_TARGETING ||
-       GlobalInterfaceState == HEAL_TARGETING ||
        GlobalInterfaceState == UNIT_MENU_ROOT ||
 	   GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO)

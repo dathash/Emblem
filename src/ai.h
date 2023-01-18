@@ -115,9 +115,14 @@ GetAction(const Unit &unit, const Tilemap &map)
                     }, false);
                 path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
                 if(path_to_nearest.size())
-                    action = pair<position, Unit *>(
-                            FurthestMovementOnPath(map, path_to_nearest, unit.movement),
-                                                 NULL);
+                {
+                    position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.movement);
+                    if(furthest == position(0, 0))
+                    {
+                        furthest = unit.pos;
+                    }
+                    action = pair<position, Unit *>(furthest, NULL);
+                }
                 else
                     action = {unit.pos, NULL};
             }
@@ -136,7 +141,7 @@ GetAction(const Unit &unit, const Tilemap &map)
                                             ManhattanDistance(p, target->pos),
                                             map.tiles[p.col][p.row].avoid,
                                             map.tiles[target->pos.col][target->pos.row].avoid);
-                    int health_remaining = clamp(target->health - outcome.two_attack, 0, target->health);
+                    int health_remaining = clamp(target->health - outcome.two_attack * (1 + outcome.two_double), 0, target->health);
                     if(health_remaining < min_health_after_attack)
                     {
                         action = poss;
@@ -167,12 +172,41 @@ GetAction(const Unit &unit, const Tilemap &map)
                                                 ManhattanDistance(p, target->pos),
                                                 map.tiles[p.col][p.row].avoid,
                                                 map.tiles[target->pos.col][target->pos.row].avoid);
-                        int health_remaining = clamp(target->health - outcome.two_attack, 0, target->health);
+                        int health_remaining = clamp(target->health - outcome.two_attack * (1 + outcome.two_double), 0, target->health);
                         if(health_remaining < min_health_after_attack)
                         {
                             action = poss;
                             min_health_after_attack = health_remaining;
                         }
+                    }
+                }
+            }
+        } break;
+        case WAIT_THEN_ATTACK:
+        {
+            if(possibilities.size() == 0) // No enemies to attack in range.
+            {
+                action = {unit.pos, NULL};
+            }
+            else
+            {
+                int min_health_after_attack = 999;
+                Outcome outcome;
+
+                action = {unit.pos, NULL};
+                for(const pair<position, Unit *> &poss : possibilities)
+                {
+                    const position &p = poss.first;
+                    Unit *target = poss.second;
+                    outcome = PredictCombat(unit, *target,
+                                            ManhattanDistance(p, target->pos),
+                                            map.tiles[p.col][p.row].avoid,
+                                            map.tiles[target->pos.col][target->pos.row].avoid);
+                    int health_remaining = clamp(target->health - outcome.two_attack * (1 + outcome.two_double), 0, target->health);
+                    if(health_remaining < min_health_after_attack)
+                    {
+                        action = poss;
+                        min_health_after_attack = health_remaining;
                     }
                 }
             }

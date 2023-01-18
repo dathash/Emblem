@@ -88,6 +88,8 @@ PROTOTYPE
     * Bolsters until attacked, then changes to Pursue.
     State Machine?
 
+    Unit Death Screen
+
     Abilities
     * Create a system where a unit possesses one of the following.
         (x) Heal
@@ -99,6 +101,9 @@ PROTOTYPE
         ( ) Shield
         ( ) Dance (Genealogy)
 
+    More complex conversations
+    * Units come and go
+    * Facial expression changes
     Add some conversations for inbetween levels
     * Menu
 
@@ -119,8 +124,6 @@ PROTOTYPE
     Audio
         Sound Effects
         Drum-n-bass Audio
-            Trance-like state of playing
-    End turn with a button
     Tutorial
 
     Placing Unit moves them smoothly to that square (A-star)
@@ -128,6 +131,8 @@ PROTOTYPE
     Unit damage and healing ranges are displayed.
 
 NICE
+    Real-time color editing in the editor
+
     Better enemy AI
         Pursuing Enemies only come for you when you get near.
         * Bresenham's line plus a certain distance (maybe 7 tiles?)

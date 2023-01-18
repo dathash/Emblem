@@ -102,14 +102,6 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
-enum AIBehavior
-{
-    NO_BEHAVIOR,
-    PURSUE,
-    BOLSTER,
-    FLEE
-};
-
 struct Unit
 {
     string name;
@@ -123,6 +115,7 @@ struct Unit
     int attack;
     int ability;
     int defense;
+    int speed;
     int min_range;
     int max_range;
     int accuracy;
@@ -154,6 +147,7 @@ struct Unit
          bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
          int attack_in, int ability_in, int defense_in,
+         int speed_in,
          int accuracy_in, int avoid_in, int crit_in,
          int min_range_in, int max_range_in,
          AIBehavior ai_behavior_in)
@@ -167,6 +161,7 @@ struct Unit
       attack(attack_in),
       ability(ability_in),
       defense(defense_in),
+      speed(speed_in),
       accuracy(accuracy_in),
       avoid(avoid_in),
       crit(crit_in),

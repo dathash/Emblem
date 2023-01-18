@@ -273,6 +273,8 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
 			ImGui::Text("[ABI %d]", unit.ability);
             ImGui::PopStyleColor();
+			ImGui::SameLine();
+			ImGui::Text("[SPD %d]", unit.speed);
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
@@ -325,7 +327,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     }
 
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(200, 200));
+    ImGui::SetNextWindowSize(ImVec2(300, 160));
     ImGui::SetNextWindowPos(ImVec2(50, 400));
 
     // Render
@@ -335,21 +337,44 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 
 		ImGui::PushFont(uiFontMedium);
             ImGui::Text("%d atk", outcome.one_attack);
+            if(outcome.one_double)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                ImGui::SameLine();
+                ImGui::Text("X2");
+                ImGui::PopStyleColor();
+            }
             ImGui::Text("%d%% hit", outcome.one_hit);
             ImGui::Text("%d%% crit", outcome.one_crit);
         ImGui::PopFont();
     }
     ImGui::End();
 
-    ImGui::SetNextWindowSize(ImVec2(200, 200));
-    ImGui::SetNextWindowPos(ImVec2(620, 400));
+    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowPos(ImVec2(540, 400));
 
     ImGui::Begin(target.name.c_str(), NULL, wf);
     {
 		ImGui::PushFont(uiFontMedium);
-            ImGui::Text("%d atk", outcome.two_attack);
-            ImGui::Text("%d%% hit", outcome.two_hit);
-            ImGui::Text("%d%% crit", outcome.two_crit);
+            if(outcome.two_double)
+            {
+                ImGui::SameLine(ImGui::GetWindowWidth()-150);
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                ImGui::Text("X2");
+                ImGui::PopStyleColor();
+                ImGui::SameLine();
+            }
+            else
+            {
+                ImGui::SameLine(ImGui::GetWindowWidth()-100);
+            }
+            ImGui::Text("atk %d", outcome.two_attack);
+            ImGui::NewLine();
+            ImGui::SameLine(ImGui::GetWindowWidth()-140);
+            ImGui::Text("hit %d%%", outcome.two_hit);
+            ImGui::NewLine();
+            ImGui::SameLine(ImGui::GetWindowWidth()-140);
+            ImGui::Text("crit %d%%", outcome.two_crit);
         ImGui::PopFont();
     }
     ImGui::End();
@@ -358,7 +383,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 	wf |= ImGuiWindowFlags_NoTitleBar;
 
     ImGui::SetNextWindowSize(ImVec2(100, 100));
-    ImGui::SetNextWindowPos(ImVec2(260, 440));
+    ImGui::SetNextWindowPos(ImVec2(240, 450));
     ImGui::Begin("health1", NULL, wf);
     {
         //TextCentered(string text)
@@ -370,7 +395,7 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     ImGui::End();
 
     ImGui::SetNextWindowSize(ImVec2(100, 100));
-    ImGui::SetNextWindowPos(ImVec2(510, 440));
+    ImGui::SetNextWindowPos(ImVec2(550, 450));
     ImGui::Begin("health2", NULL, wf);
     {
         

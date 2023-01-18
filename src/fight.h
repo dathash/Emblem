@@ -77,9 +77,11 @@ CalculateHealing(const Unit &healer, const Unit &healee)
 // For return in function below.
 struct Outcome
 {
+    bool one_double;
     int one_attack;
     int one_hit;
     int one_crit;
+    bool two_double;
     int two_attack;
     int two_hit;
     int two_crit;
@@ -98,12 +100,14 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     outcome.one_attack = CalculateDamage(one, two);
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;
+    outcome.one_double = one.speed - two.speed > DOUBLE_RATIO;
 
     if(distance >= two.min_range && distance <= two.max_range)
     {
         outcome.two_attack = CalculateDamage(two, one);
         outcome.two_hit = HitChance(two, one, one_avoid_bonus);
         outcome.two_crit = two.crit;
+        outcome.two_double = two.speed - one.speed > DOUBLE_RATIO;
     }
 
     return outcome;
@@ -115,7 +119,6 @@ void
 SimulateCombat(Unit *one, Unit *two, int distance,
 			   int one_avoid_bonus, int two_avoid_bonus)
 {
-    //cout << "COMBAT\n";
     int one_dmg = CalculateDamage(*one, *two);
     int two_dmg = CalculateDamage(*two, *one);
     if(d100() < HitChance(*one, *two, two_avoid_bonus))
@@ -131,6 +134,27 @@ SimulateCombat(Unit *one, Unit *two, int distance,
         one->Damage(two_dmg);
         if(d100() < CritChance(*two, *one))
             one->Damage(two_dmg); // double the damage
+    }
+
+    if(one->speed - two->speed > DOUBLE_RATIO)
+    {
+        if(d100() < HitChance(*one, *two, two_avoid_bonus))
+        {
+            two->Damage(one_dmg);
+            if(d100() < CritChance(*one, *two))
+                two->Damage(one_dmg); // double the damage
+        }
+    }
+
+    if(two->health > 0 && two->speed - one->speed > DOUBLE_RATIO &&
+      (distance >= two->min_range && distance <= two->max_range))
+    {
+        if(d100() < HitChance(*two, *one, one_avoid_bonus))
+        {
+            one->Damage(two_dmg);
+            if(d100() < CritChance(*two, *one))
+                one->Damage(two_dmg); // double the damage
+        }
     }
 }
 

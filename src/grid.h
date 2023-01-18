@@ -351,7 +351,6 @@ FurthestMovementOnPath(const Tilemap &map, const path &path_in, int movement)
             return path_in[i];
         }
     }
-    assert(!"ERROR FurthestMovementOnPath: This will be a problem. Unit cannot even move to its own square haha\n");
     return {0, 0};
 }
 

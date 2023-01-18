@@ -1138,7 +1138,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<NullCommand>());
+                BindB(make_shared<DeselectEnemyCommand>(cursor));
                 BindR(make_shared<DeselectEnemyCommand>(cursor));
             } break;
             case(ENEMY_RANGE):

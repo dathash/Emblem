@@ -26,6 +26,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 				3,
 				3,
 				3,
+                3,
 				3,
 				3,
 				3,
@@ -66,6 +67,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
 		ImGui::SliderInt("abi", &selected->ability, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
+		ImGui::SliderInt("spd", &selected->speed, 0, 20);
 		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
 		ImGui::SliderInt("avo", &selected->avoid, 0, 100);
 		ImGui::SliderInt("crit", &selected->crit, 0, 100);
@@ -190,8 +192,8 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 		if(ImGui::Button("BOLSTER"))
             hover_tile->occupant->ai_behavior = BOLSTER;
         ImGui::SameLine();
-		if(ImGui::Button("FLEE"))
-            hover_tile->occupant->ai_behavior = FLEE;
+		if(ImGui::Button("wta"))
+            hover_tile->occupant->ai_behavior = WAIT_THEN_ATTACK;
 
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");

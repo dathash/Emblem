@@ -52,6 +52,8 @@
 
 #define LEVEL_TIME 99
 
+#define DOUBLE_RATIO 2
+
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 2, 40, nullptr, {0, 6}}
@@ -105,6 +107,15 @@ enum AIState
     PLAYER_TURN
 };
 
+enum AIBehavior
+{
+    NO_BEHAVIOR,
+    PURSUE,
+    BOLSTER,
+    FLEE,
+    WAIT_THEN_ATTACK
+};
+
 enum quadrant
 {
     TOP_LEFT,
@@ -156,6 +167,7 @@ const SDL_Color darkBlue =  {22, 50, 125, 255};
 
 const SDL_Color yellow =  {200, 200, 50, 255};
 const SDL_Color darkGray =  {100, 100, 100, 255};
+const SDL_Color accentBlue = {106, 150, 250, 255};
 
 // Combat
 const SDL_Color allyHealthBarColor = {10, 10, 200, 255};
