@@ -6,16 +6,16 @@ ATL ruins.png
 
 WDT 15
 HGT 10
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 
-MAP 0 0 0 4 0 0 0 0 0 0 0 0 1 1 1 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 
+MAP 0 0 0 0 0 0 0 0 2 2 2 2 1 1 1 
+MAP 0 0 0 0 0 0 0 0 0 0 2 2 1 1 1 
+MAP 0 0 0 4 0 0 0 0 0 0 2 2 1 1 1 
+MAP 0 0 0 0 0 0 0 0 0 0 0 2 1 1 1 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 
 MAP 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 
 MAP 1 1 0 0 0 0 0 0 0 0 0 3 3 3 1 
 MAP 1 1 1 1 1 0 0 0 0 0 3 3 3 3 3 
-MAP 1 0 1 1 1 1 1 1 1 1 3 3 3 3 3 
+MAP 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 
 
 COM <UNT <name> <col> <row> <ai>
 UNT Lucina 1 1 0 
@@ -27,3 +27,7 @@ UNT Tiki 6 1 0
 UNT Lon'qu 7 1 0 
 UNT Flavia 8 1 0 
 UNT Tharja 9 1 0 
+UNT Thief 1 3 1 
+UNT Brute 2 3 1 
+UNT Archer 3 3 1 
+

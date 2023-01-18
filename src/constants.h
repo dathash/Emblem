@@ -53,6 +53,7 @@
 #define LEVEL_TIME 99
 
 #define DOUBLE_RATIO 2
+#define CRIT_MULTIPLIER 3
 
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
@@ -60,6 +61,7 @@
 #define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
 #define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
 #define SPAWN_TILE {SPAWN, 1, 0, nullptr, {14, 1}}
+
 
 enum InterfaceState
 {
@@ -93,6 +95,8 @@ enum InterfaceState
     LEVEL_MENU,
 
     CONVERSATION,
+
+    ANIMATING,
 
     NO_OP,
 

@@ -5,40 +5,6 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-// TODO: This is a non-animation situation. I want to write the animation code
-// separately, so that it doesn't become such a spaghetti mess. We'll see how
-// that goes.
-// In the end, this is a pretty pernicious problem. We need a system that can
-// predict its outcome and send out data about the process, then resolve and
-// send an actual outcome, which we then animate on-screen, and THEN update all
-// relevant fields (health, ammunition, etc.)
-// Below is a better system, which should be implemented when animation work begins.
-/*
-struct Attack
-{
-    int damage;
-    bool hit;
-    bool crit;
-};
-
-struct Combat
-{
-    Unit *one;
-    Unit *two;
-    // NOTE: Fields are either an attack or null.
-    Attack first;
-    Attack second;
-    Attack third;
-    Attack fourth;
-
-    // Populates a Combat struct with attacks based on battle logic.
-    void
-    Populate()
-    {
-    }
-};
-*/
-
 // Rolls a d100. range: 00 to 99.
 int
 d100()
@@ -74,7 +40,8 @@ CalculateHealing(const Unit &healer, const Unit &healee)
     return healer.ability;
 }
 
-// For return in function below.
+// Declares the outcome of a coming altercation.
+// For information passing in combat functions.
 struct Outcome
 {
     bool one_double;
@@ -113,50 +80,181 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     return outcome;
 }
 
-// Simulates a single combat between a unit and their enemy.
-// Includes logic for different distances.
-void
-SimulateCombat(Unit *one, Unit *two, int distance,
-			   int one_avoid_bonus, int two_avoid_bonus)
+/*
+enum AttackType
 {
-    int one_dmg = CalculateDamage(*one, *two);
-    int two_dmg = CalculateDamage(*two, *one);
-    if(d100() < HitChance(*one, *two, two_avoid_bonus))
+    MELEE,
+    RANGED,
+};
+*/
+
+struct Attack
+{
+    Unit *source;
+    Unit *target;
+    int damage;
+
+    bool hit;
+    bool crit;
+    // AttackType type;
+
+    void
+    Execute()
     {
-        two->Damage(one_dmg);
-        if(d100() < CritChance(*one, *two))
-            two->Damage(one_dmg); // double the damage
+        // TODO: Different attack types result in different animations
+        if(hit && !crit)
+        {
+            GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_HIT);
+            target->Damage(damage);
+        }
+        else if(hit && crit)
+        {
+            GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_CRITICAL);
+            target->Damage(CRIT_MULTIPLIER * damage);
+        }
+        else
+        {
+            GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_MISS);
+            return;
+        }
+
+    }
+};
+std::ostream
+&operator<<(std::ostream &os, const Attack &a)
+{
+    return os << "Attack | " << a.source->name << " on " << a.target->name 
+              << " | dmg: " << a.damage 
+              << ", hit: " << a.hit 
+              << ", crit: " << a.crit;
+}
+
+
+struct Fight
+{
+    Unit *one = nullptr;
+    Unit *two = nullptr;
+
+    int one_avoid_bonus = 0, two_avoid_bonus = 0;
+    int distance = 0;
+
+    queue<Attack> attack_queue = {};
+
+    bool ready = true;
+
+    Fight() = default;
+
+    Fight(Unit *one_in, Unit *two_in, 
+          int one_avo_in, int two_avo_in,
+          int distance_in)
+    : one(one_in),
+      two(two_in),
+      one_avoid_bonus(one_avo_in),
+      two_avoid_bonus(two_avo_in),
+      distance(distance_in)
+    {
+        Populate(PredictCombat(*one_in, *two_in,
+                               distance_in,
+                               one_avo_in,
+                               two_avo_in));
     }
 
-    if(two->health > 0 && d100() < HitChance(*two, *one, one_avoid_bonus) &&
-       (distance >= two->min_range && distance <= two->max_range))
+    void
+    Update()
     {
-        one->Damage(two_dmg);
-        if(d100() < CritChance(*two, *one))
-            one->Damage(two_dmg); // double the damage
+        if(ready)
+        {
+            if(!attack_queue.empty())
+            {
+                Attack next = attack_queue.front();
+                attack_queue.pop();
+
+                next.Execute();
+                cout << next << "\n";
+                ready = false;
+            }
+            else
+            {
+                //EmitEvent(COMBAT_OVER);
+            }
+        }
     }
 
-    if(one->speed - two->speed > DOUBLE_RATIO)
+    void
+    Populate(const Outcome &outcome)
     {
+        int one_dmg = CalculateDamage(*one, *two);
+        int two_dmg = CalculateDamage(*two, *one);
+        Attack attack = {one, two, one_dmg};
         if(d100() < HitChance(*one, *two, two_avoid_bonus))
         {
-            two->Damage(one_dmg);
+            attack.hit = true;
             if(d100() < CritChance(*one, *two))
-                two->Damage(one_dmg); // double the damage
+                attack.crit = true;
+        }
+        attack_queue.push(attack);
+
+        if(attack.hit && 
+           (two->health - attack.damage <= 0 ||
+            attack.crit && two->health - attack.damage * CRIT_MULTIPLIER <= 0))
+            return;
+
+        if(distance >= two->min_range && distance <= two->max_range)
+        {
+            attack = {two, one, two_dmg};
+            if(d100() < HitChance(*two, *one, one_avoid_bonus))
+            {
+                attack.hit = true;
+                if(d100() < CritChance(*two, *one))
+                    attack.crit = true;
+            }
+            attack_queue.push(attack);
+
+            if(attack.hit && 
+               (one->health - attack.damage <= 0 ||
+                attack.crit && one->health - attack.damage * CRIT_MULTIPLIER <= 0))
+                return;
+        }
+
+        attack = {one, two, one_dmg};
+        if(one->speed - two->speed > DOUBLE_RATIO)
+        {
+            if(d100() < HitChance(*one, *two, two_avoid_bonus))
+            {
+                attack.hit = true;
+                if(d100() < CritChance(*one, *two))
+                    attack.crit = true;
+            }
+        }
+        attack_queue.push(attack);
+
+        if(attack.hit && 
+           (two->health - attack.damage <= 0 ||
+            attack.crit && two->health - attack.damage * CRIT_MULTIPLIER <= 0))
+            return;
+
+        if(distance >= two->min_range && distance <= two->max_range)
+        {
+            attack = {two, one, two_dmg};
+            if(two->speed - one->speed > DOUBLE_RATIO)
+            {
+                if(d100() < HitChance(*two, *one, one_avoid_bonus))
+                {
+                    attack.hit = true;
+                    if(d100() < CritChance(*two, *one))
+                        attack.crit = true;
+                }
+            } 
+            attack_queue.push(attack);
         }
     }
 
-    if(two->health > 0 && two->speed - one->speed > DOUBLE_RATIO &&
-      (distance >= two->min_range && distance <= two->max_range))
+    void
+    AnimationComplete()
     {
-        if(d100() < HitChance(*two, *one, one_avoid_bonus))
-        {
-            one->Damage(two_dmg);
-            if(d100() < CritChance(*two, *one))
-                one->Damage(two_dmg); // double the damage
-        }
+
     }
-}
+};
 
 // =============================== Healing =====================================
 // Displays the outcome of one unit healing another.

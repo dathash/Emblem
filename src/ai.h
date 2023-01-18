@@ -227,9 +227,11 @@ GetAction(const Unit &unit, const Tilemap &map)
 class AIPerformUnitActionCommand : public Command
 {
 public:
-    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in)
+    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in,
+                               Fight *fight_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      fight(fight_in)
     {}
 
     virtual void Execute()
@@ -255,9 +257,10 @@ public:
         {
             int distance = ManhattanDistance(cursor->selected->pos,
                                              action.second->pos);
-            SimulateCombat(cursor->selected, action.second, distance,
-                           map->tiles[cursor->redo.col][cursor->redo.row].avoid,
-                           map->tiles[cursor->pos.col][cursor->pos.row].avoid);
+            *fight = Fight(cursor->selected, action.second,
+                          map->tiles[cursor->redo.col][cursor->redo.row].avoid,
+                          map->tiles[cursor->pos.col][cursor->pos.row].avoid,
+                          distance);
         }
 
         // resolution
@@ -273,6 +276,7 @@ public:
 private:
     Cursor *cursor;
     Tilemap *map;
+    Fight *fight;
 };
 
 // ============================== struct ====================================
@@ -281,21 +285,21 @@ struct AI
     int frame = 0;
 
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Tilemap *map)
+    void Plan(Cursor *cursor, Tilemap *map, Fight *fight)
     {
         commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, *map));
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, map));
+        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, map, fight));
     }
 
     // Passes the args through to plan.
-    void Update(Cursor *cursor, Tilemap *map)
+    void Update(Cursor *cursor, Tilemap *map, Fight *fight)
     {
         if(GlobalPlayerTurn)
             return;
 
         if(commandQueue.empty())
-            Plan(cursor, map);
+            Plan(cursor, map, fight);
 
         ++frame;
         // Every __ frames.

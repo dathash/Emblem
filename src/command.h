@@ -406,24 +406,26 @@ private:
 class AttackCommand : public Command
 {
 public:
-    AttackCommand(Cursor *cursor_in, const Tilemap &map_in)
+    AttackCommand(Cursor *cursor_in, const Tilemap &map_in,
+                  Fight *fight_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      fight(fight_in)
     {}
 
     virtual void Execute()
     {
         int distance = ManhattanDistance(cursor->source, cursor->pos);
-        SimulateCombat(cursor->selected, cursor->targeted, distance,
-                       map.tiles[cursor->source.col][cursor->source.row].avoid,
-                       map.tiles[cursor->pos.col][cursor->pos.row].avoid);
+        *fight = Fight(cursor->selected, cursor->targeted,
+                            map.tiles[cursor->source.col][cursor->source.row].avoid,
+                            map.tiles[cursor->pos.col][cursor->pos.row].avoid,
+                            distance);
 
         cursor->selected->Deactivate();
 
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->pos = cursor->source;
-
         cursor->path_draw = {};
 
         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -432,6 +434,7 @@ public:
 private:
     Cursor *cursor;
     const Tilemap &map;
+    Fight *fight;
 };
 
 
@@ -943,7 +946,8 @@ public:
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map,
                         Menu *gameMenu, Menu *unitMenu,
-                        Menu *levelMenu, Conversation *conversation)
+                        Menu *levelMenu, Conversation *conversation,
+                        Fight *fight)
     {
         if(!GlobalPlayerTurn)
             return;
@@ -1065,7 +1069,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<AttackCommand>(cursor, *map));
+                BindA(make_shared<AttackCommand>(cursor, *map, fight));
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1147,7 +1151,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
+                BindA(make_shared<EnemyUndoRangeCommand>());
                 BindB(make_shared<EnemyUndoRangeCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1182,6 +1186,17 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<RestartGameCommand>());
                 BindB(make_shared<QuitGameCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(ANIMATING):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 

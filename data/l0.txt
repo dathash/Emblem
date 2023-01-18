@@ -39,4 +39,6 @@ UNT Donnel 2 15 0
 UNT Noire 5 18 0 
 UNT Lon'qu 5 16 0 
 UNT Brute 7 17 1 
+UNT Thief 8 16 1 
+UNT Archer 11 16 1 
 

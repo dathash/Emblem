@@ -76,27 +76,18 @@ Super Mario 64 Title Theme
 Tripod (Bomberman Hero)
 
 # TODO
-PROTOTYPE
+PROTOTYPE ///////////////////////////////////////////////////
     16 levels
 
     Win Screen
 
-    AI Movement Pattern:
-    Enemies need to treat their own units as walls in a sort of sense
-    * Waits until you're within a certain number of squares (probably like 5),
-      then pursues
-    * Bolsters until attacked, then changes to Pursue.
-    State Machine?
+    Basic Combat Animations
 
     Unit Death Screen
 
     Abilities
     * Create a system where a unit possesses one of the following.
         (x) Heal
-        ( ) Warp
-        ( ) Swap
-        ( ) Explode
-        ( ) Boost (Over obstacles)
         ( ) Buff
         ( ) Shield
         ( ) Dance (Genealogy)
@@ -108,6 +99,10 @@ PROTOTYPE
     * Menu
 
     *HUGE QA and Balancing Pass*
+
+///////////////////////////////////////////////////////////////
+Portraits don't block screen, put them with the blurb like in binding blade.
+display enemy damage range, unit damage range.
 
 0.1
     Inbetween Levels | Metagame
@@ -138,6 +133,11 @@ NICE
         * Bresenham's line plus a certain distance (maybe 7 tiles?)
         Enemy Units have more complex decision-making process.
         * More factors like accuracy and whether they will die in the process.
+        Enemies need to treat their own units as walls in a sort of sense
+        * Waits until you're within a certain number of squares (probably like 5),
+          then pursues
+        * Bolsters until attacked, then changes to Pursue.
+        State Machine?
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
     Swap Noire and Donnel's Colors

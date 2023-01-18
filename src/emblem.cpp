@@ -38,6 +38,7 @@
 
 // C++ stdlib
 #include <iostream>
+#include <queue>
 using namespace std;
 
 // ============================= globals ===================================
@@ -92,12 +93,35 @@ static unsigned int GlobalAIState;
 static int viewportCol = 0;
 static int viewportRow = 0;
 
+enum EventType
+{
+    EVENT_ANIMATION_COMPLETE,
+};
+
+struct Event
+{
+    EventType type;
+
+    Event(EventType type_in)
+    : type(type_in)
+    {}
+};
+
+static queue<Event> GlobalEvents;
+
+void
+EmitEvent(Event event)
+{
+    GlobalEvents.push(event);
+}
+
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
 #include "utils.h"
 #include "state.h"
 #include "structs.h"
+#include "animation.h" // NOTE: Contains GlobalAnimations.
 #include "load.h"
 #include "init.h"
 #include "input.h"
@@ -108,6 +132,28 @@ static int viewportRow = 0;
 #include "ai.h"
 #include "render.h"
 #include "editor.h"
+
+void
+HandleEvents(Fight *fight)
+{
+    while(!GlobalEvents.empty())
+    {
+        Event event = GlobalEvents.front();
+        GlobalEvents.pop();
+
+        switch(event.type)
+        {
+            case EVENT_ANIMATION_COMPLETE:
+            {
+                fight->ready = true;
+            } break;
+            default:
+            {
+                assert(!"ERROR: Unimplemented Event\n");
+            } break;
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -150,6 +196,10 @@ int main(int argc, char *argv[])
     Conversation conversation = LoadConversation(CONVERSATIONS_PATH, "test.txt",
                                                  *units[0], *units[1]);
 
+    Fight fight;
+
+    AnimationSystem animation_system = {};
+
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
 
@@ -165,19 +215,24 @@ int main(int argc, char *argv[])
         // Update
         if(!GlobalEditorMode)
         {
+            HandleEvents(&fight); // TODO: This needn't be global.
+
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
                                    &game_menu, &unit_menu, &level_menu,
-                                   &conversation);
+                                   &conversation, &fight);
 
-            ai.Update(&cursor, &level.map);
+            ai.Update(&cursor, &level.map, &fight);
 
             cursor.Update();
             ui.Update();
             level.Update();
+            fight.Update();
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
+
+            GlobalAnimations.Update();
         }
 
         // Resolve State
