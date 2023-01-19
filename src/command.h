@@ -196,7 +196,7 @@ public:
         // Update unit menu with available actions
         *menu = Menu({});
 
-        if(map->tiles[cursor->pos.col][cursor->pos.row].type == OBJECTIVE &&
+        if(map->tiles[cursor->pos.col][cursor->pos.row].type == GOAL &&
            cursor->selected->ID() == LEADER_ID)
         {
             menu->AddOption("Capture");
@@ -416,19 +416,20 @@ public:
     virtual void Execute()
     {
         int distance = ManhattanDistance(cursor->source, cursor->pos);
+        direction dir = GetDirection(cursor->source,
+                                     cursor->pos);
         *fight = Fight(cursor->selected, cursor->targeted,
                         map.tiles[cursor->source.col][cursor->source.row].avoid,
                         map.tiles[cursor->pos.col][cursor->pos.row].avoid,
-                        distance);
+                        distance, dir);
         fight->ready = true;
 
-        cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->pos = cursor->source;
         cursor->path_draw = {};
 
-        GlobalInterfaceState = FIGHT;
+        GlobalInterfaceState = PLAYER_FIGHT;
     }
 
 private:
@@ -1189,7 +1190,7 @@ public:
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(FIGHT):
+            case(PLAYER_FIGHT):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());

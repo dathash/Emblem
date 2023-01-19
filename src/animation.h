@@ -31,12 +31,12 @@ enum AnimationValue
 struct Sample
 {
     float value;
+    float t;
 };
 
 struct Channel
 {
     Sample samples[30] = {};
-    float *value;
 };
 
 struct Animation
@@ -45,8 +45,7 @@ struct Animation
     int counter = 0;
     int finish  = 0;
     bool repeat = false;
-    Channel channels[4] = {};
-    //Event on_finish;
+    Channel channel;
 
     Animation() = default;
 
@@ -61,11 +60,13 @@ struct Animation
       finish(other.finish),
       repeat(other.repeat)
     {
-        // TODO: Make sure this is right.
-        for(int i = 0; i < 4; ++i)
-        {
-            channels[i] = other.channels[i];
-        }
+        channel = other.channel;
+    }
+
+    float
+    Value()
+    {
+        return ((float)counter / finish);
     }
 
     // called each frame
@@ -93,9 +94,9 @@ GetAnimation(AnimationValue anim)
 {
     switch(anim)
     {
-        case ATTACK_ANIMATION_HIT: return (new Animation(1, 20, false));
-        case ATTACK_ANIMATION_MISS: return (new Animation(1, 20, false));
-        case ATTACK_ANIMATION_CRITICAL: return (new Animation(1, 20, false));
+        case ATTACK_ANIMATION_HIT: return (new Animation(1, 40, false));
+        case ATTACK_ANIMATION_MISS: return (new Animation(1, 40, false));
+        case ATTACK_ANIMATION_CRITICAL: return (new Animation(1, 40, false));
         default:
         {
             assert(!"ERROR GetAnimation: Animation type not defined\n");

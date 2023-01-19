@@ -18,18 +18,30 @@ TextCentered(string text) {
 
 // switch-case to get a ui-printable name from the tile's type enum.
 string 
-GetTileNameString(int type)
+GetTileNameString(TileType type)
 {
     switch (type)
     {
     case FLOOR: return "Plain";
     case WALL: return "Hill";
     case FOREST: return "Forest";
-    case DESERT: return "Swamp";
-    case OBJECTIVE: return "Goal";
+    case SWAMP: return "Swamp";
+    case GOAL: return "Goal";
     case SPAWN: return "Spawn";
 	default:
 		assert(!"ERROR: Unhandled Tile name string in UI.\n");
+		return "";
+	}
+}
+
+string 
+GetInterfaceString(InterfaceState state)
+{
+    switch (state)
+    {
+    case NO_OP: return "No-Op";
+	default:
+		assert(!"ERROR: Unhandled InterfaceState name string in UI.\n");
 		return "";
 	}
 }
@@ -62,6 +74,16 @@ struct UI_State
     void 
     Update()
     {
+        if(GlobalInterfaceState == PLAYER_FIGHT ||
+           GlobalAIState == AI_FIGHT)
+        {
+            combat_screen = true;
+        }
+        else
+        {
+            combat_screen = false;
+        }
+
 		// Tile Info
         if(
            !(GlobalInterfaceState == LEVEL_MENU ||
@@ -409,6 +431,38 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 	ImGui::PopFont(); // Large
 }
 
+// Displays combat preview when initiating combat
+void
+DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
+{
+	// Window sizing
+    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowPos(ImVec2(50, 400));
+
+    // Render
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin(fight.one->name.c_str(), NULL, wf);
+    {
+        DisplayHealthBar(fight.one->health, fight.one->max_health, 0);
+		ImGui::PushFont(uiFontMedium);
+        ImGui::PopFont();
+    }
+    ImGui::End();
+
+    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowPos(ImVec2(540, 400));
+
+    ImGui::Begin(fight.two->name.c_str(), NULL, wf);
+    {
+        DisplayHealthBar(fight.two->health, fight.two->max_health, 0);
+		ImGui::PushFont(uiFontMedium);
+        ImGui::PopFont();
+    }
+    ImGui::End();
+
+	ImGui::PopFont(); // Large
+}
+
 // Displays options menu
 void 
 DisplayGameOver(ImGuiWindowFlags wf)
@@ -434,11 +488,10 @@ DisplayGameOver(ImGuiWindowFlags wf)
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
-         const Tilemap &map)
+         const Tilemap &map,
+         const Fight &fight)
 {
     if(GlobalEditorMode)
-        return;
-    if(!GlobalPlayerTurn)
         return;
 
     ImGuiWindowFlags window_flags = 0;
@@ -454,6 +507,18 @@ RenderUI(UI_State *ui,
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
 
+    // USER/AI UI
+    if(ui->combat_screen)
+		DisplayCombatScreen(window_flags, fight);
+
+    if(!GlobalPlayerTurn)
+    {
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(3);
+        return;
+    }
+
+    // USER MODE UI
 	if(ui->tile_info)
 		DisplayTileInfo(window_flags, map.tiles[cursor.pos.col][cursor.pos.row], cursor.Quadrant());
 	if(ui->unit_blurb)
@@ -469,7 +534,6 @@ RenderUI(UI_State *ui,
 
 	// cleanup
 	ImGui::PopStyleVar();
-
 	ImGui::PopStyleColor(3);
 }
 

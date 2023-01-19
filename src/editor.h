@@ -211,28 +211,28 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("frst"))
+        if(ImGui::Button("cover"))
         {
             Unit *tmp = hover_tile->occupant;
             *hover_tile = FOREST_TILE;
             hover_tile->occupant = tmp;
         }
 
-        if(ImGui::Button("dsrt"))
+        if(ImGui::Button("slow"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = DESERT_TILE;
+            *hover_tile = SWAMP_TILE;
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("obj"))
+        if(ImGui::Button("goal"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = OBJECTIVE_TILE;
+            *hover_tile = GOAL_TILE;
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("spwn"))
+        if(ImGui::Button("spawn"))
         {
             Unit *tmp = hover_tile->occupant;
             *hover_tile = SPAWN_TILE;

@@ -58,8 +58,8 @@
 #define FLOOR_TILE {FLOOR, 1, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 2, 40, nullptr, {0, 6}}
-#define DESERT_TILE {DESERT, 3, 0, nullptr, {18, 29}}
-#define OBJECTIVE_TILE {OBJECTIVE, 1, 0, nullptr, {31, 0}}
+#define SWAMP_TILE {SWAMP, 3, 0, nullptr, {18, 29}}
+#define GOAL_TILE {GOAL, 1, 0, nullptr, {31, 0}}
 #define SPAWN_TILE {SPAWN, 1, 0, nullptr, {14, 1}}
 
 
@@ -96,7 +96,7 @@ enum InterfaceState
 
     CONVERSATION, // 20
 
-    FIGHT, // 21
+    PLAYER_FIGHT, // 21
 
     NO_OP, // 22
 
@@ -105,9 +105,10 @@ enum InterfaceState
 
 enum AIState
 {
-    WAITING, // 0
-    FINDING_NEXT, // 1
-    SELECTED, // 2
+    FINDING_NEXT, // 0
+    SELECTED, // 1
+
+    AI_FIGHT, // 2
 
     PLAYER_TURN, // 3
 };
@@ -129,13 +130,13 @@ enum quadrant
     BOTTOM_RIGHT
 };
 
-enum TileTypes
+enum TileType
 {
     FLOOR,
     WALL,
     FOREST,
-    DESERT,
-    OBJECTIVE,
+    SWAMP,
+    GOAL,
     SPAWN
 };
 

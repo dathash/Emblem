@@ -150,6 +150,7 @@ struct Fight
     int one_avoid_bonus = 0;
     int two_avoid_bonus = 0;
     int distance = 0;
+    direction one_to_two_direction = {0, 0};
 
     queue<Attack> attack_queue = {};
 
@@ -161,13 +162,15 @@ struct Fight
 
     Fight(Unit *one_in, Unit *two_in, 
           int one_avo_in, int two_avo_in,
-          int distance_in)
+          int distance_in, const direction &direction_in)
     : one(one_in),
       two(two_in),
       one_avoid_bonus(one_avo_in),
       two_avoid_bonus(two_avo_in),
       distance(distance_in)
     {
+        cout << direction_in << "\n";
+        one_to_two_direction = direction_in;
         Populate(PredictCombat(*one_in, *two_in,
                                distance_in,
                                one_avo_in,
@@ -175,14 +178,27 @@ struct Fight
         ready = true;
     }
 
+    Attack
+    Current() const
+    {
+        return attack_queue.front();
+    }
+
     void
     Update()
     {
         if(animation)
         {
+            direction dir = one_to_two_direction;
+            if(Current().source == two)
+                dir = dir * -1;
+            float value = animation->Value();
+            Current().source->animation_offset = (dir * TILE_SIZE) * value;
             if(animation->Update())
             {
-                attack_queue.front().Resolve();
+                // SHOULD BE UNNECESSARY
+                //Current().source->animation_offset = {0, 0};
+                Current().Resolve();
                 attack_queue.pop();
                 ready = true;
                 delete animation;
@@ -193,17 +209,22 @@ struct Fight
         {
             if(!attack_queue.empty())
             {
-                animation = attack_queue.front().Execute();
+                animation = Current().Execute();
                 cout << attack_queue.front() << "\n";
             }
             else
             {
+                // TODO: Put an extra animation in
+                // here which waits to kill units
+                // until the fight is resolved.
                 if(one->health <= 0)
                     one->should_die = true;
                 if(two->health <= 0)
                     two->should_die = true;
                 if(GlobalPlayerTurn)
                 {
+                    one->Deactivate();
+
                     GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
                     if(one->should_die)
                     {
@@ -212,6 +233,7 @@ struct Fight
                 }
                 else
                 {
+                    one->Deactivate();
                     GlobalAIState = FINDING_NEXT;
                 }
 

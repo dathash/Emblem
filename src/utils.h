@@ -84,6 +84,16 @@ operator-(const position &a, const position &b)
 {
     return {a.col - b.col, a.row - b.row};
 }
+position
+operator*(const position &a, int i)
+{
+    return {a.col * i, a.row * i};
+}
+position
+operator*(const position &a, float f)
+{
+    return {(int)(a.col * f), (int)(a.row * f)};
+}
 std::ostream
 &operator<<(std::ostream &os, position const &p)
 {

@@ -123,8 +123,8 @@ struct Unit
     int crit;
     Spritesheet sheet;
     Texture portrait;
+    position animation_offset = {0, 0};
     AIBehavior ai_behavior = NO_BEHAVIOR;
-
 
     size_t
     ID()
@@ -194,7 +194,7 @@ struct Unit
 // ========================== map stuff =======================================
 struct Tile
 {
-    int type = 0;
+    TileType type = FLOOR;
     int penalty = 1;
     int avoid = 0;
     Unit *occupant = nullptr;

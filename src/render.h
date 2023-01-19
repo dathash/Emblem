@@ -35,10 +35,11 @@ RenderTileTexture(const Tilemap &map, const Tile &tile,
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false)
+RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false,
+             const position &animation_offset = position(0, 0))
 {
-    SDL_Rect destination = {pos.col * TILE_SIZE, 
-                            pos.row * TILE_SIZE, 
+    SDL_Rect destination = {pos.col * TILE_SIZE + animation_offset.col, 
+                            pos.row * TILE_SIZE + animation_offset.row, 
                             TILE_SIZE, TILE_SIZE};
     SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
 
@@ -68,9 +69,9 @@ RenderText(const Texture &texture, int x, int y)
     SDL_RenderCopy(GlobalRenderer, texture.sdl_texture, NULL, &destination);
 }
 
-// Renders a Health Bar
+// Renders a Health Bar (For use underneath units)
 void
-RenderHealthBar(const position &p, int hp, int maxHp)
+RenderHealthBarSmall(const position &p, int hp, int maxHp)
 {
     float ratio = (float)hp / maxHp;
     SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
@@ -92,12 +93,33 @@ RenderHealthBar(const position &p, int hp, int maxHp)
     SDL_RenderDrawRect(GlobalRenderer, &bar_rect);
 }
 
+// Renders a Health Bar (For Combat Animations)
+void
+RenderHealthBarCombat(const position &p, int hp, int maxHp)
+{
+    float ratio = (float)hp / maxHp;
+    SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
+
+    SDL_Rect bar_rect = {p.col, p.row,
+                         200, 24};
+    SDL_Rect health_rect = {p.col, p.row,
+                            (int)(200 * ratio), 24};
+
+    SDL_SetRenderDrawColor(GlobalRenderer, darkGray.r, darkGray.g, darkGray.b, darkGray.a);
+    SDL_RenderFillRect(GlobalRenderer, &bar_rect);
+
+    SDL_SetRenderDrawColor(GlobalRenderer, healthColor.r, healthColor.g, healthColor.b, healthColor.a);
+    SDL_RenderFillRect(GlobalRenderer, &health_rect);
+
+    SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
+    SDL_RenderDrawRect(GlobalRenderer, &bar_rect);
+}
 
 // Renders the scene from the given game state.
 void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu,
-       const Conversation &conversation)
+       const Conversation &conversation, const Fight &fight)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -231,18 +253,18 @@ Render(const Tilemap &map, const Cursor &cursor,
                     SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
                 }
                 position screen_pos = {col - viewportCol, row - viewportRow};
-                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally);
-                RenderHealthBar(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
+                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally, tileToRender.occupant->animation_offset);
+                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
             }
         }
     }
 
 
 // ================================= render cursor ================================================
-    if(GlobalInterfaceState != FIGHT &&
-       GlobalAIState != WAITING)
+    if(GlobalInterfaceState != PLAYER_FIGHT &&
+       GlobalAIState != AI_FIGHT)
     {
-        RenderSprite(cursor.pos - position(viewportCol, viewportRow), cursor.sheet, false);
+        RenderSprite(cursor.pos - position(viewportCol, viewportRow), cursor.sheet);
     }
 
 
@@ -312,6 +334,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
+    /*
     // Portraits
     if((GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
        GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
@@ -331,6 +354,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
+    */
 
     if(GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)
@@ -371,33 +395,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderText(conversation.speaker_texture, name_rect.x + 10, 400);
         RenderText(conversation.words_texture, 30, 440);
     }
-
-    /*
-	// Combat Screen
-    // TODO: Add in barebones of the actual combat screen
-    if(combatResolver.inc < (float)combatResolver.framesActive * 0.6666)
-    {
-        RenderHealthBar(200, 560, combatResolver.attacker->hp,
-                combatResolver.attacker->maxHp, combatResolver.attacker->is_ally);
-    }
-    else
-    {
-        RenderHealthBarDamage(200, 560, combatResolver.attacker->hp,
-                combatResolver.attacker->maxHp, combatResolver.damageToAttacker,
-                combatResolver.attacker->is_ally);
-    }
-    if(combatResolver.inc < (float)combatResolver.framesActive * 0.3333)
-    {
-        RenderHealthBar(400, 560, combatResolver.victim->hp,
-                combatResolver.victim->maxHp, combatResolver.victim->is_ally);
-    }
-    else
-    {
-        RenderHealthBarDamage(400, 560, combatResolver.victim->hp,
-                combatResolver.victim->maxHp, combatResolver.damageToVictim, 
-                combatResolver.victim->is_ally);
-    }
-    */
 }
 
 #endif

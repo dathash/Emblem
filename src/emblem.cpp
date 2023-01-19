@@ -154,8 +154,6 @@ int main(int argc, char *argv[])
 
     Fight fight;
 
-    //AnimationSystem animation_system = {};
-
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
 
@@ -171,8 +169,6 @@ int main(int argc, char *argv[])
         // Update
         if(!GlobalEditorMode)
         {
-            //HandleEvents(&fight, &cursor); // TODO: This needn't be global.
-
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
                                    &game_menu, &unit_menu, &level_menu,
@@ -181,14 +177,12 @@ int main(int argc, char *argv[])
             ai.Update(&cursor, &level.map, &fight);
 
             cursor.Update();
-            ui.Update();
             fight.Update();
             level.Update();
+            ui.Update();
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
-
-            //GlobalAnimations.Update();
         }
 
         // Resolve State
@@ -249,13 +243,14 @@ int main(int argc, char *argv[])
         //////////////// ABOVE TO BE EXTRICATED //////////////////
 
         // Render
-        Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation);
+        Render(level.map, cursor, game_menu, unit_menu, level_menu, 
+               conversation, fight);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level.map);
+        RenderUI(&ui, cursor, level.map, fight);
 
 #if DEV_MODE
         if(GlobalEditorMode)

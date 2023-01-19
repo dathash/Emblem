@@ -257,19 +257,20 @@ public:
         {
             int distance = ManhattanDistance(cursor->selected->pos,
                                              action.second->pos);
+            direction dir = GetDirection(cursor->selected->pos,
+                                         action.second->pos);
             *fight = Fight(cursor->selected, action.second,
                           map->tiles[cursor->redo.col][cursor->redo.row].avoid,
                           map->tiles[cursor->pos.col][cursor->pos.row].avoid,
-                          distance);
+                          distance, dir);
             fight->ready = true;
 
             // resolution
-            cursor->selected->Deactivate();
             cursor->selected = nullptr;
             cursor->targeted = nullptr;
             cursor->pos = cursor->source;
 
-            GlobalAIState = WAITING;
+            GlobalAIState = AI_FIGHT;
             return;
         }
 
@@ -309,7 +310,7 @@ struct AI
         if(GlobalPlayerTurn)
             return;
 
-        if(GlobalAIState == WAITING) // TODO: Simplify these states. Reduce bugs.
+        if(GlobalAIState == AI_FIGHT) // TODO: Simplify these states. Reduce bugs.
             return;
 
         if(commandQueue.empty())

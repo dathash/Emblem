@@ -229,15 +229,11 @@ How the program should run:
 
 # TODO
 PROTOTYPE ///////////////////////////////////////////////////
+    Unit Death Screen
+
     16 levels
 
-    BUG | COMBAT STATES
-
     Win Screen
-
-    Basic Combat Animations
-
-    Unit Death Screen
 
     Abilities
     * Create a system where a unit possesses one of the following.
@@ -246,18 +242,18 @@ PROTOTYPE ///////////////////////////////////////////////////
         ( ) Shield
         ( ) Dance (Genealogy)
 
-    More complex conversations
-    * Units come and go
-    * Facial expression changes
-    Add some conversations for inbetween levels
-    * Menu
-
     *HUGE QA and Balancing Pass*
 
 ///////////////////////////////////////////////////////////////
 Portraits don't block screen, put them with the blurb like in binding blade.
 display enemy damage range, unit damage range.
 Make every change in GlobalInterfaceState be an Event.
+More complex conversations
+* Units come and go
+* Facial expression changes
+Add some conversations for inbetween levels
+* Menu
+
 
 0.1
     Inbetween Levels | Metagame

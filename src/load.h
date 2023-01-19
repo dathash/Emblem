@@ -181,15 +181,15 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
                         level.map.tiles[col][mapRow] = 
                             FOREST_TILE;
                     } break;
-                    case(DESERT):
+                    case(SWAMP):
                     {
                         level.map.tiles[col][mapRow] = 
-                            DESERT_TILE;
+                            SWAMP_TILE;
                     } break;
-                    case(OBJECTIVE):
+                    case(GOAL):
                     {
                         level.map.tiles[col][mapRow] = 
-                            OBJECTIVE_TILE;
+                            GOAL_TILE;
                     } break;
                     case(SPAWN):
                     {
