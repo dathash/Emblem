@@ -334,17 +334,9 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
-    /*
     // Portraits
-    if((GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
-       GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-       GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
-       GlobalInterfaceState == SELECTED_OVER_ALLY ||
-       GlobalInterfaceState == SELECTED_OVER_ENEMY ||
-       GlobalInterfaceState == UNIT_MENU_ROOT ||
-	   GlobalInterfaceState == UNIT_INFO ||
+    if(GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO)
-       && GlobalPlayerTurn && !GlobalEditorMode)
     {
         assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
         int x_pos = 560;
@@ -354,7 +346,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
-    */
 
     if(GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)

@@ -22,6 +22,12 @@ Lerp(float a, float b, float amount)
 }
 
 float
+Identity(float t)
+{
+    return t;
+}
+
+float
 Flip(float t)
 {
     return 1 - t;
@@ -34,15 +40,57 @@ EaseIn(float t)
 }
 
 float
+EaseInCubic(float t)
+{
+    return t * t * t;
+}
+
+float
+EaseInQuadratic(float t)
+{
+    return t * t * t * t;
+}
+
+float
+EaseInQuintic(float t)
+{
+    return t * t * t * t * t;
+}
+
+float
 EaseOut(float t)
 {
     return Flip(EaseIn(Flip(t)));
 }
 
 float
+EaseOutCubic(float t)
+{
+    return Flip(EaseInCubic(Flip(t)));
+}
+
+float
+EaseOutQuadratic(float t)
+{
+    return Flip(EaseInQuadratic(Flip(t)));
+}
+
+float
+EaseOutQuintic(float t)
+{
+    return Flip(EaseInQuintic(Flip(t)));
+}
+
+float
 EaseInOut(float t)
 {
     return Lerp(EaseIn(t), EaseOut(t), t);
+}
+
+float
+EaseInOutCustom(float t, float (*in) (float), float (*out) (float))
+{
+    return Lerp(in(t), out(t), t);
 }
 
 float
@@ -64,8 +112,31 @@ enum AnimationValue
 
 struct Sample
 {
-    float value;
     float t;
+    float value;
+};
+
+struct Channel
+{
+    vector<Sample> samples = {{0.0, 0.0}, {0.25, 0.5}, {0.75, 0.0}, {1.0, 0.0}};
+    int index = 0;
+    float (*ease) (float) = Identity;
+
+    void
+    Update(float time)
+    {
+        if(samples[index+1].t < time)
+        {
+            ++index;
+        }
+    }
+
+    float
+    Value(float time)
+    {
+        return Lerp(samples[index].value, samples[index+1].value,
+                    ease(time));
+    }
 };
 
 struct Animation
@@ -74,8 +145,7 @@ struct Animation
     int counter = 0;
     int finish  = 0;
     bool repeat = false;
-    vector<Sample> channel = {{0.0, 0.0}, {0.5, 0.5}, {0.0, 1.0}};
-    int channel_index = 0;
+    Channel channel;
 
     Animation() = default;
 
@@ -96,8 +166,7 @@ struct Animation
     float
     Value()
     {
-        return Lerp(channel[channel_index].value, channel[channel_index+1].value,
-                    EaseOut(Time()));
+        return channel.Value(Time());
     }
 
     float
@@ -110,25 +179,19 @@ struct Animation
     bool
     Update()
     {
-        //cout << channel_index << "\n";
         counter++;
-        if(channel[channel_index+1].t < Time())
-        {
-            ++channel_index;
-        }
-
         if(!(counter % finish))
         {
             if(repeat)
             {
                 counter = 0;
-                channel_index = 0;
                 return false;
             }
 
             //EmitEvent(on_finish);
             return true;
         }
+        channel.Update(Time());
         return false;
     }
 };

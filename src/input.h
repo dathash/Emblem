@@ -43,7 +43,7 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     case SDLK_SPACE:
                         input->a = true;
                         break;
-                    case SDLK_q:
+                    case SDLK_LSHIFT:
                         input->b = true;
                         break;
                     case SDLK_e:
@@ -70,7 +70,7 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     case SDLK_SPACE:
                         input->a = false;
                         break;
-                    case SDLK_q:
+                    case SDLK_LSHIFT:
                         input->b = false;
                         break;
                     case SDLK_e:

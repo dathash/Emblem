@@ -142,7 +142,6 @@ std::ostream
               << ", crit: " << a.crit;
 }
 
-
 struct Fight
 {
     Unit *one = nullptr;
