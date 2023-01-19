@@ -18,7 +18,7 @@ class NullCommand : public Command
 public:
     virtual void Execute()
     {
-        printf("Null Command\n");
+        //printf("Null Command\n");
     }
 };
 
@@ -226,7 +226,7 @@ public:
                 map->healable.push_back(p);
             }
         }
-        if(map->healable.size() > 0)
+        if(map->healable.size() > 0 && cursor->selected->ability > 0)
             menu->AddOption("Heal");
 
         menu->AddOption("Wait");
@@ -420,15 +420,9 @@ public:
                             map.tiles[cursor->source.col][cursor->source.row].avoid,
                             map.tiles[cursor->pos.col][cursor->pos.row].avoid,
                             distance);
+        fight->ready = true;
 
-        cursor->selected->Deactivate();
-
-        cursor->selected = nullptr;
-        cursor->targeted = nullptr;
-        cursor->pos = cursor->source;
-        cursor->path_draw = {};
-
-        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+        GlobalInterfaceState = FIGHT;
     }
 
 private:
@@ -1189,7 +1183,7 @@ public:
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(ANIMATING):
+            case(FIGHT):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());

@@ -104,6 +104,8 @@ struct Attack
         // TODO: Different attack types result in different animations
         if(hit && !crit)
         {
+            // TODO: How do I decouple this damage from here?
+            // I want it to happen when the animation finishes.
             GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_HIT);
             target->Damage(damage);
         }
@@ -117,7 +119,6 @@ struct Attack
             GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_MISS);
             return;
         }
-
     }
 };
 std::ostream
@@ -134,13 +135,13 @@ struct Fight
 {
     Unit *one = nullptr;
     Unit *two = nullptr;
-
-    int one_avoid_bonus = 0, two_avoid_bonus = 0;
+    int one_avoid_bonus = 0;
+    int two_avoid_bonus = 0;
     int distance = 0;
 
     queue<Attack> attack_queue = {};
 
-    bool ready = true;
+    bool ready = false;
 
     Fight() = default;
 
@@ -171,12 +172,12 @@ struct Fight
 
                 next.Execute();
                 cout << next << "\n";
-                ready = false;
             }
             else
             {
-                //EmitEvent(COMBAT_OVER);
+                EmitEvent(EVENT_COMBAT_OVER);
             }
+            ready = false;
         }
     }
 

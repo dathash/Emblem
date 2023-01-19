@@ -75,102 +75,6 @@ Intro Theme (Tom Clancy's Rainbow Six)
 Super Mario 64 Title Theme
 Tripod (Bomberman Hero)
 
-# TODO
-PROTOTYPE ///////////////////////////////////////////////////
-    16 levels
-
-    Win Screen
-
-    Basic Combat Animations
-
-    Unit Death Screen
-
-    Abilities
-    * Create a system where a unit possesses one of the following.
-        (x) Heal
-        ( ) Buff
-        ( ) Shield
-        ( ) Dance (Genealogy)
-
-    More complex conversations
-    * Units come and go
-    * Facial expression changes
-    Add some conversations for inbetween levels
-    * Menu
-
-    *HUGE QA and Balancing Pass*
-
-///////////////////////////////////////////////////////////////
-Portraits don't block screen, put them with the blurb like in binding blade.
-display enemy damage range, unit damage range.
-
-0.1
-    Inbetween Levels | Metagame
-    * Revive dead units?
-    * Recruit new units?
-
-    RPG Mechanics
-    * Boosted stats?
-    * New abilities?
-    * Improved abilities?
-    * Experience points?
-    * Levels?
-    Battle Animations
-    Audio
-        Sound Effects
-        Drum-n-bass Audio
-    Tutorial
-
-    Placing Unit moves them smoothly to that square (A-star)
-
-    Unit damage and healing ranges are displayed.
-
-NICE
-    Real-time color editing in the editor
-
-    Better enemy AI
-        Pursuing Enemies only come for you when you get near.
-        * Bresenham's line plus a certain distance (maybe 7 tiles?)
-        Enemy Units have more complex decision-making process.
-        * More factors like accuracy and whether they will die in the process.
-        Enemies need to treat their own units as walls in a sort of sense
-        * Waits until you're within a certain number of squares (probably like 5),
-          then pursues
-        * Bolsters until attacked, then changes to Pursue.
-        State Machine?
-    Shrink Tilesets to absolute necessity, also enforce consistency across them
-    for ease of plug-n-play.
-    Swap Noire and Donnel's Colors
-
-POLISH
-    Switch Options menu to internal system.
-    * Music Volume
-    * Resolution?
-      * This would require constructing some kind of anchor system, which would
-        be an enormous amount of work. If we want to allow for variable
-        resolutions, we will need to probably use Qt or something similar.
-    * Quit
-
-    Look into pixel squishing problems
-
-    Attack and Move
-    BUG | Paths are drawn without regard for walkable squares. EX: When choosing
-    a square to place a unit, its path is drawn through an enemy.
-    Cycle units with L trigger.
-    * Should be able to do this in the same way we cycle units when selecting a
-      victim for an attack in command.h
-    Startup Screen
-    Create polished tilemaps with Tiled and overlay them onto the in-game maps.
-
-QA
-    Controller added mid-game doesn't register joystick, only buttons.
-    The Next-Level code is so flimsy...
-    So is the Game Over code.
-
-REFACTOR
-    Take junk out of main
-    Rip out the viewport code (for now). It needs some serious reconsideration.
-
 # Ideas
 ## Brainstorm
 What is appealing to me about tactics games?
@@ -311,4 +215,114 @@ Replayability
   * Like Into the Breach
 * Randomized recruits inbetween levels.
   * Like Auto-chess
+
+
+# Scratch
+
+How the program should run:
+
+1. Player triggers "Attack", putting game into Combat state.
+2. Game renders in Combat state. Nothing updates.
+3. Animation ends, changing state back to normal.
+   Damage is applied.
+4. Game isn't in combat state anymore and continues as normal.
+
+# TODO
+PROTOTYPE ///////////////////////////////////////////////////
+    16 levels
+
+    BUG | COMBAT STATES
+
+    Win Screen
+
+    Basic Combat Animations
+
+    Unit Death Screen
+
+    Abilities
+    * Create a system where a unit possesses one of the following.
+        (x) Heal
+        ( ) Buff
+        ( ) Shield
+        ( ) Dance (Genealogy)
+
+    More complex conversations
+    * Units come and go
+    * Facial expression changes
+    Add some conversations for inbetween levels
+    * Menu
+
+    *HUGE QA and Balancing Pass*
+
+///////////////////////////////////////////////////////////////
+Portraits don't block screen, put them with the blurb like in binding blade.
+display enemy damage range, unit damage range.
+Make every change in GlobalInterfaceState be an Event.
+
+0.1
+    Inbetween Levels | Metagame
+    * Revive dead units?
+    * Recruit new units?
+
+    RPG Mechanics
+    * Boosted stats?
+    * New abilities?
+    * Improved abilities?
+    * Experience points?
+    * Levels?
+    Battle Animations
+    Audio
+        Sound Effects
+        Drum-n-bass Audio
+    Tutorial
+
+    Placing Unit moves them smoothly to that square (A-star)
+
+    Unit damage and healing ranges are displayed.
+
+NICE
+    Real-time color editing in the editor
+
+    Better enemy AI
+        Pursuing Enemies only come for you when you get near.
+        * Bresenham's line plus a certain distance (maybe 7 tiles?)
+        Enemy Units have more complex decision-making process.
+        * More factors like accuracy and whether they will die in the process.
+        Enemies need to treat their own units as walls in a sort of sense
+        * Waits until you're within a certain number of squares (probably like 5),
+          then pursues
+        * Bolsters until attacked, then changes to Pursue.
+        State Machine?
+    Shrink Tilesets to absolute necessity, also enforce consistency across them
+    for ease of plug-n-play.
+    Swap Noire and Donnel's Colors
+
+POLISH
+    Switch Options menu to internal system.
+    * Music Volume
+    * Resolution?
+      * This would require constructing some kind of anchor system, which would
+        be an enormous amount of work. If we want to allow for variable
+        resolutions, we will need to probably use Qt or something similar.
+    * Quit
+
+    Look into pixel squishing problems
+
+    Attack and Move
+    BUG | Paths are drawn without regard for walkable squares. EX: When choosing
+    a square to place a unit, its path is drawn through an enemy.
+    Cycle units with L trigger.
+    * Should be able to do this in the same way we cycle units when selecting a
+      victim for an attack in command.h
+    Startup Screen
+    Create polished tilemaps with Tiled and overlay them onto the in-game maps.
+
+QA
+    Controller added mid-game doesn't register joystick, only buttons.
+    The Next-Level code is so flimsy...
+    So is the Game Over code.
+
+REFACTOR
+    Take junk out of main
+    Rip out the viewport code (for now). It needs some serious reconsideration.
 

@@ -96,7 +96,7 @@ enum InterfaceState
 
     CONVERSATION,
 
-    ANIMATING,
+    FIGHT,
 
     NO_OP,
 
@@ -105,6 +105,7 @@ enum InterfaceState
 
 enum AIState
 {
+    WAITING,
     FINDING_NEXT,
     SELECTED,
 

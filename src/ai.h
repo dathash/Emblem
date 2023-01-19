@@ -261,6 +261,10 @@ public:
                           map->tiles[cursor->redo.col][cursor->redo.row].avoid,
                           map->tiles[cursor->pos.col][cursor->pos.row].avoid,
                           distance);
+            fight->ready = true;
+
+            GlobalAIState = WAITING;
+            return;
         }
 
         // resolution
@@ -271,6 +275,7 @@ public:
 
         // change state
         GlobalAIState = FINDING_NEXT;
+        return;
     }
 
 private:
@@ -296,6 +301,9 @@ struct AI
     void Update(Cursor *cursor, Tilemap *map, Fight *fight)
     {
         if(GlobalPlayerTurn)
+            return;
+
+        if(GlobalAIState == WAITING) // TODO: Simplify these states. Reduce bugs.
             return;
 
         if(commandQueue.empty())

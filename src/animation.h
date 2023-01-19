@@ -6,8 +6,6 @@
 #define ANIMATION_H
 
 /* From Game Engine Architecture:
-   Channels
-   Metachannels
    Event Channel
    * Footstep sound
    * Cloud of dust Particle effect
@@ -17,6 +15,12 @@
 */
 
 // ================================ Animation ==================================
+float
+lerp(float a, float b, float amount)
+{
+    return a * (1.0 - amount) + (b * amount);
+}
+
 enum AnimationValue
 {
     ATTACK_ANIMATION_HIT,
@@ -24,36 +28,53 @@ enum AnimationValue
     ATTACK_ANIMATION_CRITICAL,
 };
 
+struct Sample
+{
+    float value;
+};
+
+struct Channel
+{
+    Sample samples[30] = {};
+    float *value;
+};
+
 struct Animation
 {
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
-    int frames  = 0;
+    int finish  = 0;
     bool repeat = false;
+    Channel channels[4] = {};
     Event on_finish;
 
-    Animation(int speed_in, int frames_in, bool repeat_in,
+    Animation(int speed_in, int finish_in, bool repeat_in,
               Event on_finish_in)
     : speed(speed_in),
-      frames(frames_in),
+      finish(finish_in),
       repeat(repeat_in),
       on_finish(on_finish_in)
     {}
 
     Animation(const Animation &other)
     : speed(other.speed),
-      frames(other.frames),
+      finish(other.finish),
       repeat(other.repeat),
       on_finish(other.on_finish)
-    {}
+    {
+        // TODO: Make sure this is right.
+        for(int i = 0; i < 4; ++i)
+        {
+            channels[i] = other.channels[i];
+        }
+    }
 
     // called each frame
     bool
     Update()
     {
         counter++;
-        cout << counter << "\n";
-        if(!(counter % frames))
+        if(!(counter % finish))
         {
             if(repeat)
             {
@@ -110,4 +131,5 @@ struct AnimationSystem
 };
 
 static AnimationSystem GlobalAnimations;
+
 #endif

@@ -96,6 +96,7 @@ static int viewportRow = 0;
 enum EventType
 {
     EVENT_ANIMATION_COMPLETE,
+    EVENT_COMBAT_OVER,
 };
 
 struct Event
@@ -121,7 +122,7 @@ EmitEvent(Event event)
 #include "utils.h"
 #include "state.h"
 #include "structs.h"
-#include "animation.h" // NOTE: Contains GlobalAnimations.
+#include "animation.h"
 #include "load.h"
 #include "init.h"
 #include "input.h"
@@ -134,7 +135,7 @@ EmitEvent(Event event)
 #include "editor.h"
 
 void
-HandleEvents(Fight *fight)
+HandleEvents(Fight *fight, Cursor *cursor)
 {
     while(!GlobalEvents.empty())
     {
@@ -146,6 +147,28 @@ HandleEvents(Fight *fight)
             case EVENT_ANIMATION_COMPLETE:
             {
                 fight->ready = true;
+            } break;
+            case EVENT_COMBAT_OVER:
+            {
+                if(GlobalPlayerTurn)
+                {
+                    cursor->selected->Deactivate();
+                    cursor->selected = nullptr;
+                    cursor->targeted = nullptr;
+                    cursor->pos = cursor->source;
+                    cursor->path_draw = {};
+                    GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                }
+                else
+                {
+                    // resolution
+                    cursor->selected->Deactivate();
+                    cursor->selected = nullptr;
+                    cursor->targeted = nullptr;
+                    cursor->pos = cursor->source;
+
+                    GlobalAIState = FINDING_NEXT;
+                }
             } break;
             default:
             {
@@ -215,7 +238,7 @@ int main(int argc, char *argv[])
         // Update
         if(!GlobalEditorMode)
         {
-            HandleEvents(&fight); // TODO: This needn't be global.
+            HandleEvents(&fight, &cursor); // TODO: This needn't be global.
 
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
