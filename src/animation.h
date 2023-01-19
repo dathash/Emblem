@@ -16,10 +16,44 @@
 
 // ================================ Animation ==================================
 float
-lerp(float a, float b, float amount)
+Lerp(float a, float b, float amount)
 {
     return a * (1.0 - amount) + (b * amount);
 }
+
+float
+Flip(float t)
+{
+    return 1 - t;
+}
+
+float
+EaseIn(float t)
+{
+    return t * t;
+}
+
+float
+EaseOut(float t)
+{
+    return Flip(EaseIn(Flip(t)));
+}
+
+float
+EaseInOut(float t)
+{
+    return Lerp(EaseIn(t), EaseOut(t), t);
+}
+
+float
+Spike(float t)
+{
+    if (t <= .5f)
+        return EaseIn(t/0.5);
+ 
+    return EaseIn(Flip(t)/0.5);
+}
+
 
 enum AnimationValue
 {
@@ -34,18 +68,14 @@ struct Sample
     float t;
 };
 
-struct Channel
-{
-    Sample samples[30] = {};
-};
-
 struct Animation
 {
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
     int finish  = 0;
     bool repeat = false;
-    Channel channel;
+    vector<Sample> channel = {{0.0, 0.0}, {0.5, 0.5}, {0.0, 1.0}};
+    int channel_index = 0;
 
     Animation() = default;
 
@@ -66,19 +96,33 @@ struct Animation
     float
     Value()
     {
-        return ((float)counter / finish);
+        return Lerp(channel[channel_index].value, channel[channel_index+1].value,
+                    EaseOut(Time()));
+    }
+
+    float
+    Time()
+    {
+        return (float)counter / finish;
     }
 
     // called each frame
     bool
     Update()
     {
+        //cout << channel_index << "\n";
         counter++;
+        if(channel[channel_index+1].t < Time())
+        {
+            ++channel_index;
+        }
+
         if(!(counter % finish))
         {
             if(repeat)
             {
                 counter = 0;
+                channel_index = 0;
                 return false;
             }
 

@@ -196,8 +196,6 @@ struct Fight
             Current().source->animation_offset = (dir * TILE_SIZE) * value;
             if(animation->Update())
             {
-                // SHOULD BE UNNECESSARY
-                //Current().source->animation_offset = {0, 0};
                 Current().Resolve();
                 attack_queue.pop();
                 ready = true;
@@ -248,6 +246,8 @@ struct Fight
     {
         int one_dmg = CalculateDamage(*one, *two);
         int two_dmg = CalculateDamage(*two, *one);
+        int one_accum = 0;
+        int two_accum = 0;
         Attack attack = {one, two, one_dmg};
         if(d100() < HitChance(*one, *two, two_avoid_bonus))
         {
@@ -257,9 +257,12 @@ struct Fight
         }
         attack_queue.push(attack);
 
-        if(attack.hit && 
-           (two->health - attack.damage <= 0 ||
-            attack.crit && two->health - attack.damage * CRIT_MULTIPLIER <= 0))
+        if(attack.hit)
+            two_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
+
+        cout << two_accum << "\n";
+
+        if(attack.hit && two->health - two_accum <= 0)
             return;
 
         if(distance >= two->min_range && distance <= two->max_range)
@@ -273,9 +276,10 @@ struct Fight
             }
             attack_queue.push(attack);
 
-            if(attack.hit && 
-               (one->health - attack.damage <= 0 ||
-                attack.crit && one->health - attack.damage * CRIT_MULTIPLIER <= 0))
+            if(attack.hit)
+                one_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
+
+            if(attack.hit && one->health - one_accum <= 0)
                 return;
         }
 
@@ -291,9 +295,10 @@ struct Fight
         }
         attack_queue.push(attack);
 
-        if(attack.hit && 
-           (two->health - attack.damage <= 0 ||
-            attack.crit && two->health - attack.damage * CRIT_MULTIPLIER <= 0))
+        if(attack.hit)
+            two_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
+
+        if(attack.hit && two->health - two_accum <= 0)
             return;
 
         if(distance >= two->min_range && distance <= two->max_range)
