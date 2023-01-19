@@ -263,6 +263,12 @@ public:
                           distance);
             fight->ready = true;
 
+            // resolution
+            cursor->selected->Deactivate();
+            cursor->selected = nullptr;
+            cursor->targeted = nullptr;
+            cursor->pos = cursor->source;
+
             GlobalAIState = WAITING;
             return;
         }

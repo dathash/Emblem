@@ -417,10 +417,16 @@ public:
     {
         int distance = ManhattanDistance(cursor->source, cursor->pos);
         *fight = Fight(cursor->selected, cursor->targeted,
-                            map.tiles[cursor->source.col][cursor->source.row].avoid,
-                            map.tiles[cursor->pos.col][cursor->pos.row].avoid,
-                            distance);
+                        map.tiles[cursor->source.col][cursor->source.row].avoid,
+                        map.tiles[cursor->pos.col][cursor->pos.row].avoid,
+                        distance);
         fight->ready = true;
+
+        cursor->selected->Deactivate();
+        cursor->selected = nullptr;
+        cursor->targeted = nullptr;
+        cursor->pos = cursor->source;
+        cursor->path_draw = {};
 
         GlobalInterfaceState = FIGHT;
     }

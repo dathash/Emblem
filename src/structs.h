@@ -136,10 +136,6 @@ struct Unit
     Update()
     {
         sheet.Update();
-		if(health <= 0)
-		{
-			should_die = true;
-		}
     }
 
     Unit(string name_in, Spritesheet sheet_in,
@@ -295,9 +291,7 @@ struct Level
                     combatants.end());
 
         for(position tile : tiles)
-        {
             map.tiles[tile.col][tile.row].occupant = nullptr;
-        }
     }
 
     // A mutation function that just checks if there are any units left to

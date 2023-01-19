@@ -312,9 +312,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
-    cout << GlobalInterfaceState << "\n";
-
-    /*
     // Portraits
     if((GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
        GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
@@ -334,7 +331,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
-    */
 
     if(GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_HEALING)

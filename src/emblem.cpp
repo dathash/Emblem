@@ -93,29 +93,6 @@ static unsigned int GlobalAIState;
 static int viewportCol = 0;
 static int viewportRow = 0;
 
-enum EventType
-{
-    EVENT_ANIMATION_COMPLETE,
-    EVENT_COMBAT_OVER,
-};
-
-struct Event
-{
-    EventType type;
-
-    Event(EventType type_in)
-    : type(type_in)
-    {}
-};
-
-static queue<Event> GlobalEvents;
-
-void
-EmitEvent(Event event)
-{
-    GlobalEvents.push(event);
-}
-
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
@@ -133,50 +110,6 @@ EmitEvent(Event event)
 #include "ai.h"
 #include "render.h"
 #include "editor.h"
-
-void
-HandleEvents(Fight *fight, Cursor *cursor)
-{
-    while(!GlobalEvents.empty())
-    {
-        Event event = GlobalEvents.front();
-        GlobalEvents.pop();
-
-        switch(event.type)
-        {
-            case EVENT_ANIMATION_COMPLETE:
-            {
-                fight->ready = true;
-            } break;
-            case EVENT_COMBAT_OVER:
-            {
-                if(GlobalPlayerTurn)
-                {
-                    cursor->selected->Deactivate();
-                    cursor->selected = nullptr;
-                    cursor->targeted = nullptr;
-                    cursor->pos = cursor->source;
-                    cursor->path_draw = {};
-                    GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-                }
-                else
-                {
-                    // resolution
-                    cursor->selected->Deactivate();
-                    cursor->selected = nullptr;
-                    cursor->targeted = nullptr;
-                    cursor->pos = cursor->source;
-
-                    GlobalAIState = FINDING_NEXT;
-                }
-            } break;
-            default:
-            {
-                assert(!"ERROR: Unimplemented Event\n");
-            } break;
-        }
-    }
-}
 
 int main(int argc, char *argv[])
 {
@@ -221,7 +154,7 @@ int main(int argc, char *argv[])
 
     Fight fight;
 
-    AnimationSystem animation_system = {};
+    //AnimationSystem animation_system = {};
 
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
@@ -238,7 +171,7 @@ int main(int argc, char *argv[])
         // Update
         if(!GlobalEditorMode)
         {
-            HandleEvents(&fight, &cursor); // TODO: This needn't be global.
+            //HandleEvents(&fight, &cursor); // TODO: This needn't be global.
 
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
@@ -249,13 +182,13 @@ int main(int argc, char *argv[])
 
             cursor.Update();
             ui.Update();
-            level.Update();
             fight.Update();
+            level.Update();
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
 
-            GlobalAnimations.Update();
+            //GlobalAnimations.Update();
         }
 
         // Resolve State

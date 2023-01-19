@@ -46,21 +46,20 @@ struct Animation
     int finish  = 0;
     bool repeat = false;
     Channel channels[4] = {};
-    Event on_finish;
+    //Event on_finish;
 
-    Animation(int speed_in, int finish_in, bool repeat_in,
-              Event on_finish_in)
+    Animation() = default;
+
+    Animation(int speed_in, int finish_in, bool repeat_in)
     : speed(speed_in),
       finish(finish_in),
-      repeat(repeat_in),
-      on_finish(on_finish_in)
+      repeat(repeat_in)
     {}
 
     Animation(const Animation &other)
     : speed(other.speed),
       finish(other.finish),
-      repeat(other.repeat),
-      on_finish(other.on_finish)
+      repeat(other.repeat)
     {
         // TODO: Make sure this is right.
         for(int i = 0; i < 4; ++i)
@@ -82,7 +81,7 @@ struct Animation
                 return false;
             }
 
-            EmitEvent(on_finish);
+            //EmitEvent(on_finish);
             return true;
         }
         return false;
@@ -94,9 +93,9 @@ GetAnimation(AnimationValue anim)
 {
     switch(anim)
     {
-        case ATTACK_ANIMATION_HIT: return (new Animation(1, 20, false, Event(EVENT_ANIMATION_COMPLETE)));
-        case ATTACK_ANIMATION_MISS: return (new Animation(1, 20, false, Event(EVENT_ANIMATION_COMPLETE)));
-        case ATTACK_ANIMATION_CRITICAL: return (new Animation(1, 20, false, Event(EVENT_ANIMATION_COMPLETE)));
+        case ATTACK_ANIMATION_HIT: return (new Animation(1, 20, false));
+        case ATTACK_ANIMATION_MISS: return (new Animation(1, 20, false));
+        case ATTACK_ANIMATION_CRITICAL: return (new Animation(1, 20, false));
         default:
         {
             assert(!"ERROR GetAnimation: Animation type not defined\n");

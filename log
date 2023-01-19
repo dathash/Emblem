@@ -326,3 +326,53 @@ REFACTOR
     Take junk out of main
     Rip out the viewport code (for now). It needs some serious reconsideration.
 
+# Systems
+Interface
+* Takes an InterfaceState and a button press
+* returns an InterfaceState
+* MUTATES THE GAMESTATE
+
+AI
+* Takes an AIState and a Plan
+* Returns an AIState
+* MUTATES THE GAMESTATE
+
+Renderer
+* Takes the state of the game
+* Outputs sprites
+* Relies on:
+  * The Game state being well-formatted
+  * The Viewport being sized correctly
+
+UI
+* Takes the state of the level, cursor.
+* Outputs text
+* Returns nothing
+
+Event
+
+MENU
+* Takes 
+*
+*
+
+Input
+* Takes Keystrokes
+* Returns an Input() struct
+
+Editor
+* Takes the game state
+* Mutates the game state
+
+Combat
+* Takes a fight outcome as input.
+* Mutates State *****************************************************************
+* Returns thing
+
+Animation
+* Takes a property to animate, a duration, and a speed.
+* Mutates that thing while it's going.
+* Mutates the gamestate to hold fast
+* Calls methods at certain points
+*
+

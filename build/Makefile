@@ -18,7 +18,7 @@ $(OUT): $(OBJ)
 	@printf "\e[34mDone!\e[0m\n"
 
 %.o: %.cpp
-	@$(CC) $(FLAGS) $(INCFLAGS) -c $< -o $@
+	@$(CC) $(FLAGS) $(INCFLAGS) $(WINDOWS) -c $< -o $@
 	@printf "\e[36mCompile\e[90m %s\e[0m\n" $@
 
 ../src/emblem.o: ../src/*.h

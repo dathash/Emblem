@@ -98,26 +98,38 @@ struct Attack
     bool crit;
     // AttackType type;
 
-    void
+    // Starts up animations.
+    Animation *
     Execute()
     {
+        Animation *animation;
         // TODO: Different attack types result in different animations
         if(hit && !crit)
         {
-            // TODO: How do I decouple this damage from here?
-            // I want it to happen when the animation finishes.
-            GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_HIT);
+            animation = GetAnimation(ATTACK_ANIMATION_HIT);
+        }
+        else if(hit && crit)
+        {
+            animation = GetAnimation(ATTACK_ANIMATION_CRITICAL);
+        }
+        else
+        {
+            animation = GetAnimation(ATTACK_ANIMATION_MISS);
+        }
+        return animation;
+    }
+
+    // Actually Applies damage
+    void
+    Resolve()
+    {
+        if(hit && !crit)
+        {
             target->Damage(damage);
         }
         else if(hit && crit)
         {
-            GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_CRITICAL);
-            target->Damage(CRIT_MULTIPLIER * damage);
-        }
-        else
-        {
-            GlobalAnimations.PlayAnimation(ATTACK_ANIMATION_MISS);
-            return;
+            target->Damage(damage * CRIT_MULTIPLIER);
         }
     }
 };
@@ -143,6 +155,8 @@ struct Fight
 
     bool ready = false;
 
+    Animation *animation = nullptr;
+
     Fight() = default;
 
     Fight(Unit *one_in, Unit *two_in, 
@@ -158,24 +172,50 @@ struct Fight
                                distance_in,
                                one_avo_in,
                                two_avo_in));
+        ready = true;
     }
 
     void
     Update()
     {
+        if(animation)
+        {
+            if(animation->Update())
+            {
+                attack_queue.front().Resolve();
+                attack_queue.pop();
+                ready = true;
+                delete animation;
+                animation = nullptr;
+            }
+        }
         if(ready)
         {
             if(!attack_queue.empty())
             {
-                Attack next = attack_queue.front();
-                attack_queue.pop();
-
-                next.Execute();
-                cout << next << "\n";
+                animation = attack_queue.front().Execute();
+                cout << attack_queue.front() << "\n";
             }
             else
             {
-                EmitEvent(EVENT_COMBAT_OVER);
+                if(one->health <= 0)
+                    one->should_die = true;
+                if(two->health <= 0)
+                    two->should_die = true;
+                if(GlobalPlayerTurn)
+                {
+                    GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                    if(one->should_die)
+                    {
+                        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+                    }
+                }
+                else
+                {
+                    GlobalAIState = FINDING_NEXT;
+                }
+
+                //EmitEvent(EVENT_COMBAT_OVER);
             }
             ready = false;
         }
@@ -248,12 +288,6 @@ struct Fight
             } 
             attack_queue.push(attack);
         }
-    }
-
-    void
-    AnimationComplete()
-    {
-
     }
 };
 
