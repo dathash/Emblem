@@ -5,108 +5,12 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-/* From Game Engine Architecture:
-   Event Channel
-   * Footstep sound
-   * Cloud of dust Particle effect
-   YOU CAN HOOK THESE THINGS UP TO EVENTS.
-   For instance:
-   * Unit_Died event results in the dialogue system playing and changing the interface state.
-*/
-
-// ================================ Animation ==================================
-float
-Lerp(float a, float b, float amount)
-{
-    return a * (1.0 - amount) + (b * amount);
-}
-
-float
-Identity(float t)
-{
-    return t;
-}
-
-float
-Flip(float t)
-{
-    return 1 - t;
-}
-
-float
-EaseIn2(float t)
-{
-    return t * t;
-}
-
-float
-EaseIn3(float t)
-{
-    return t * t * t;
-}
-
-float
-EaseIn4(float t)
-{
-    return t * t * t * t;
-}
-
-float
-EaseIn5(float t)
-{
-    return t * t * t * t * t;
-}
-
-float
-EaseOut2(float t)
-{
-    return Flip(EaseIn2(Flip(t)));
-}
-
-float
-EaseOut3(float t)
-{
-    return Flip(EaseIn3(Flip(t)));
-}
-
-float
-EaseOut4(float t)
-{
-    return Flip(EaseIn4(Flip(t)));
-}
-
-float
-EaseOut5(float t)
-{
-    return Flip(EaseIn5(Flip(t)));
-}
-
-float
-EaseInOut(float t)
-{
-    return Lerp(EaseIn2(t), EaseOut2(t), t);
-}
-
-float
-EaseInOutCustom(float t, float (*in) (float), float (*out) (float))
-{
-    return Lerp(in(t), out(t), t);
-}
-
-float
-Spike(float t)
-{
-    if (t <= .5f)
-        return EaseIn2(t/0.5);
- 
-    return EaseIn2(Flip(t)/0.5);
-}
-
 enum AnimationValue
 {
-    ATTACK_ANIMATION_HIT,
+    ATTACK_ANIMATION_RANGED,
+    ATTACK_ANIMATION_MELEE,
+    ATTACK_ANIMATION_LEAP,
     ATTACK_ANIMATION_MISS,
-    ATTACK_ANIMATION_CRITICAL,
 };
 
 enum ChannelIndex
@@ -252,7 +156,31 @@ GetAnimation(AnimationValue anim)
 {
     switch(anim)
     {
-        case ATTACK_ANIMATION_HIT:
+        case ATTACK_ANIMATION_RANGED:
+        {
+            return (new Animation(1, 40, false, 2,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.4 , -0.1 },
+                     {0.5 ,  0.0 },
+                     {1.0 ,  0.0 }},
+                     Identity,
+                    {{0.0 ,  0.0 },  // channel 2
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case ATTACK_ANIMATION_MELEE: 
+        {
+            return (new Animation(1, 40, false, 2,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.4 ,  0.0 },
+                     {0.5 ,  1.0 },
+                     {1.0 ,  0.0 }},
+                     Identity,
+                    {{0.0 ,  0.0 },  // channel 2
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case ATTACK_ANIMATION_LEAP:
         {
             return (new Animation(1, 40, false, 2,
                     {{0.0 ,  0.0 },  // channel 1
@@ -267,7 +195,7 @@ GetAnimation(AnimationValue anim)
                      {1.0 ,  0.0 }},
                      Identity));
         }
-        case ATTACK_ANIMATION_MISS: 
+        case ATTACK_ANIMATION_MISS:
         {
             return (new Animation(1, 40, false, 2,
                     {{0.0 ,  0.0 },  // channel 1
@@ -276,23 +204,6 @@ GetAnimation(AnimationValue anim)
                      {1.0 ,  0.0 }},
                      Identity,
                     {{0.0 ,  0.0 },  // channel 2
-                     {0.40,  0.0 },
-                     {0.45,  0.5 },
-                     {0.5 ,  0.0 },
-                     {1.0 ,  0.0 }},
-                     Identity));
-        }
-        case ATTACK_ANIMATION_CRITICAL: 
-        {
-            return (new Animation(1, 40, false, 2,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.4 ,  0.0 },
-                     {0.5 ,  1.0 },
-                     {1.0 ,  0.0 }},
-                     Identity,
-                    {{0.0 ,  0.0 },  // channel 2
-                     {0.40,  0.0 },
-                     {0.45,  0.5 },
                      {0.5 ,  0.0 },
                      {1.0 ,  0.0 }},
                      Identity));

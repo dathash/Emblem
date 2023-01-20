@@ -240,4 +240,93 @@ ImToSdlColor(ImU32 in)
 }
 */
 
+// ======================== Easing Functions ===================================
+float
+Lerp(float a, float b, float amount)
+{
+    return a * (1.0 - amount) + (b * amount);
+}
+
+float
+Identity(float t)
+{
+    return t;
+}
+
+float
+Flip(float t)
+{
+    return 1 - t;
+}
+
+float
+SmoothStart2(float t)
+{
+    return t * t;
+}
+
+float
+SmoothStart3(float t)
+{
+    return t * t * t;
+}
+
+float
+SmoothStart4(float t)
+{
+    return t * t * t * t;
+}
+
+float
+SmoothStart5(float t)
+{
+    return t * t * t * t * t;
+}
+
+float
+SmoothStop2(float t)
+{
+    return Flip(SmoothStart2(Flip(t)));
+}
+
+float
+SmoothStop3(float t)
+{
+    return Flip(SmoothStart3(Flip(t)));
+}
+
+float
+SmoothStop4(float t)
+{
+    return Flip(SmoothStart4(Flip(t)));
+}
+
+float
+SmoothStop5(float t)
+{
+    return Flip(SmoothStart5(Flip(t)));
+}
+
+float
+SmoothStartStop(float t)
+{
+    return Lerp(SmoothStart2(t), SmoothStop2(t), t);
+}
+
+float
+SmoothStartStopCustom(float t, float (*in) (float), float (*out) (float))
+{
+    return Lerp(in(t), out(t), t);
+}
+
+float
+Spike(float t)
+{
+    if (t <= .5f)
+        return SmoothStart2(t/0.5);
+ 
+    return SmoothStart2(Flip(t)/0.5);
+}
+
+
 #endif

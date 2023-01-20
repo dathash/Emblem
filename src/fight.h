@@ -80,13 +80,13 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     return outcome;
 }
 
-/*
 enum AttackType
 {
     MELEE,
     RANGED,
+    //MAGIC,
+    //DIVINE,
 };
-*/
 
 struct Attack
 {
@@ -96,7 +96,7 @@ struct Attack
 
     bool hit;
     bool crit;
-    // AttackType type;
+    AttackType type;
 
     // Starts up animations.
     Animation *
@@ -104,18 +104,30 @@ struct Attack
     {
         Animation *animation;
         // TODO: Different attack types result in different animations
-        if(hit && !crit)
+        switch (type)
         {
-            animation = GetAnimation(ATTACK_ANIMATION_HIT);
+            case RANGED:
+            {
+                animation = GetAnimation(ATTACK_ANIMATION_RANGED);
+            } break;
+
+            case MELEE:
+            {
+                if(hit && !crit)
+                {
+                    animation = GetAnimation(ATTACK_ANIMATION_MELEE);
+                }
+                else if(hit && crit)
+                {
+                    animation = GetAnimation(ATTACK_ANIMATION_LEAP);
+                }
+                else
+                {
+                    animation = GetAnimation(ATTACK_ANIMATION_MISS);
+                }
+            } break;
         }
-        else if(hit && crit)
-        {
-            animation = GetAnimation(ATTACK_ANIMATION_CRITICAL);
-        }
-        else
-        {
-            animation = GetAnimation(ATTACK_ANIMATION_MISS);
-        }
+
         return animation;
     }
 
@@ -139,7 +151,8 @@ std::ostream
     return os << "Attack | " << a.source->name << " on " << a.target->name 
               << " | dmg: " << a.damage 
               << ", hit: " << a.hit 
-              << ", crit: " << a.crit;
+              << ", crit: " << a.crit
+              << ", type: " << a.type;
 }
 
 struct Fight
@@ -254,6 +267,10 @@ struct Fight
         int one_accum = 0;
         int two_accum = 0;
         Attack attack = {one, two, one_dmg};
+        if(distance > 1)
+        {
+            attack.type = RANGED;
+        }
         if(d100() < HitChance(*one, *two, two_avoid_bonus))
         {
             attack.hit = true;
@@ -271,6 +288,10 @@ struct Fight
         if(distance >= two->min_range && distance <= two->max_range)
         {
             attack = {two, one, two_dmg};
+            if(distance > 1)
+            {
+                attack.type = RANGED;
+            }
             if(d100() < HitChance(*two, *one, one_avoid_bonus))
             {
                 attack.hit = true;
@@ -287,6 +308,10 @@ struct Fight
         }
 
         attack = {one, two, one_dmg};
+        if(distance > 1)
+        {
+            attack.type = RANGED;
+        }
         if(one->speed - two->speed > DOUBLE_RATIO)
         {
             if(d100() < HitChance(*one, *two, two_avoid_bonus))
@@ -295,18 +320,21 @@ struct Fight
                 if(d100() < CritChance(*one, *two))
                     attack.crit = true;
             }
+            attack_queue.push(attack);
+            if(attack.hit)
+                two_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
+
+            if(attack.hit && two->health - two_accum <= 0)
+                return;
         }
-        attack_queue.push(attack);
-
-        if(attack.hit)
-            two_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
-
-        if(attack.hit && two->health - two_accum <= 0)
-            return;
 
         if(distance >= two->min_range && distance <= two->max_range)
         {
             attack = {two, one, two_dmg};
+            if(distance > 1)
+            {
+                attack.type = RANGED;
+            }
             if(two->speed - one->speed > DOUBLE_RATIO)
             {
                 if(d100() < HitChance(*two, *one, one_avoid_bonus))
@@ -315,8 +343,8 @@ struct Fight
                     if(d100() < CritChance(*two, *one))
                         attack.crit = true;
                 }
+                attack_queue.push(attack);
             } 
-            attack_queue.push(attack);
         }
     }
 };

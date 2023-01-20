@@ -243,6 +243,8 @@ PROTOTYPE ///////////////////////////////////////////////////
         ( ) Shield
         ( ) Dance (Genealogy)
 
+    Sound Effects
+
     *HUGE QA and Balancing Pass*
         BUG | Enemies that can actually reach you don't believe that they can due to
         the difference in pathfinding/flood filling. We NEED To get a more unified
