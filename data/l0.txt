@@ -35,10 +35,10 @@ UNT Thief 7 1 1
 UNT Archer 8 5 2 
 UNT Archer 7 6 2 
 UNT Lucina 3 17 0 
-UNT Donnel 2 15 0 
 UNT Noire 5 18 0 
 UNT Lon'qu 5 16 0 
 UNT Brute 7 17 1 
 UNT Thief 8 16 1 
 UNT Archer 11 16 1 
+UNT Donnel 4 15 0 
 

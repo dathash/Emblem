@@ -168,7 +168,6 @@ struct Fight
       two_avoid_bonus(two_avo_in),
       distance(distance_in)
     {
-        cout << direction_in << "\n";
         one_to_two_direction = direction_in;
         Populate(PredictCombat(*one_in, *two_in,
                                distance_in,
@@ -186,13 +185,20 @@ struct Fight
     void
     Update()
     {
+        // TODO: Move animations out of this class into a global animation manager
         if(animation)
         {
             direction dir = one_to_two_direction;
             if(Current().source == two)
                 dir = dir * -1;
-            float value = animation->Value();
-            Current().source->animation_offset = (dir * TILE_SIZE) * value;
+            position offset = {0, 0};
+            float value = animation->Value(CHANNEL_ONE);
+            offset = (dir * TILE_SIZE) * value;
+
+            float value_two = animation->Value(CHANNEL_TWO);
+            offset += (direction(0, -1) * TILE_SIZE) * value_two;
+            Current().source->animation_offset = offset;
+
             if(animation->Update())
             {
                 Current().Resolve();
@@ -258,8 +264,6 @@ struct Fight
 
         if(attack.hit)
             two_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
-
-        cout << two_accum << "\n";
 
         if(attack.hit && two->health - two_accum <= 0)
             return;

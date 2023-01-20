@@ -63,6 +63,13 @@ struct position
     position(int col, int row) : col(col), row(row) {}
 
     int col, row;
+
+    position& operator+=(const position& rhs)
+    {
+        this->col += rhs.col;
+        this->row += rhs.row;
+        return *this;
+    }
 };
 bool
 operator<(const position &a, const position &b)

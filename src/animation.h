@@ -34,57 +34,57 @@ Flip(float t)
 }
 
 float
-EaseIn(float t)
+EaseIn2(float t)
 {
     return t * t;
 }
 
 float
-EaseInCubic(float t)
+EaseIn3(float t)
 {
     return t * t * t;
 }
 
 float
-EaseInQuadratic(float t)
+EaseIn4(float t)
 {
     return t * t * t * t;
 }
 
 float
-EaseInQuintic(float t)
+EaseIn5(float t)
 {
     return t * t * t * t * t;
 }
 
 float
-EaseOut(float t)
+EaseOut2(float t)
 {
-    return Flip(EaseIn(Flip(t)));
+    return Flip(EaseIn2(Flip(t)));
 }
 
 float
-EaseOutCubic(float t)
+EaseOut3(float t)
 {
-    return Flip(EaseInCubic(Flip(t)));
+    return Flip(EaseIn3(Flip(t)));
 }
 
 float
-EaseOutQuadratic(float t)
+EaseOut4(float t)
 {
-    return Flip(EaseInQuadratic(Flip(t)));
+    return Flip(EaseIn4(Flip(t)));
 }
 
 float
-EaseOutQuintic(float t)
+EaseOut5(float t)
 {
-    return Flip(EaseInQuintic(Flip(t)));
+    return Flip(EaseIn5(Flip(t)));
 }
 
 float
 EaseInOut(float t)
 {
-    return Lerp(EaseIn(t), EaseOut(t), t);
+    return Lerp(EaseIn2(t), EaseOut2(t), t);
 }
 
 float
@@ -97,17 +97,24 @@ float
 Spike(float t)
 {
     if (t <= .5f)
-        return EaseIn(t/0.5);
+        return EaseIn2(t/0.5);
  
-    return EaseIn(Flip(t)/0.5);
+    return EaseIn2(Flip(t)/0.5);
 }
-
 
 enum AnimationValue
 {
     ATTACK_ANIMATION_HIT,
     ATTACK_ANIMATION_MISS,
     ATTACK_ANIMATION_CRITICAL,
+};
+
+enum ChannelIndex
+{
+    CHANNEL_ONE,
+    CHANNEL_TWO,
+    CHANNEL_THREE,
+    CHANNEL_FOUR,
 };
 
 struct Sample
@@ -118,13 +125,22 @@ struct Sample
 
 struct Channel
 {
-    vector<Sample> samples = {{0.0, 0.0}, {0.25, 0.5}, {0.75, 0.0}, {1.0, 0.0}};
+    vector<Sample> samples = {};
     int index = 0;
     float (*ease) (float) = Identity;
+
+    Channel() = default;
+
+    Channel(const vector<Sample> &samples_in,
+            float (*ease_in) (float))
+    : samples(samples_in),
+      ease(ease_in)
+    {}
 
     void
     Update(float time)
     {
+        assert(!samples.empty());
         if(samples[index+1].t < time)
         {
             ++index;
@@ -134,8 +150,9 @@ struct Channel
     float
     Value(float time)
     {
+        float ratio = (ease(time) - samples[index].t) / (samples[index+1].t - samples[index].t);
         return Lerp(samples[index].value, samples[index+1].value,
-                    ease(time));
+                    ratio);
     }
 };
 
@@ -145,28 +162,55 @@ struct Animation
     int counter = 0;
     int finish  = 0;
     bool repeat = false;
-    Channel channel;
+    Channel channel_one   = {};
+    Channel channel_two   = {};
+    Channel channel_three = {};
+    Channel channel_four  = {};
+    int num_channels = 0;
 
     Animation() = default;
 
-    Animation(int speed_in, int finish_in, bool repeat_in)
+    Animation(int speed_in, int finish_in, bool repeat_in, int num_channels_in,
+              const vector<Sample> &samples_one, float (*ease_one) (float),
+              const vector<Sample> &samples_two = {}, float (*ease_two) (float) = Identity,
+              const vector<Sample> &samples_three = {}, float (*ease_three) (float) = Identity,
+              const vector<Sample> &samples_four = {}, float (*ease_four) (float) = Identity
+              )
     : speed(speed_in),
       finish(finish_in),
-      repeat(repeat_in)
-    {}
+      repeat(repeat_in),
+      num_channels(num_channels_in)
+    {
+        channel_one = Channel(samples_one, ease_one);
+        channel_two = Channel(samples_two, ease_two);
+        channel_three = Channel(samples_three, ease_three);
+        channel_four = Channel(samples_four, ease_four);
+    }
 
     Animation(const Animation &other)
     : speed(other.speed),
       finish(other.finish),
-      repeat(other.repeat)
+      repeat(other.repeat),
+      num_channels(other.num_channels)
     {
-        channel = other.channel;
+        // TODO: This is still suspect
+        channel_one = other.channel_one;
+        channel_two = other.channel_two;
+        channel_three = other.channel_three;
+        channel_four = other.channel_four;
     }
 
     float
-    Value()
+    Value(ChannelIndex index)
     {
-        return channel.Value(Time());
+        switch (index)
+        {
+            case CHANNEL_ONE: return channel_one.Value(Time());
+            case CHANNEL_TWO: return channel_two.Value(Time());
+            case CHANNEL_THREE: return channel_three.Value(Time());
+            case CHANNEL_FOUR: return channel_four.Value(Time());
+            default: assert(!"We only support four channels of animation.\n"); return 0.0f;
+        }
     }
 
     float
@@ -191,7 +235,14 @@ struct Animation
             //EmitEvent(on_finish);
             return true;
         }
-        channel.Update(Time());
+        if(num_channels > 0)
+            channel_one.Update(Time());
+        if(num_channels > 1)
+            channel_two.Update(Time());
+        if(num_channels > 2)
+            channel_three.Update(Time());
+        if(num_channels > 3)
+            channel_four.Update(Time());
         return false;
     }
 };
@@ -201,9 +252,51 @@ GetAnimation(AnimationValue anim)
 {
     switch(anim)
     {
-        case ATTACK_ANIMATION_HIT: return (new Animation(1, 40, false));
-        case ATTACK_ANIMATION_MISS: return (new Animation(1, 40, false));
-        case ATTACK_ANIMATION_CRITICAL: return (new Animation(1, 40, false));
+        case ATTACK_ANIMATION_HIT:
+        {
+            return (new Animation(1, 40, false, 2,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.4 ,  0.0 },
+                     {0.5 ,  1.0 },
+                     {1.0 ,  0.0 }},
+                     Identity,
+                    {{0.0 ,  0.0 },  // channel 2
+                     {0.40,  0.0 },
+                     {0.45,  0.5 },
+                     {0.5 ,  0.0 },
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case ATTACK_ANIMATION_MISS: 
+        {
+            return (new Animation(1, 40, false, 2,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.4 ,  0.0 },
+                     {0.5 ,  1.0 },
+                     {1.0 ,  0.0 }},
+                     Identity,
+                    {{0.0 ,  0.0 },  // channel 2
+                     {0.40,  0.0 },
+                     {0.45,  0.5 },
+                     {0.5 ,  0.0 },
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case ATTACK_ANIMATION_CRITICAL: 
+        {
+            return (new Animation(1, 40, false, 2,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.4 ,  0.0 },
+                     {0.5 ,  1.0 },
+                     {1.0 ,  0.0 }},
+                     Identity,
+                    {{0.0 ,  0.0 },  // channel 2
+                     {0.40,  0.0 },
+                     {0.45,  0.5 },
+                     {0.5 ,  0.0 },
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
         default:
         {
             assert(!"ERROR GetAnimation: Animation type not defined\n");

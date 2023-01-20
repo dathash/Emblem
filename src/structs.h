@@ -336,7 +336,7 @@ struct Cursor
     Update()
     {
         sheet.Update();
-        if(!WithinViewport(pos))
+        if(!WithinViewport(pos)) // Catch-all
         {
             MoveViewport(pos);
         }
