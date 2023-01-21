@@ -33,6 +33,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 				3,
 				3,
 				3,
+				ABILITY_NONE,
                 NO_BEHAVIOR
 			));
 		}
@@ -65,7 +66,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::SliderInt("mov", &selected->movement, 0, 10);
 		ImGui::SliderInt("hp", &selected->max_health, 1, 50);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
-		ImGui::SliderInt("abi", &selected->ability, 0, 20);
+		ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
 		ImGui::SliderInt("spd", &selected->speed, 0, 20);
 		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
@@ -74,6 +75,22 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::SliderInt("min", &selected->min_range, 1, 4);
 		ImGui::SliderInt("max", &selected->max_range, 1, 4);
 		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 3);
+        ImGui::Text("ability");
+        ImGui::SameLine();
+        if(ImGui::Button("N"))
+            selected->ability = ABILITY_NONE;
+        ImGui::SameLine();
+        if(ImGui::Button("H"))
+            selected->ability = ABILITY_HEAL;
+        ImGui::SameLine();
+        if(ImGui::Button("B"))
+            selected->ability = ABILITY_BUFF;
+        ImGui::SameLine();
+        if(ImGui::Button("S"))
+            selected->ability = ABILITY_SHIELD;
+        ImGui::SameLine();
+        if(ImGui::Button("D"))
+            selected->ability = ABILITY_DANCE;
 	}
 	ImGui::End();
 }
@@ -179,7 +196,17 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         {
             ImGui::Text("Over unit.");
             ImGui::SameLine();
-            ImGui::Text("Behavior: %d", level->map.tiles[editor_cursor.col][editor_cursor.row].occupant->ai_behavior);
+            ImGui::Text("Behavior: %d", hover_tile->occupant->ai_behavior);
+            ImGui::SameLine();
+            if(ImGui::Button("Dmg"))
+            {
+                hover_tile->occupant->Damage(1);
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Heal"))
+            {
+                hover_tile->occupant->Damage(-1);
+            }
         }
 
         ImGui::Text("AI Behavior");

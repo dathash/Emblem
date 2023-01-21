@@ -77,10 +77,10 @@ enum InterfaceState
 
     ATTACK_TARGETING, // 8
 
-    HEAL_TARGETING, // 9
+    ABILITY_TARGETING, // 9
 
     PREVIEW_ATTACK, // 10
-    PREVIEW_HEALING, // 11
+    PREVIEW_ABILITY, // 11
 
     GAME_MENU, // 12
     GAME_MENU_OUTLOOK, // 13
@@ -148,7 +148,11 @@ const SDL_Color aiMoveColor =   {150, 0, 0, 100};
 const SDL_Color attackColor =   {250, 0, 0, 100};
 const SDL_Color healColor =     {0, 255, 0, 100};
 
-const SDL_Color exhaustedMod =  {50, 0, 50, 0};
+const SDL_Color exhaustedMod =  {50,    0,  50, 0};
+const SDL_Color buffAtkMod =    {255,   0,   0, 0};
+const SDL_Color buffDefMod =    {0,   255, 255, 0};
+const SDL_Color buffAptMod =    {255, 150, 255, 0};
+const SDL_Color buffSpdMod =    {255, 255,   0, 0};
 const SDL_Color readyMod =      {255, 255, 255, 0};
 
 const SDL_Color editorColor =   {255, 255, 0, 100};

@@ -225,8 +225,22 @@ int main(int argc, char *argv[])
         {
             GlobalTurnStart = false;
 
+
+            if(GlobalPlayerTurn)
+            {
+                for(auto const &unit : level.combatants)
+                {
+                    if(unit->buff)
+                    {
+                        unit->TickBuff();
+                    }
+                }
+            }
+
             for(auto const &unit : level.combatants)
+            {
                 unit->Activate();
+            }
             cursor.PlaceAt(level.Leader());
             SetViewport(cursor.pos, level.map.width, level.map.height);
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;

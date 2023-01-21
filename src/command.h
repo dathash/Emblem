@@ -188,7 +188,7 @@ public:
 
         // Determine interactible squares
         map->attackable.clear();
-        map->healable.clear();
+        map->ability.clear();
         map->range.clear();
         vector<position> interactible = InteractibleFrom(*map, cursor->pos,
                                              cursor->selected->min_range, cursor->selected->max_range);
@@ -216,18 +216,63 @@ public:
             menu->AddOption("Attack");
 
         interactible = InteractibleFrom(*map, cursor->pos, 1, 1);
-        // for healing
-        for(const position &p : interactible)
+        // for ability
+        switch(cursor->selected->ability)
         {
-            if(map->tiles[p.col][p.row].occupant &&
-               map->tiles[p.col][p.row].occupant->is_ally &&
-               map->tiles[p.col][p.row].occupant->health < map->tiles[p.col][p.row].occupant->max_health)
+            case ABILITY_NONE:
             {
-                map->healable.push_back(p);
+                //cout << "AbilityCommand: You have no ability.\n";
+            } break;
+            case ABILITY_HEAL:
+            {
+                for(const position &p : interactible)
+                {
+                    if(map->tiles[p.col][p.row].occupant &&
+                       map->tiles[p.col][p.row].occupant->is_ally &&
+                       map->tiles[p.col][p.row].occupant->health < map->tiles[p.col][p.row].occupant->max_health)
+                    {
+                        map->ability.push_back(p);
+                    }
+                }
+                if(map->ability.size() > 0)
+                    menu->AddOption("Heal");
+            } break;
+            case ABILITY_BUFF:
+            {
+                for(const position &p : interactible)
+                {
+                    if(map->tiles[p.col][p.row].occupant &&
+                       map->tiles[p.col][p.row].occupant->is_ally)
+                    {
+                        map->ability.push_back(p);
+                    }
+                }
+                if(map->ability.size() > 0)
+                    menu->AddOption("Buff");
+            } break;
+            case ABILITY_SHIELD:
+            {
+                cout << "Unimplemented Ability: " << GetAbilityString(cursor->selected->ability) << "\n";
+            } break;
+            case ABILITY_DANCE:
+            {
+                for(const position &p : interactible)
+                {
+                    if(map->tiles[p.col][p.row].occupant &&
+                       map->tiles[p.col][p.row].occupant->is_ally &&
+                       map->tiles[p.col][p.row].occupant->is_exhausted)
+                    {
+                        map->ability.push_back(p);
+                    }
+                }
+                if(map->ability.size() > 0)
+                    menu->AddOption("Dance");
+            } break;
+            default:
+            {
+                assert(!"ERROR Unimplemented Ability in AbilityCommand!\n");
             }
         }
-        if(map->healable.size() > 0 && cursor->selected->ability > 0)
-            menu->AddOption("Heal");
 
         menu->AddOption("Wait");
 
@@ -307,10 +352,10 @@ private:
     bool forward;
 };
 
-class NextHealTargetCommand : public Command
+class NextAbilityTargetCommand : public Command
 {
 public:
-    NextHealTargetCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
+    NextAbilityTargetCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
     : cursor(cursor_in),
       map(map_in),
       forward(forward_in)
@@ -318,19 +363,19 @@ public:
 
     virtual void Execute()
     {
-        assert(map->healable.size() > 0);
-        if(map->healable.size() == 1)
+        assert(map->ability.size() > 0);
+        if(map->ability.size() == 1)
             return;
 
         if(forward)
-            rotate(map->healable.begin(), 
-                   map->healable.begin() + 1,
-                   map->healable.end());
+            rotate(map->ability.begin(), 
+                   map->ability.begin() + 1,
+                   map->ability.end());
         else
-            rotate(map->healable.begin(), 
-                   map->healable.begin() + map->healable.size() - 1,
-                   map->healable.end());
-        position next = map->healable[0];
+            rotate(map->ability.begin(), 
+                   map->ability.begin() + map->ability.size() - 1,
+                   map->ability.end());
+        position next = map->ability[0];
 
         // move cursor
         cursor->pos = next;
@@ -383,10 +428,10 @@ private:
     const Tilemap &map;
 };
 
-class InitiateHealCommand : public Command
+class InitiateAbilityCommand : public Command
 {
 public:
-    InitiateHealCommand(Cursor *cursor_in, const Tilemap &map_in)
+    InitiateAbilityCommand(Cursor *cursor_in, const Tilemap &map_in)
     : cursor(cursor_in),
       map(map_in)
     {}
@@ -395,7 +440,7 @@ public:
     {
         cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
 
-        GlobalInterfaceState = PREVIEW_HEALING;
+        GlobalInterfaceState = PREVIEW_ABILITY;
     }
 
 private:
@@ -439,23 +484,47 @@ private:
 };
 
 
-class HealCommand : public Command
+class AbilityCommand : public Command
 {
 public:
-    HealCommand(Cursor *cursor_in)
+    AbilityCommand(Cursor *cursor_in)
     : cursor(cursor_in)
     {}
 
     virtual void Execute()
     {
-
-        SimulateHealing(cursor->selected, cursor->targeted);
+        switch(cursor->selected->ability)
+        {
+            case ABILITY_NONE:
+            {
+                cout << "WARN AbilityCommand: How did you get here? You have no ability.\n";
+            } break;
+            case ABILITY_HEAL:
+            {
+                SimulateHealing(cursor->selected, cursor->targeted);
+            } break;
+            case ABILITY_BUFF:
+            {
+                cursor->targeted->ApplyBuff(new Buff(STAT_APTITUDE, 10, 1));
+            } break;
+            case ABILITY_SHIELD:
+            {
+                cout << "Unimplemented Ability\n";
+            } break;
+            case ABILITY_DANCE:
+            {
+                SimulateDancing(cursor->selected, cursor->targeted);
+            } break;
+            default:
+            {
+                assert(!"ERROR Unimplemented Ability in AbilityCommand!\n");
+            }
+        }
 
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
         cursor->pos = cursor->source;
-
         cursor->path_draw = {};
 
         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -483,19 +552,18 @@ private:
     Cursor *cursor;
 };
 
-class BackDownFromHealingCommand : public Command
+class BackDownFromAbilityCommand : public Command
 {
 public:
-    BackDownFromHealingCommand(Cursor *cursor_in)
+    BackDownFromAbilityCommand(Cursor *cursor_in)
     : cursor(cursor_in)
     {}
 
     virtual void Execute()
     {
         cursor->targeted = nullptr;
-        cursor->source = {-1, -1};
 
-        GlobalInterfaceState = HEAL_TARGETING;
+        GlobalInterfaceState = ABILITY_TARGETING;
     }
 
 private:
@@ -705,13 +773,14 @@ public:
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
         }
-        if(option == "Heal")
+        if(option == "Heal" || option == "Dance" ||
+           option == "Buff")
         {
-            assert(map.healable.size());
+            assert(map.ability.size());
             cursor->source = cursor->pos;
 
-            cursor->pos = map.healable[0];
-            GlobalInterfaceState = HEAL_TARGETING;
+            cursor->pos = map.ability[0];
+            GlobalInterfaceState = ABILITY_TARGETING;
             return;
         }
 
@@ -1053,13 +1122,13 @@ public:
                 BindB(make_shared<DetargetCommand>(cursor, map));
                 BindR(make_shared<NullCommand>());
             } break;
-            case(HEAL_TARGETING):
+            case(ABILITY_TARGETING):
             {
-                BindUp(make_shared<NextHealTargetCommand>(cursor, map, true));
-                BindDown(make_shared<NextHealTargetCommand>(cursor, map, false));
+                BindUp(make_shared<NextAbilityTargetCommand>(cursor, map, true));
+                BindDown(make_shared<NextAbilityTargetCommand>(cursor, map, false));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<InitiateHealCommand>(cursor, *map));
+                BindA(make_shared<InitiateAbilityCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1074,14 +1143,14 @@ public:
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
-            case(PREVIEW_HEALING):
+            case(PREVIEW_ABILITY):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<HealCommand>(cursor));
-                BindB(make_shared<BackDownFromHealingCommand>(cursor));
+                BindA(make_shared<AbilityCommand>(cursor));
+                BindB(make_shared<BackDownFromAbilityCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 

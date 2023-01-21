@@ -328,5 +328,28 @@ Spike(float t)
     return SmoothStart2(Flip(t)/0.5);
 }
 
+float
+Parabola(float t)
+{
+    return t * (1 - t);
+}
+
+float
+BounceClampBottom(float t)
+{
+    return fabs(t);
+}
+
+float
+BounceClampTop(float t)
+{
+    return 1.0f - fabs(1.0f - t);
+}
+
+float
+BounceClampBottomTop(float t)
+{
+    return BounceClampTop(BounceClampTop(t));
+}
 
 #endif

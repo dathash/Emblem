@@ -31,13 +31,35 @@ CritChance(const Unit &predator, const Unit &prey)
 int
 CalculateDamage(const Unit &predator, const Unit &prey)
 {
-    return clamp(predator.attack - prey.defense, 0, 999);
+    int attack = predator.attack;
+    int defense = prey.defense;
+    if(predator.buff && predator.buff->stat == STAT_ATTACK)
+        attack += predator.buff->amount;
+    if(prey.buff && prey.buff->stat == STAT_DEFENSE)
+        defense += prey.buff->amount;
+    return clamp(attack - defense, 0, 999);
+}
+
+// Determines the speed difference between two units.
+bool
+Doubles(const Unit &predator, const Unit &prey)
+{
+    int pred_spd = predator.speed;
+    int prey_spd = prey.speed;
+    if(predator.buff && predator.buff->stat == STAT_SPEED)
+        pred_spd += predator.buff->amount;
+    if(prey.buff && prey.buff->stat == STAT_SPEED)
+        prey_spd += prey.buff->amount;
+    return pred_spd - prey_spd > DOUBLE_RATIO;
 }
 
 int
 CalculateHealing(const Unit &healer, const Unit &healee)
 {
-    return healer.ability;
+    int healing = healer.aptitude;
+    if(healer.buff && healer.buff->stat == STAT_SPEED)
+        healing += healer.buff->amount;
+    return healing;
 }
 
 // Declares the outcome of a coming altercation.
@@ -67,14 +89,14 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     outcome.one_attack = CalculateDamage(one, two);
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;
-    outcome.one_double = one.speed - two.speed > DOUBLE_RATIO;
+    outcome.one_double = Doubles(one, two);
 
     if(distance >= two.min_range && distance <= two.max_range)
     {
         outcome.two_attack = CalculateDamage(two, one);
         outcome.two_hit = HitChance(two, one, one_avoid_bonus);
         outcome.two_crit = two.crit;
-        outcome.two_double = two.speed - one.speed > DOUBLE_RATIO;
+        outcome.two_double = Doubles(two, one);
     }
 
     return outcome;
@@ -312,7 +334,7 @@ struct Fight
         {
             attack.type = RANGED;
         }
-        if(one->speed - two->speed > DOUBLE_RATIO)
+        if(Doubles(*one, *two))
         {
             if(d100() < HitChance(*one, *two, two_avoid_bonus))
             {
@@ -335,7 +357,7 @@ struct Fight
             {
                 attack.type = RANGED;
             }
-            if(two->speed - one->speed > DOUBLE_RATIO)
+            if(Doubles(*two, *one))
             {
                 if(d100() < HitChance(*two, *one, one_avoid_bonus))
                 {
@@ -366,9 +388,15 @@ Outcome PredictHealing(const Unit &one, const Unit &two)
 void SimulateHealing(Unit *one, Unit *two)
 {
     // one -> two
-    int healing = one->ability;
+    int healing = one->aptitude;
     two->health = min(healing + two->health, two->max_health);
 }
 
+// Simulates one unit healing another.
+void SimulateDancing(Unit *one, Unit *two)
+{
+    // one -> two
+    two->Activate();
+}
 
 #endif

@@ -40,8 +40,41 @@ GetInterfaceString(InterfaceState state)
     switch (state)
     {
     case NO_OP: return "No-Op";
+                // TODO: Fill these in!!
 	default:
 		assert(!"ERROR: Unhandled InterfaceState name string in UI.\n");
+		return "";
+	}
+}
+
+string 
+GetAbilityString(Ability ability)
+{
+    switch (ability)
+    {
+    case ABILITY_NONE: return "None";
+    case ABILITY_HEAL: return "Heal";
+    case ABILITY_BUFF: return "Buff";
+    case ABILITY_SHIELD: return "Shield";
+    case ABILITY_DANCE: return "Dance";
+	default:
+		assert(!"ERROR: Unhandled Ability name string in UI.\n");
+		return "";
+	}
+}
+
+string
+GetStatString(Stat stat)
+{
+    switch (stat)
+    {
+    case STAT_NONE: return "N/A";
+    case STAT_ATTACK: return "Atk";
+    case STAT_DEFENSE: return "Def";
+    case STAT_APTITUDE: return "Apt";
+    case STAT_SPEED: return "Spd";
+	default:
+		assert(!"ERROR: Unhandled Ability name string in UI.\n");
 		return "";
 	}
 }
@@ -89,7 +122,7 @@ struct UI_State
            !(GlobalInterfaceState == LEVEL_MENU ||
              GlobalInterfaceState == CONVERSATION ||
              GlobalInterfaceState == PREVIEW_ATTACK ||
-             GlobalInterfaceState == PREVIEW_HEALING)
+             GlobalInterfaceState == PREVIEW_ABILITY)
 			)
         {
             tile_info = true;
@@ -107,7 +140,7 @@ struct UI_State
 				GlobalInterfaceState == SELECTED_OVER_ALLY ||
 				GlobalInterfaceState == SELECTED_OVER_ENEMY ||
 				GlobalInterfaceState == ATTACK_TARGETING ||
-				GlobalInterfaceState == HEAL_TARGETING ||
+				GlobalInterfaceState == ABILITY_TARGETING ||
 				GlobalInterfaceState == UNIT_MENU_ROOT
             )
 		{
@@ -119,10 +152,8 @@ struct UI_State
 		}
 
 		// Unit Info
-		if(
-			GlobalInterfaceState == UNIT_INFO ||
-		    GlobalInterfaceState == ENEMY_INFO
-			)
+		if(GlobalInterfaceState == UNIT_INFO ||
+		   GlobalInterfaceState == ENEMY_INFO)
 		{
 			unit_info = true;
 		}
@@ -133,7 +164,7 @@ struct UI_State
 
 		// Combat Preview
 		if(GlobalInterfaceState == PREVIEW_ATTACK ||
-		   GlobalInterfaceState == PREVIEW_HEALING)
+		   GlobalInterfaceState == PREVIEW_ABILITY)
 		{
 			combat_preview = true;
 		}
@@ -278,6 +309,15 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::SameLine();
 			ImGui::Text("[%d/%d]", unit.health, unit.max_health);
 
+            if(unit.buff)
+            {
+                ImGui::SameLine(ImGui::GetWindowWidth()-220);
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                ImGui::Text("[BUFF: %s/%d]", GetStatString(unit.buff->stat).c_str(), 
+                                               unit.buff->turns_remaining);
+                ImGui::PopStyleColor();
+            }
+
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
 
@@ -293,10 +333,17 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             ImGui::PopStyleColor();
 			ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
-			ImGui::Text("[ABI %d]", unit.ability);
+			ImGui::Text("[APT %d]", unit.aptitude);
             ImGui::PopStyleColor();
 			ImGui::SameLine();
 			ImGui::Text("[SPD %d]", unit.speed);
+            if(unit.ability != ABILITY_NONE)
+            {
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                ImGui::Text("[%s]", GetAbilityString(unit.ability).c_str());
+                ImGui::PopStyleColor();
+            }
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
@@ -436,7 +483,7 @@ void
 DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowSize(ImVec2(300, 110));
     ImGui::SetNextWindowPos(ImVec2(50, 400));
 
     // Render
@@ -449,7 +496,7 @@ DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
     }
     ImGui::End();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowSize(ImVec2(300, 110));
     ImGui::SetNextWindowPos(ImVec2(540, 400));
 
     ImGui::Begin(fight.two->name.c_str(), NULL, wf);

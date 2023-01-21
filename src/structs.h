@@ -102,6 +102,37 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
+enum Ability
+{
+    ABILITY_NONE,
+    ABILITY_HEAL,
+    ABILITY_BUFF,
+    ABILITY_SHIELD,
+    ABILITY_DANCE,
+};
+
+enum Stat
+{
+    STAT_NONE,
+    STAT_ATTACK,
+    STAT_DEFENSE,
+    STAT_APTITUDE,
+    STAT_SPEED,
+};
+
+struct Buff
+{
+    Stat stat = STAT_NONE;
+    int amount = 5;
+    int turns_remaining = 1;
+
+    Buff(Stat stat_in, int amount_in, int turns_remaining_in)
+    : stat(stat_in),
+      amount(amount_in),
+      turns_remaining(turns_remaining_in)
+    {}
+};
+
 struct Unit
 {
     string name;
@@ -113,7 +144,7 @@ struct Unit
     int health;
     int max_health;
     int attack;
-    int ability;
+    int aptitude;
     int defense;
     int speed;
     int min_range;
@@ -124,7 +155,15 @@ struct Unit
     Spritesheet sheet;
     Texture portrait;
     position animation_offset = {0, 0};
+    Ability ability;
     AIBehavior ai_behavior = NO_BEHAVIOR;
+
+    Buff *buff;
+
+    ~Unit() // TODO: shared_ptr?
+    {
+        delete buff;
+    }
 
     size_t
     ID()
@@ -142,10 +181,11 @@ struct Unit
          Texture portrait_in,
          bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
-         int attack_in, int ability_in, int defense_in,
+         int attack_in, int aptitude_in, int defense_in,
          int speed_in,
          int accuracy_in, int avoid_in, int crit_in,
          int min_range_in, int max_range_in,
+         Ability ability_in,
          AIBehavior ai_behavior_in)
     : name(name_in),
       sheet(sheet_in),
@@ -155,7 +195,7 @@ struct Unit
       health(health_in),
       max_health(max_health_in),
       attack(attack_in),
-      ability(ability_in),
+      aptitude(aptitude_in),
       defense(defense_in),
       speed(speed_in),
       accuracy(accuracy_in),
@@ -163,6 +203,7 @@ struct Unit
       crit(crit_in),
       min_range(min_range_in),
       max_range(max_range_in),
+      ability(ability_in),
       ai_behavior(ai_behavior_in)
     {} // haha c++
     // This little thing is like a vestigial organ
@@ -183,11 +224,26 @@ struct Unit
         is_exhausted = true;
         sheet.ChangeTrack(0);
     }
-
     void
     Activate()
     {
         is_exhausted = false;
+    }
+    void
+    ApplyBuff(Buff *buff_in)
+    {
+        buff = buff_in;
+    }
+    // Called every turn. If buff is over, deletes the buff.
+    void
+    TickBuff()
+    {
+        --(buff->turns_remaining);
+        if(buff->turns_remaining <= 0)
+        {
+            delete buff;
+            buff = nullptr;
+        }
     }
 };
 
@@ -207,7 +263,7 @@ struct Tilemap
     vector<vector<Tile>> tiles;
     vector<position> accessible;
     vector<position> attackable;
-    vector<position> healable;
+    vector<position> ability;
     vector<position> range;
     //vector<point> adjacent;
     Texture atlas;

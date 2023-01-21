@@ -230,18 +230,7 @@ How the program should run:
 
 # TODO
 PROTOTYPE ///////////////////////////////////////////////////
-    Unit Death Screen
-
-    16 levels
-
-    Win Screen
-
-    Abilities
-    * Create a system where a unit possesses one of the following.
-        (x) Heal
-        ( ) Buff
-        ( ) Shield
-        ( ) Dance (Genealogy)
+    8 levels
 
     Sound Effects
 
@@ -251,8 +240,12 @@ PROTOTYPE ///////////////////////////////////////////////////
         solution working.
         BUG | We seg fault when an enemy has no squares? (When you surround an
               archer)
+        BUG | Retry level doesn't keep retained units
 
 ///////////////////////////////////////////////////////////////
+Have Buffs display in the stats block itself
+Have Speed buff add to movement speed as well?
+Solid walls that don't allow ranged attacks?
 Portraits don't block screen, put them with the blurb like in binding blade.
 display enemy damage range, unit damage range.
 Make every change in GlobalInterfaceState be an Event?
@@ -262,6 +255,11 @@ More complex conversations
 * Facial expression changes
 Add some conversations for inbetween levels
 * Menu
+Fix the Portraits and their wonkiness
+* Fighter
+* Flavia
+* Lon'qu
+* Olivia
 
 0.1
     Inbetween Levels | Metagame
@@ -277,12 +275,12 @@ Add some conversations for inbetween levels
     Audio
         Sound Effects
         Drum-n-bass Audio
-    Particles
-    Tutorial
 
     Placing Unit moves them smoothly to that square (A-star)
 
     Unit damage and healing ranges are displayed.
+
+    Unit Death Screen
 
 NICE
     Eventually switch over to OpenGL or Vulkan/Direct3D12
@@ -305,6 +303,8 @@ NICE
     Cycle units with L trigger.
     * Should be able to do this in the same way we cycle units when selecting a
       victim for an attack in command.h
+    "Guard" action
+
 
 POLISH
     Switch Options menu to internal system.

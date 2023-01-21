@@ -263,7 +263,7 @@ LoadUnits(string filename_in)
                     stoi(tokens[5]),							// health
                     stoi(tokens[5]),							// max health
                     stoi(tokens[6]),							// attack
-                    stoi(tokens[7]),							// ability
+                    stoi(tokens[7]),							// aptitude
                     stoi(tokens[8]),							// defense
                     stoi(tokens[9]),							// speed
                     stoi(tokens[10]),						    // accuracy
@@ -271,7 +271,8 @@ LoadUnits(string filename_in)
                     stoi(tokens[12]),						    // crit
                     stoi(tokens[13]),						    // short range
                     stoi(tokens[14]),						    // long range
-                    (AIBehavior)stoi(tokens[15])                // ai behavior
+                    (Ability)stoi(tokens[15]),						    // ability
+                    (AIBehavior)stoi(tokens[16])                // ai behavior
                 ));
             }
         }
@@ -295,7 +296,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <abi> <def> <acc> <avo> <crit> <short> <long> <ai>>\n";
+    fp << "COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <apt> <def> <acc> <avo> <crit> <short> <long> <abi> <ai>>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << " "
@@ -305,7 +306,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->movement << " "
                      << unit->max_health << " "
                      << unit->attack << " "
-                     << unit->ability << " "
+                     << unit->aptitude << " "
                      << unit->defense << " "
                      << unit->speed << " "
                      << unit->accuracy << " "
@@ -313,6 +314,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->crit << " "
                      << unit->min_range << " "
                      << unit->max_range << " "
+                     << unit->ability << " "
                      << unit->ai_behavior << " "
                      << "\n";
     }

@@ -199,7 +199,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
-    if(GlobalInterfaceState == HEAL_TARGETING)
+    if(GlobalInterfaceState == ABILITY_TARGETING)
     {
         for(const position &cell : map.range)
         {
@@ -211,7 +211,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             }
         }
 
-        for(const position &cell : map.healable)
+        for(const position &cell : map.ability)
         {
             if(WithinViewport(cell))
             {
@@ -250,8 +250,36 @@ Render(const Tilemap &map, const Cursor &cursor,
                 }
                 else
                 {
-                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
+                    if(tileToRender.occupant->buff)
+                    {
+                        switch(tileToRender.occupant->buff->stat)
+                        {
+                            case STAT_ATTACK:
+                            {
+                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
+                            } break;
+                            case STAT_DEFENSE:
+                            {
+                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffDefMod.r, buffDefMod.g, buffDefMod.b);
+                            } break;
+                            case STAT_APTITUDE:
+                            {
+                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffAptMod.r, buffAptMod.g, buffAptMod.b);
+                            } break;
+                            case STAT_SPEED:
+                            {
+                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
+                            } break;
+                            default:
+                            {
+                                cout << "WARN Render(): Unit has unhandled buff color mod\n";
+                            } break;
+                        }
+                    }
+                    else
+                        SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
                 }
+
                 position screen_pos = {col - viewportCol, row - viewportRow};
                 RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally, tileToRender.occupant->animation_offset);
                 RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
@@ -341,14 +369,14 @@ Render(const Tilemap &map, const Cursor &cursor,
         assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
         int x_pos = 560;
         if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)
-            x_pos = 180;
+            x_pos = 100;
 
         RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
 
     if(GlobalInterfaceState == PREVIEW_ATTACK ||
-	   GlobalInterfaceState == PREVIEW_HEALING)
+	   GlobalInterfaceState == PREVIEW_ABILITY)
     {
         assert(cursor.selected);
 
