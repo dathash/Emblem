@@ -66,12 +66,14 @@ CalculateHealing(const Unit &healer, const Unit &healee)
 // For information passing in combat functions.
 struct Outcome
 {
-    bool one_double;
-    int one_attack;
+    bool one_attacks;
+    bool one_doubles;
+    int one_damage;
     int one_hit;
     int one_crit;
-    bool two_double;
-    int two_attack;
+    bool two_attacks;
+    bool two_doubles;
+    int two_damage;
     int two_hit;
     int two_crit;
 };
@@ -86,17 +88,19 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
 			  int one_avoid_bonus, int two_avoid_bonus)
 {
     Outcome outcome = {};
-    outcome.one_attack = CalculateDamage(one, two);
+    outcome.one_attacks = true;
+    outcome.one_damage = CalculateDamage(one, two);
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;
-    outcome.one_double = Doubles(one, two);
+    outcome.one_doubles = Doubles(one, two);
 
     if(distance >= two.min_range && distance <= two.max_range)
     {
-        outcome.two_attack = CalculateDamage(two, one);
+        outcome.two_attacks = true;
+        outcome.two_damage = CalculateDamage(two, one);
         outcome.two_hit = HitChance(two, one, one_avoid_bonus);
         outcome.two_crit = two.crit;
-        outcome.two_double = Doubles(two, one);
+        outcome.two_doubles = Doubles(two, one);
     }
 
     return outcome;
@@ -248,7 +252,7 @@ struct Fight
             if(!attack_queue.empty())
             {
                 animation = Current().Execute();
-                cout << attack_queue.front() << "\n";
+                //cout << attack_queue.front() << "\n";
             }
             else
             {
@@ -334,7 +338,7 @@ struct Fight
         {
             attack.type = RANGED;
         }
-        if(Doubles(*one, *two))
+        if(outcome.one_doubles)
         {
             if(d100() < HitChance(*one, *two, two_avoid_bonus))
             {
@@ -357,7 +361,7 @@ struct Fight
             {
                 attack.type = RANGED;
             }
-            if(Doubles(*two, *one))
+            if(outcome.two_doubles)
             {
                 if(d100() < HitChance(*two, *one, one_avoid_bonus))
                 {
@@ -376,7 +380,9 @@ struct Fight
 Outcome PredictHealing(const Unit &one, const Unit &two)
 {
     Outcome outcome = {};
-    outcome.one_attack = CalculateHealing(one, two);
+    outcome.one_attacks = true;
+    outcome.one_doubles = false;
+    outcome.one_damage = CalculateHealing(one, two);
     outcome.one_hit = 100;
     outcome.one_crit = 0;
 

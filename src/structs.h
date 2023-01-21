@@ -16,6 +16,7 @@ struct InputState
     bool right;
     bool a;
     bool b;
+    bool l;
     bool r;
 
 	int joystickCooldown = 0;

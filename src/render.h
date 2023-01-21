@@ -367,11 +367,11 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == ENEMY_INFO)
     {
         assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
-        int x_pos = 560;
+        int x_pos = 480;
         if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)
-            x_pos = 100;
+            x_pos = -50;
 
-        RenderPortrait(x_pos, 300, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
+        RenderPortrait(x_pos, 0, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
 
@@ -380,7 +380,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         assert(cursor.selected);
 
-        RenderPortrait(30, 0, cursor.selected->portrait, true);
+        RenderPortrait(-100, 0, cursor.selected->portrait, true);
         RenderPortrait(430, 0, cursor.targeted->portrait, false);
 }
 

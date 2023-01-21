@@ -324,19 +324,61 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			DisplayHealthBar(unit.health, unit.max_health, 0);
 
 			// Second line
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
-			ImGui::Text("[ATK %d]", unit.attack);
+            int attack = unit.attack;
+            if(unit.buff && unit.buff->stat == STAT_ATTACK)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                attack += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
+            }
+			ImGui::Text("[ATK %d]", attack);
             ImGui::PopStyleColor();
+
+            int defense = unit.defense;
 			ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
-			ImGui::Text("[DEF %d]", unit.defense);
+            if(unit.buff && unit.buff->stat == STAT_DEFENSE)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                defense += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
+            }
+			ImGui::Text("[DEF %d]", defense);
             ImGui::PopStyleColor();
+
+            int aptitude = unit.aptitude;
 			ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
-			ImGui::Text("[APT %d]", unit.aptitude);
+            if(unit.buff && unit.buff->stat == STAT_APTITUDE)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                aptitude += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
+            }
+			ImGui::Text("[APT %d]", aptitude);
             ImGui::PopStyleColor();
+
+            int speed = unit.speed;
 			ImGui::SameLine();
-			ImGui::Text("[SPD %d]", unit.speed);
+            if(unit.buff && unit.buff->stat == STAT_SPEED)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                speed += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(yellow));
+            }
+			ImGui::Text("[SPD %d]", speed);
+            ImGui::PopStyleColor();
+
             if(unit.ability != ABILITY_NONE)
             {
                 ImGui::SameLine();
@@ -344,6 +386,7 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
                 ImGui::Text("[%s]", GetAbilityString(unit.ability).c_str());
                 ImGui::PopStyleColor();
             }
+
 
 			ImGui::Text("[HIT %d%%]", unit.accuracy);
 			ImGui::SameLine();
@@ -396,17 +439,16 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     }
 
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowSize(ImVec2(350, 160));
     ImGui::SetNextWindowPos(ImVec2(50, 400));
 
     // Render
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin(ally.name.c_str(), NULL, wf);
     {
-
 		ImGui::PushFont(uiFontMedium);
-            ImGui::Text("%d atk", outcome.one_attack);
-            if(outcome.one_double)
+            ImGui::Text("%d dmg", outcome.one_damage);
+            if(outcome.one_doubles)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
                 ImGui::SameLine();
@@ -419,31 +461,41 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     }
     ImGui::End();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 160));
-    ImGui::SetNextWindowPos(ImVec2(540, 400));
+    ImGui::SetNextWindowSize(ImVec2(350, 160));
+    ImGui::SetNextWindowPos(ImVec2(510, 400));
 
     ImGui::Begin(target.name.c_str(), NULL, wf);
     {
 		ImGui::PushFont(uiFontMedium);
-            if(outcome.two_double)
+            if(outcome.two_attacks)
             {
                 ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                ImGui::Text("X2");
-                ImGui::PopStyleColor();
-                ImGui::SameLine();
+                ImGui::Text("%d dmg", outcome.two_damage);
+                if(outcome.two_doubles)
+                {
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                    ImGui::Text("X2");
+                    ImGui::PopStyleColor();
+                }
+                ImGui::NewLine();
+                ImGui::SameLine(ImGui::GetWindowWidth()-150);
+                ImGui::Text("%d%% hit", outcome.two_hit);
+                ImGui::NewLine();
+                ImGui::SameLine(ImGui::GetWindowWidth()-150);
+                ImGui::Text("%d%% crit", outcome.two_crit);
             }
             else
             {
-                ImGui::SameLine(ImGui::GetWindowWidth()-100);
+                ImGui::SameLine(ImGui::GetWindowWidth()-150);
+                ImGui::Text("-- dmg");
+                ImGui::NewLine();
+                ImGui::SameLine(ImGui::GetWindowWidth()-150);
+                ImGui::Text("--%% hit");
+                ImGui::NewLine();
+                ImGui::SameLine(ImGui::GetWindowWidth()-150);
+                ImGui::Text("--%% crit");
             }
-            ImGui::Text("atk %d", outcome.two_attack);
-            ImGui::NewLine();
-            ImGui::SameLine(ImGui::GetWindowWidth()-140);
-            ImGui::Text("hit %d%%", outcome.two_hit);
-            ImGui::NewLine();
-            ImGui::SameLine(ImGui::GetWindowWidth()-140);
-            ImGui::Text("crit %d%%", outcome.two_crit);
         ImGui::PopFont();
     }
     ImGui::End();
@@ -451,29 +503,53 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     // Health Window
 	wf |= ImGuiWindowFlags_NoTitleBar;
 
-    ImGui::SetNextWindowSize(ImVec2(100, 100));
-    ImGui::SetNextWindowPos(ImVec2(240, 450));
+    ImGui::SetNextWindowSize(ImVec2(170, 100));
+    ImGui::SetNextWindowPos(ImVec2(225, 450));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(uiDarkColor));
     ImGui::Begin("health1", NULL, wf);
     {
-        //TextCentered(string text)
+        int health_after = clamp(ally.health - (outcome.two_doubles ? 2 * outcome.two_damage : outcome.two_damage), 
+                                 0, ally.max_health);
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)ally.health / ally.max_health)));
         ImGui::Text("%d", ally.health);
+        ImGui::PopStyleColor();
+        ImGui::SameLine();
+        ImGui::Text("->");
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)health_after / ally.max_health)));
+        ImGui::Text("%d", health_after);
+        ImGui::PopStyleColor();
         ImGui::PushFont(uiFontMedium);
         ImGui::Text("HP");
         ImGui::PopFont();
     }
     ImGui::End();
+    ImGui::PopStyleColor();
 
-    ImGui::SetNextWindowSize(ImVec2(100, 100));
-    ImGui::SetNextWindowPos(ImVec2(550, 450));
+    ImGui::SetNextWindowSize(ImVec2(170, 100));
+    ImGui::SetNextWindowPos(ImVec2(515, 450));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(uiDarkColor));
     ImGui::Begin("health2", NULL, wf);
     {
-        
+        int health_after = clamp(target.health - (outcome.one_doubles ? 2 * outcome.one_damage : outcome.one_damage), 
+                                 0, target.max_health);
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)target.health / target.max_health)));
         ImGui::Text("%d", target.health);
+        ImGui::PopStyleColor();
+        ImGui::SameLine();
+        ImGui::Text("->");
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)health_after / target.max_health)));
+        ImGui::Text("%d", health_after);
+        ImGui::PopStyleColor();
         ImGui::PushFont(uiFontMedium);
+        ImGui::NewLine();
+        ImGui::SameLine(ImGui::GetWindowWidth()-50);
         ImGui::Text("HP");
         ImGui::PopFont();
     }
     ImGui::End();
+    ImGui::PopStyleColor();
 
 	ImGui::PopFont(); // Large
 }
@@ -548,9 +624,9 @@ RenderUI(UI_State *ui,
 	window_flags |= ImGuiWindowFlags_NoScrollbar;
 	window_flags |= ImGuiWindowFlags_NoResize;
 
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, IM_COL32(255, 224, 145, 255));
-	ImGui::PushStyleColor(ImGuiCol_TitleBg, IM_COL32(120, 100, 50, 255));
-	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, IM_COL32(120, 100, 50, 255));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(uiColor));
+	ImGui::PushStyleColor(ImGuiCol_TitleBg, SdlToImColor(uiTitleColor));
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, SdlToImColor(uiTitleColor));
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
 

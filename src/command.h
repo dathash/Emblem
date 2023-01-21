@@ -72,6 +72,33 @@ private:
     direction dir;
 };
 
+class CycleUnitsCommand : public Command
+{
+public:
+    CycleUnitsCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
+    : cursor(cursor_in),
+      map(map_in),
+      forward(forward_in)
+    {}
+
+    virtual void Execute()
+    {
+        // TODO: Cycle units requires me to get the next allied unit.
+        //       Solutions:
+        //           Keep a vector of Allies<>, which works like attackable, etc.
+        //           Split up combatants in Level into allies and enemies.
+        //               (Obviously more of a change and harder, but might be the right thing)
+        // move cursor
+        cout << "Cycle Units UNIMPLEMENTED!\n";
+        cursor->pos = cursor->pos;
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+    bool forward;
+};
+
 
 class SelectUnitCommand : public Command
 {
@@ -505,7 +532,7 @@ public:
             } break;
             case ABILITY_BUFF:
             {
-                cursor->targeted->ApplyBuff(new Buff(STAT_APTITUDE, 10, 1));
+                cursor->targeted->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
             } break;
             case ABILITY_SHIELD:
             {
@@ -944,6 +971,10 @@ public:
             input->b = false;
             return buttonB;
         }
+        if(input->l) {
+            input->l = false;
+            return buttonL;
+        }
         if(input->r) {
             input->r = false;
             return buttonR;
@@ -960,6 +991,7 @@ public:
         BindRight(make_shared<MoveCommand>(cursor, map, direction(1, 0)));
         BindA(make_shared<OpenGameMenuCommand>());
         BindB(make_shared<NullCommand>());
+        BindL(make_shared<NullCommand>());
         BindR(make_shared<NullCommand>());
     }
 
@@ -1006,6 +1038,10 @@ public:
     {
         buttonB = command;
     }
+    void BindL(shared_ptr<Command> command)
+    {
+        buttonL = command;
+    }
     void BindR(shared_ptr<Command> command)
     {
         buttonR = command;
@@ -1032,6 +1068,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1043,6 +1080,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<EnemyRangeCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<SelectEnemyCommand>(cursor, map));
             } break;
 
@@ -1054,6 +1092,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<SelectUnitCommand>(cursor, map));
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<CycleUnitsCommand>(cursor, map, true));
                 BindR(make_shared<OpenUnitInfoCommand>());
             } break;
 
@@ -1065,6 +1104,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<OpenUnitInfoCommand>());
             } break;
 
@@ -1076,6 +1116,7 @@ public:
                 BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<PlaceUnitCommand>(cursor, map, unitMenu));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1087,6 +1128,7 @@ public:
                 BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1098,6 +1140,7 @@ public:
                 BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<NullCommand>()); // CONSIDER: Move and Heal?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1109,6 +1152,7 @@ public:
                 BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
                 BindA(make_shared<NullCommand>()); // CONSIDER: Move and Attack?
                 BindB(make_shared<DeselectUnitCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1130,6 +1174,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateAbilityCommand>(cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor, map));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1141,6 +1186,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<AttackCommand>(cursor, *map, fight));
                 BindB(make_shared<BackDownFromAttackingCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(PREVIEW_ABILITY):
@@ -1151,6 +1197,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<AbilityCommand>(cursor));
                 BindB(make_shared<BackDownFromAbilityCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1162,6 +1209,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
                 BindB(make_shared<ExitGameMenuCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OUTLOOK):
@@ -1172,6 +1220,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackToGameMenuCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
@@ -1182,6 +1231,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackToGameMenuCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1193,16 +1243,18 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, *map, *unitMenu));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, map));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(UNIT_INFO):
             {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
+                BindUp(make_shared<CycleUnitsCommand>(cursor, map, false));
+                BindDown(make_shared<CycleUnitsCommand>(cursor, map, true));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackOutOfUnitInfoCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<BackOutOfUnitInfoCommand>());
             } break;
             case(ENEMY_INFO):
@@ -1213,6 +1265,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<DeselectEnemyCommand>(cursor));
             } break;
             case(ENEMY_RANGE):
@@ -1223,6 +1276,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<EnemyUndoRangeCommand>());
                 BindB(make_shared<EnemyUndoRangeCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1234,6 +1288,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu));
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1245,6 +1300,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NextSentenceCommand>(conversation));
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1256,6 +1312,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<RestartGameCommand>());
                 BindB(make_shared<QuitGameCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1267,6 +1324,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1278,6 +1336,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -1300,6 +1359,7 @@ private:
     shared_ptr<Command> buttonRight;
     shared_ptr<Command> buttonA;
     shared_ptr<Command> buttonB;
+    shared_ptr<Command> buttonL;
     shared_ptr<Command> buttonR;
 
     queue<shared_ptr<Command>> commandQueue = {};

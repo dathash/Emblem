@@ -67,7 +67,6 @@ static ma_engine GlobalMusicEngine;
 // * StartEnemyTurn
 // * Resetting
 // * Next Level
-// * Animating
 
 // Note: I don't have anything against global state in this program, since I
 // don't intend to multi-thread it. However, I keep it to a minimum and

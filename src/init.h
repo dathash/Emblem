@@ -31,7 +31,7 @@ Initialize()
             {
                 if(TTF_Init() != -1)
                 {
-                    GlobalFont = TTF_OpenFont("../assets/fonts/pixel.ttf", 20);
+                    GlobalFont = TTF_OpenFont("../assets/fonts/bjg.ttf", 20);
                     if(GlobalFont)
                     {
                         int imgFlags = IMG_INIT_PNG;
@@ -47,9 +47,9 @@ Initialize()
                                 //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
                                 io.Fonts->AddFontFromFileTTF("../assets/fonts/verdanab.ttf", 10.0f);
-                                uiFontSmall = io.Fonts->AddFontFromFileTTF("../assets/fonts/pixel.ttf", 20.0f);
-                                uiFontMedium = io.Fonts->AddFontFromFileTTF("../assets/fonts/pixel.ttf", 30.0f);
-                                uiFontLarge = io.Fonts->AddFontFromFileTTF("../assets/fonts/pixel.ttf", 40.0f);
+                                uiFontSmall = io.Fonts->AddFontFromFileTTF("../assets/fonts/bjg.ttf", 20.0f);
+                                uiFontMedium = io.Fonts->AddFontFromFileTTF("../assets/fonts/bjg.ttf", 30.0f);
+                                uiFontLarge = io.Fonts->AddFontFromFileTTF("../assets/fonts/bjg.ttf", 40.0f);
 
                                 // Setup Dear ImGui style
                                 ImGui::StyleColorsLight();

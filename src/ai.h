@@ -138,7 +138,7 @@ GetAction(const Unit &unit, const Tilemap &map)
                                             ManhattanDistance(p, target->pos),
                                             map.tiles[p.col][p.row].avoid,
                                             map.tiles[target->pos.col][target->pos.row].avoid);
-                    int health_remaining = clamp(target->health - outcome.two_attack * (1 + outcome.two_double), 0, target->health);
+                    int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
                     if(health_remaining < min_health_after_attack)
                     {
                         action = poss;
@@ -169,7 +169,7 @@ GetAction(const Unit &unit, const Tilemap &map)
                                                 ManhattanDistance(p, target->pos),
                                                 map.tiles[p.col][p.row].avoid,
                                                 map.tiles[target->pos.col][target->pos.row].avoid);
-                        int health_remaining = clamp(target->health - outcome.two_attack * (1 + outcome.two_double), 0, target->health);
+                        int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
                         if(health_remaining < min_health_after_attack)
                         {
                             action = poss;
@@ -199,7 +199,7 @@ GetAction(const Unit &unit, const Tilemap &map)
                                             ManhattanDistance(p, target->pos),
                                             map.tiles[p.col][p.row].avoid,
                                             map.tiles[target->pos.col][target->pos.row].avoid);
-                    int health_remaining = clamp(target->health - outcome.two_attack * (1 + outcome.two_double), 0, target->health);
+                    int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
                     if(health_remaining < min_health_after_attack)
                     {
                         action = poss;

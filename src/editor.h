@@ -66,8 +66,8 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::SliderInt("mov", &selected->movement, 0, 10);
 		ImGui::SliderInt("hp", &selected->max_health, 1, 50);
 		ImGui::SliderInt("atk", &selected->attack, 0, 20);
-		ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
+		ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
 		ImGui::SliderInt("spd", &selected->speed, 0, 20);
 		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
 		ImGui::SliderInt("avo", &selected->avoid, 0, 100);
@@ -146,6 +146,51 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
         Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
 
+        // =======================  Tile stuff  ================================
+        ImGui::Text("Tiles:");
+        if(ImGui::Button("none"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = FLOOR_TILE;
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("wall"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = WALL_TILE;
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("cover"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = FOREST_TILE;
+            hover_tile->occupant = tmp;
+        }
+
+        if(ImGui::Button("slow"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = SWAMP_TILE;
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("goal"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GOAL_TILE;
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("spawn"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = SPAWN_TILE;
+            hover_tile->occupant = tmp;
+        }
+
+
         ImGui::Text("Units:");
         if(ImGui::Button("add"))
         {
@@ -207,65 +252,22 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             {
                 hover_tile->occupant->Damage(-1);
             }
+
+            ImGui::Text("AI Behavior");
+            if(ImGui::Button("NONE"))
+                hover_tile->occupant->ai_behavior = NO_BEHAVIOR;
+            ImGui::SameLine();
+            if(ImGui::Button("PURSUE"))
+                hover_tile->occupant->ai_behavior = PURSUE;
+            ImGui::SameLine();
+            if(ImGui::Button("BOLSTER"))
+                hover_tile->occupant->ai_behavior = BOLSTER;
+            ImGui::SameLine();
+            if(ImGui::Button("wta"))
+                hover_tile->occupant->ai_behavior = WAIT_THEN_ATTACK;
         }
 
-        ImGui::Text("AI Behavior");
-		if(ImGui::Button("NONE"))
-            hover_tile->occupant->ai_behavior = NO_BEHAVIOR;
-        ImGui::SameLine();
-		if(ImGui::Button("PURSUE"))
-            hover_tile->occupant->ai_behavior = PURSUE;
-        ImGui::SameLine();
-		if(ImGui::Button("BOLSTER"))
-            hover_tile->occupant->ai_behavior = BOLSTER;
-        ImGui::SameLine();
-		if(ImGui::Button("wta"))
-            hover_tile->occupant->ai_behavior = WAIT_THEN_ATTACK;
-
-        // =======================  Tile stuff  ================================
-        ImGui::Text("Tiles:");
-        if(ImGui::Button("none"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = FLOOR_TILE;
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("wall"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = WALL_TILE;
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("cover"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = FOREST_TILE;
-            hover_tile->occupant = tmp;
-        }
-
-        if(ImGui::Button("slow"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = SWAMP_TILE;
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("goal"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GOAL_TILE;
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("spawn"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = SPAWN_TILE;
-            hover_tile->occupant = tmp;
-        }
-
+        /*
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)
             GenerateDebugPaths(*level, &path_debug);
@@ -280,6 +282,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
                            healColor);
             }
         }
+        */
 
         RenderTileColor({editor_cursor.col - viewportCol,
                    editor_cursor.row - viewportRow},
@@ -319,10 +322,6 @@ EditorPass(vector<shared_ptr<Unit>> *units,
 
     ImGui::Begin("emblem editor");
     {
-        ImGui::Text("Files: <no directory needed>");
-        ImGui::InputText("units", fileName, IM_ARRAYSIZE(fileName));
-        ImGui::InputText("level", levelFileName, IM_ARRAYSIZE(levelFileName));
-
         if(ImGui::Button("Load"))
         {
             *units = LoadUnits(DATA_PATH + string(fileName));
@@ -363,6 +362,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             if(++wrap % 4)
                 ImGui::SameLine();
         }
+
+        ImGui::InputText("units", fileName, IM_ARRAYSIZE(fileName));
+        ImGui::InputText("level", levelFileName, IM_ARRAYSIZE(levelFileName));
 
         ImGui::Checkbox("Unit Editor", &showUnitEditor);
         ImGui::Checkbox("Level Editor", &showLevelEditor);

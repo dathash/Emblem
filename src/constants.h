@@ -23,7 +23,7 @@
 #define SCREEN_WIDTH 1120
 #define SCREEN_HEIGHT 800
 
-#define PORTRAIT_SIZE 400
+#define PORTRAIT_SIZE 600
 #define SPRITE_SIZE 32
 #define ATLAS_TILE_SIZE 16
 
@@ -159,7 +159,9 @@ const SDL_Color editorColor =   {255, 255, 0, 100};
 
 // UI
 const SDL_Color backgroundColor =   {165, 179, 201, 255};
-const SDL_Color uiColor =           {255, 224, 137, 255};
+const SDL_Color uiColor =           {255, 224, 145, 255};
+const SDL_Color uiDarkColor =       {138, 110, 39, 255};
+const SDL_Color uiTitleColor =      {120, 100, 50, 255};
 const SDL_Color outlineColor =      {85, 70, 31, 255};
 const SDL_Color uiAltColor =        {60, 100, 30, 255};
 const SDL_Color enemyColor =        {150, 60, 30, 255};
