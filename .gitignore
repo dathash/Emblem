@@ -3,3 +3,4 @@ build/*.*dSYM
 build/*.ini
 build/em
 *.swp
+*/tags
