@@ -141,14 +141,17 @@ struct Attack
                 if(hit && !crit)
                 {
                     animation = GetAnimation(ATTACK_ANIMATION_MELEE);
+                    EmitEvent(ATTACK_HIT);
                 }
                 else if(hit && crit)
                 {
                     animation = GetAnimation(ATTACK_ANIMATION_LEAP);
+                    EmitEvent(ATTACK_CRIT);
                 }
                 else
                 {
                     animation = GetAnimation(ATTACK_ANIMATION_MISS);
+                    EmitEvent(ATTACK_MISS);
                 }
             } break;
         }
@@ -292,8 +295,7 @@ struct Fight
         if(quad == BOTTOM_LEFT
            || quad == BOTTOM_RIGHT)
             lower_half_screen = true;
-        lower_half_screen = true;
-        int one_dmg = CalculateDamage(*one, *two);
+            int one_dmg = CalculateDamage(*one, *two);
         int two_dmg = CalculateDamage(*two, *one);
         int one_accum = 0;
         int two_accum = 0;

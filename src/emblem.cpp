@@ -52,9 +52,6 @@ static ImFont *uiFontSmall;
 static ImFont *uiFontMedium;
 static ImFont *uiFontLarge;
 
-// MINIAUDIO
-static ma_engine GlobalMusicEngine;
-
 //// STATE //////////////////////
 // Necessary State:
 // * Running
@@ -95,6 +92,8 @@ static int viewportRow = 0;
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
 #include "utils.h"
+#include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx.
+#include "event.h" // NOTE: Includes a GlobalEvents queue.
 #include "state.h"
 #include "structs.h"
 #include "animation.h"
@@ -157,12 +156,13 @@ int main(int argc, char *argv[])
     GlobalAIState = PLAYER_TURN;
 
 	// Play Music
-    //ma_engine_play_sound(&GlobalMusicEngine, "../assets/audio/r4.wav", NULL);
+    PlayMusic("desert.wav");
 
     GlobalRunning = true;
 // ========================= game loop =========================================
     while(GlobalRunning)
     {
+        GlobalHandleEvents(); // TODO: Better naming scheme, or make this not global.
         HandleEvents(&input, gamepad);
 
         // Update

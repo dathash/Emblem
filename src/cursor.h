@@ -54,6 +54,7 @@ struct Cursor
         pos = pos_in;
         animation_dir = dir_in;
         animation = GetAnimation(MOVE_ANIMATION);
+        EmitEvent(MOVE_CURSOR);
     }
 
     // Places the cursor at a position.

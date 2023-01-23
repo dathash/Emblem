@@ -5,6 +5,15 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
+/* From Game Engine Architecture:
+   Event Channel
+   * Footstep sound
+   * Cloud of dust Particle effect
+   YOU CAN HOOK THESE THINGS UP TO EVENTS.
+   For instance:
+   * Unit_Died event results in the dialogue system playing and changing the interface state.
+*/
+
 enum AnimationValue
 {
     ATTACK_ANIMATION_RANGED,

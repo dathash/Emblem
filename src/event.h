@@ -5,19 +5,14 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-/* From Game Engine Architecture:
-   Event Channel
-   * Footstep sound
-   * Cloud of dust Particle effect
-   YOU CAN HOOK THESE THINGS UP TO EVENTS.
-   For instance:
-   * Unit_Died event results in the dialogue system playing and changing the interface state.
-*/
-
 enum EventType
 {
-    EVENT_ANIMATION_COMPLETE,
-    EVENT_COMBAT_OVER,
+    MOVE_CURSOR,
+    PICK_UP_UNIT,
+    PLACE_UNIT,
+    ATTACK_HIT,
+    ATTACK_CRIT,
+    ATTACK_MISS,
 };
 
 struct Event
@@ -38,7 +33,7 @@ EmitEvent(Event event)
 }
 
 void
-HandleEvents(Fight *fight, Cursor *cursor)
+GlobalHandleEvents()
 {
     while(!GlobalEvents.empty())
     {
@@ -47,20 +42,29 @@ HandleEvents(Fight *fight, Cursor *cursor)
 
         switch(event.type)
         {
-            case EVENT_ANIMATION_COMPLETE:
+            case MOVE_CURSOR:
             {
-                fight->ready = true;
+                PlaySfx("mov.wav");
             } break;
-            case EVENT_COMBAT_OVER:
+            case PICK_UP_UNIT:
             {
-                if(GlobalPlayerTurn)
-                {
-                    GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-                }
-                else
-                {
-                    GlobalAIState = FINDING_NEXT;
-                }
+                PlaySfx("pickup.wav");
+            } break;
+            case PLACE_UNIT:
+            {
+                PlaySfx("place.wav");
+            } break;
+            case ATTACK_HIT:
+            {
+                PlaySfx("hit1.wav");
+            } break;
+            case ATTACK_CRIT:
+            {
+                PlaySfx("crit.wav");
+            } break;
+            case ATTACK_MISS:
+            {
+                PlaySfx("miss.wav");
             } break;
             default:
             {

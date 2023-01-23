@@ -116,6 +116,8 @@ public:
                                          cursor->selected->movement,
                                          cursor->selected->is_ally);
 
+        EmitEvent(PICK_UP_UNIT);
+
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
 
@@ -140,6 +142,8 @@ public:
         cursor->selected = nullptr;
 
         cursor->path_draw = {};
+
+        EmitEvent(PLACE_UNIT);
 
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
@@ -303,6 +307,8 @@ public:
 
         menu->AddOption("Wait");
 
+        EmitEvent(PLACE_UNIT);
+
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
@@ -333,6 +339,8 @@ public:
 
         cursor->selected->pos = cursor->pos;
         cursor->selected->sheet.ChangeTrack(0);
+
+        EmitEvent(PICK_UP_UNIT);
 
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }

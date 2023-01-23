@@ -16,6 +16,10 @@
 //       OR Decide on one input system or the other.
 #define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
+// defaults
+#define DEFAULT_MUSIC_VOLUME 1.0f
+#define DEFAULT_SFX_VOLUME 0.5f
+
 // rendering
 #define VIEWPORT_WIDTH 15
 #define VIEWPORT_HEIGHT 10
@@ -35,14 +39,20 @@
 #define ANIMATION_SPEED 10
 #define AI_ACTION_SPEED 15
 
+// data
 #define DATA_PATH "../data/"
 #define CONVERSATIONS_PATH "../data/conversations/"
+
+#define INITIAL_LEVEL "l0.txt"
+#define INITIAL_UNITS "units.txt"
+
+// assets
+#define MUSIC_PATH "../assets/music/"
+#define SFX_PATH "../assets/sfx/"
 #define SPRITES_PATH "../assets/sprites/"
 #define THUMBS_PATH "../assets/portraits/thumbs/"
 #define FULLS_PATH "../assets/portraits/fulls/"
 #define TILESETS_PATH "../assets/tilesets/"
-#define INITIAL_LEVEL "l0.txt"
-#define INITIAL_UNITS "units.txt"
 
 #define DEFAULT_PORTRAIT "ph.png"
 #define DEFAULT_SHEET "thief.png"

@@ -4,3 +4,4 @@ build/*.ini
 build/em
 *.swp
 */tags
+assets/music/*
