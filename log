@@ -233,28 +233,22 @@ PROTOTYPE ///////////////////////////////////////////////////
     8 levels
 
     Sound Effects
+    * Emit Events in Commands
 
     *HUGE QA PASS*
         BUG | Enemies that can actually reach you don't believe that they can due to
         the difference in pathfinding/flood filling. We NEED To get a more unified
         solution working.
-        BUG | We seg fault when an enemy has no squares? (When you surround an
-              archer)
         BUG | Retry level doesn't keep retained units
 
-CONTROLLER WITH L BUTTON
+    Unit Death Screen
 
 ///////////////////////////////////////////////////////////////
 QOL
-    Have Buffs display over the stats in unit_info
     display enemy damage range, unit damage range, plus abilities too.
     Cycle units with L trigger.
+    * CONTROLLER TESTING
 
-Lon'qu won't crit even when 100% crit rates
-
-Have Speed buff add to movement speed as well?
-Solid walls that don't allow ranged attacks?
-Emit Events in Commands
 More complex conversations
 * Units come and go
 * Facial expression changes
@@ -272,13 +266,8 @@ Add some conversations for inbetween levels
     * Improved abilities?
     * Experience points?
     * Levels?
-    Audio
-        Sound Effects
-        Drum-n-bass Audio
 
     Placing Unit moves them smoothly to that square (A-star)
-
-    Unit Death Screen
 
 NICE
     Real-time color editing in the editor
@@ -318,6 +307,8 @@ MAYBE?
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
     Attack and Move
+    Have Speed buff add to movement speed as well?
+    Solid walls that don't allow ranged attacks?
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.

@@ -111,6 +111,22 @@ typedef position direction;
 typedef vector<position> path;
 
 
+// returns the current quadrant of where the cursor is on the screen.
+enum quadrant
+Quadrant(const position &pos)
+{
+    int x = pos.col - viewportCol;
+    int y = pos.row - viewportRow;
+
+    if(x > VIEWPORT_WIDTH / 2 && y >= VIEWPORT_HEIGHT / 2)
+        return BOTTOM_RIGHT;
+    else if(x > VIEWPORT_WIDTH / 2)
+        return TOP_RIGHT;
+    else if(y >= VIEWPORT_HEIGHT / 2)
+        return BOTTOM_LEFT;
+    return TOP_LEFT;
+}
+
 
 // REST ////////////////////////////
 // Returns a value clamped between min and max.

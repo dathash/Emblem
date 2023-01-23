@@ -371,6 +371,10 @@ position
 FurthestMovementOnPath(const Tilemap &map, const path &path_in, int movement)
 {
     assert(path_in.size());
+    if(movement > path_in.size())
+    {
+        return {0, 0};
+    }
     for(int i = movement; i > 0; --i) // Start at the furthest square, test all.
     {
         if(!map.tiles[path_in[i].col][path_in[i].row].occupant)

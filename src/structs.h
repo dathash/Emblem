@@ -374,63 +374,6 @@ struct Level
     }
 };
 
-struct Cursor
-{
-    position pos = {-1, -1};
-    Unit *selected = nullptr;
-    position redo = {-1, -1}; // Where the cursor was before placing a unit
-    Unit *targeted = nullptr;
-    position source = {-1, -1}; // Where the cursor was before choosing a target
-
-    Spritesheet sheet;
-    path path_draw = {};
-
-    Cursor(Spritesheet sheet_in)
-    : sheet(sheet_in)
-    {}
-
-    void
-    Update()
-    {
-        sheet.Update();
-        if(!WithinViewport(pos)) // Catch-all
-        {
-            MoveViewport(pos);
-        }
-    }
-
-    // Places the cursor at a position.
-    void
-    PlaceAt(const position &pos_in)
-    {
-        pos = pos_in;
-        path_draw = {};
-    }
-
-    // returns the current quadrant of where the cursor is on the screen.
-    enum quadrant
-    Quadrant() const
-    {
-        int x = pos.col - viewportCol;
-        int y = pos.row - viewportRow;
-
-        if(x > VIEWPORT_WIDTH / 2 && y >= VIEWPORT_HEIGHT / 2)
-        {
-            return BOTTOM_RIGHT;
-        }
-        else if(x > VIEWPORT_WIDTH / 2)
-        {
-            return TOP_RIGHT;
-        }
-        else if(y >= VIEWPORT_HEIGHT / 2)
-        {
-            return BOTTOM_LEFT;
-        }
-        return TOP_LEFT;
-    }
-};
-
-
 // ===================================== Animation =============================
 enum Speaker
 {

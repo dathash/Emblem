@@ -122,7 +122,8 @@ struct UI_State
            !(GlobalInterfaceState == LEVEL_MENU ||
              GlobalInterfaceState == CONVERSATION ||
              GlobalInterfaceState == PREVIEW_ATTACK ||
-             GlobalInterfaceState == PREVIEW_ABILITY)
+             GlobalInterfaceState == PREVIEW_ABILITY ||
+             GlobalInterfaceState == PLAYER_FIGHT)
 			)
         {
             tile_info = true;
@@ -558,9 +559,14 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 void
 DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
 {
+    int y_pos = 400;
+    if(fight.lower_half_screen)
+    {
+        y_pos = 100;
+    }
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(300, 110));
-    ImGui::SetNextWindowPos(ImVec2(50, 400));
+    ImGui::SetNextWindowPos(ImVec2(50, y_pos));
 
     // Render
 	ImGui::PushFont(uiFontLarge);
@@ -573,7 +579,7 @@ DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
     ImGui::End();
 
     ImGui::SetNextWindowSize(ImVec2(300, 110));
-    ImGui::SetNextWindowPos(ImVec2(540, 400));
+    ImGui::SetNextWindowPos(ImVec2(540, y_pos));
 
     ImGui::Begin(fight.two->name.c_str(), NULL, wf);
     {
@@ -643,11 +649,11 @@ RenderUI(UI_State *ui,
 
     // USER MODE UI
 	if(ui->tile_info)
-		DisplayTileInfo(window_flags, map.tiles[cursor.pos.col][cursor.pos.row], cursor.Quadrant());
+		DisplayTileInfo(window_flags, map.tiles[cursor.pos.col][cursor.pos.row], Quadrant(cursor.pos));
 	if(ui->unit_blurb)
-		DisplayUnitBlurb(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, cursor.Quadrant());
+		DisplayUnitBlurb(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, Quadrant(cursor.pos));
 	if(ui->unit_info)
-		DisplayUnitInfo(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, cursor.Quadrant());
+		DisplayUnitInfo(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, Quadrant(cursor.pos));
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
                                            map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,

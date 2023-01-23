@@ -30,7 +30,6 @@
 // Local external files (in /ext)
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
-
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_impl_sdl.h"
@@ -99,6 +98,7 @@ static int viewportRow = 0;
 #include "state.h"
 #include "structs.h"
 #include "animation.h"
+#include "cursor.h"
 #include "load.h"
 #include "init.h"
 #include "input.h"

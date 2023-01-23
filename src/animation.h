@@ -11,6 +11,7 @@ enum AnimationValue
     ATTACK_ANIMATION_MELEE,
     ATTACK_ANIMATION_LEAP,
     ATTACK_ANIMATION_MISS,
+    MOVE_ANIMATION,
 };
 
 enum ChannelIndex
@@ -205,6 +206,14 @@ GetAnimation(AnimationValue anim)
                      Identity,
                     {{0.0 ,  0.0 },  // channel 2
                      {0.5 ,  0.0 },
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case MOVE_ANIMATION:
+        {
+            return (new Animation(1, 5, false, 1,
+                    {{0.0 ,  1.0 },  // channel 1
+                     {0.5 ,  0.5 },
                      {1.0 ,  0.0 }},
                      Identity));
         }

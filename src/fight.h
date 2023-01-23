@@ -129,7 +129,6 @@ struct Attack
     Execute()
     {
         Animation *animation;
-        // TODO: Different attack types result in different animations
         switch (type)
         {
             case RANGED:
@@ -195,6 +194,7 @@ struct Fight
     bool ready = false;
 
     Animation *animation = nullptr;
+    bool lower_half_screen = false;
 
     Fight() = default;
 
@@ -230,9 +230,8 @@ struct Fight
             direction dir = one_to_two_direction;
             if(Current().source == two)
                 dir = dir * -1;
-            position offset = {0, 0};
             float value = animation->Value(CHANNEL_ONE);
-            offset = (dir * TILE_SIZE) * value;
+            position offset = (dir * TILE_SIZE) * value;
 
             float value_two = animation->Value(CHANNEL_TWO);
             offset += (direction(0, -1) * TILE_SIZE) * value_two;
@@ -288,6 +287,12 @@ struct Fight
     void
     Populate(const Outcome &outcome)
     {
+        lower_half_screen = false;
+        quadrant quad = Quadrant(one->pos);
+        if(quad == BOTTOM_LEFT
+           || quad == BOTTOM_RIGHT)
+            lower_half_screen = true;
+        lower_half_screen = true;
         int one_dmg = CalculateDamage(*one, *two);
         int two_dmg = CalculateDamage(*two, *one);
         int one_accum = 0;

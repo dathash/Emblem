@@ -39,7 +39,7 @@ public:
         if(IsValidBoundsPosition(map.width, map.height, new_pos))
         {
             // move cursor
-            cursor->pos = new_pos;
+            cursor->MoveTo(new_pos, dir * -1);
 
             // change state
             const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
@@ -136,7 +136,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->pos = cursor->redo;
+        cursor->PlaceAt(cursor->redo);
         cursor->selected = nullptr;
 
         cursor->path_draw = {};
@@ -166,7 +166,7 @@ public:
             return;
 
         // move cursor
-        cursor->pos = new_pos;
+        cursor->MoveTo(new_pos, dir * -1);
 
         const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
         if(!VectorHasElement(new_pos, map.accessible))
@@ -327,7 +327,7 @@ public:
         map->tiles[cursor->pos.col][cursor->pos.row].occupant = nullptr;
         map->tiles[cursor->redo.col][cursor->redo.row].occupant = cursor->selected;
 
-        cursor->pos = cursor->redo;
+        cursor->PlaceAt(cursor->redo);
 
         cursor->path_draw = {};
 
@@ -370,7 +370,7 @@ public:
         position next = map->attackable[0];
 
         // move cursor
-        cursor->pos = next;
+        cursor->PlaceAt(next);
     }
 
 private:
@@ -405,7 +405,7 @@ public:
         position next = map->ability[0];
 
         // move cursor
-        cursor->pos = next;
+        cursor->PlaceAt(next);
     }
 
 private:
@@ -424,7 +424,7 @@ public:
 
     virtual void Execute()
     { 
-        cursor->pos = cursor->source;
+        cursor->PlaceAt(cursor->source);
 
         GlobalInterfaceState = UNIT_MENU_ROOT;
     }
@@ -498,7 +498,7 @@ public:
 
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
-        cursor->pos = cursor->source;
+        cursor->PlaceAt(cursor->source);
         cursor->path_draw = {};
 
         GlobalInterfaceState = PLAYER_FIGHT;
@@ -551,7 +551,7 @@ public:
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->targeted = nullptr;
-        cursor->pos = cursor->source;
+        cursor->PlaceAt(cursor->source);
         cursor->path_draw = {};
 
         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -629,7 +629,7 @@ public:
 
     virtual void Execute()
     {
-        cursor->pos = cursor->redo;
+        cursor->PlaceAt(cursor->redo);
         cursor->selected = nullptr;
         cursor->redo = {-1, -1};
 
@@ -796,7 +796,7 @@ public:
             assert(map.attackable.size());
             cursor->source = cursor->pos;
 
-            cursor->pos = map.attackable[0];
+            cursor->PlaceAt(map.attackable[0]);
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
         }
@@ -806,7 +806,7 @@ public:
             assert(map.ability.size());
             cursor->source = cursor->pos;
 
-            cursor->pos = map.ability[0];
+            cursor->PlaceAt(map.ability[0]);
             GlobalInterfaceState = ABILITY_TARGETING;
             return;
         }
