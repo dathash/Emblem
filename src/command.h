@@ -716,6 +716,7 @@ public:
 
     virtual void Execute()
     { 
+        EmitEvent(SELECT_MENU_OPTION);
         switch(menu->current)
         {
             case(0): // OUTLOOK
@@ -758,6 +759,7 @@ public:
 
     virtual void Execute()
     { 
+        EmitEvent(MOVE_MENU);
         int newCurrent = menu->current + direction;
         if(newCurrent >= menu->rows)
             menu->current = 0;
@@ -784,6 +786,8 @@ public:
 
     virtual void Execute()
     {
+        EmitEvent(SELECT_MENU_OPTION);
+
         string option = menu.optionText[menu.current];
 
         if(option == "Capture")
@@ -867,6 +871,8 @@ public:
 
     virtual void Execute()
     {
+        EmitEvent(SELECT_MENU_OPTION);
+
         string option = menu.optionText[menu.current];
 
         if(option == "Next")

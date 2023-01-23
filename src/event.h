@@ -10,6 +10,8 @@ enum EventType
     MOVE_CURSOR,
     PICK_UP_UNIT,
     PLACE_UNIT,
+    SELECT_MENU_OPTION,
+    MOVE_MENU,
     ATTACK_HIT,
     ATTACK_CRIT,
     ATTACK_MISS,
@@ -45,6 +47,14 @@ GlobalHandleEvents()
             case MOVE_CURSOR:
             {
                 PlaySfx("mov.wav");
+            } break;
+            case SELECT_MENU_OPTION:
+            {
+                PlaySfx("sel1.wav");
+            } break;
+            case MOVE_MENU:
+            {
+                PlaySfx("sel2.wav");
             } break;
             case PICK_UP_UNIT:
             {
