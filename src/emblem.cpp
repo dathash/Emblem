@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     GlobalAIState = PLAYER_TURN;
 
 	// Play Music
-    PlayMusic("desert.wav");
+    PlayMusic("spiny.wav");
 
     GlobalRunning = true;
 // ========================= game loop =========================================

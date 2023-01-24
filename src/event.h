@@ -15,6 +15,10 @@ enum EventType
     ATTACK_HIT,
     ATTACK_CRIT,
     ATTACK_MISS,
+    ATTACK_RANGED,
+    BUFF,
+    HEAL,
+    DANCE,
 };
 
 struct Event
@@ -75,6 +79,22 @@ GlobalHandleEvents()
             case ATTACK_MISS:
             {
                 PlaySfx("miss.wav");
+            } break;
+            case ATTACK_RANGED:
+            {
+                PlaySfx("ranged.wav");
+            } break;
+            case BUFF:
+            {
+                PlaySfx("powerup.wav");
+            } break;
+            case HEAL:
+            {
+                PlaySfx("heal.wav");
+            } break;
+            case DANCE:
+            {
+                PlaySfx("ranged.wav");
             } break;
             default:
             {

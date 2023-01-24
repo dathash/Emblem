@@ -50,8 +50,8 @@ Initialize()
     if(ma_engine_init(NULL, &GlobalAudioEngine) != MA_SUCCESS)
         return false;
 
-    ma_sound_group_init(&GlobalAudioEngine, 0, nullptr, &(GlobalMusic.group));
-    ma_sound_group_init(&GlobalAudioEngine, 0, nullptr, &(GlobalSfx.group));
+    ma_sound_group_init(&GlobalAudioEngine, 0, nullptr, &(GlobalMusicGroup));
+    ma_sound_group_init(&GlobalAudioEngine, 0, nullptr, &(GlobalSfxGroup));
     SetMusicVolume(DEFAULT_MUSIC_VOLUME);
     SetSfxVolume(DEFAULT_SFX_VOLUME);
 

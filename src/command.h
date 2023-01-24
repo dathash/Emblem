@@ -537,10 +537,12 @@ public:
             case ABILITY_HEAL:
             {
                 SimulateHealing(cursor->selected, cursor->targeted);
+                EmitEvent(HEAL);
             } break;
             case ABILITY_BUFF:
             {
                 cursor->targeted->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
+                EmitEvent(BUFF);
             } break;
             case ABILITY_SHIELD:
             {
@@ -549,6 +551,7 @@ public:
             case ABILITY_DANCE:
             {
                 SimulateDancing(cursor->selected, cursor->targeted);
+                EmitEvent(DANCE);
             } break;
             default:
             {

@@ -134,6 +134,7 @@ struct Attack
             case RANGED:
             {
                 animation = GetAnimation(ATTACK_ANIMATION_RANGED);
+                EmitEvent(ATTACK_RANGED);
             } break;
 
             case MELEE:

@@ -8,6 +8,21 @@
 
 #if DEV_MODE
 
+void
+Meta()
+{
+	ImGui::Begin("Meta");
+	{
+        static float music_volume = DEFAULT_MUSIC_VOLUME;
+        static float sfx_volume = DEFAULT_SFX_VOLUME;
+        if(ImGui::SliderFloat("Music", &music_volume, 0.0f, 1.0f))
+            SetMusicVolume(music_volume);
+        if(ImGui::SliderFloat("SFX", &sfx_volume, 0.0f, 1.0f))
+            SetSfxVolume(sfx_volume);
+    }
+    ImGui::End();
+}
+
 static uint8_t selectedIndex = 0;
 void
 UnitEditor(vector<shared_ptr<Unit>> *units)
@@ -316,6 +331,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
     static bool showUnitEditor = true;
     static bool showLevelEditor = true;
     static bool showGlobals = false;
+    static bool showMeta = true;
 
     static char fileName[128] = INITIAL_UNITS;
     static char levelFileName[128] = INITIAL_LEVEL;
@@ -369,6 +385,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         ImGui::Checkbox("Unit Editor", &showUnitEditor);
         ImGui::Checkbox("Level Editor", &showLevelEditor);
         ImGui::Checkbox("Globals", &showGlobals);
+        ImGui::Checkbox("Meta", &showMeta);
 
         ImGui::Text("avg %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
@@ -380,10 +397,14 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         LevelEditor(level, *units);
     if(showGlobals)
         GlobalsViewer();
+    if(showMeta)
+        Meta();
 
+    /*
 	// debug
 	ImGui::ShowStyleEditor();
 	ImGui::ShowDemoWindow();
+    */
 }
 #endif // EDITOR
 
