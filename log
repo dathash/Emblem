@@ -232,14 +232,14 @@ How the program should run:
 PROTOTYPE ///////////////////////////////////////////////////
     8 levels
 
-    Sound Effects
-    * Emit Events in Commands
-
     *HUGE QA PASS*
         BUG | Enemies that can actually reach you don't believe that they can due to
         the difference in pathfinding/flood filling. We NEED To get a more unified
         solution working.
         BUG | Retry level doesn't keep retained units
+        BUG | Cursor animations at the edge of the screen are wonky.
+
+    New song per level?
 
     Unit Death Screen
 
@@ -248,6 +248,18 @@ QOL
     display enemy damage range, unit damage range, plus abilities too.
     Cycle units with L trigger.
     * CONTROLLER TESTING
+
+Audio
+* Finish refactoring
+* Add sounds
+  * Walk
+  * Dance
+  * Heal
+  * Buff
+* Fix combat sounds
+  * Event emitter track in animations?
+
+BUG | Miniaudio stuff leaks memory
 
 More complex conversations
 * Units come and go

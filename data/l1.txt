@@ -2,26 +2,51 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
-ATL ruins.png
+ATL sunset.png
 
-WDT 15
-HGT 10
-MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 4 0 
-MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 
-MAP 0 0 0 1 1 1 0 0 0 1 0 0 1 1 1 
-MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
-MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
-MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 
-MAP 0 5 5 5 0 1 0 0 0 1 1 1 1 0 0 
-MAP 0 5 0 5 0 1 0 0 0 0 0 0 0 0 0 
-MAP 0 5 5 5 0 1 0 0 0 0 0 0 0 0 0 
+WDT 20
+HGT 20
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 4 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 1 1 1 0 0 0 1 0 0 1 1 1 0 0 1 1 1 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 5 5 5 0 1 0 0 0 1 1 1 1 0 0 1 1 1 0 0 
+MAP 0 5 0 5 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 5 5 5 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 1 1 1 0 0 0 1 0 0 1 1 1 0 0 1 1 1 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 1 1 1 1 0 0 1 1 1 0 0 
+MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Noire 0 9 0 
 UNT Lucina 2 8 0 
-UNT Brute  8 4 1 
+UNT Brute 8 4 1 
 UNT Brute 6 6 1 
 UNT Archer 11 5 2 
 UNT Brute 11 2 2 
 UNT Brute 10 2 2 
+UNT Donnel 1 6 0 
+UNT Olivia 1 10 0 
+UNT Lon'qu 3 10 0 
+UNT Noire 0 8 0 
+UNT Flavia 3 6 0 
+UNT Brute 6 1 1 
+UNT Archer 6 10 4 
+UNT Archer 6 11 4 
+UNT Archer 6 12 4 
+UNT Thief 10 8 4 
+UNT Thief 10 9 4 
+UNT Brute 14 6 2 
+UNT Brute 13 6 2 
+UNT Brute 16 2 4 
+UNT Brute 15 2 4 
+
