@@ -390,7 +390,7 @@ Outcome PredictHealing(const Unit &one, const Unit &two)
     Outcome outcome = {};
     outcome.one_attacks = true;
     outcome.one_doubles = false;
-    outcome.one_damage = CalculateHealing(one, two);
+    outcome.one_damage = -CalculateHealing(one, two);
     outcome.one_hit = 100;
     outcome.one_crit = 0;
 

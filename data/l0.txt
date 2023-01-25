@@ -28,19 +28,17 @@ MAP 1 1 5 5 5 0 0 0 0 0 0 0 0 0 0
 MAP 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Brute 13 7 4 
 UNT Brute 8 4 1 
 UNT Brute 6 6 1 
-UNT Thief 7 1 1 
 UNT Archer 8 5 4 
 UNT Archer 7 6 4 
 UNT Lucina 3 17 0 
 UNT Brute 10 10 4 
 UNT Brute 12 11 4 
-UNT Thief 11 8 1 
 UNT Brute 5 4 2 
-UNT Archer 3 15 1 
 UNT Lon'qu 5 15 0 
-UNT Olivia 5 18 0 
 UNT Donnel 2 15 0 
+UNT Brute 8 15 1 
+UNT Thief 9 16 1 
+UNT Archer 6 9 4 
 

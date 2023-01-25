@@ -35,7 +35,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 				string("DEFAULT_CHANGE"),
 				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
 				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				true,
+				false,
 				3,
 				3,
 				3,
@@ -89,7 +89,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::SliderInt("crit", &selected->crit, 0, 100);
 		ImGui::SliderInt("min", &selected->min_range, 1, 4);
 		ImGui::SliderInt("max", &selected->max_range, 1, 4);
-		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 3);
+		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
         ImGui::Text("ability");
         ImGui::SameLine();
         if(ImGui::Button("N"))

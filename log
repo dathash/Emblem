@@ -217,6 +217,13 @@ Replayability
 * Randomized recruits inbetween levels.
   * Like Auto-chess
 
+Why are we fighting?
+Fire Emblem maps are almost always about killing all the enemies
+What about other objectives?
+What about Save all the Innocents?
+What about Collect all the Items?
+What about Escape?
+What about anything else?
 
 # Scratch
 
@@ -238,6 +245,8 @@ PROTOTYPE ///////////////////////////////////////////////////
         solution working.
         BUG | Retry level doesn't keep retained units
         BUG | Cursor animations at the edge of the screen are wonky.
+        BUG | Enemy attacks on targets outside the viewport don't get the target
+        in view.
 
     New song per level?
 
