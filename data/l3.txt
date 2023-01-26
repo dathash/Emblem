@@ -4,6 +4,8 @@ COM File: Level
 
 ATL ruins.png
 
+MUS qc.wav
+
 WDT 15
 HGT 10
 MAP 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 

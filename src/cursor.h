@@ -52,8 +52,11 @@ struct Cursor
     MoveTo(const position &pos_in, const direction &dir_in)
     {
         pos = pos_in;
-        animation_dir = dir_in;
-        animation = GetAnimation(MOVE_ANIMATION);
+        if(WithinViewport(pos_in))
+        {
+            animation_dir = dir_in;
+            animation = GetAnimation(MOVE_ANIMATION);
+        }
         EmitEvent(MOVE_CURSOR);
     }
 

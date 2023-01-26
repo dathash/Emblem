@@ -124,6 +124,37 @@ int main(int argc, char *argv[])
         assert(gamepad);
     }
 
+    GlobalMusic.sounds =
+    {
+        new Sound("spiny.wav", MUSIC),
+        new Sound("r4.wav", MUSIC),
+        new Sound("qc.wav", MUSIC),
+        new Sound("6.wav", MUSIC),
+        new Sound("13.wav", MUSIC),
+        new Sound("21.wav", MUSIC),
+        new Sound("tripod.wav", MUSIC),
+        new Sound("title.wav", MUSIC)
+    };
+
+    GlobalSfx.sounds =
+    {
+        new Sound("mov.wav", SFX),
+        new Sound("crit.wav", SFX),
+        new Sound("heal.wav", SFX),
+        new Sound("hit1.wav", SFX),
+        new Sound("hit2.wav", SFX),
+        new Sound("hit3.wav", SFX),
+        new Sound("magic.wav", SFX),
+        new Sound("miss.wav", SFX),
+        new Sound("pickup.wav", SFX),
+        new Sound("place.wav", SFX),
+        new Sound("powerup.wav", SFX),
+        new Sound("ranged.wav", SFX),
+        new Sound("sel1.wav", SFX),
+        new Sound("sel2.wav", SFX),
+        new Sound("sel3.wav", SFX)
+    };
+
 // ================================== load =================================
     vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
 
@@ -154,9 +185,6 @@ int main(int argc, char *argv[])
 
     GlobalInterfaceState = NO_OP;
     GlobalAIState = PLAYER_TURN;
-
-	// Play Music
-    PlayMusic("spiny.wav");
 
     GlobalRunning = true;
 // ========================= game loop =========================================
@@ -277,6 +305,13 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(GlobalRenderer);
 
     } // End Game Loop
+
+    // This needs to be in this function due to scope restrictions.
+    // TODO: Learn more about heap allocation, scope weirdness, double frees, etc.
+    for(Sound *sound : GlobalMusic.sounds)
+        delete sound;
+    for(Sound *sound : GlobalSfx.sounds)
+        delete sound;
 
     Close();
     return 0;

@@ -87,6 +87,8 @@ void Close()
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
+    ma_sound_group_uninit(&GlobalMusicGroup);
+    ma_sound_group_uninit(&GlobalSfxGroup);
     ma_engine_uninit(&GlobalAudioEngine);
 
     TTF_CloseFont(GlobalFont);

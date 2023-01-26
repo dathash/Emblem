@@ -118,11 +118,11 @@ Level
 LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
 {
     string line;
-	string type;
-	string rest;
-	vector<string> tokens;
+    string type;
+    string rest;
+    vector<string> tokens;
 
-	int mapRow = 0;
+    int mapRow = 0;
 
     Level level;
 
@@ -143,6 +143,14 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         if(type == "ATL")
         {
             level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
+        }
+        else if(type == "MUS")
+        {
+            if(GlobalSong)
+                GlobalSong->Stop();
+
+            GlobalSong = GetMusic(rest);
+            GlobalSong->Start();
         }
         else if(type == "WDT")
         {

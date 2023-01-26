@@ -4,6 +4,8 @@ COM File: Level
 
 ATL frozen.png
 
+MUS qc.wav
+
 WDT 30
 HGT 10
 MAP 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
@@ -31,7 +33,7 @@ UNT Donnel 2 6 0
 UNT Sniper 10 7 3 
 UNT Noire 2 1 0 
 UNT Lon'qu 3 5 0 
-UNT Boss 28 8 2 
+UNT Diane 28 8 2 
 UNT Brigand 24 6 4 
 UNT Sniper 25 5 4 
 UNT Brute 21 4 4 

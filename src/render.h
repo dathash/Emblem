@@ -292,8 +292,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(GlobalInterfaceState != PLAYER_FIGHT &&
        GlobalAIState != AI_FIGHT)
     {
-        RenderSprite(cursor.pos - position(viewportCol, viewportRow), 
-                     cursor.sheet, false, cursor.animation_offset);
+        if(WithinViewport(cursor.pos))
+            RenderSprite(cursor.pos - position(viewportCol, viewportRow), 
+                         cursor.sheet, false, cursor.animation_offset);
     }
 
 

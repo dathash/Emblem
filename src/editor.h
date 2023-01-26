@@ -19,6 +19,14 @@ Meta()
             SetMusicVolume(music_volume);
         if(ImGui::SliderFloat("SFX", &sfx_volume, 0.0f, 1.0f))
             SetSfxVolume(sfx_volume);
+        if(ImGui::Button("Play"))
+            GlobalSong->Start();
+        ImGui::SameLine();
+        if(ImGui::Button("Pause"))
+            GlobalSong->Pause();
+        ImGui::SameLine();
+        if(ImGui::Button("Stop"))
+            GlobalSong->Stop();
     }
     ImGui::End();
 }

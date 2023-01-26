@@ -4,6 +4,8 @@ COM File: Level
 
 ATL sunset.png
 
+MUS spiny.wav
+
 WDT 20
 HGT 20
 MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
@@ -45,7 +47,7 @@ UNT Brute 14 6 2
 UNT Brute 13 6 2 
 UNT Brute 16 2 4 
 UNT Brute 15 2 4 
-UNT Boss 18 1 2 
+UNT Charles 18 1 2 
 UNT Flavia 18 18 0 
 UNT Brute 14 16 1 
 UNT Brute 15 14 1 

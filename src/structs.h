@@ -293,6 +293,15 @@ struct Level
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
 
+    // TODO: WHAT IS GOING ON?
+    //Sound *music = nullptr;
+    // This cannot be added to the structure.
+    // In fact, if I add anything to this structure, I get a bus error.
+    // lldb tells me it breaks somewhere in the animation code.
+    // I have no idea what this issue is and I
+    // believe I should ask someone who knows more
+    // than I do. In any case, don't put stuff here for now.
+
     // Puts a piece on the board
     void
     AddCombatant(shared_ptr<Unit> newcomer, const position &pos)

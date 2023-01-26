@@ -225,16 +225,6 @@ What about Collect all the Items?
 What about Escape?
 What about anything else?
 
-# Scratch
-
-How the program should run:
-
-1. Player triggers "Attack", putting game into Combat state.
-2. Game renders in Combat state. Nothing updates.
-3. Animation ends, changing state back to normal.
-   Damage is applied.
-4. Game isn't in combat state anymore and continues as normal.
-
 # TODO
 PROTOTYPE ///////////////////////////////////////////////////
     8 levels
@@ -244,42 +234,17 @@ PROTOTYPE ///////////////////////////////////////////////////
         the difference in pathfinding/flood filling. We NEED To get a more unified
         solution working.
         BUG | Retry level doesn't keep retained units
-        BUG | Cursor animations at the edge of the screen are wonky.
         BUG | Enemy attacks on targets outside the viewport don't get the target
         in view.
-
-    New song per level?
 
     Unit Death Screen
 
 ///////////////////////////////////////////////////////////////
-QOL
-    display enemy damage range, unit damage range, plus abilities too.
-    Cycle units with L trigger.
-    * CONTROLLER TESTING
-
-Audio
-* Finish refactoring
-* Add sounds
-  * Walk
-  * Dance
-  * Heal
-  * Buff
-* Fix combat sounds
-  * Event emitter track in animations?
-
-BUG | Miniaudio stuff leaks memory
-
-More complex conversations
-* Units come and go
-* Facial expression changes
-Add some conversations for inbetween levels
-* Menu
-
 0.1
     Inbetween Levels | Metagame
-    * Revive dead units?
     * Recruit new units?
+    * Conversations?
+    * Allocate stats?
 
     RPG Mechanics
     * Boosted stats?
@@ -288,9 +253,20 @@ Add some conversations for inbetween levels
     * Experience points?
     * Levels?
 
-    Placing Unit moves them smoothly to that square (A-star)
+    QOL
+        display enemy damage range, unit damage range, plus abilities too.
+        Cycle units with L trigger.
+        * CONTROLLER TESTING
 
-NICE
+    Audio
+    * Add sounds
+      * Walk
+      * Dance
+    * Fix combat sounds
+      * Event emitter track in animations?
+
+
+0.2
     Real-time color editing in the editor
 
     Better enemy AI
@@ -304,6 +280,12 @@ NICE
         * Bolsters until attacked, then changes to Pursue.
         State Machine?
     "Guard" action
+
+    More complex conversations
+    * Units come and go
+    * Facial expression changes
+    Add some conversations for inbetween levels
+    * Menu
 
 
 POLISH
@@ -323,6 +305,10 @@ POLISH
     Startup Screen
     Create polished tilemaps with Tiled and overlay them onto the in-game maps.
 
+    Placing Unit moves them smoothly to that square (A-star)
+    Smooth Screen Scroll (Render tiles one tile off of the screen.)
+
+
 MAYBE?
     Eventually switch over to OpenGL or Vulkan/Direct3D12
     Shrink Tilesets to absolute necessity, also enforce consistency across them
@@ -338,3 +324,7 @@ QA
 
 REFACTOR
     Take junk out of main
+
+MULTI-PLATFORM
+    Don't include SDL2/SDL.h, rather include SDL.h therefore you can remove the CRT.
+    Use SDL_Assert().

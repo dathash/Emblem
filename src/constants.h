@@ -17,8 +17,8 @@
 #define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
 // defaults
-#define DEFAULT_MUSIC_VOLUME 1.0f
-#define DEFAULT_SFX_VOLUME 0.5f
+#define DEFAULT_MUSIC_VOLUME 0.5f
+#define DEFAULT_SFX_VOLUME 0.2f
 
 // rendering
 #define VIEWPORT_WIDTH 15
