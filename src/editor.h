@@ -164,8 +164,6 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         static position editor_cursor = {0, 0};
         static path path_debug = {};
 
-        static bool showDebugPaths = false;
-
         EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
         Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
 
@@ -297,6 +295,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
                 hover_tile->occupant->ai_behavior = WAIT_THEN_ATTACK;
         }
 
+        //static bool showDebugPaths = false;
         /*
         ImGui::Checkbox("debug paths", &showDebugPaths);
         if(showDebugPaths)

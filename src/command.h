@@ -11,6 +11,7 @@ class Command
 {
 public:
     virtual void Execute() = 0;
+    virtual ~Command() = default;
 };
 
 class NullCommand : public Command
@@ -115,6 +116,15 @@ public:
         map->accessible = AccessibleFrom(*map, cursor->redo,
                                          cursor->selected->movement,
                                          cursor->selected->is_ally);
+        // TODO: This condition should be dynamic based on what they do.
+        // OR, we do what the new FE game does and overlay both with a sin wave between them.
+        //if(cursor->selected->aptitude > cursor->selected->attack)
+        //{
+        //}
+        //map->prospective = AccessibleFrom(*map, cursor->redo,
+        //                                  cursor->selected->movement + cursor->selected->max_range,
+        //                                  cursor->selected->is_ally);
+        //cout << map->prospective.size() << "\n";
 
         EmitEvent(PICK_UP_UNIT_EVENT);
 
@@ -425,9 +435,8 @@ private:
 class DetargetCommand : public Command
 {
 public:
-    DetargetCommand(Cursor *cursor_in, Tilemap *map_in)
-    : cursor(cursor_in),
-      map(map_in)
+    DetargetCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
     {}
 
     virtual void Execute()
@@ -439,7 +448,6 @@ public:
 
 private:
     Cursor *cursor;
-    Tilemap *map;
 };
 
 class InitiateAttackCommand : public Command
@@ -1187,7 +1195,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateAttackCommand>(cursor, *map));
-                BindB(make_shared<DetargetCommand>(cursor, map));
+                BindB(make_shared<DetargetCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
             case(ABILITY_TARGETING):
@@ -1197,7 +1205,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateAbilityCommand>(cursor, *map));
-                BindB(make_shared<DetargetCommand>(cursor, map));
+                BindB(make_shared<DetargetCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

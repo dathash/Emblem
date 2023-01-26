@@ -223,8 +223,6 @@ DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 void 
 DisplayHealthBar(int health, int max_health, int damage)
 {
-	float original_cursor_position = ImGui::GetCursorPosX();
-	float original_line_height = ImGui::GetFrameHeight();
 	float percentHealth = (((float)health - damage) / (float)max_health);
 	percentHealth = (0 < percentHealth ? percentHealth : 0);
 	if(percentHealth > 0.66)

@@ -136,11 +136,11 @@ struct Buff
 
 struct Unit
 {
+
     string name;
+    Spritesheet sheet;
+    Texture portrait;
     bool is_ally;
-    position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
-    bool is_exhausted = false;
-    bool should_die = false;
     int movement;
     int health;
     int max_health;
@@ -148,16 +148,18 @@ struct Unit
     int aptitude;
     int defense;
     int speed;
-    int min_range;
-    int max_range;
     int accuracy;
     int avoid;
     int crit;
-    Spritesheet sheet;
-    Texture portrait;
-    position animation_offset = {0, 0};
+    int min_range;
+    int max_range;
     Ability ability;
+
     AIBehavior ai_behavior = NO_BEHAVIOR;
+    position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
+    bool is_exhausted = false;
+    bool should_die = false;
+    position animation_offset = {0, 0};
 
     Buff *buff;
 
@@ -262,12 +264,13 @@ struct Tilemap
 {
     int width;
     int height;
-    vector<vector<Tile>> tiles;
-    vector<position> accessible;
-    vector<position> attackable;
-    vector<position> ability;
-    vector<position> range;
+    vector<vector<Tile>> tiles = {};
+    vector<position> accessible = {};
+    vector<position> attackable = {};
+    vector<position> ability = {};
+    vector<position> range = {};
     //vector<point> adjacent;
+    //vector<position> prospective = {};
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 

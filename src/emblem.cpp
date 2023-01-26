@@ -72,7 +72,6 @@ static ImFont *uiFontLarge;
 static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
 static bool GlobalPlayerTurn = true;
-static bool GlobalLevelTransition = false;
 
 // Transitory
 static bool GlobalNextLevel = false;

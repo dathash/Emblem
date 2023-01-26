@@ -231,6 +231,16 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     display enemy damage range, unit damage range, plus abilities too.
 
+    More complex conversations
+    * Units come and go
+    * Facial expression changes
+    * Menu
+    * Unit Death Screen
+    Add some conversations for inbetween levels
+
+    Figure out my bus error bug – happens when I add a field to the Map struct
+    or the Level struct.
+
 ////////////////////////////////////////////////////////////
 
 0.1 ////////////////////////////////////////////////////////
@@ -255,7 +265,7 @@ PROTOTYPE ///////////////////////////////////////////////////
     * CONTROLLER TESTING
 ////////////////////////////////////////////////////////////
 
-0.2
+0.2 ////////////////////////////////////////////////////////
     Real-time color editing in the editor
 
     Better enemy AI
@@ -270,13 +280,7 @@ PROTOTYPE ///////////////////////////////////////////////////
         State Machine?
     "Guard" action
 
-    More complex conversations
-    * Units come and go
-    * Facial expression changes
-    * Menu
-    * Unit Death Screen
-    Add some conversations for inbetween levels
-
+////////////////////////////////////////////////////////////
 
 POLISH
     Swap Noire and Donnel's Colors
