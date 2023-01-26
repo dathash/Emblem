@@ -7,18 +7,20 @@
 
 enum EventType
 {
-    MOVE_CURSOR,
-    PICK_UP_UNIT,
-    PLACE_UNIT,
-    SELECT_MENU_OPTION,
-    MOVE_MENU,
-    ATTACK_HIT,
-    ATTACK_CRIT,
-    ATTACK_MISS,
-    ATTACK_RANGED,
-    BUFF,
-    HEAL,
-    DANCE,
+    MOVE_CURSOR_EVENT,
+    MOVE_MENU_EVENT,
+    SELECT_MENU_OPTION_EVENT,
+    NEXT_SENTENCE_EVENT,
+    PICK_UP_UNIT_EVENT,
+    PLACE_UNIT_EVENT,
+    UNIT_INFO_EVENT,
+    ATTACK_HIT_EVENT,
+    ATTACK_CRIT_EVENT,
+    ATTACK_MISS_EVENT,
+    ATTACK_RANGED_EVENT,
+    BUFF_EVENT,
+    HEAL_EVENT,
+    DANCE_EVENT,
 };
 
 struct Event
@@ -48,57 +50,65 @@ GlobalHandleEvents()
 
         switch(event.type)
         {
-            case MOVE_CURSOR:
+            case MOVE_CURSOR_EVENT:
             {
                 PlaySfx("mov.wav");
             } break;
-            case SELECT_MENU_OPTION:
-            {
-                PlaySfx("sel1.wav");
-            } break;
-            case MOVE_MENU:
+            case MOVE_MENU_EVENT:
             {
                 PlaySfx("sel2.wav");
             } break;
-            case PICK_UP_UNIT:
+            case SELECT_MENU_OPTION_EVENT:
+            {
+                PlaySfx("sel1.wav");
+            } break;
+            case NEXT_SENTENCE_EVENT:
+            {
+                PlaySfx("sel3.wav");
+            } break;
+            case PICK_UP_UNIT_EVENT:
             {
                 PlaySfx("pickup.wav");
             } break;
-            case PLACE_UNIT:
+            case PLACE_UNIT_EVENT:
             {
                 PlaySfx("place.wav");
             } break;
-            case ATTACK_HIT:
+            case UNIT_INFO_EVENT:
+            {
+                PlaySfx("sel2.wav");
+            } break;
+            case ATTACK_HIT_EVENT:
             {
                 PlaySfx("hit1.wav");
             } break;
-            case ATTACK_CRIT:
+            case ATTACK_CRIT_EVENT:
             {
                 PlaySfx("crit.wav");
             } break;
-            case ATTACK_MISS:
+            case ATTACK_MISS_EVENT:
             {
-                PlaySfx("miss.wav");
+                PlaySfx("miss01.wav");
             } break;
-            case ATTACK_RANGED:
+            case ATTACK_RANGED_EVENT:
             {
                 PlaySfx("ranged.wav");
             } break;
-            case BUFF:
+            case BUFF_EVENT:
             {
                 PlaySfx("powerup.wav");
             } break;
-            case HEAL:
+            case HEAL_EVENT:
             {
                 PlaySfx("heal.wav");
             } break;
-            case DANCE:
+            case DANCE_EVENT:
             {
-                PlaySfx("ranged.wav");
+                PlaySfx("dance.wav");
             } break;
             default:
             {
-                assert(!"ERROR: Unimplemented Event\n");
+                cout << "WARN: Unimplemented Event\n";
             } break;
         }
     }

@@ -254,6 +254,7 @@ struct Tile
     TileType type = FLOOR;
     int penalty = 1;
     int avoid = 0;
+    int defense = 0;
     Unit *occupant = nullptr;
     position atlas_index = {0, 16};
 };

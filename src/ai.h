@@ -137,7 +137,9 @@ GetAction(const Unit &unit, const Tilemap &map)
                     outcome = PredictCombat(unit, *target,
                                             ManhattanDistance(p, target->pos),
                                             map.tiles[p.col][p.row].avoid,
-                                            map.tiles[target->pos.col][target->pos.row].avoid);
+                                            map.tiles[target->pos.col][target->pos.row].avoid,
+                                            map.tiles[p.col][p.row].defense,
+                                            map.tiles[target->pos.col][target->pos.row].defense);
                     int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
                     if(health_remaining < min_health_after_attack)
                     {
@@ -168,7 +170,9 @@ GetAction(const Unit &unit, const Tilemap &map)
                         outcome = PredictCombat(unit, *target,
                                                 ManhattanDistance(p, target->pos),
                                                 map.tiles[p.col][p.row].avoid,
-                                                map.tiles[target->pos.col][target->pos.row].avoid);
+                                                map.tiles[target->pos.col][target->pos.row].avoid,
+                                                map.tiles[p.col][p.row].defense,
+                                                map.tiles[target->pos.col][target->pos.row].defense);
                         int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
                         if(health_remaining < min_health_after_attack)
                         {
@@ -198,7 +202,9 @@ GetAction(const Unit &unit, const Tilemap &map)
                     outcome = PredictCombat(unit, *target,
                                             ManhattanDistance(p, target->pos),
                                             map.tiles[p.col][p.row].avoid,
-                                            map.tiles[target->pos.col][target->pos.row].avoid);
+                                            map.tiles[target->pos.col][target->pos.row].avoid,
+                                            map.tiles[p.col][p.row].defense,
+                                            map.tiles[target->pos.col][target->pos.row].defense);
                     int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
                     if(health_remaining < min_health_after_attack)
                     {
@@ -258,6 +264,8 @@ public:
             *fight = Fight(cursor->selected, action.second,
                           map->tiles[cursor->redo.col][cursor->redo.row].avoid,
                           map->tiles[cursor->pos.col][cursor->pos.row].avoid,
+                          map->tiles[cursor->redo.col][cursor->redo.row].defense,
+                          map->tiles[cursor->pos.col][cursor->pos.row].defense,
                           distance, dir);
             fight->ready = true;
 

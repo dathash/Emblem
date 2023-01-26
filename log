@@ -227,24 +227,21 @@ What about anything else?
 
 # TODO
 PROTOTYPE ///////////////////////////////////////////////////
-    8 levels
+    5 levels
 
-    *HUGE QA PASS*
-        BUG | Enemies that can actually reach you don't believe that they can due to
-        the difference in pathfinding/flood filling. We NEED To get a more unified
-        solution working.
-        BUG | Retry level doesn't keep retained units
-        BUG | Enemy attacks on targets outside the viewport don't get the target
-        in view.
+    display enemy damage range, unit damage range, plus abilities too.
 
-    Unit Death Screen
+////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////
-0.1
+0.1 ////////////////////////////////////////////////////////
     Inbetween Levels | Metagame
     * Recruit new units?
     * Conversations?
     * Allocate stats?
+
+    Fire Tile?
+    Fortress Tile?
+    Shifting ground?
 
     RPG Mechanics
     * Boosted stats?
@@ -253,18 +250,10 @@ PROTOTYPE ///////////////////////////////////////////////////
     * Experience points?
     * Levels?
 
-    QOL
-        display enemy damage range, unit damage range, plus abilities too.
-        Cycle units with L trigger.
-        * CONTROLLER TESTING
-
-    Audio
-    * Add sounds
-      * Walk
-      * Dance
-    * Fix combat sounds
-      * Event emitter track in animations?
-
+    display enemy damage range, unit damage range, plus abilities too.
+    Cycle units with L trigger.
+    * CONTROLLER TESTING
+////////////////////////////////////////////////////////////
 
 0.2
     Real-time color editing in the editor
@@ -284,8 +273,9 @@ PROTOTYPE ///////////////////////////////////////////////////
     More complex conversations
     * Units come and go
     * Facial expression changes
-    Add some conversations for inbetween levels
     * Menu
+    * Unit Death Screen
+    Add some conversations for inbetween levels
 
 
 POLISH
@@ -314,17 +304,18 @@ MAYBE?
     Shrink Tilesets to absolute necessity, also enforce consistency across them
     for ease of plug-n-play.
     Attack and Move
-    Have Speed buff add to movement speed as well?
-    Solid walls that don't allow ranged attacks?
 
 QA
     Controller added mid-game doesn't register joystick, only buttons.
-    The Next-Level code is so flimsy...
-    So is the Game Over code.
-
-REFACTOR
     Take junk out of main
+        The Next-Level code is so flimsy...
+        So is the Game Over code.
+    BUG | Enemy attacks on targets outside the viewport don't get the target
+    in view.
+    BUG | Enemies that can actually reach you don't believe that they can due to
+    the difference in pathfinding/flood filling. We NEED To get a more unified
+    solution working.
 
 MULTI-PLATFORM
     Don't include SDL2/SDL.h, rather include SDL.h therefore you can remove the CRT.
-    Use SDL_Assert().
+    Use SDL Assert().

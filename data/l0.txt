@@ -4,43 +4,29 @@ COM File: Level
 
 ATL ruins.png
 
-MUS qc.wav
+MUS 21.wav
 
 WDT 15
-HGT 20
-MAP 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 
-MAP 0 2 2 0 0 0 0 0 1 1 1 1 1 1 1 
-MAP 0 2 0 0 1 1 1 0 0 2 1 1 1 1 1 
-MAP 0 0 0 0 1 1 1 0 1 1 1 1 1 1 1 
-MAP 0 0 2 0 1 4 1 0 0 2 2 1 1 1 1 
-MAP 0 0 0 2 0 0 0 0 2 0 2 2 1 1 1 
-MAP 1 0 0 0 0 0 0 2 0 0 0 0 0 0 1 
-MAP 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
-MAP 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 1 1 1 1 1 2 2 2 0 0 0 0 0 0 0 
-MAP 1 1 1 1 1 1 1 2 2 0 0 0 0 0 0 
-MAP 1 1 1 1 1 1 1 2 2 2 2 2 0 0 0 
-MAP 1 1 1 1 1 1 1 0 0 0 0 2 2 2 2 
-MAP 1 1 1 1 1 1 0 0 0 0 0 0 2 2 2 
-MAP 1 1 1 0 2 0 0 0 0 0 0 0 1 1 1 
-MAP 1 0 0 0 0 0 0 0 2 0 0 0 1 1 1 
-MAP 1 0 5 5 5 0 0 2 0 0 0 0 0 1 1 
-MAP 1 1 5 0 5 0 2 0 0 0 0 0 0 0 1 
-MAP 1 1 5 5 5 0 0 0 0 0 0 0 0 0 0 
-MAP 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 
+HGT 10
+MAP 0 0 0 0 0 2 2 2 2 2 1 1 1 1 1 
+MAP 0 5 5 5 0 0 0 2 2 2 1 1 1 1 1 
+MAP 0 5 6 5 0 0 0 0 2 2 1 1 0 4 1 
+MAP 0 5 5 5 0 0 0 0 2 1 1 2 2 2 2 
+MAP 0 0 0 0 0 3 0 0 1 1 2 0 2 0 2 
+MAP 0 0 0 0 0 3 3 1 1 1 0 2 2 2 2 
+MAP 0 0 0 0 3 3 3 0 0 1 1 2 0 2 0 
+MAP 1 1 0 0 3 3 0 0 0 0 1 0 2 0 2 
+MAP 1 1 1 0 0 0 0 0 6 0 0 0 0 0 0 
+MAP 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Brute 8 4 1 
-UNT Brute 6 6 1 
-UNT Archer 8 5 4 
-UNT Archer 7 6 4 
-UNT Lucina 3 17 0 
-UNT Brute 10 10 4 
-UNT Brute 12 11 4 
-UNT Brute 5 4 2 
-UNT Lon'qu 5 15 0 
-UNT Donnel 2 15 0 
-UNT Brute 8 15 1 
-UNT Thief 9 16 1 
-UNT Archer 6 9 4 
+UNT Lucina 2 2 0 
+UNT Priam 1 4 0 
+UNT Thief 4 5 1 
+UNT Archer 8 8 2 
+UNT Brute 11 8 4 
+UNT Brute 11 9 4 
+UNT Brute 13 2 2 
+UNT Thief 13 4 4 
+UNT Archer 10 5 4 
 

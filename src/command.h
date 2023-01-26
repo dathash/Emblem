@@ -116,7 +116,7 @@ public:
                                          cursor->selected->movement,
                                          cursor->selected->is_ally);
 
-        EmitEvent(PICK_UP_UNIT);
+        EmitEvent(PICK_UP_UNIT_EVENT);
 
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
@@ -143,7 +143,7 @@ public:
 
         cursor->path_draw = {};
 
-        EmitEvent(PLACE_UNIT);
+        EmitEvent(PLACE_UNIT_EVENT);
 
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
@@ -307,7 +307,7 @@ public:
 
         menu->AddOption("Wait");
 
-        EmitEvent(PLACE_UNIT);
+        EmitEvent(PLACE_UNIT_EVENT);
 
         // change state
         GlobalInterfaceState = UNIT_MENU_ROOT;
@@ -340,7 +340,7 @@ public:
         cursor->selected->pos = cursor->pos;
         cursor->selected->sheet.ChangeTrack(0);
 
-        EmitEvent(PICK_UP_UNIT);
+        EmitEvent(PICK_UP_UNIT_EVENT);
 
         GlobalInterfaceState = SELECTED_OVER_GROUND;
     }
@@ -501,6 +501,8 @@ public:
         *fight = Fight(cursor->selected, cursor->targeted,
                         map.tiles[cursor->source.col][cursor->source.row].avoid,
                         map.tiles[cursor->pos.col][cursor->pos.row].avoid,
+                        map.tiles[cursor->source.col][cursor->source.row].defense,
+                        map.tiles[cursor->pos.col][cursor->pos.row].defense,
                         distance, dir);
         fight->ready = true;
 
@@ -537,12 +539,12 @@ public:
             case ABILITY_HEAL:
             {
                 SimulateHealing(cursor->selected, cursor->targeted);
-                EmitEvent(HEAL);
+                EmitEvent(HEAL_EVENT);
             } break;
             case ABILITY_BUFF:
             {
                 cursor->targeted->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
-                EmitEvent(BUFF);
+                EmitEvent(BUFF_EVENT);
             } break;
             case ABILITY_SHIELD:
             {
@@ -551,7 +553,7 @@ public:
             case ABILITY_DANCE:
             {
                 SimulateDancing(cursor->selected, cursor->targeted);
-                EmitEvent(DANCE);
+                EmitEvent(DANCE_EVENT);
             } break;
             default:
             {
@@ -624,6 +626,7 @@ public:
         cursor->redo = cursor->pos;
 
         GlobalInterfaceState = ENEMY_INFO;
+        EmitEvent(UNIT_INFO_EVENT);
     }
 
 private:
@@ -645,6 +648,7 @@ public:
         cursor->redo = {-1, -1};
 
         GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        EmitEvent(PLACE_UNIT_EVENT);
     }
 
 private:
@@ -719,7 +723,7 @@ public:
 
     virtual void Execute()
     { 
-        EmitEvent(SELECT_MENU_OPTION);
+        EmitEvent(SELECT_MENU_OPTION_EVENT);
         switch(menu->current)
         {
             case(0): // OUTLOOK
@@ -762,7 +766,7 @@ public:
 
     virtual void Execute()
     { 
-        EmitEvent(MOVE_MENU);
+        EmitEvent(MOVE_MENU_EVENT);
         int newCurrent = menu->current + direction;
         if(newCurrent >= menu->rows)
             menu->current = 0;
@@ -789,7 +793,7 @@ public:
 
     virtual void Execute()
     {
-        EmitEvent(SELECT_MENU_OPTION);
+        EmitEvent(SELECT_MENU_OPTION_EVENT);
 
         string option = menu.optionText[menu.current];
 
@@ -853,6 +857,7 @@ public:
     virtual void Execute()
     {
         GlobalInterfaceState = UNIT_INFO;
+        EmitEvent(UNIT_INFO_EVENT);
     }
 };
 
@@ -862,6 +867,7 @@ public:
     virtual void Execute()
     {
         GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        EmitEvent(PLACE_UNIT_EVENT);
     }
 };
 
@@ -874,7 +880,7 @@ public:
 
     virtual void Execute()
     {
-        EmitEvent(SELECT_MENU_OPTION);
+        EmitEvent(SELECT_MENU_OPTION_EVENT);
 
         string option = menu.optionText[menu.current];
 
@@ -922,6 +928,7 @@ public:
             GlobalInterfaceState = LEVEL_MENU;
         }
         conversation->ReloadTextures();
+        EmitEvent(NEXT_SENTENCE_EVENT);
     }
 
 private:

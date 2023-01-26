@@ -212,6 +212,13 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             *hover_tile = SPAWN_TILE;
             hover_tile->occupant = tmp;
         }
+        ImGui::SameLine();
+        if(ImGui::Button("fort"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = FORT_TILE;
+            hover_tile->occupant = tmp;
+        }
 
 
         ImGui::Text("Units:");

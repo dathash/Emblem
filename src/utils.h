@@ -198,8 +198,20 @@ MoveViewport(const position &p)
 void
 SetViewport(const position &p, int width, int height)
 {
-    if(WithinViewport(p))
+    // TODO: More robust solution
+    // For now, this just makes sure if the viewport is too small that we aren't breaking things.
+    if(viewportCol + VIEWPORT_WIDTH > width ||
+       viewportRow + VIEWPORT_HEIGHT > height)
+    {
+        viewportCol = 0;
+        viewportRow = 0;
         return;
+    }
+
+    if(WithinViewport(p) && viewportCol >= 0 && viewportRow >= 0)
+    {
+        return;
+    }
 
     position viewport_grid_position = 
     {

@@ -70,6 +70,39 @@ struct Channel
     }
 };
 
+struct EventSample
+{
+    float t;
+    EventType value;
+};
+
+struct EventChannel
+{
+    vector<EventSample> samples = {};
+    int index = 0;
+    //float (*ease) (float) = Identity;
+
+    EventChannel() = default;
+
+    EventChannel(const vector<EventSample> &samples_in)
+    : samples(samples_in)
+    {}
+
+    void
+    Update(float time)
+    {
+        assert(!samples.empty());
+        if(index < samples.size())
+        {
+            if(samples[index].t < time)
+            {
+                EmitEvent(samples[index].value);
+                ++index;
+            }
+        }
+    }
+};
+
 struct Animation
 {
     int speed   = 1; // inverse. 1 is faster than 10.
@@ -80,12 +113,14 @@ struct Animation
     Channel channel_two   = {};
     Channel channel_three = {};
     Channel channel_four  = {};
+    EventChannel event_channel = {};
     int num_channels = 0;
 
     Animation() = default;
 
     Animation(int speed_in, int finish_in, bool repeat_in, int num_channels_in,
               const vector<Sample> &samples_one, float (*ease_one) (float),
+              const vector<EventSample> &event_samples = {},
               const vector<Sample> &samples_two = {}, float (*ease_two) (float) = Identity,
               const vector<Sample> &samples_three = {}, float (*ease_three) (float) = Identity,
               const vector<Sample> &samples_four = {}, float (*ease_four) (float) = Identity
@@ -96,6 +131,7 @@ struct Animation
       num_channels(num_channels_in)
     {
         channel_one = Channel(samples_one, ease_one);
+        event_channel = EventChannel(event_samples);
         channel_two = Channel(samples_two, ease_two);
         channel_three = Channel(samples_three, ease_three);
         channel_four = Channel(samples_four, ease_four);
@@ -112,6 +148,7 @@ struct Animation
         channel_two = other.channel_two;
         channel_three = other.channel_three;
         channel_four = other.channel_four;
+        event_channel = other.event_channel;
     }
 
     float
@@ -149,6 +186,10 @@ struct Animation
             //EmitEvent(on_finish);
             return true;
         }
+
+        if(event_channel.samples.size() > 0)
+            event_channel.Update(Time());
+
         if(num_channels > 0)
             channel_one.Update(Time());
         if(num_channels > 1)
@@ -174,6 +215,7 @@ GetAnimation(AnimationValue anim)
                      {0.5 ,  0.0 },
                      {1.0 ,  0.0 }},
                      Identity,
+                    {{0.5, ATTACK_RANGED_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
                      {1.0 ,  0.0 }},
                      Identity));
@@ -186,6 +228,7 @@ GetAnimation(AnimationValue anim)
                      {0.5 ,  1.0 },
                      {1.0 ,  0.0 }},
                      Identity,
+                    {{0.5, ATTACK_HIT_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
                      {1.0 ,  0.0 }},
                      Identity));
@@ -198,6 +241,7 @@ GetAnimation(AnimationValue anim)
                      {0.5 ,  1.0 },
                      {1.0 ,  0.0 }},
                      Identity,
+                    {{0.5, ATTACK_CRIT_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
                      {0.40,  0.0 },
                      {0.45,  0.5 },
@@ -213,6 +257,7 @@ GetAnimation(AnimationValue anim)
                      {0.5 ,  1.0 },
                      {1.0 ,  0.0 }},
                      Identity,
+                    {{0.45, ATTACK_MISS_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
                      {0.5 ,  0.0 },
                      {1.0 ,  0.0 }},

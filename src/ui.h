@@ -28,6 +28,7 @@ GetTileNameString(TileType type)
     case SWAMP: return "Swamp";
     case GOAL: return "Goal";
     case SPAWN: return "Spawn";
+    case FORT: return "Fort";
 	default:
 		assert(!"ERROR: Unhandled Tile name string in UI.\n");
 		return "";
@@ -202,13 +203,12 @@ DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 	//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.8);
 
 	ImGui::PushFont(uiFontLarge);
-    ImGui::Begin("Tile", NULL, wf);
+    ImGui::Begin(GetTileNameString(tile.type).c_str(), NULL, wf);
     {
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
-
-			TextCentered(GetTileNameString(tile.type));
 			ImGui::Text("hide %d", tile.avoid);
+			ImGui::Text("def  %d", tile.defense);
 			ImGui::Text("move %d", tile.penalty);
 
 		ImGui::PopFont();
@@ -424,7 +424,8 @@ GetHitColor(int hit)
 // Displays combat preview when initiating combat
 void
 DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
-                                          int ally_avoid_bonus, int enemy_avoid_bonus)
+                                          int ally_avoid_bonus, int enemy_avoid_bonus,
+                                          int ally_defense_bonus, int enemy_defense_bonus)
 {
     // Predict the outcome
     Outcome outcome;
@@ -436,7 +437,8 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     {
         outcome = PredictCombat(ally, target,
                   ManhattanDistance(ally.pos, target.pos),
-                  ally_avoid_bonus, enemy_avoid_bonus);
+                  ally_avoid_bonus, enemy_avoid_bonus,
+                  ally_defense_bonus, enemy_defense_bonus);
     }
 
 	// Window sizing
@@ -657,7 +659,10 @@ RenderUI(UI_State *ui,
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
                                            map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,
-                                           map.tiles[cursor.pos.col][cursor.pos.row].avoid);
+                                           map.tiles[cursor.pos.col][cursor.pos.row].avoid,
+                                           map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].defense,
+                                           map.tiles[cursor.pos.col][cursor.pos.row].defense
+                                           );
     if(ui->game_over)
         DisplayGameOver(window_flags);
 

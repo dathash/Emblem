@@ -152,7 +152,8 @@ int main(int argc, char *argv[])
         new Sound("ranged.wav", SFX),
         new Sound("sel1.wav", SFX),
         new Sound("sel2.wav", SFX),
-        new Sound("sel3.wav", SFX)
+        new Sound("sel3.wav", SFX),
+        new Sound("dance.wav", SFX)
     };
 
 // ================================== load =================================
@@ -226,23 +227,27 @@ int main(int argc, char *argv[])
         {
             GlobalNextLevel = false;
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
-            vector<shared_ptr<Unit>> party = {};
 
+            /*
             // Persistence (Naive)
+            vector<shared_ptr<Unit>> party = {};
             for(shared_ptr<Unit> unit : level.combatants)
             {
                 if(unit->is_ally && 
                    unit->ID() != LEADER_ID)
                     party.push_back(unit);
             }
+            */
 
             level = LoadLevel(DATA_PATH + levels[level_index], units);
 
+            /*
             // Persistence (Naive)
             for(shared_ptr<Unit> unit : party)
             {
                 level.AddCombatant(unit, level.map.GetNextSpawnLocation());
             }
+            */
 
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;

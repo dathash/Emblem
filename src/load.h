@@ -194,6 +194,11 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
                         level.map.tiles[col][mapRow] = 
                             SWAMP_TILE;
                     } break;
+                    case(FORT):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            FORT_TILE;
+                    } break;
                     case(GOAL):
                     {
                         level.map.tiles[col][mapRow] = 
@@ -342,6 +347,8 @@ SaveLevel(string filename_in, const Level &level)
     fp << "COM File: Level\n\n";
 
     fp << "ATL " << level.map.atlas.filename << "\n\n";
+
+    fp << "MUS " << GlobalSong->name << "\n\n";
 
     // Save Map Data
     fp << "WDT " << level.map.width << "\n";

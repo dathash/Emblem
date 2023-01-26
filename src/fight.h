@@ -29,10 +29,10 @@ CritChance(const Unit &predator, const Unit &prey)
 
 // Determines what damage a hit will do.
 int
-CalculateDamage(const Unit &predator, const Unit &prey)
+CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
 {
     int attack = predator.attack;
-    int defense = prey.defense;
+    int defense = prey.defense + defense_bonus;
     if(predator.buff && predator.buff->stat == STAT_ATTACK)
         attack += predator.buff->amount;
     if(prey.buff && prey.buff->stat == STAT_DEFENSE)
@@ -85,11 +85,13 @@ struct Outcome
 // Returns the struct defined above.
 Outcome
 PredictCombat(const Unit &one, const Unit &two, int distance,
-			  int one_avoid_bonus, int two_avoid_bonus)
+			  int one_avoid_bonus, int two_avoid_bonus,
+			  int one_defense_bonus, int two_defense_bonus
+              )
 {
     Outcome outcome = {};
     outcome.one_attacks = true;
-    outcome.one_damage = CalculateDamage(one, two);
+    outcome.one_damage = CalculateDamage(one, two, two_defense_bonus);
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
     outcome.one_crit = one.crit;
     outcome.one_doubles = Doubles(one, two);
@@ -97,7 +99,7 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     if(distance >= two.min_range && distance <= two.max_range)
     {
         outcome.two_attacks = true;
-        outcome.two_damage = CalculateDamage(two, one);
+        outcome.two_damage = CalculateDamage(two, one, one_defense_bonus);
         outcome.two_hit = HitChance(two, one, one_avoid_bonus);
         outcome.two_crit = two.crit;
         outcome.two_doubles = Doubles(two, one);
@@ -134,7 +136,6 @@ struct Attack
             case RANGED:
             {
                 animation = GetAnimation(ATTACK_ANIMATION_RANGED);
-                EmitEvent(ATTACK_RANGED);
             } break;
 
             case MELEE:
@@ -142,17 +143,14 @@ struct Attack
                 if(hit && !crit)
                 {
                     animation = GetAnimation(ATTACK_ANIMATION_MELEE);
-                    EmitEvent(ATTACK_HIT);
                 }
                 else if(hit && crit)
                 {
                     animation = GetAnimation(ATTACK_ANIMATION_LEAP);
-                    EmitEvent(ATTACK_CRIT);
                 }
                 else
                 {
                     animation = GetAnimation(ATTACK_ANIMATION_MISS);
-                    EmitEvent(ATTACK_MISS);
                 }
             } break;
         }
@@ -190,6 +188,8 @@ struct Fight
     Unit *two = nullptr;
     int one_avoid_bonus = 0;
     int two_avoid_bonus = 0;
+    int one_defense_bonus = 0;
+    int two_defense_bonus = 0;
     int distance = 0;
     direction one_to_two_direction = {0, 0};
 
@@ -204,18 +204,23 @@ struct Fight
 
     Fight(Unit *one_in, Unit *two_in, 
           int one_avo_in, int two_avo_in,
+          int one_def_in, int two_def_in,
           int distance_in, const direction &direction_in)
     : one(one_in),
       two(two_in),
       one_avoid_bonus(one_avo_in),
       two_avoid_bonus(two_avo_in),
+      one_defense_bonus(one_def_in),
+      two_defense_bonus(two_def_in),
       distance(distance_in)
     {
         one_to_two_direction = direction_in;
         Populate(PredictCombat(*one_in, *two_in,
                                distance_in,
                                one_avo_in,
-                               two_avo_in));
+                               two_avo_in,
+                               one_def_in,
+                               two_def_in));
         ready = true;
     }
 
@@ -296,8 +301,8 @@ struct Fight
         if(quad == BOTTOM_LEFT
            || quad == BOTTOM_RIGHT)
             lower_half_screen = true;
-            int one_dmg = CalculateDamage(*one, *two);
-        int two_dmg = CalculateDamage(*two, *one);
+            int one_dmg = CalculateDamage(*one, *two, two_defense_bonus);
+        int two_dmg = CalculateDamage(*two, *one, one_defense_bonus);
         int one_accum = 0;
         int two_accum = 0;
         Attack attack = {one, two, one_dmg};
