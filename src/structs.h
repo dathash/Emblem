@@ -250,6 +250,93 @@ struct Unit
     }
 };
 
+Unit *
+GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
+{
+    for(shared_ptr<Unit> unit : units)
+    {
+        if(unit->ID() == hash<string>{}(name))
+        {
+            return unit.get();
+        }
+    }
+    cout << "WARN GetUnitByName: No unit of that name.\n";
+    return nullptr;
+}
+
+// ===================================== Converation ===========================
+enum Speaker
+{
+    SPEAKER_ONE,
+    SPEAKER_TWO
+};
+typedef pair<Speaker, string> sentence;
+
+// CIRCULAR
+Texture LoadTextureText(string, SDL_Color, int);
+
+struct Conversation
+{
+    string filename = "";
+    Unit *one = nullptr;
+    Unit *two = nullptr;
+    vector<sentence> prose;
+    int current = 0;
+    Texture words_texture;
+    Texture speaker_texture;
+    bool done = false;
+
+    Conversation() = default;
+
+    Conversation(Unit *one_in, Unit *two_in)
+    : one(one_in),
+      two(two_in),
+      prose({})
+    {
+    }
+
+    string
+    Words() const
+    {
+        return prose[current].second;
+    }
+
+    Speaker
+    Speaker() const
+    {
+        return prose[current].first;
+    }
+
+    void
+    ReloadTextures()
+    {
+        words_texture = LoadTextureText(Words(), black, CONVERSATION_WRAP);
+        if(Speaker() == SPEAKER_ONE)
+            speaker_texture = LoadTextureText(one->name, black, 0);
+        if(Speaker() == SPEAKER_TWO)
+            speaker_texture = LoadTextureText(two->name, black, 0);
+    }
+
+    void
+    Next()
+    {
+        ++current;
+        if(current >= prose.size())
+        {
+            done = true;
+            current = 0;
+        }
+    }
+};
+
+struct ConversationList
+{
+    vector<Conversation> list = {};
+    int index = 0;
+};
+
+
+
 // ========================== map stuff =======================================
 struct Tile
 {
@@ -270,7 +357,7 @@ struct Tilemap
     vector<position> ability = {};
     vector<position> range = {};
     //vector<point> adjacent;
-    //vector<position> prospective = {};
+    //vector<position> prospective = {}; // TODO
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 
@@ -296,15 +383,8 @@ struct Level
 {
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
-
-    // TODO: WHAT IS GOING ON?
-    //Sound *music = nullptr;
-    // This cannot be added to the structure.
-    // In fact, if I add anything to this structure, I get a bus error.
-    // lldb tells me it breaks somewhere in the animation code.
-    // I have no idea what this issue is and I
-    // believe I should ask someone who knows more
-    // than I do. In any case, don't put stuff here for now.
+    //Sound *music = nullptr; // TODO: Move GlobalSong in here.
+    ConversationList conversations;
 
     // Puts a piece on the board
     void
@@ -386,69 +466,6 @@ struct Level
         CheckForRemaining();
     }
 };
-
-// ===================================== Animation =============================
-enum Speaker
-{
-    SPEAKER_ONE,
-    SPEAKER_TWO
-};
-typedef pair<Speaker, string> sentence;
-
-// CIRCULAR
-Texture LoadTextureText(string, SDL_Color, int);
-
-struct Conversation
-{
-    const Unit &one;
-    const Unit &two;
-    vector<sentence> prose;
-    int current = 0;
-    Texture words_texture;
-    Texture speaker_texture;
-
-    Conversation(const Unit &one_in, const Unit &two_in)
-    : one(one_in),
-      two(two_in),
-      prose({})
-    {
-    }
-
-    string
-    Words() const
-    {
-        return prose[current].second;
-    }
-
-    Speaker
-    Speaker() const
-    {
-        return prose[current].first;
-    }
-
-    void
-    ReloadTextures()
-    {
-        words_texture = LoadTextureText(Words(), black, CONVERSATION_WRAP);
-        if(Speaker() == SPEAKER_ONE)
-            speaker_texture = LoadTextureText(one.name, black, 0);
-        if(Speaker() == SPEAKER_TWO)
-            speaker_texture = LoadTextureText(two.name, black, 0);
-    }
-
-    void
-    Next()
-    {
-        ++current;
-    }
-
-    void
-    First()
-    {
-        current = 0;
-    }
-};
-
 
 // ================================= Menu ======================================
 struct Menu

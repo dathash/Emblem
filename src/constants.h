@@ -17,8 +17,8 @@
 #define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
 // defaults
-#define DEFAULT_MUSIC_VOLUME 0.5f
-#define DEFAULT_SFX_VOLUME 0.2f
+#define DEFAULT_MUSIC_VOLUME 0.0f
+#define DEFAULT_SFX_VOLUME 0.0f
 
 // rendering
 #define VIEWPORT_WIDTH 15
@@ -33,6 +33,7 @@
 
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
+#define CONV_MENU_WIDTH 400
 #define CONVERSATION_WRAP 840
 
 // animation
@@ -105,13 +106,14 @@ enum InterfaceState
 
     LEVEL_MENU, // 19
 
-    CONVERSATION, // 20
+    CONVERSATION_MENU, // 20
+    CONVERSATION, // 21
 
-    PLAYER_FIGHT, // 21
+    PLAYER_FIGHT, // 22
 
-    NO_OP, // 22
+    NO_OP, // 23
 
-    GAME_OVER, // 23
+    GAME_OVER, // 24
 };
 
 enum AIState

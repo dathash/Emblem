@@ -11,9 +11,10 @@
 // ============================== loading data =================================
 Conversation
 LoadConversation(string path, string filename,
-                 const Unit &one, const Unit &two)
+                 const vector<shared_ptr<Unit>> units)
 {
-    Conversation conversation = {one, two};
+    Conversation conversation = {};
+    conversation.filename = filename;
 
     string line;
 	string type;
@@ -32,7 +33,15 @@ LoadConversation(string path, string filename,
         type = line.substr(0, 3);
         rest = line.substr(4);
 
-        if(type == "ONE")
+        if(type == "SP1")
+        {
+            conversation.one = GetUnitByName(units, rest);
+        }
+        else if(type == "SP2")
+        {
+            conversation.two = GetUnitByName(units, rest);
+        }
+        else if(type == "ONE")
         {
             conversation.prose.push_back(sentence(SPEAKER_ONE, rest));
         }
@@ -49,8 +58,10 @@ LoadConversation(string path, string filename,
         }
     }
     fp.close();
-    conversation.ReloadTextures();
 
+    assert(conversation.one && conversation.two);
+
+    conversation.ReloadTextures();
     return conversation;
 }
 
@@ -143,6 +154,11 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         if(type == "ATL")
         {
             level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
+        }
+        else if(type == "CNV")
+        {
+            level.conversations.list.push_back(LoadConversation(
+                                CONVERSATIONS_PATH, rest, units));
         }
         else if(type == "MUS")
         {
@@ -347,6 +363,12 @@ SaveLevel(string filename_in, const Level &level)
     fp << "COM File: Level\n\n";
 
     fp << "ATL " << level.map.atlas.filename << "\n\n";
+
+    for(const Conversation &conv : level.conversations.list)
+    {
+        fp << "CNV " << conv.filename << "\n";
+    }
+    fp << "\n";
 
     fp << "MUS " << GlobalSong->name << "\n\n";
 

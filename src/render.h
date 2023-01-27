@@ -119,7 +119,9 @@ RenderHealthBarCombat(const position &p, int hp, int maxHp)
 void
 Render(const Tilemap &map, const Cursor &cursor, 
        const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu,
-       const Conversation &conversation, const Fight &fight)
+       const Menu &conversationMenu,
+       const ConversationList &conversations, 
+       const Fight &fight)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -364,6 +366,31 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
+    if(GlobalInterfaceState == CONVERSATION_MENU)
+    {
+        for(int i = 0; i < conversationMenu.rows; ++i)
+        {
+            SDL_Rect menuRect = {400, 140 + i * MENU_ROW_HEIGHT, CONV_MENU_WIDTH, MENU_ROW_HEIGHT};
+
+            if(i < conversations.list.size() && conversations.list[i].done)
+                SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
+            else
+                SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
+            SDL_RenderFillRect(GlobalRenderer, &menuRect);
+
+            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
+
+            RenderText(conversationMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
+        }
+
+        SDL_Rect menuSelectorRect = {400, 140 + MENU_ROW_HEIGHT * conversationMenu.current, CONV_MENU_WIDTH, MENU_ROW_HEIGHT};
+        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
+        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
+        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
+        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
+    }
+
     // Portraits
     if(GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO)
@@ -388,9 +415,15 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     if(GlobalInterfaceState == CONVERSATION)
     {
-        RenderPortrait(50, 0, conversation.one.portrait,
+        Conversation conversation = conversations.list[conversations.index];
+
+        SDL_Rect bg_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
+        SDL_RenderFillRect(GlobalRenderer, &bg_rect);
+
+        RenderPortrait(-50, 0, conversation.one->portrait,
                        true);
-        RenderPortrait(500, 0, conversation.two.portrait,
+        RenderPortrait(400, 0, conversation.two->portrait,
                        false);
 
         SDL_Rect conv_rect = {20, 400, 860, 180};

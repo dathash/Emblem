@@ -4,6 +4,10 @@ COM File: Level
 
 ATL ruins.png
 
+CNV lucina_donnel_1.txt
+CNV lucina_lonqu_1.txt
+CNV donnel_lonqu_1.txt
+
 MUS qc.wav
 
 WDT 15
@@ -25,7 +29,7 @@ MAP 1 1 1 1 1 1 0 0 0 0 0 0 2 2 2
 MAP 1 1 1 0 2 0 0 0 0 0 0 0 1 1 1 
 MAP 1 0 0 0 0 0 0 0 2 0 0 0 1 1 1 
 MAP 1 0 5 5 5 0 0 2 0 0 0 0 0 1 1 
-MAP 1 1 5 0 5 0 2 0 0 0 0 0 0 0 1 
+MAP 1 1 5 0 5 4 2 0 0 0 0 0 0 0 1 
 MAP 1 1 5 5 5 0 0 0 0 0 0 0 0 0 0 
 MAP 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 
 
@@ -38,9 +42,9 @@ UNT Lucina 3 17 0
 UNT Brute 10 10 4 
 UNT Brute 12 11 4 
 UNT Brute 5 4 2 
-UNT Lon'qu 5 15 0 
-UNT Donnel 2 15 0 
 UNT Brute 8 15 1 
 UNT Thief 9 16 1 
 UNT Archer 6 9 4 
+UNT Lon'qu 13 18 0 
+UNT Donnel 10 19 0 
 

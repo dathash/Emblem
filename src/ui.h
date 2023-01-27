@@ -121,6 +121,7 @@ struct UI_State
 		// Tile Info
         if(
            !(GlobalInterfaceState == LEVEL_MENU ||
+             GlobalInterfaceState == CONVERSATION_MENU ||
              GlobalInterfaceState == CONVERSATION ||
              GlobalInterfaceState == PREVIEW_ATTACK ||
              GlobalInterfaceState == PREVIEW_ABILITY ||

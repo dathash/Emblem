@@ -4,7 +4,7 @@ OBJ = ${SRC:.cpp=.o}
 
 LDFLAGS = -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
 INCFLAGS = -I../src/ -I../ext/ -I../ext/imgui/ -I../ext/imgui/backends -I/opt/homebrew/include/SDL2
-FLAGS = -std=c++14 -Wno-deprecated -Wall -glldb -O0
+FLAGS = -std=c++14 -Wno-deprecated -glldb -O0 # -Wall 
 OUT = em
 
 CC = clang++

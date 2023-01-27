@@ -4,6 +4,9 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
+SP1 Lucina
+SP2 Priam
+
 ONE This is a test.
 TWO What are you talking about?
 ONE This line is extremely long. You can tell it is long by the way that it is. Goodbye..

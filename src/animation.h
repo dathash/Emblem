@@ -107,7 +107,7 @@ struct Animation
 {
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
-    int finish  = 0;
+    int finish  = 100;
     bool repeat = false;
     Channel channel_one   = {};
     Channel channel_two   = {};

@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
         new Sound("13.wav", MUSIC),
         new Sound("21.wav", MUSIC),
         new Sound("tripod.wav", MUSIC),
+        new Sound("fs.wav", MUSIC),
         new Sound("title.wav", MUSIC)
     };
 
@@ -173,13 +174,11 @@ int main(int argc, char *argv[])
     Menu game_menu({"Outlook", "Options", "End Turn"});
     Menu unit_menu({"Wait"});
     Menu level_menu({"Next", "Redo", "Conv"});
+    Menu conversation_menu({"Return"});
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
     AI ai;
-
-    Conversation conversation = LoadConversation(CONVERSATIONS_PATH, "test.txt",
-                                                 *units[0], *units[1]);
 
     Fight fight;
 
@@ -198,8 +197,8 @@ int main(int argc, char *argv[])
         {
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level.map,
-                                   &game_menu, &unit_menu, &level_menu,
-                                   &conversation, &fight);
+                                   &game_menu, &unit_menu, &level_menu, &conversation_menu,
+                                   &level.conversations, &fight);
 
             ai.Update(&cursor, &level.map, &fight);
 
@@ -288,8 +287,8 @@ int main(int argc, char *argv[])
         //////////////// ABOVE TO BE EXTRICATED //////////////////
 
         // Render
-        Render(level.map, cursor, game_menu, unit_menu, level_menu, 
-               conversation, fight);
+        Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
+               level.conversations, fight);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

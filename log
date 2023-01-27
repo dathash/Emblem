@@ -79,25 +79,16 @@ Sometimes I breath (planet dob)
 # Ideas
 ## Brainstorm
 What is appealing to me about tactics games?
-    Being in Command
     Individual Characters
         Strong Characterization
         Developing Relationships
     Permadeath sacrifices
     Gaining new team members
-    RPG Elements
-        Nurturing weak units until they're strong.
-        That's it. I pretty much think all other uses of RPG mechanics in these
-        games are a waste of time.
-        Strategy is good. Just the incessant "Level Up!" portion of Fire Emblem
-        makes me sick.
-            Big numbers != fun game.
     The beginning of Fire Emblem games are always the best.
     Middle of a level is best.
         Beginning: Setting up, being overly cautious. Not good.
         End: Ganging up on a boss. Pretty much a waste of time.
-
-    
+ 
 Ideas
 * Social Psychology game
     Characterization is deeply ingrained into combat.
@@ -109,20 +100,43 @@ Ideas
                 Enemies hit them more often.
         Conversations mid-battle.
 
-* Text-only tactics game?
-    In D&D, the grid distracts from the moment-to-moment decisions. It makes
-    the game less exciting, not more.
-    Perhaps we could imbue a computer game with this sort of think-on-your-feet
-    decision-making.
-    Would be a lot of work to make the computer be able to communicate your
-    situation well enough. This is one area where I have 'em beat.
-
 * Deep exploration of mechanics
     Fire Emblem reaches a point where it's all sort of the same.
     What if we dug in to this?
         Made mechanics that lended themselves towards extremely specific playstyles?
         Made objectives that required modes of thinking?
         Dropped RPG elements to make way for the new puzzle-style mechanic?
+
+* Shapes game
+
+* Turn Timer game
+
+* Rogue-like combinatoric explosion game
+
+## Design
+Why are we fighting?
+Fire Emblem maps are almost always about killing all the enemies
+What about other objectives?
+What about Save all the Innocents?
+What about Collect all the Items?
+What about Escape?
+What about anything else?
+
+What do RPG Mechanics really achieve?
+* Feeling of commitment to the game.
+* Numbers go up hehe
+* The strategic decision of nurturing a weak unit until they grow.
+
+## Mechanics
+Group mechanics (Units nearby eachother get bonuses)
+Leader mechanics (Genealogy stars)
+Fort with attack bonus instead of defense
+Knight Moves?
+Jumping tiles in general?
+Boost teammate units over stuff?
+Misty Step
+Area of Effect
+Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
 ## Characters
 ### Commander
@@ -197,33 +211,6 @@ Noire
         Consequences.
     Personality
 
-## Mechanics
-Group mechanics (Units nearby eachother get bonuses)
-Leader mechanics (Genealogy stars)
-Fort with attack bonus instead of defense
-Knight Moves?
-Jumping tiles in general?
-Boost teammate units over stuff?
-Misty Step
-Area of Effect
-Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
-
-Some levels objective is to kill all the enemies?
-
-## Design
-Replayability
-* Curated rooms, enemies, etc. but randomized order.
-  * Like Into the Breach
-* Randomized recruits inbetween levels.
-  * Like Auto-chess
-
-Why are we fighting?
-Fire Emblem maps are almost always about killing all the enemies
-What about other objectives?
-What about Save all the Innocents?
-What about Collect all the Items?
-What about Escape?
-What about anything else?
 
 # TODO
 PROTOTYPE ///////////////////////////////////////////////////
@@ -232,22 +219,20 @@ PROTOTYPE ///////////////////////////////////////////////////
     display enemy damage range, unit damage range, plus abilities too.
 
     More complex conversations
+    * Conversations mid-battle
+    * Unit Death Screens
     * Units come and go
     * Facial expression changes
-    * Menu
-    * Unit Death Screen
-    Add some conversations for inbetween levels
-
-    Figure out my bus error bug – happens when I add a field to the Map struct
-    or the Level struct.
 
 ////////////////////////////////////////////////////////////
 
 0.1 ////////////////////////////////////////////////////////
+    10 levels
+
     Inbetween Levels | Metagame
     * Recruit new units?
-    * Conversations?
     * Allocate stats?
+    * Equipment?
 
     Fire Tile?
     Fortress Tile?
@@ -266,6 +251,8 @@ PROTOTYPE ///////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 0.2 ////////////////////////////////////////////////////////
+    15 levels
+
     Real-time color editing in the editor
 
     Better enemy AI
@@ -302,7 +289,6 @@ POLISH
     Placing Unit moves them smoothly to that square (A-star)
     Smooth Screen Scroll (Render tiles one tile off of the screen.)
 
-
 MAYBE?
     Eventually switch over to OpenGL or Vulkan/Direct3D12
     Shrink Tilesets to absolute necessity, also enforce consistency across them
@@ -323,3 +309,25 @@ QA
 MULTI-PLATFORM
     Don't include SDL2/SDL.h, rather include SDL.h therefore you can remove the CRT.
     Use SDL Assert().
+
+# World
+Tolmec
+* Desert
+* Theocracy
+
+Imrryr
+* Plains
+* Lordship
+
+Gaul
+* Mountains
+* Nomads
+
+Heroes
+Close party, like in Bebop or in Lupin.
+The hero.
+The brooding one.
+The heart.
+The lover.
+The demon.
+

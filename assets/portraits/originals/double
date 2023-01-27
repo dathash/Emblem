@@ -1,2 +1,0 @@
-#!/bin/bash
-2x -m /usr/local/bin/waifu2x/models-cunet -i "$1" -o "$2" -n 3

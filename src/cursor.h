@@ -16,7 +16,7 @@ struct Cursor
     Spritesheet sheet;
     path path_draw = {};
 
-    Animation *animation;
+    Animation *animation = nullptr;
     position animation_offset = position(0, 0);
     direction animation_dir = direction(0, 0);
 

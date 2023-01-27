@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for file in ./wip/*
+do
+  echo "$file"
+  2x -m /usr/local/bin/waifu2x/models-cunet -i "$file" -o "$file" -n 3
+done
+

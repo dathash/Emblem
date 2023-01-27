@@ -1,0 +1,32 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Conversation
+
+COM NOTE: Don't use tabs in here!
+
+SP1 Donnel
+SP2 Lon'qu
+
+ONE Lonnie, holy cow! I ain't seen you strike a bull that way before!
+ONE Where were you keeping that dagger?
+TWO Early mornings, Donnel. I've been training for a while.
+ONE Should'a known. No one's got as much discipline as my brother.
+TWO You were pretty sharp yourself, though we ought to find you a proper weapon.
+ONE Pitchfork's good enough for the crop, I say it's good enough for these scumbags!
+TWO Whatever your feelings, you've got no chance against armored foes.
+ONE You might be right... I don't suppose that's my strong suit in the long run.
+TWO Indeed. You seem to do better as a target than as an attacker.
+TWO You take punishment like nobody's business.
+ONE Hell, I always been that way. you 'member that from our bar brawlin' days.
+TWO It's one thing to take a bottle, another to take a blade.
+TWO I'll keep you in front of me, but be careful, Don. Don't want to make mom worry.
+ONE 'course.
+ONE Say, what do you think of that one?
+TWO Lucina?
+ONE Yeah, I can't place her accent.
+TWO Gaul.
+ONE Where?
+TWO The Mountains. To the south.
+ONE Oh... I didn't know anyone lived up there.
+TWO Me neither. The world is wide.
+TWO I have a feeling it's far wider than we could ever imagine.

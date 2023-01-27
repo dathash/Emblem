@@ -882,8 +882,12 @@ public:
 class ChooseLevelMenuOptionCommand : public Command
 {
 public:
-    ChooseLevelMenuOptionCommand(const Menu &menu_in)
-    : menu(menu_in)
+    ChooseLevelMenuOptionCommand(const Menu &menu_in,
+                                 Menu *conversation_menu_in,
+                                 ConversationList *conversations_in)
+    : menu(menu_in),
+      conversation_menu(conversation_menu_in),
+      conversations(conversations_in)
     {}
 
     virtual void Execute()
@@ -904,7 +908,17 @@ public:
         }
         if(option == "Conv")
         {
-            GlobalInterfaceState = CONVERSATION;
+            *conversation_menu = Menu({});
+            char buffer[256] = "";
+
+            for(const Conversation &conv : conversations->list)
+            {
+                sprintf(buffer, "%s / %s", conv.one->name.c_str(), conv.two->name.c_str());
+                conversation_menu->AddOption(buffer);
+            }
+            conversation_menu->AddOption("Return");
+
+            GlobalInterfaceState = CONVERSATION_MENU;
             return;
         }
 
@@ -913,7 +927,69 @@ public:
 
 private:
     const Menu &menu;
+    Menu *conversation_menu;
+    ConversationList *conversations;
 };
+
+
+class ReturnToLevelMenuCommand : public Command
+{
+public:
+    ReturnToLevelMenuCommand()
+    {}
+
+    virtual void Execute()
+    {
+        EmitEvent(SELECT_MENU_OPTION_EVENT);
+        GlobalInterfaceState = LEVEL_MENU;
+    }
+
+private:
+};
+
+
+class ChooseConversationMenuOptionCommand : public Command
+{
+public:
+    ChooseConversationMenuOptionCommand(const Menu &menu_in, ConversationList *conversations_in)
+    : menu(menu_in),
+      conversations(conversations_in)
+    {}
+
+    virtual void Execute()
+    {
+        EmitEvent(SELECT_MENU_OPTION_EVENT);
+
+        string option = menu.optionText[menu.current];
+
+        if(menu.current < conversations->list.size())
+        {
+            if(conversations->list[menu.current].done)
+                return;
+
+            conversations->index = menu.current;
+            GlobalInterfaceState = CONVERSATION;
+            return;
+        }
+        if(option == "Return")
+        {
+            GlobalInterfaceState = LEVEL_MENU;
+            return;
+        }
+        else
+        {
+            cout << "UNIMPLEMENTED\n";
+            return;
+        }
+
+        assert(!"ERROR ChooseConversationMenuOptionCommand | How did you get here?\n");
+    }
+
+private:
+    const Menu &menu;
+    ConversationList *conversations;
+};
+
 
 // ================================== Conversations ============================
 class NextSentenceCommand : public Command
@@ -926,15 +1002,12 @@ public:
     virtual void Execute()
     {
         conversation->Next();
-        if(conversation->current >= conversation->prose.size())
+        if(conversation->done)
         {
-            conversation->First();
-            //TODO: Conversations are a one-time thing, so remove them from the menu.
-            //      While we're at it, make a vector of conversations per level
-            //      and create a new menu in level_menu which displays possible
-            //      conversations.
-            GlobalInterfaceState = LEVEL_MENU;
+            GlobalInterfaceState = CONVERSATION_MENU;
+            return;
         }
+
         conversation->ReloadTextures();
         EmitEvent(NEXT_SENTENCE_EVENT);
     }
@@ -1084,7 +1157,8 @@ public:
     // each individual command takes only what is absolutely necessary for its completion.
     void UpdateCommands(Cursor *cursor, Tilemap *map,
                         Menu *gameMenu, Menu *unitMenu,
-                        Menu *levelMenu, Conversation *conversation,
+                        Menu *levelMenu, Menu *conversationMenu, 
+                        ConversationList *conversations,
                         Fight *fight)
     {
         if(!GlobalPlayerTurn)
@@ -1318,8 +1392,20 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(levelMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu));
+                BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu, conversationMenu, conversations));
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(CONVERSATION_MENU):
+            {
+                BindUp(make_shared<UpdateMenuCommand>(conversationMenu, -1));
+                BindDown(make_shared<UpdateMenuCommand>(conversationMenu, 1));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<ChooseConversationMenuOptionCommand>(*conversationMenu, conversations));
+                BindB(make_shared<ReturnToLevelMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1330,7 +1416,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(conversation));
+                BindA(make_shared<NextSentenceCommand>(&(conversations->list[conversations->index])));
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

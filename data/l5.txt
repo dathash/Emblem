@@ -4,21 +4,28 @@ COM File: Level
 
 ATL ruins.png
 
-MUS tripod.wav
+MUS 13.wav
 
 WDT 15
 HGT 10
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 5 5 5 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 5 0 5 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 5 5 5 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 
-MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 
+MAP 0 5 5 5 0 0 1 1 1 1 1 1 1 1 1 
+MAP 0 5 0 5 0 0 1 1 1 1 1 1 1 1 1 
+MAP 0 5 5 5 0 1 1 1 1 1 1 1 1 1 1 
+MAP 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 
+MAP 0 2 2 2 0 0 0 1 2 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 1 1 0 0 0 0 0 4 0 
+MAP 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Lucina 2 2 0
-UNT Priam 0 4 0
+UNT Lucina 2 2 0 
+UNT Priam 0 3 0 
+UNT Archer 1 5 2 
+UNT Archer 3 5 2 
+UNT Brute 2 5 1 
+UNT Brute 8 6 2 
+UNT Archer 8 5 2 
+UNT Archer 8 7 2 
+
