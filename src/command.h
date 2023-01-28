@@ -1151,7 +1151,6 @@ public:
 
     virtual void Execute()
     {
-        cout << conversation->filename << "\n";
         conversation->done = true;
 
         if(GlobalInterfaceState == PRELUDE)

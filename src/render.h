@@ -418,14 +418,15 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO)
     {
-        assert(map.tiles[cursor.pos.col][cursor.pos.row].occupant);
+        const Unit *subject = map.tiles[cursor.pos.col][cursor.pos.row].occupant;
+        assert(subject);
         int x_pos = 480;
-        if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)
+        if(subject->is_ally)
             x_pos = -50;
 
-        RenderPortrait(x_pos, 0, *map.tiles[cursor.pos.col][cursor.pos.row].occupant,
-                       EXPR_ANGRY, // TODO: Add feature that shows the character's expression changing based on their state.
-                       map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
+        RenderPortrait(x_pos, 0, *subject,
+                       subject->health < subject->max_health * 0.5 ? EXPR_WINCE : EXPR_NEUTRAL,
+                       subject->is_ally);
     }
 
     if(GlobalInterfaceState == PREVIEW_ATTACK ||
@@ -433,8 +434,12 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         assert(cursor.selected);
 
-        RenderPortrait(-100, 0, *cursor.selected, EXPR_ANGRY, true);
-        RenderPortrait(430, 0, *cursor.targeted, EXPR_ANGRY, false);
+        RenderPortrait(-100, 0, *cursor.selected, 
+                       GlobalInterfaceState == PREVIEW_ABILITY ? EXPR_HAPPY : EXPR_ANGRY, 
+                       true);
+        RenderPortrait(430, 0, *cursor.targeted, 
+                       GlobalInterfaceState == PREVIEW_ABILITY ? EXPR_HAPPY : EXPR_ANGRY, 
+                       false);
     }
 
     if(GlobalInterfaceState == CONVERSATION ||

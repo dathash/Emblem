@@ -4,7 +4,7 @@ COM File: Units
 
 COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <apt> <def> <spd> <acc> <avo> <crit> <short> <long> <abi> <ai>>
 UNT Lucina lucina.png lucina_neutral.png lucina_happy.png lucina_angry.png lucina_wince.png Ally 4 14 8 0 2 9 110 10 10 1 1 2 0 
-UNT Priam priam.png priam_neutral.png priam_happy.png priam_angry.png priam_wince.png Ally 3 25 8 5 6 6 130 0 20 1 1 1 0 
+UNT Priam priam.png priam_neutral.png priam_happy.png priam_angry.png priam_wince.png Ally 3 25 12 5 6 6 130 0 20 1 1 1 0 
 UNT Stahl stahl.png stahl_neutral.png stahl_happy.png stahl_angry.png stahl_wince.png Ally 4 13 8 0 0 9 120 20 10 2 2 0 0 
 UNT Donnel donnel.png donnel_neutral.png donnel_happy.png donnel_angry.png donnel_wince.png Ally 3 22 6 10 8 2 80 0 0 1 1 1 0 
 UNT Olivia olivia.png olivia_neutral.png olivia_happy.png olivia_angry.png olivia_wince.png Ally 3 11 0 10 0 10 0 40 0 1 1 4 0 
