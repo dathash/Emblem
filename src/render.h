@@ -49,14 +49,24 @@ RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false
 
 // Renders a unit's portrait.
 void
-RenderPortrait(int x, int y, const Texture &portrait, bool flipped)
+RenderPortrait(int x, int y, const Unit &unit, 
+               Expression expression, bool flipped)
 {
+    const Texture *portrait;
+    switch(expression)
+    {
+        case EXPR_NEUTRAL: portrait = &unit.neutral; break;
+        case EXPR_HAPPY: portrait = &unit.happy; break;
+        case EXPR_ANGRY: portrait = &unit.angry; break;
+        case EXPR_WINCE: portrait = &unit.wince; break;
+        default: assert(!"ERROR RenderPortrait: Invalid expression."); break;
+    }
     SDL_Rect destination = {x, y, 
                             PORTRAIT_SIZE,
                             PORTRAIT_SIZE};
-    SDL_Rect source = {0, 0, portrait.width, portrait.height};
+    SDL_Rect source = {0, 0, portrait->width, portrait->height};
 
-    SDL_RenderCopyEx(GlobalRenderer, portrait.sdl_texture, &source, &destination, 
+    SDL_RenderCopyEx(GlobalRenderer, portrait->sdl_texture, &source, &destination, 
                      0, NULL, (const SDL_RendererFlip)flipped);
 }
 
@@ -400,7 +410,8 @@ Render(const Tilemap &map, const Cursor &cursor,
         if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)
             x_pos = -50;
 
-        RenderPortrait(x_pos, 0, map.tiles[cursor.pos.col][cursor.pos.row].occupant->neutral,
+        RenderPortrait(x_pos, 0, *map.tiles[cursor.pos.col][cursor.pos.row].occupant,
+                       EXPR_ANGRY, // TODO: Add feature that shows the character's expression changing based on their state.
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
 
@@ -409,9 +420,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         assert(cursor.selected);
 
-        RenderPortrait(-100, 0, cursor.selected->neutral, true);
-        RenderPortrait(430, 0, cursor.targeted->neutral, false);
-}
+        RenderPortrait(-100, 0, *cursor.selected, EXPR_ANGRY, true);
+        RenderPortrait(430, 0, *cursor.targeted, EXPR_ANGRY, false);
+    }
 
     if(GlobalInterfaceState == CONVERSATION)
     {
@@ -421,10 +432,10 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
         SDL_RenderFillRect(GlobalRenderer, &bg_rect);
 
-        RenderPortrait(-50, 0, conversation.one->neutral,
-                       true);
-        RenderPortrait(400, 0, conversation.two->neutral,
-                       false);
+        RenderPortrait(-50, 0, *conversation.one,
+                       conversation.one->expression, true);
+        RenderPortrait(400, 0, *conversation.two,
+                       conversation.two->expression, false);
 
         SDL_Rect conv_rect = {20, 400, 860, 180};
         SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);

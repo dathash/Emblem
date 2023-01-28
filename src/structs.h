@@ -134,9 +134,17 @@ struct Buff
     {}
 };
 
+
+enum Expression
+{
+    EXPR_NEUTRAL,
+    EXPR_HAPPY,
+    EXPR_ANGRY,
+    EXPR_WINCE,
+};
+
 struct Unit
 {
-
     string name;
     Spritesheet sheet;
     Texture neutral;
@@ -158,6 +166,7 @@ struct Unit
     int max_range;
     Ability ability;
 
+    Expression expression = EXPR_NEUTRAL;
     AIBehavior ai_behavior = NO_BEHAVIOR;
     position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
     bool is_exhausted = false;
@@ -277,9 +286,24 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 enum Speaker
 {
     SPEAKER_ONE,
-    SPEAKER_TWO
+    SPEAKER_TWO,
 };
-typedef pair<Speaker, string> sentence;
+Expression
+GetExpressionFromString(const string &in)
+{
+    if(in == "Neutral") return EXPR_NEUTRAL;
+    else if(in == "Happy") return EXPR_HAPPY;
+    else if(in == "Angry") return EXPR_ANGRY;
+    else if(in == "Wince") return EXPR_WINCE;
+    assert(!"Warning: Unsupported Expression in GetExpressionFromString.");
+}
+
+struct Sentence
+{
+    Speaker speaker;
+    string text;
+    Expression expression;
+};
 
 // CIRCULAR
 Texture LoadTextureText(string, SDL_Color, int);
@@ -289,7 +313,7 @@ struct Conversation
     string filename = "";
     Unit *one = nullptr;
     Unit *two = nullptr;
-    vector<sentence> prose;
+    vector<Sentence> prose;
     int current = 0;
     Texture words_texture;
     Texture speaker_texture;
@@ -307,13 +331,19 @@ struct Conversation
     string
     Words() const
     {
-        return prose[current].second;
+        return prose[current].text;
     }
 
     Speaker
     Speaker() const
     {
-        return prose[current].first;
+        return prose[current].speaker;
+    }
+
+    Expression
+    Expression() const
+    {
+        return prose[current].expression;
     }
 
     void
@@ -334,6 +364,18 @@ struct Conversation
         {
             done = true;
             current = 0;
+            one->expression = EXPR_NEUTRAL;
+            two->expression = EXPR_NEUTRAL;
+            return;
+        }
+
+        if(Speaker() == SPEAKER_ONE)
+        {
+            one->expression = Expression();
+        }
+        else if(Speaker() == SPEAKER_TWO)
+        {
+            two->expression = Expression();
         }
     }
 };

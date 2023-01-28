@@ -17,8 +17,11 @@ LoadConversation(string path, string filename,
     conversation.filename = filename;
 
     string line;
-	string type;
-	string rest;
+    string type;
+    string rest;
+
+    Expression one_expression = EXPR_NEUTRAL;
+    Expression two_expression = EXPR_NEUTRAL;
 
     ifstream fp;
     fp.open(path + filename);
@@ -41,13 +44,21 @@ LoadConversation(string path, string filename,
         {
             conversation.two = GetUnitByName(units, rest);
         }
+        else if(type == "EX1")
+        {
+            one_expression = GetExpressionFromString(rest);
+        }
+        else if(type == "EX2")
+        {
+            two_expression = GetExpressionFromString(rest);
+        }
         else if(type == "ONE")
         {
-            conversation.prose.push_back(sentence(SPEAKER_ONE, rest));
+            conversation.prose.push_back({SPEAKER_ONE, rest, one_expression});
         }
         else if(type == "TWO")
         {
-            conversation.prose.push_back(sentence(SPEAKER_TWO, rest));
+            conversation.prose.push_back({SPEAKER_TWO, rest, two_expression});
         }
         else if(type == "COM")
         {

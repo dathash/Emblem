@@ -3,19 +3,19 @@ COM Program: Emblem
 COM File: Units
 
 COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <apt> <def> <spd> <acc> <avo> <crit> <short> <long> <abi> <ai>>
-UNT Lucina lucina.png lucina_neutral.png Ally 4 14 8 0 2 9 110 10 10 1 1 2 0 
-UNT Priam priam.png priam_neutral.png Ally 3 20 8 5 5 5 90 0 15 1 1 1 0 
-UNT Stahl stahl.png stahl_neutral.png Ally 4 13 8 0 0 9 120 20 10 2 2 0 0 
-UNT Donnel donnel.png donnel_neutral.png Ally 3 22 6 10 8 2 80 0 0 1 1 1 0 
-UNT Olivia olivia.png olivia_neutral.png Ally 3 11 0 10 0 10 0 40 0 1 1 4 0 
-UNT Tiki tiki.png tiki_neutral.png Ally 4 13 2 12 8 6 100 10 0 2 2 1 0 
-UNT Flavia flavia.png flavia_neutral.png Ally 4 18 10 0 6 6 80 10 10 1 1 0 0 
-UNT Lon'qu lonqu.png lonqu_neutral.png Ally 5 13 12 0 0 12 70 30 100 1 1 0 0 
-UNT Tharja tharja.png tharja_neutral.png Ally 4 14 8 12 0 6 100 30 20 2 3 1 0 
-UNT Thief thief.png fighter_full.png Enemy 4 14 5 0 0 8 100 20 0 1 1 0 1 
-UNT Brute brute.png brute_full.png Enemy 3 18 8 0 3 6 80 10 0 1 1 0 1 
-UNT Archer archer.png archer_full.png Enemy 3 12 8 0 0 6 100 20 0 2 2 0 1 
-UNT Charles axeknight.png boss1_full.png Enemy 5 30 10 0 5 6 80 20 10 1 1 0 2 
-UNT Diane axeknight.png boss2_full.png Enemy 5 30 10 0 5 6 80 20 10 1 1 0 2 
-UNT Sniper sniper.png sniper_full.png Enemy 5 14 10 0 0 8 105 15 0 2 3 0 4 
-UNT Brigand savage.png savage_full.png Enemy 4 25 10 0 4 4 70 10 5 1 1 0 1 
+UNT Lucina lucina.png lucina_neutral.png lucina_happy.png lucina_angry.png lucina_wince.png Ally 4 14 8 0 2 9 110 10 10 1 1 2 0 
+UNT Priam priam.png priam_neutral.png priam_happy.png priam_angry.png priam_wince.png Ally 3 20 8 5 5 5 90 0 15 1 1 1 0 
+UNT Stahl stahl.png stahl_neutral.png stahl_happy.png stahl_angry.png stahl_wince.png Ally 4 13 8 0 0 9 120 20 10 2 2 0 0 
+UNT Donnel donnel.png donnel_neutral.png donnel_happy.png donnel_angry.png donnel_wince.png Ally 3 22 6 10 8 2 80 0 0 1 1 1 0 
+UNT Olivia olivia.png olivia_neutral.png olivia_happy.png olivia_angry.png olivia_wince.png Ally 3 11 0 10 0 10 0 40 0 1 1 4 0 
+UNT Tiki tiki.png tiki_neutral.png tiki_happy.png tiki_angry.png tiki_wince.png Ally 4 13 2 12 8 6 100 10 0 2 2 1 0 
+UNT Flavia flavia.png flavia_neutral.png flavia_happy.png flavia_angry.png flavia_wince.png Ally 4 18 10 0 6 6 80 10 10 1 1 0 0 
+UNT Lon'qu lonqu.png lonqu_neutral.png lonqu_happy.png lonqu_angry.png lonqu_wince.png Ally 5 13 12 0 0 12 70 30 100 1 1 0 0 
+UNT Tharja tharja.png tharja_neutral.png tharja_happy.png tharja_angry.png tharja_wince.png Ally 4 14 8 12 0 6 100 30 20 2 3 1 0 
+UNT Thief thief.png fighter_full.png fighter_full.png fighter_full.png fighter_full.png Enemy 4 14 5 0 0 8 100 20 0 1 1 0 1 
+UNT Brute brute.png brute_full.png brute_full.png brute_full.png brute_full.png Enemy 3 18 8 0 3 6 80 10 0 1 1 0 1 
+UNT Archer archer.png archer_full.png archer_full.png archer_full.png archer_full.png Enemy 3 12 8 0 0 6 100 20 0 2 2 0 1 
+UNT Charles axeknight.png boss1_full.png boss1_full.png boss1_full.png boss1_full.png Enemy 5 30 10 0 5 6 80 20 10 1 1 0 2 
+UNT Diane axeknight.png boss2_full.png boss2_full.png boss2_full.png boss2_full.png Enemy 5 30 10 0 5 6 80 20 10 1 1 0 2 
+UNT Sniper sniper.png sniper_full.png sniper_full.png sniper_full.png sniper_full.png Enemy 5 14 10 0 0 8 105 15 0 2 3 0 4 
+UNT Brigand savage.png savage_full.png savage_full.png savage_full.png savage_full.png Enemy 4 25 10 0 4 4 70 10 5 1 1 0 1 
