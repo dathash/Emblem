@@ -7,8 +7,10 @@ COM NOTE: Don't use tabs in here!
 SP1 Donnel
 SP2 Lon'qu
 
+EVE ONE Enters
 ONE -Huff- -Huff-
 
+EVE TWO Enters
 EX1 Happy
 ONE Lonnie, holy cow! I ain't seen you strike a bull that way before!
 ONE Where were you keeping that dagger?
@@ -62,7 +64,6 @@ ONE Oh... I didn't know anyone lived up there.
 
 EX2 Happy
 TWO Me neither. The world is wide.
-TWO It's just a hunch from how she acts. She's like a hero.
 
 EX1 Happy
 ONE I have a feeling it's far wider than we could ever imagine.

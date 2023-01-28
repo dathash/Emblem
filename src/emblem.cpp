@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
     Fight fight;
 
-    GlobalInterfaceState = NO_OP;
+    GlobalInterfaceState = PRELUDE;
     GlobalAIState = PLAYER_TURN;
 
     GlobalRunning = true;
@@ -224,6 +224,7 @@ int main(int argc, char *argv[])
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
+
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
 
             /*
@@ -249,31 +250,31 @@ int main(int argc, char *argv[])
 
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
+            GlobalInterfaceState = PRELUDE;
         }
 
         if(GlobalTurnStart)
         {
             GlobalTurnStart = false;
 
-
             if(GlobalPlayerTurn)
             {
                 for(auto const &unit : level.combatants)
                 {
                     if(unit->buff)
-                    {
                         unit->TickBuff();
-                    }
                 }
             }
 
             for(auto const &unit : level.combatants)
-            {
                 unit->Activate();
-            }
+
             cursor.PlaceAt(level.Leader());
             SetViewport(cursor.pos, level.map.width, level.map.height);
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+
+            // TODO: This is pretty bad. Just work out how the logic should actually go.
+            if(GlobalInterfaceState != PRELUDE)
+                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
             ai.clearQueue();
             handler.clearQueue();

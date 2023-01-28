@@ -125,7 +125,10 @@ struct UI_State
              GlobalInterfaceState == CONVERSATION ||
              GlobalInterfaceState == PREVIEW_ATTACK ||
              GlobalInterfaceState == PREVIEW_ABILITY ||
-             GlobalInterfaceState == PLAYER_FIGHT)
+             GlobalInterfaceState == PLAYER_FIGHT ||
+             GlobalInterfaceState == BATTLE_CONVERSATION ||
+             GlobalInterfaceState == PRELUDE
+             )
 			)
         {
             tile_info = true;

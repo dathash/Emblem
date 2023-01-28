@@ -4,7 +4,9 @@ COM File: Level
 
 ATL ruins.png
 
-CNV test.txt
+PRE prelude00.txt
+MID lucina_priam_1.txt
+CNV lucina_priam_2.txt
 
 MUS 21.wav
 

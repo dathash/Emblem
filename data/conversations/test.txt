@@ -7,17 +7,30 @@ COM NOTE: Don't use tabs in here!
 SP1 Lucina
 SP2 Priam
 
+EVE ONE Enters
 EX1 Angry
 ONE This is a test.
+
+EVE TWO Enters
 TWO What are you talking about?
+
 ONE This line is extremely long. You can tell it is long by the way that it is. Goodbye..
+
+EVE ONE Exits
+
 EX2 Wince
 TWO This is... unsettling. What the hell?
+
+EVE ONE Enters
+
 EX1 Happy
 ONE C
+
 EX2 Angry
 TWO Huh.
+
 EX1 Wince
 ONE I've got to go.
+
 EX2 Neutral
 TWO Later??? [WHAT THE HELL]

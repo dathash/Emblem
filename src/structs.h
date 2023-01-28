@@ -288,6 +288,16 @@ enum Speaker
     SPEAKER_ONE,
     SPEAKER_TWO,
 };
+
+enum ConversationEvent
+{
+    CONV_NONE,
+    CONV_ONE_EXITS,
+    CONV_TWO_EXITS,
+    CONV_ONE_ENTERS,
+    CONV_TWO_ENTERS,
+};
+
 Expression
 GetExpressionFromString(const string &in)
 {
@@ -295,7 +305,18 @@ GetExpressionFromString(const string &in)
     else if(in == "Happy") return EXPR_HAPPY;
     else if(in == "Angry") return EXPR_ANGRY;
     else if(in == "Wince") return EXPR_WINCE;
-    assert(!"Warning: Unsupported Expression in GetExpressionFromString.");
+    cout << "Warning: Unsupported Expression in GetExpressionFromString: " << in << "\n";
+    return EXPR_NEUTRAL;
+}
+
+ConversationEvent
+GetConversationEventFromString(const string &in)
+{
+    if(in == "ONE Exits") return CONV_ONE_EXITS;
+    else if(in == "TWO Exits") return CONV_TWO_EXITS;
+    else if(in == "ONE Enters") return CONV_ONE_ENTERS;
+    else if(in == "TWO Enters") return CONV_TWO_ENTERS;
+    assert(!"Warning: Unsupported Expression in GetConversationEventFromString.");
 }
 
 struct Sentence
@@ -303,6 +324,7 @@ struct Sentence
     Speaker speaker;
     string text;
     Expression expression;
+    ConversationEvent event;
 };
 
 // CIRCULAR
@@ -313,6 +335,7 @@ struct Conversation
     string filename = "";
     Unit *one = nullptr;
     Unit *two = nullptr;
+    pair<bool, bool> active = {true, false};
     vector<Sentence> prose;
     int current = 0;
     Texture words_texture;
@@ -377,6 +400,30 @@ struct Conversation
         {
             two->expression = Expression();
         }
+
+        switch(prose[current].event)
+        {
+            case CONV_NONE:
+            {
+            } break;
+            case CONV_ONE_EXITS: 
+            {
+                active.first = false;
+            } break;
+            case CONV_TWO_EXITS: 
+            {
+                active.second = false;
+            } break;;
+            case CONV_ONE_ENTERS: 
+            {
+                active.first = true;
+            } break;;
+            case CONV_TWO_ENTERS:
+            {
+                active.second = true;
+            } break;;
+            default: assert(!"ERROR Unhandled enum in Conversation.Next()");
+        }
     }
 };
 
@@ -384,6 +431,9 @@ struct ConversationList
 {
     vector<Conversation> list = {};
     int index = 0;
+    vector<Conversation> mid_battle = {};
+    Conversation *current = nullptr;
+    Conversation prelude;
 };
 
 
@@ -407,7 +457,7 @@ struct Tilemap
     vector<position> attackable = {};
     vector<position> ability = {};
     vector<position> range = {};
-    //vector<point> adjacent;
+    vector<position> adjacent = {};
     //vector<position> prospective = {}; // TODO
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;

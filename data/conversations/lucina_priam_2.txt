@@ -1,0 +1,34 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Conversation
+
+COM NOTE: Don't use tabs in here!
+
+SP1 Lucina
+SP2 Priam
+
+EVE ONE Enters
+EX1 Wince
+ONE So many of them... I killed so many...
+
+EVE TWO Enters
+EX2 Happy
+TWO Well done, my daughter!
+TWO The blood runs through you, as well.
+TWO Come, we will celebrate our victory with the village.
+
+EX1 Angry
+ONE They were hardly an organized force... Did we have to kill them all?
+
+EX1 Wince
+ONE Perhaps we could have intimidated them, or distracted them such that...
+
+EX2 Neutral
+TWO Lucina, it is better to kill a dying boar than to sustain it through suffering.
+TWO We have done what we must. Come, think not of this.
+
+EVE TWO Exits
+
+ONE So I have slaughtered my first man.
+ONE My life is consigned to violence.
+ONE What other cruel crimes lie ahead?

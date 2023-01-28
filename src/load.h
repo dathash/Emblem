@@ -22,6 +22,7 @@ LoadConversation(string path, string filename,
 
     Expression one_expression = EXPR_NEUTRAL;
     Expression two_expression = EXPR_NEUTRAL;
+    ConversationEvent conversation_event = CONV_NONE;
 
     ifstream fp;
     fp.open(path + filename);
@@ -52,13 +53,17 @@ LoadConversation(string path, string filename,
         {
             two_expression = GetExpressionFromString(rest);
         }
+        else if(type == "EVE")
+        {
+            conversation_event = GetConversationEventFromString(rest);
+        }
         else if(type == "ONE")
         {
-            conversation.prose.push_back({SPEAKER_ONE, rest, one_expression});
+            conversation.prose.push_back({SPEAKER_ONE, rest, one_expression, conversation_event});
         }
         else if(type == "TWO")
         {
-            conversation.prose.push_back({SPEAKER_TWO, rest, two_expression});
+            conversation.prose.push_back({SPEAKER_TWO, rest, two_expression, conversation_event});
         }
         else if(type == "COM")
         {
@@ -166,10 +171,20 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         {
             level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
         }
+        else if(type == "PRE")
+        {
+            level.conversations.prelude = 
+                    LoadConversation(CONVERSATIONS_PATH, rest, units);
+        }
+        else if(type == "MID")
+        {
+            level.conversations.mid_battle.push_back(
+                    LoadConversation(CONVERSATIONS_PATH, rest, units));
+        }
         else if(type == "CNV")
         {
-            level.conversations.list.push_back(LoadConversation(
-                                CONVERSATIONS_PATH, rest, units));
+            level.conversations.list.push_back(
+                    LoadConversation(CONVERSATIONS_PATH, rest, units));
         }
         else if(type == "MUS")
         {
@@ -263,6 +278,13 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
             unitCopy->ai_behavior = (AIBehavior)stoi(tokens[3]);
             level.combatants.push_back(move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
+        }
+        else if(type == "COM")
+        {
+        }
+        else
+        {
+            cout << "Warning LoadLevel: Unhandled line type: " << type << "\n";
         }
     }
     fp.close();
@@ -381,6 +403,13 @@ SaveLevel(string filename_in, const Level &level)
 
     fp << "ATL " << level.map.atlas.filename << "\n\n";
 
+    fp << "PRE " << level.conversations.prelude.filename << "\n";
+    fp << "\n";
+    for(const Conversation &conv : level.conversations.mid_battle)
+    {
+        fp << "MID " << conv.filename << "\n";
+    }
+    fp << "\n";
     for(const Conversation &conv : level.conversations.list)
     {
         fp << "CNV " << conv.filename << "\n";

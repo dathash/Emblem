@@ -213,10 +213,12 @@ private:
 class PlaceUnitCommand : public Command
 {
 public:
-    PlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in, Menu *menu_in)
+    PlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in, Menu *menu_in,
+                     ConversationList *conversations_in)
     : cursor(cursor_in),
       map(map_in),
-      menu(menu_in)
+      menu(menu_in),
+      conversations(conversations_in)
     {}
 
     virtual void Execute()
@@ -231,6 +233,7 @@ public:
         map->attackable.clear();
         map->ability.clear();
         map->range.clear();
+        map->adjacent.clear();
         vector<position> interactible = InteractibleFrom(*map, cursor->pos,
                                              cursor->selected->min_range, cursor->selected->max_range);
 
@@ -315,6 +318,32 @@ public:
             }
         }
 
+        interactible = InteractibleFrom(*map, cursor->pos, 1, 1);
+        // for talking
+        for(const position &p : interactible)
+        {
+            if(map->tiles[p.col][p.row].occupant &&
+               map->tiles[p.col][p.row].occupant->is_ally)
+            {
+                for(const Conversation &conv : conversations->mid_battle)
+                {
+                    if(((cursor->selected->ID() == conv.one->ID() &&
+                         map->tiles[p.col][p.row].occupant->ID() == conv.two->ID())
+                            ||
+                        (cursor->selected->ID() == conv.two->ID() &&
+                         map->tiles[p.col][p.row].occupant->ID() == conv.one->ID()))
+                            &&
+                        !conv.done
+                      )
+                    {
+                        map->adjacent.push_back(p);
+                    }
+                }
+            }
+        }
+        if(map->adjacent.size() > 0)
+            menu->AddOption("Talk");
+
         menu->AddOption("Wait");
 
         EmitEvent(PLACE_UNIT_EVENT);
@@ -327,6 +356,7 @@ private:
     Cursor *cursor; 
     Tilemap *map;
     Menu *menu;
+    ConversationList *conversations;
 };
 
 
@@ -432,6 +462,41 @@ private:
     bool forward;
 };
 
+class NextTalkTargetCommand : public Command
+{
+public:
+    NextTalkTargetCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
+    : cursor(cursor_in),
+      map(map_in),
+      forward(forward_in)
+    {}
+
+    virtual void Execute()
+    {
+        assert(map->adjacent.size() > 0);
+        if(map->adjacent.size() == 1)
+            return;
+
+        if(forward)
+            rotate(map->adjacent.begin(), 
+                   map->adjacent.begin() + 1,
+                   map->adjacent.end());
+        else
+            rotate(map->adjacent.begin(), 
+                   map->adjacent.begin() + map->adjacent.size() - 1,
+                   map->adjacent.end());
+        position next = map->adjacent[0];
+
+        // move cursor
+        cursor->PlaceAt(next);
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+    bool forward;
+};
+
 class DetargetCommand : public Command
 {
 public:
@@ -487,6 +552,40 @@ public:
     }
 
 private:
+    Cursor *cursor;
+    const Tilemap &map;
+};
+
+class InitiateConversationCommand : public Command
+{
+public:
+    InitiateConversationCommand(ConversationList *conversations_in,
+                                Cursor *cursor_in, const Tilemap &map_in)
+    : conversations(conversations_in),
+      cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
+        for(Conversation &conv : conversations->mid_battle)
+        {
+            if((cursor->selected->ID() == conv.one->ID() &&
+                cursor->targeted->ID() == conv.two->ID())
+                    ||
+               (cursor->selected->ID() == conv.two->ID() &&
+                cursor->targeted->ID() == conv.one->ID()))
+            {
+                conversations->current = &conv;
+            }
+        }
+
+        GlobalInterfaceState = BATTLE_CONVERSATION;
+    }
+
+private:
+    ConversationList *conversations;
     Cursor *cursor;
     const Tilemap &map;
 };
@@ -837,6 +936,15 @@ public:
             GlobalInterfaceState = ABILITY_TARGETING;
             return;
         }
+        if(option == "Talk")
+        {
+            assert(map.adjacent.size());
+            cursor->source = cursor->pos;
+
+            cursor->PlaceAt(map.adjacent[0]);
+            GlobalInterfaceState = TALK_TARGETING;
+            return;
+        }
 
         if(option == "Wait")
         {
@@ -995,8 +1103,9 @@ private:
 class NextSentenceCommand : public Command
 {
 public:
-    NextSentenceCommand(Conversation *conversation_in)
-    : conversation(conversation_in)
+    NextSentenceCommand(Cursor *cursor_in, Conversation *conversation_in)
+    : cursor(cursor_in),
+      conversation(conversation_in)
     {}
 
     virtual void Execute()
@@ -1004,8 +1113,23 @@ public:
         conversation->Next();
         if(conversation->done)
         {
-            GlobalInterfaceState = CONVERSATION_MENU;
-            return;
+            if(GlobalInterfaceState == PRELUDE)
+            {
+                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+                return;
+            }
+            if(GlobalInterfaceState == BATTLE_CONVERSATION)
+            {
+                cursor->pos = cursor->selected->pos;
+                cursor->selected->Deactivate();
+                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                return;
+            }
+            if(GlobalInterfaceState == CONVERSATION)
+            {
+                GlobalInterfaceState = CONVERSATION_MENU;
+                return;
+            }
         }
 
         conversation->ReloadTextures();
@@ -1013,6 +1137,44 @@ public:
     }
 
 private:
+    Cursor *cursor;
+    Conversation *conversation;
+};
+
+class EndConversationEarlyCommand : public Command
+{
+public:
+    EndConversationEarlyCommand(Cursor *cursor_in, Conversation *conversation_in)
+    : cursor(cursor_in),
+      conversation(conversation_in)
+    {}
+
+    virtual void Execute()
+    {
+        cout << conversation->filename << "\n";
+        conversation->done = true;
+
+        if(GlobalInterfaceState == PRELUDE)
+        {
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            return;
+        }
+        if(GlobalInterfaceState == BATTLE_CONVERSATION)
+        {
+            cursor->pos = cursor->selected->pos;
+            cursor->selected->Deactivate();
+            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            return;
+        }
+        if(GlobalInterfaceState == CONVERSATION)
+        {
+            GlobalInterfaceState = CONVERSATION_MENU;
+            return;
+        }
+    }
+
+private:
+    Cursor *cursor;
     Conversation *conversation;
 };
 
@@ -1220,7 +1382,7 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, *map, direction(0, 1)));
                 BindLeft(make_shared<MoveSCommand>(cursor, *map, direction(-1, 0)));
                 BindRight(make_shared<MoveSCommand>(cursor, *map, direction(1, 0)));
-                BindA(make_shared<PlaceUnitCommand>(cursor, map, unitMenu));
+                BindA(make_shared<PlaceUnitCommand>(cursor, map, unitMenu, conversations));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1279,6 +1441,17 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<InitiateAbilityCommand>(cursor, *map));
+                BindB(make_shared<DetargetCommand>(cursor));
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+            case(TALK_TARGETING):
+            {
+                BindUp(make_shared<NextTalkTargetCommand>(cursor, map, true));
+                BindDown(make_shared<NextTalkTargetCommand>(cursor, map, false));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<InitiateConversationCommand>(conversations, cursor, *map));
                 BindB(make_shared<DetargetCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1416,8 +1589,32 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(&(conversations->list[conversations->index])));
-                BindB(make_shared<NullCommand>());
+                BindA(make_shared<NextSentenceCommand>(cursor, &(conversations->list[conversations->index])));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(conversations->list[conversations->index])));
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(BATTLE_CONVERSATION):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NextSentenceCommand>(cursor, conversations->current));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, conversations->current));
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(PRELUDE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NextSentenceCommand>(cursor, &(conversations->prelude)));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(conversations->prelude)));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

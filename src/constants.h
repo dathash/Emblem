@@ -88,32 +88,34 @@ enum InterfaceState
     SELECTED_OVER_ENEMY, // 7
 
     ATTACK_TARGETING, // 8
-
     ABILITY_TARGETING, // 9
+    TALK_TARGETING, // 10
 
-    PREVIEW_ATTACK, // 10
-    PREVIEW_ABILITY, // 11
+    PREVIEW_ATTACK, // 11
+    PREVIEW_ABILITY, // 12
 
-    GAME_MENU, // 12
-    GAME_MENU_OUTLOOK, // 13
-    GAME_MENU_OPTIONS, // 14
+    GAME_MENU, // 13
+    GAME_MENU_OUTLOOK, // 14
+    GAME_MENU_OPTIONS, // 15
 
-    UNIT_MENU_ROOT, // 15
-    UNIT_INFO, // 16
+    UNIT_MENU_ROOT, // 16
+    UNIT_INFO, // 17
 
-    ENEMY_INFO, // 17
-    ENEMY_RANGE, // 18
+    ENEMY_INFO, // 18
+    ENEMY_RANGE, // 19
 
-    LEVEL_MENU, // 19
+    LEVEL_MENU, // 20
 
-    CONVERSATION_MENU, // 20
-    CONVERSATION, // 21
+    CONVERSATION_MENU, // 21
+    CONVERSATION, // 22
+    BATTLE_CONVERSATION, // 23
+    PRELUDE, // 24
 
-    PLAYER_FIGHT, // 22
+    PLAYER_FIGHT, // 25
 
-    NO_OP, // 23
+    NO_OP, // 26
 
-    GAME_OVER, // 24
+    GAME_OVER, // 27
 };
 
 enum AIState

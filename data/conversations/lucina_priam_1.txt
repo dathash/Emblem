@@ -1,0 +1,27 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Conversation
+
+COM NOTE: Don't use tabs in here!
+
+SP1 Lucina
+SP2 Priam
+
+EVE ONE Enters
+EX1 Wince
+ONE Father, there are a lot of them. We are surely outnumbered.
+
+EVE TWO Enters
+EX2 Happy
+TWO Of course there are. Such is the way of the world.
+TWO Enemies in abundance. Allies in scarcity.
+TWO Such is the life of the Gauls.
+
+EX1 Neutral
+ONE Where are they from? The lowlands?
+
+EX2 Angry
+TWO Lucina, I have told you, do not consider such things on the field of battle.
+
+EX2 Neutral
+TWO Focus only on your foe.

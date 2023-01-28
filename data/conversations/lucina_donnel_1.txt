@@ -7,53 +7,12 @@ COM NOTE: Don't use tabs in here!
 SP1 Lucina
 SP2 Donnel
 
-ONE I suppose I should ask their names...
+EVE ONE Enters
+ONE Who are you?
 
-EX2 Happy
-TWO Phew, that fight was a doozy!
+EVE TWO Enters
+EX2 Angry
+TWO No time! Let's take care of these goons!
 
-ONE My name is Lucina. I'm grateful for your help. What are your names?
-
-TWO I'm Donnel, that's my brother Lon'qu.
-TWO We're just a couple of folk passing through. Thought we'd check out the ruckus.
-TWO Turned into a brawl real quick, now didn't it?
-
-ONE Indeed. Why did you help me?
-
-TWO Well, no one likes a one-sided fight, you know. Just thought we'd even the odds up a bit.
-
-ONE You don't look like a fighter...
-
-TWO Well, I ain't fight much, but momma didn't raise no fool.
-
-EX1 Happy
-ONE Guess looks can be deceiving.
-
-EX2 Neutral
-TWO Where are you headed after this? Looks like you're set up for a long journey.
-
-EX1 Wince
-ONE I... there's someone that I have to find...
-
-EX2 Happy
-TWO Well golly, I know every damned face in town, My brother'n I can show you around!
-TWO We can even have a cooked meal, you know, with the loot we snatched off these bandits.
-
-EX1 Angry
-ONE No, we leave the money on them.
-
-EX2 Wince
-TWO What in the hell? We got 'em, fair and square!
-
-EX1 Neutral
-ONE They'll need it, where they're going.
-
-EX2 Neutral
-TWO ...
-
-EX1 Neutral
-ONE I'll head to the village with you two, but I don't expect you to defend me if we run into trouble.
-
-EX2 Happy
-TWO Alright, hop on the cart, and let's get rolling!
-
+EVE TWO Exits
+ONE Why is this lowlander helping me? Are they not allied with the bandits?

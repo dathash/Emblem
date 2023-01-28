@@ -234,6 +234,19 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
+    if(GlobalInterfaceState == TALK_TARGETING)
+    {
+        for(const position &cell : map.adjacent)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           healColor);
+            }
+        }
+    }
+
 // ================================ ai visualization  =============================
     if(GlobalAIState == SELECTED)
     {
@@ -424,18 +437,30 @@ Render(const Tilemap &map, const Cursor &cursor,
         RenderPortrait(430, 0, *cursor.targeted, EXPR_ANGRY, false);
     }
 
-    if(GlobalInterfaceState == CONVERSATION)
+    if(GlobalInterfaceState == CONVERSATION ||
+       GlobalInterfaceState == BATTLE_CONVERSATION ||
+       GlobalInterfaceState == PRELUDE)
     {
-        Conversation conversation = conversations.list[conversations.index];
+        Conversation conversation;
+        if(GlobalInterfaceState == CONVERSATION)
+            conversation = conversations.list[conversations.index];
+
+        if(GlobalInterfaceState == BATTLE_CONVERSATION)
+            conversation = *conversations.current;
+
+        if(GlobalInterfaceState == PRELUDE)
+            conversation = conversations.prelude;
 
         SDL_Rect bg_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
         SDL_RenderFillRect(GlobalRenderer, &bg_rect);
 
-        RenderPortrait(-50, 0, *conversation.one,
-                       conversation.one->expression, true);
-        RenderPortrait(400, 0, *conversation.two,
-                       conversation.two->expression, false);
+        if(conversation.active.first)
+            RenderPortrait(-50, 0, *conversation.one,
+                           conversation.one->expression, true);
+        if(conversation.active.second)
+            RenderPortrait(400, 0, *conversation.two,
+                           conversation.two->expression, false);
 
         SDL_Rect conv_rect = {20, 400, 860, 180};
         SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);

@@ -4,8 +4,13 @@ COM File: Level
 
 ATL ruins.png
 
-CNV lucina_donnel_1.txt
-CNV lucina_lonqu_1.txt
+PRE prelude01.txt
+
+MID lucina_donnel_1.txt
+MID lucina_lonqu_1.txt
+
+CNV lucina_donnel_2.txt
+CNV lucina_lonqu_2.txt
 CNV donnel_lonqu_1.txt
 
 MUS qc.wav
