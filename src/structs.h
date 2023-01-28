@@ -139,7 +139,10 @@ struct Unit
 
     string name;
     Spritesheet sheet;
-    Texture portrait;
+    Texture neutral;
+    Texture happy;
+    Texture angry;
+    Texture wince;
     bool is_ally;
     int movement;
     int health;
@@ -181,7 +184,10 @@ struct Unit
     }
 
     Unit(string name_in, Spritesheet sheet_in,
-         Texture portrait_in,
+         Texture neutral_in,
+         Texture happy_in,
+         Texture angry_in,
+         Texture wince_in,
          bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
          int attack_in, int aptitude_in, int defense_in,
@@ -192,7 +198,10 @@ struct Unit
          AIBehavior ai_behavior_in)
     : name(name_in),
       sheet(sheet_in),
-      portrait(portrait_in),
+      neutral(neutral_in),
+      happy(happy_in),
+      angry(angry_in),
+      wince(wince_in),
       is_ally(is_ally_in),
       movement(movement_in),
       health(health_in),

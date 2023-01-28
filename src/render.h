@@ -400,7 +400,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         if(map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally)
             x_pos = -50;
 
-        RenderPortrait(x_pos, 0, map.tiles[cursor.pos.col][cursor.pos.row].occupant->portrait,
+        RenderPortrait(x_pos, 0, map.tiles[cursor.pos.col][cursor.pos.row].occupant->neutral,
                        map.tiles[cursor.pos.col][cursor.pos.row].occupant->is_ally);
     }
 
@@ -409,8 +409,8 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         assert(cursor.selected);
 
-        RenderPortrait(-100, 0, cursor.selected->portrait, true);
-        RenderPortrait(430, 0, cursor.targeted->portrait, false);
+        RenderPortrait(-100, 0, cursor.selected->neutral, true);
+        RenderPortrait(430, 0, cursor.targeted->neutral, false);
 }
 
     if(GlobalInterfaceState == CONVERSATION)
@@ -421,9 +421,9 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
         SDL_RenderFillRect(GlobalRenderer, &bg_rect);
 
-        RenderPortrait(-50, 0, conversation.one->portrait,
+        RenderPortrait(-50, 0, conversation.one->neutral,
                        true);
-        RenderPortrait(400, 0, conversation.two->portrait,
+        RenderPortrait(400, 0, conversation.two->neutral,
                        false);
 
         SDL_Rect conv_rect = {20, 400, 860, 180};

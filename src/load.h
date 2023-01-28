@@ -286,22 +286,25 @@ LoadUnits(string filename_in)
                 units.push_back(make_shared<Unit>(
                     tokens[0],									// name
                     Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[1]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(FULLS_PATH, tokens[2]),// portrait
-                    tokens[3] == "Ally" ? true : false,			// team
-                    stoi(tokens[4]),							// movement
-                    stoi(tokens[5]),							// health
-                    stoi(tokens[5]),							// max health
-                    stoi(tokens[6]),							// attack
-                    stoi(tokens[7]),							// aptitude
-                    stoi(tokens[8]),							// defense
-                    stoi(tokens[9]),							// speed
-                    stoi(tokens[10]),						    // accuracy
-                    stoi(tokens[11]),						    // avoid
-                    stoi(tokens[12]),						    // crit
-                    stoi(tokens[13]),						    // short range
-                    stoi(tokens[14]),						    // long range
-                    (Ability)stoi(tokens[15]),						    // ability
-                    (AIBehavior)stoi(tokens[16])                // ai behavior
+                    LoadTextureImage(FULLS_PATH, tokens[2]),    // neutral
+                    LoadTextureImage(FULLS_PATH, tokens[3]),    // happy
+                    LoadTextureImage(FULLS_PATH, tokens[4]),    // angry
+                    LoadTextureImage(FULLS_PATH, tokens[5]),    // wince
+                    tokens[6] == "Ally" ? true : false,			// team
+                    stoi(tokens[7]),							// movement
+                    stoi(tokens[8]),							// health
+                    stoi(tokens[8]),							// max health
+                    stoi(tokens[9]),							// attack
+                    stoi(tokens[10]),							// aptitude
+                    stoi(tokens[11]),							// defense
+                    stoi(tokens[12]),							// speed
+                    stoi(tokens[13]),						    // accuracy
+                    stoi(tokens[14]),						    // avoid
+                    stoi(tokens[15]),						    // crit
+                    stoi(tokens[16]),						    // short range
+                    stoi(tokens[17]),						    // long range
+                    (Ability)stoi(tokens[18]),				    // ability
+                    (AIBehavior)stoi(tokens[19])                // ai behavior
                 ));
             }
         }
@@ -330,7 +333,10 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     {
         fp << "UNT " << unit->name << " "
                      << unit->sheet.texture.filename << " "
-                     << unit->portrait.filename << " "
+                     << unit->neutral.filename << " "
+                     << unit->happy.filename << " "
+                     << unit->angry.filename << " "
+                     << unit->wince.filename << " "
                      << (unit->is_ally ? "Ally" : "Enemy") << " "
                      << unit->movement << " "
                      << unit->max_health << " "
