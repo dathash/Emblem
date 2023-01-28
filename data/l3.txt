@@ -4,6 +4,8 @@ COM File: Level
 
 ATL sunset.png
 
+PRE prelude03.txt
+
 MUS spiny.wav
 
 WDT 20

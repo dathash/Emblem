@@ -174,7 +174,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         else if(type == "PRE")
         {
             level.conversations.prelude = 
-                    LoadConversation(CONVERSATIONS_PATH, rest, units);
+                    LoadConversation(PRELUDES_PATH, rest, units);
         }
         else if(type == "MID")
         {

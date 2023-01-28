@@ -4,6 +4,8 @@ COM File: Level
 
 ATL frozen.png
 
+PRE prelude04.txt
+
 MUS r4.wav
 
 WDT 30

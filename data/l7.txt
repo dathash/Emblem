@@ -4,6 +4,8 @@ COM File: Level
 
 ATL ruins.png
 
+PRE prelude07.txt
+
 MUS title.wav
 
 WDT 15
