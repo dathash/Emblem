@@ -163,7 +163,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             {
                 RenderTileColor({cell.col - viewportCol, 
                            cell.row - viewportRow}, 
-                           attackColor);
+                           clearColor);
             }
         }
 
@@ -204,7 +204,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             {
                 RenderTileColor({cell.col - viewportCol, 
                            cell.row - viewportRow}, 
-                           attackColor);
+                           clearColor);
             }
         }
     }
@@ -277,7 +277,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             {
                 RenderTileColor({cell.col - viewportCol, 
                            cell.row - viewportRow}, 
-                           attackColor);
+                           clearColor);
             }
         }
 
@@ -345,8 +345,21 @@ Render(const Tilemap &map, const Cursor &cursor,
 
 
 // ================================= render cursor ================================================
-    if(GlobalInterfaceState != PLAYER_FIGHT &&
-       GlobalAIState != AI_FIGHT)
+    if(
+        GlobalInterfaceState == NEUTRAL_OVER_GROUND ||
+        GlobalInterfaceState == NEUTRAL_OVER_ENEMY ||
+        GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
+        GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+        GlobalInterfaceState == SELECTED_OVER_GROUND ||
+        GlobalInterfaceState == SELECTED_OVER_INACCESSIBLE ||
+        GlobalInterfaceState == SELECTED_OVER_ALLY ||
+        GlobalInterfaceState == SELECTED_OVER_ENEMY ||
+        GlobalInterfaceState == ATTACK_TARGETING ||
+        GlobalInterfaceState == ABILITY_TARGETING ||
+        GlobalInterfaceState == TALK_TARGETING ||
+        GlobalInterfaceState == ENEMY_INFO ||
+        GlobalInterfaceState == ENEMY_RANGE
+      )
     {
         if(WithinViewport(cursor.pos))
             RenderSprite(cursor.pos - position(viewportCol, viewportRow), 

@@ -164,6 +164,7 @@ const SDL_Color pathColor =     {150, 150, 150, 100};
 const SDL_Color aiMoveColor =   {150, 0, 0, 100};
 const SDL_Color attackColor =   {250, 0, 0, 100};
 const SDL_Color healColor =     {0, 255, 0, 100};
+const SDL_Color clearColor =    {0, 0, 0, 0};
 
 const SDL_Color exhaustedMod =  {50,    0,  50, 0};
 const SDL_Color buffAtkMod =    {255,   0,   0, 0};
