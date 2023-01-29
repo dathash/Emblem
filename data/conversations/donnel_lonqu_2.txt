@@ -1,0 +1,40 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Conversation
+
+COM NOTE: Don't use tabs in here!
+
+SP1 Donnel
+SP2 Lon'qu
+
+EVE ONE Enters
+EX1 Happy
+ONE Say Lonnie...
+
+EVE TWO Enters
+TWO 'sup?
+
+EX1 Wince
+ONE You realize how far we are from home?
+
+EX2 Happy
+TWO Of course I do. It's an adventure.
+TWO Nothing out here is like it was back in the pasture.
+TWO The people are harder, the water tastes sweeter...
+
+EX1 Neutral
+ONE You really like it out here?
+ONE I mean, it's alright, I guess.
+ONE It's just... I kinda miss mom, and the way the sun goes down 
+ONE over the mountains.
+
+EX2 Neutral
+TWO Yeah, that's pretty special too. But out here... It's just different.
+TWO It's like a place where I belong.
+
+EX1 Happy
+ONE I'm glad you're happy, Lonnie. I want to see as much of the world as I can!
+ONE I mean, this is only our first stop, who knows where we'll end up?
+
+EX2 Happy
+TWO Who knows indeed.

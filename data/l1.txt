@@ -41,8 +41,6 @@ MAP 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0
 COM <UNT <name> <col> <row> <ai>
 UNT Brute 8 4 1 
 UNT Brute 6 6 1 
-UNT Archer 8 5 4 
-UNT Archer 7 6 4 
 UNT Lucina 3 17 0 
 UNT Brute 10 10 4 
 UNT Brute 12 11 4 
@@ -52,4 +50,7 @@ UNT Thief 9 16 1
 UNT Archer 6 9 4 
 UNT Lon'qu 13 18 0 
 UNT Donnel 10 19 0 
+UNT Archer 8 5 4 
+UNT Archer 10 4 4 
+UNT Thief 3 5 4 
 
