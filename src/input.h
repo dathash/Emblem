@@ -162,7 +162,7 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
             {
                 printf("Gamepad connected!\n");
                 gamepad = SDL_JoystickOpen(0);
-                assert(gamepad);
+                SDL_assert(gamepad);
             }
             else if(Event.type == SDL_JOYDEVICEREMOVED)
             {

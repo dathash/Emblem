@@ -27,7 +27,7 @@ LoadConversation(string path, string filename,
     ifstream fp;
     fp.open(path + filename);
     if(!fp.is_open())
-        assert(!"ERROR LoadConversation: File could not be opened.\n");
+        SDL_assert(!"ERROR LoadConversation: File could not be opened.\n");
 
     while(getline(fp, line))
     {
@@ -75,7 +75,7 @@ LoadConversation(string path, string filename,
     }
     fp.close();
 
-    assert(conversation.one && conversation.two);
+    SDL_assert(conversation.one && conversation.two);
 
     conversation.ReloadTextures();
     return conversation;
@@ -89,16 +89,16 @@ LoadTextureText(string text, SDL_Color color, int line_length)
     SDL_Texture *texture = nullptr;
     SDL_Surface *surface = nullptr;
 
-    assert(GlobalFont);
+    SDL_assert(GlobalFont);
     surface = TTF_RenderText_Solid_Wrapped(GlobalFont,
                                            text.c_str(),
                                            color,
                                            (Uint32)line_length);
-    assert(surface);
+    SDL_assert(surface);
     int width = surface->w;
     int height = surface->h;
     texture = SDL_CreateTextureFromSurface(GlobalRenderer, surface);
-    assert(texture);
+    SDL_assert(texture);
     SDL_FreeSurface(surface);
 
     return Texture(texture, "", "", width, height);
@@ -113,11 +113,11 @@ LoadTextureImage(string path, string filename)
 
     //cout << path + filename << "\n";
     surface = IMG_Load((path + filename).c_str());
-    assert(surface);
+    SDL_assert(surface);
     int width = surface->w;
     int height = surface->h;
     texture = SDL_CreateTextureFromSurface(GlobalRenderer, surface);
-    assert(texture);
+    SDL_assert(texture);
     SDL_FreeSurface(surface);
 
     return Texture(texture, path, filename, width, height);
@@ -156,7 +156,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
     ifstream fp;
     fp.open(filename_in);
     if(!fp.is_open())
-        assert(!"ERROR LoadLevel: File could not be opened!\n");
+        SDL_assert(!"ERROR LoadLevel: File could not be opened!\n");
 
     while(getline(fp, line))
     {
@@ -269,7 +269,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
                     unitCopy = make_shared<Unit>(*unit);
                 }
             }
-            assert(unitCopy);
+            SDL_assert(unitCopy);
             int col = stoi(tokens[1]);
             int row = stoi(tokens[2]);
 
@@ -305,7 +305,7 @@ LoadUnits(string filename_in)
 
     ifstream fp;
     fp.open(filename_in);
-    assert(fp.is_open());
+    SDL_assert(fp.is_open());
     while(getline(fp, line))
     {
         if(!line.empty())
@@ -355,7 +355,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
 {
     ofstream fp;
     fp.open(filename_in);
-    assert(fp.is_open());
+    SDL_assert(fp.is_open());
     
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";
@@ -395,7 +395,7 @@ SaveLevel(string filename_in, const Level &level)
 {
     ofstream fp;
     fp.open(filename_in);
-    assert(fp.is_open());
+    SDL_assert(fp.is_open());
     
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";

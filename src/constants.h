@@ -10,15 +10,14 @@
 #define DEV_MODE 1
 
 // low level
-#define MS_PER_FRAME 16.666
 #define JOYSTICK_DEAD_ZONE 8000
 // TODO: Create a separate system for keyboard inputs
 //       OR Decide on one input system or the other.
 #define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
 // defaults
-#define DEFAULT_MUSIC_VOLUME 0.5f
-#define DEFAULT_SFX_VOLUME 0.1f
+#define DEFAULT_MUSIC_VOLUME 0.1f
+#define DEFAULT_SFX_VOLUME 0.05f
 
 // rendering
 #define VIEWPORT_WIDTH 15
@@ -38,7 +37,11 @@
 
 // animation
 #define ANIMATION_SPEED 10
-#define AI_ACTION_SPEED 15
+#define AI_ACTION_SPEED 10
+
+// startup
+#define INITIAL_LEVEL "l0.txt"
+#define INITIAL_UNITS "units.txt"
 
 // data
 #define DATA_PATH "../data/"
@@ -53,20 +56,14 @@
 #define FULLS_PATH "../assets/portraits/fulls/"
 #define TILESETS_PATH "../assets/tilesets/"
 
-#define INITIAL_LEVEL "l0.txt"
-#define INITIAL_UNITS "units.txt"
-
-
 #define DEFAULT_PORTRAIT "ph.png"
 #define DEFAULT_SHEET "thief.png"
 
 // gameplay
 #define LEADER_ID hash<string>{}("Lucina")
 
-#define LEVEL_TIME 99
-
-#define DOUBLE_RATIO 2
-#define CRIT_MULTIPLIER 3
+#define DOUBLE_RATIO 2    // How much a unit must beat another by to double them.
+#define CRIT_MULTIPLIER 2 // The multiplier on damage.
 
 #define FLOOR_TILE {FLOOR, 1, 0, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, 0, nullptr, {6, 22}}
@@ -100,24 +97,26 @@ enum InterfaceState
     GAME_MENU_OUTLOOK, // 14
     GAME_MENU_OPTIONS, // 15
 
-    UNIT_MENU_ROOT, // 16
-    UNIT_INFO, // 17
+    ANIMATING_UNIT_MOVEMENT, // 16
 
-    ENEMY_INFO, // 18
-    ENEMY_RANGE, // 19
+    UNIT_MENU_ROOT, // 17
+    UNIT_INFO, // 18
 
-    LEVEL_MENU, // 20
+    ENEMY_INFO, // 19
+    ENEMY_RANGE, // 20
 
-    CONVERSATION_MENU, // 21
-    CONVERSATION, // 22
-    BATTLE_CONVERSATION, // 23
-    PRELUDE, // 24
+    LEVEL_MENU, // 21
 
-    PLAYER_FIGHT, // 25
+    CONVERSATION_MENU, // 22
+    CONVERSATION, // 23
+    BATTLE_CONVERSATION, // 24
+    PRELUDE, // 25
 
-    NO_OP, // 26
+    PLAYER_FIGHT, // 26
 
-    GAME_OVER, // 27
+    NO_OP, // 27
+
+    GAME_OVER, // 28
 };
 
 enum AIState
@@ -136,7 +135,7 @@ enum AIBehavior
     PURSUE,
     BOLSTER,
     FLEE,
-    WAIT_THEN_ATTACK
+    WAIT_THEN_ATTACK,
 };
 
 enum quadrant
@@ -144,7 +143,7 @@ enum quadrant
     TOP_LEFT,
     TOP_RIGHT,
     BOTTOM_LEFT,
-    BOTTOM_RIGHT
+    BOTTOM_RIGHT,
 };
 
 enum TileType

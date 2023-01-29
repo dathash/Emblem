@@ -76,7 +76,7 @@ public:
     {
         cursor->selected->is_exhausted = true;
 
-        cursor->selected->sheet.ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(TRACK_IDLE);
         cursor->selected = nullptr;
 
         cursor->redo = {-1, -1};
@@ -221,7 +221,7 @@ GetAction(const Unit &unit, const Tilemap &map)
 
         default:
         {
-            assert(!"Shouldn't get here!\n");
+            SDL_assert(!"Shouldn't get here!\n");
         } break;
     }
     return action;
@@ -241,7 +241,7 @@ public:
     {
         // Find target
         pair<position, Unit *> action = GetAction(*cursor->selected, *map);
-        assert(!(action.first == position(0, 0)));
+        SDL_assert(!(action.first == position(0, 0)));
 
         // move cursor
         cursor->pos = action.first;
@@ -252,7 +252,7 @@ public:
 
         cursor->selected->pos = cursor->pos;
         cursor->source = cursor->pos;
-        cursor->selected->sheet.ChangeTrack(1);
+        cursor->selected->sheet.ChangeTrack(TRACK_ACTIVE);
 
         // perform attack
         if(action.second)

@@ -84,7 +84,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		}
 		ImGui::NewLine();
 
-		assert(selectedIndex < units->size());
+		SDL_assert(selectedIndex < units->size());
 		Unit *selected = (*units)[selectedIndex].get();
 
 		ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());

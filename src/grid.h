@@ -168,32 +168,7 @@ int ManhattanDistance(const position &one, const position &two)
     return (abs(one.col - two.col) + abs(one.row - two.row));
 }
 
-// Finds the direction from one position to another.
-direction GetDirection(const position &one, const position &two)
-{
-    direction result;
-    position difference = one - two;
-    if(abs(difference.col) > abs(difference.row))
-    {
-        result = {1, 0};
-        // SIGN
-        if(difference.col > 0)
-        {
-            result = result * -1;
-        }
-    }
-    else
-    {
-        result = {0, 1};
-        // SIGN
-        if(difference.row > 0)
-        {
-            result = result * -1;
-        }
-    }
 
-    return result;
-}
 
 void
 PrintDistanceField(const vector<vector<int>> &field)
@@ -207,7 +182,6 @@ PrintDistanceField(const vector<vector<int>> &field)
         cout << "\n";
     }
 }
-
 
 void
 PrintField(const vector<vector<position>> &field)
@@ -370,7 +344,7 @@ GetPath(const Tilemap &map,
 position
 FurthestMovementOnPath(const Tilemap &map, const path &path_in, int movement)
 {
-    assert(path_in.size());
+    SDL_assert(path_in.size());
     if(movement > path_in.size())
     {
         return {0, 0};

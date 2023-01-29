@@ -53,13 +53,23 @@ struct Texture
     }
 };
 
+enum SheetTrack
+{
+    TRACK_IDLE,
+    TRACK_ACTIVE,
+    TRACK_LEFT,
+    TRACK_RIGHT,
+    TRACK_DOWN,
+    TRACK_UP,
+};
+
 struct Spritesheet
 {
     Texture texture;
     int size    = SPRITE_SIZE;
     int tracks  = 0;
     int frames  = 0;
-    int track   = 0;
+    SheetTrack track = TRACK_IDLE;
     int frame   = 0;
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
@@ -82,23 +92,34 @@ struct Spritesheet
         {
             int new_frame = frame + 1;
             if(new_frame >= frames)
-            {
                 this->frame = 0;
-            }
             else
-            {
                 this->frame = new_frame;
-            }
         }
     }
 
     // switches the sprite to the next animation track
     void
-    ChangeTrack(int track_in)
+    ChangeTrack(SheetTrack track_in)
     {
-        assert(track_in < tracks && track_in >= 0);
+        SDL_assert(track_in < tracks && track_in >= 0);
         this->track = track_in;
         this->frame = 0;
+    }
+
+    void
+    ChangeTrackMovement(const direction &dir)
+    {
+        if(dir == position(1, 0))
+            ChangeTrack(TRACK_RIGHT);
+        else if(dir == position(-1, 0))
+            ChangeTrack(TRACK_LEFT);
+        else if(dir == position(0, -1))
+            ChangeTrack(TRACK_DOWN);
+        else if(dir == position(0, 1))
+            ChangeTrack(TRACK_UP);
+        else
+            assert(!"ChangeTrackMovement: Invalid direction.");
     }
 };
 
@@ -166,16 +187,15 @@ struct Unit
     int max_range;
     Ability ability;
 
-    Expression expression = EXPR_NEUTRAL;
     AIBehavior ai_behavior = NO_BEHAVIOR;
-    position pos = {0, 0}; // CONSIDER: DRY. This could just be represented in cursor.
+    position pos = {0, 0};
     bool is_exhausted = false;
     bool should_die = false;
     position animation_offset = {0, 0};
 
-    Buff *buff;
+    Buff *buff = nullptr;
 
-    ~Unit() // TODO: shared_ptr?
+    ~Unit()
     {
         delete buff;
     }
@@ -232,7 +252,6 @@ struct Unit
 
 
     // Damages a unit and resolves things involved with that process.
-    // Includes a clamp function for less code reuse
     void
     Damage(int damage)
     {
@@ -243,7 +262,7 @@ struct Unit
     Deactivate()
     {
         is_exhausted = true;
-        sheet.ChangeTrack(0);
+        sheet.ChangeTrack(TRACK_IDLE);
     }
     void
     Activate()
@@ -255,6 +274,7 @@ struct Unit
     {
         buff = buff_in;
     }
+
     // Called every turn. If buff is over, deletes the buff.
     void
     TickBuff()
@@ -316,7 +336,8 @@ GetConversationEventFromString(const string &in)
     else if(in == "TWO Exits") return CONV_TWO_EXITS;
     else if(in == "ONE Enters") return CONV_ONE_ENTERS;
     else if(in == "TWO Enters") return CONV_TWO_ENTERS;
-    assert(!"Warning: Unsupported Expression in GetConversationEventFromString.");
+    SDL_assert(!"Warning: Unsupported Expression in GetConversationEventFromString.");
+    return CONV_ONE_EXITS;
 }
 
 struct Sentence
@@ -336,6 +357,7 @@ struct Conversation
     Unit *one = nullptr;
     Unit *two = nullptr;
     pair<bool, bool> active = {true, false};
+    pair<Expression, Expression> expressions = {EXPR_NEUTRAL, EXPR_NEUTRAL};
     vector<Sentence> prose;
     int current = 0;
     Texture words_texture;
@@ -387,18 +409,16 @@ struct Conversation
         {
             done = true;
             current = 0;
-            one->expression = EXPR_NEUTRAL;
-            two->expression = EXPR_NEUTRAL;
             return;
         }
 
         if(Speaker() == SPEAKER_ONE)
         {
-            one->expression = Expression();
+            expressions.first = Expression();
         }
         else if(Speaker() == SPEAKER_TWO)
         {
-            two->expression = Expression();
+            expressions.second = Expression();
         }
 
         switch(prose[current].event)
@@ -422,7 +442,7 @@ struct Conversation
             {
                 active.second = true;
             } break;;
-            default: assert(!"ERROR Unhandled enum in Conversation.Next()");
+            default: SDL_assert(!"ERROR Unhandled enum in Conversation.Next()");
         }
     }
 };
@@ -476,7 +496,8 @@ struct Tilemap
                 }
             }
         }
-        assert(!"ERROR GetNextSpawnLocation: No spawn locations available.");
+        SDL_assert(!"ERROR GetNextSpawnLocation: No spawn locations available.");
+        return position(0, 0);
     }
 };
 
@@ -493,7 +514,7 @@ struct Level
     {
         newcomer->pos = pos;
         combatants.push_back(newcomer);
-        assert(!map.tiles[pos.col][pos.row].occupant);
+        SDL_assert(!map.tiles[pos.col][pos.row].occupant);
         map.tiles[pos.col][pos.row].occupant = newcomer.get();
     }
 
@@ -512,7 +533,8 @@ struct Level
             if(unit->ID() == LEADER_ID)
                 return unit->pos;
         }
-        assert(!"ERROR Level.Leader(): No leader!\n");
+        SDL_assert(!"ERROR Level.Leader(): No leader!\n");
+        return position(0, 0);
     }
 
     void
@@ -588,7 +610,6 @@ struct Menu
     }
 
     // Custom-build a menu based on your current options.
-    // Mostly used to dynamically display attack/heal/trade options.
     void
     AddOption(string s)
     {

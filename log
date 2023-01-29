@@ -5,79 +5,6 @@ log
 Plan
 > Build a fun little game!
 
-# Notes
-July 15
-* I'm finding that there are many easy tasks, which are not essential, which I
-    love to do, and few very difficult tasks, which are essential, which I do
-    not want to do. It is as though the force of gravity pulls me down, away
-    from the work that truly needs doing.
-* Also of note is that refactoring is pretty enjoyable, especially when I
-    write decent code. Maybe it falls into that category of easy tasks above,
-    but it feels beneficial in some way.	
-* Testing, however, seems to have very little import. I will try some more,
-    but it has some crucial flaws.  To test the important parts of the system is
-    difficult, and to test the trivial parts of the system is easy.  Must
-    reconcile these differences.
-
-November 4
-* Returned to the game after a long time away.
-    It's actually pretty well put together, and I didn't have a hard time
-    reading the code or adding something new.
-* I'm still a little intimidated by adding big features, which is next.
-
-# Log
-## Summer 2022
-June 30 | 6h  | 500 lines     | Start
-July 1  | 10h | 1500 		  | Stayed up till 3 working on Command system. Very excited!
-July 2  | 8	  | 2100		  | Finished most of basic commands.
-July 3  | 9h  | 3000		  | Added most command functionality. Added tweens and animated sprites. Also some User Interface!
-July 4  | 1h  | 3100		  | Didn't have much time today. Just added some little tweaks and started on combat.
-July 7  | 3h  | 3300		  | Finished level loading system. Pretty happy with such quick work.
-July 8  | 6h  | 3100		  | Dropped tween system, added some rudimentary AI.
-July 9  | 3h  | 3300		  | Finished rudimentary AI.
-July 12 | 3h  | 3000		  | Big refactor! Feels a lot better now.
-July 14 | 2h  | 3100		  | Worked a bit on refining interfaces.
-July 15 | 3h  | 3500		  | Refactoring and added Health Bar
-July 16 | 3h  | 3600 		  | Added Miniaudio. Created more info menu displays.
-Total   | 57h
-
-## Fall 2022
-Nov 4   | 1h  | 3800 lines     | Added Portraits to the game.
-Nov 5   | 6h  | 3900 lines     | Added Editor features, like saving/loading files.
-## Winter 2023
-Dec 23  | 2h  | 4000 lines      | Refactored input function. Started work on pathfinding.
-Dec 28  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
-                                  various stupid things I was doing. Realized
-                                  how many stupid things I was doing.
-Dec 29  | 6h  | 4300 lines      | Finished pathfinding, level editor, refactored
-Dec 29  | 6h  | ???             | Mostly refactoring and tilesets
-Dec 30  | 6h  | 4200 lines      | UI Day! Swapped gross retained mode code to IMGUI.
-Dec 31 – Jan 4 | 22h  | 4300 lines | Read the commits.
-
-# Style
-## Concept
-Cool, slick.
-Fast.
-
-## Look
-neons
-akira streaking lights
-
-## Songs
-epilogue (r4 - ridge racer type 4)
-quiet curves (r4 as well)
-spiny desert (mario party 3)
-Track 13 (super b-daman: battle phoenix 64)
-pokemon selection (pokemon stadium)
-    Maybe some drum corps songs?
-Dark Ages 1 (Norse by Northwest - the return of the lost vikings)
-Intro Theme (Tom Clancy's Rainbow Six)
-Super Mario 64 Title Theme
-Tripod (Bomberman Hero)
-Sometimes I breath (planet dob)
-
-# Ideas
-## Brainstorm
 What is appealing to me about tactics games?
     Individual Characters
         Strong Characterization
@@ -113,7 +40,6 @@ Ideas
 
 * Rogue-like combinatoric explosion game
 
-## Design
 Why are we fighting?
 Fire Emblem maps are almost always about killing all the enemies
 What about other objectives?
@@ -127,7 +53,6 @@ What do RPG Mechanics really achieve?
 * Numbers go up hehe
 * The strategic decision of nurturing a weak unit until they grow.
 
-## Mechanics
 Group mechanics (Units nearby eachother get bonuses)
 Leader mechanics (Genealogy stars)
 Fort with attack bonus instead of defense
@@ -137,6 +62,126 @@ Boost teammate units over stuff?
 Misty Step
 Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
+
+# TODO
+PROTOTYPE ///////////////////////////////////////////////////
+    5 levels
+
+    Placing Unit moves them smoothly to that square (A-star)
+
+    display enemy damage range, unit damage range, plus abilities too.
+    
+    Do some real design thinking.
+
+    Fire Tile?
+    Heal Tile?
+
+    Slick Turn transitions
+
+    Healing Animation
+
+////////////////////////////////////////////////////////////
+
+0.1 ////////////////////////////////////////////////////////
+    10 levels
+
+    Inbetween Levels | Metagame
+    * Recruit new units?
+    * Allocate stats?
+    * Equipment?
+
+    RPG Mechanics
+    * Boosted stats?
+    * New abilities?
+    * Improved abilities?
+    * Experience points?
+    * Levels?
+
+    Cycle units with L trigger.
+    * CONTROLLER TESTING
+
+    More complex conversations
+    * Unit Death Screens
+    * Up to four conversationists
+    * Solo Conversations
+    * Multiple preludes in a row.
+    * Animated stuff inbetween.
+
+    Startup Screen
+////////////////////////////////////////////////////////////
+
+0.2 ////////////////////////////////////////////////////////
+    15 levels
+
+    Real-time color editing in the editor
+
+    Better enemy AI
+        Pursuing Enemies only come for you when you get near.
+        * Bresenham's line plus a certain distance (maybe 7 tiles?)
+        Enemy Units have more complex decision-making process.
+        * More factors like accuracy and whether they will die in the process.
+        Enemies need to treat their own units as walls in a sort of sense
+        * Waits until you're within a certain number of squares (probably like 5),
+          then pursues
+        * Bolsters until attacked, then changes to Pursue.
+        State Machine?
+    "Guard" action
+
+////////////////////////////////////////////////////////////
+
+POLISH
+    Switch Options menu to internal system.
+    * Music Volume
+    * Resolution?
+      * This would require constructing some kind of anchor system, which would
+        be an enormous amount of work. If we want to allow for variable
+        resolutions, we will need to probably use Qt or something similar.
+    * Quit
+
+    Shrink Tilesets to absolute necessity, also enforce consistency across them.
+    Create polished tilemaps with Tiled and overlay them onto the in-game maps.
+    Smooth Screen Scroll (Render tiles one tile off of the screen.)
+
+QA
+    Controller added mid-game doesn't register joystick, only buttons.
+    Take junk out of main
+        The Next-Level code is so flimsy...
+        So is the Game Over code.
+    BUG | Enemy attacks on targets outside the viewport don't get the target
+    in view.
+    BUG | Enemies that can actually reach you don't believe that they can due to
+    the difference in pathfinding/flood filling. We NEED To get a more unified
+    solution working.
+    BUG | Paths are drawn without regard for walkable squares. EX: When choosing
+    a square to place a unit, its path is drawn through an enemy.
+
+# Plot
+## World
+Tolmec
+* Desert
+* Theocracy
+
+Imrryr
+* Plains
+* Lordship
+
+Gaul
+* Mountains
+* Nomads
+
+Heroes
+Close party, like in Bebop or in Lupin.
+The hero.
+The mentor.
+The brooding one.
+The heart.
+The lover.
+The witch.
+The rival.
+The mother.
+
+## Plot
+Two part story.
 
 ## Characters
 ### Commander
@@ -211,123 +256,4 @@ Noire
         Consequences.
     Personality
 
-
-# TODO
-PROTOTYPE ///////////////////////////////////////////////////
-    5 levels
-
-    display enemy damage range, unit damage range, plus abilities too.
-    
-    Do some real design thinking
-
-////////////////////////////////////////////////////////////
-
-0.1 ////////////////////////////////////////////////////////
-    10 levels
-
-    Inbetween Levels | Metagame
-    * Recruit new units?
-    * Allocate stats?
-    * Equipment?
-
-    Fire Tile?
-    Fortress Tile?
-    Shifting ground?
-
-    RPG Mechanics
-    * Boosted stats?
-    * New abilities?
-    * Improved abilities?
-    * Experience points?
-    * Levels?
-
-    display enemy damage range, unit damage range, plus abilities too.
-    Cycle units with L trigger.
-    * CONTROLLER TESTING
-
-    More complex conversations
-    * Unit Death Screens
-    * Up to four
-////////////////////////////////////////////////////////////
-
-0.2 ////////////////////////////////////////////////////////
-    15 levels
-
-    Real-time color editing in the editor
-
-    Better enemy AI
-        Pursuing Enemies only come for you when you get near.
-        * Bresenham's line plus a certain distance (maybe 7 tiles?)
-        Enemy Units have more complex decision-making process.
-        * More factors like accuracy and whether they will die in the process.
-        Enemies need to treat their own units as walls in a sort of sense
-        * Waits until you're within a certain number of squares (probably like 5),
-          then pursues
-        * Bolsters until attacked, then changes to Pursue.
-        State Machine?
-    "Guard" action
-
-////////////////////////////////////////////////////////////
-
-POLISH
-    Swap Noire and Donnel's Colors
-    Switch Options menu to internal system.
-    * Music Volume
-    * Resolution?
-      * This would require constructing some kind of anchor system, which would
-        be an enormous amount of work. If we want to allow for variable
-        resolutions, we will need to probably use Qt or something similar.
-    * Quit
-
-    Look into pixel squishing problems
-
-    BUG | Paths are drawn without regard for walkable squares. EX: When choosing
-    a square to place a unit, its path is drawn through an enemy.
-    Startup Screen
-    Create polished tilemaps with Tiled and overlay them onto the in-game maps.
-
-    Placing Unit moves them smoothly to that square (A-star)
-    Smooth Screen Scroll (Render tiles one tile off of the screen.)
-
-MAYBE?
-    Eventually switch over to OpenGL or Vulkan/Direct3D12
-    Shrink Tilesets to absolute necessity, also enforce consistency across them
-    for ease of plug-n-play.
-    Attack and Move
-
-QA
-    Controller added mid-game doesn't register joystick, only buttons.
-    Take junk out of main
-        The Next-Level code is so flimsy...
-        So is the Game Over code.
-    BUG | Enemy attacks on targets outside the viewport don't get the target
-    in view.
-    BUG | Enemies that can actually reach you don't believe that they can due to
-    the difference in pathfinding/flood filling. We NEED To get a more unified
-    solution working.
-
-MULTI-PLATFORM
-    Don't include SDL2/SDL.h, rather include SDL.h therefore you can remove the CRT.
-    Use SDL Assert().
-
-# World
-Tolmec
-* Desert
-* Theocracy
-
-Imrryr
-* Plains
-* Lordship
-
-Gaul
-* Mountains
-* Nomads
-
-Heroes
-Close party, like in Bebop or in Lupin.
-The hero.
-The brooding one.
-The heart.
-The lover.
-The demon.
 

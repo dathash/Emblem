@@ -2,25 +2,6 @@
 // Program: Emblem
 // File: Main
 
-/* Style Guide
- * GlobalVariable;
- * local_variable;
- *
- * struct Name
- * {
- *     field_name;
- * };
- *
- * type
- * FunctionName()
- * {
- *     ...;
- *     return;
- * }
- *
- * everything else, just go nuts.
- */
-
 // ========================== includes =====================================
 // Library includes (Linked in on the machine)
 #include <SDL.h>
@@ -91,7 +72,7 @@ static int viewportRow = 0;
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
 #include "utils.h"
-#include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx.
+#include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
 #include "event.h" // NOTE: Includes a GlobalEvents queue.
 #include "state.h"
 #include "structs.h"
@@ -108,19 +89,20 @@ static int viewportRow = 0;
 #include "render.h"
 #include "editor.h"
 
+
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
 
     if(!Initialize())
-        assert(!"Initialization Failed\n");
+        SDL_assert(!"Initialization Failed\n");
 
     // controller init
     SDL_Joystick *gamepad = NULL;
     if(SDL_NumJoysticks() > 0)
     {
         gamepad = SDL_JoystickOpen(0);
-        assert(gamepad);
+        SDL_assert(gamepad);
     }
 
     GlobalMusic.sounds =
@@ -202,7 +184,7 @@ int main(int argc, char *argv[])
 
             ai.Update(&cursor, &level.map, &fight);
 
-            cursor.Update();
+            cursor.Update(&level.map);
             fight.Update();
             level.Update();
             ui.Update();

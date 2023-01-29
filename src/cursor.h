@@ -17,6 +17,7 @@ struct Cursor
     path path_draw = {};
 
     Animation *animation = nullptr;
+    Animation *unit_animation = nullptr;
     position animation_offset = position(0, 0);
     direction animation_dir = direction(0, 0);
 
@@ -25,7 +26,7 @@ struct Cursor
     {}
 
     void
-    Update()
+    Update(Tilemap *map)
     {
         if(animation)
         {
@@ -38,6 +39,41 @@ struct Cursor
                 delete animation;
                 animation = nullptr;
                 animation_offset = {0, 0};
+            }
+        }
+
+        if(unit_animation)
+        {
+            float value = unit_animation->Value(CHANNEL_ONE);
+            int index = (int)(value * path_draw.size());
+            float amount_tween = (float)(value * path_draw.size()) - (int)(value * path_draw.size());
+            position between = {0, 0};
+            if(index + 1 < path_draw.size())
+            {
+                between = ((path_draw[index+1] - path_draw[index]) * TILE_SIZE * amount_tween);
+                direction dir = GetDirection(path_draw[index+1], path_draw[index]);
+                selected->sheet.ChangeTrackMovement(dir);
+            }
+
+            selected->animation_offset = 
+                (path_draw[index] - selected->pos) * TILE_SIZE
+                + between;
+
+            if(unit_animation->Update())
+            {
+                delete unit_animation;
+                unit_animation = nullptr;
+
+                map->tiles[redo.col][redo.row].occupant = nullptr;
+                map->tiles[pos.col][pos.row].occupant = selected;
+
+                selected->pos = pos;
+                selected->sheet.ChangeTrack(TRACK_ACTIVE);
+
+                selected->animation_offset = {0, 0};
+
+                GlobalInterfaceState = UNIT_MENU_ROOT;
+                EmitEvent(PLACE_UNIT_EVENT);
             }
         }
 
@@ -55,7 +91,7 @@ struct Cursor
         if(WithinViewport(pos_in))
         {
             animation_dir = dir_in;
-            animation = GetAnimation(MOVE_ANIMATION);
+            animation = GetAnimation(MOVE_ANIMATION, 1.0f);
         }
         EmitEvent(MOVE_CURSOR_EVENT);
     }

@@ -140,6 +140,33 @@ clamp(const position &pos, const position &min, const position &max)
     return result;
 }
 
+// Finds the direction from one position to another.
+direction GetDirection(const position &one, const position &two)
+{
+    direction result;
+    position difference = one - two;
+    if(abs(difference.col) > abs(difference.row))
+    {
+        result = {1, 0};
+        // SIGN
+        if(difference.col > 0)
+        {
+            result = result * -1;
+        }
+    }
+    else
+    {
+        result = {0, 1};
+        // SIGN
+        if(difference.row > 0)
+        {
+            result = result * -1;
+        }
+    }
+
+    return result;
+}
+
 // ===================================== Viewport ===============================
 // returns the current quadrant of where the cursor is on the screen.
 enum quadrant

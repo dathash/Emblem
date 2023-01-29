@@ -21,6 +21,7 @@ enum AnimationValue
     ATTACK_ANIMATION_LEAP,
     ATTACK_ANIMATION_MISS,
     MOVE_ANIMATION,
+    MOVE_UNIT_ANIMATION,
 };
 
 enum ChannelIndex
@@ -203,13 +204,13 @@ struct Animation
 };
 
 Animation *
-GetAnimation(AnimationValue anim)
+GetAnimation(AnimationValue anim, float frame_modulation)
 {
     switch(anim)
     {
         case ATTACK_ANIMATION_RANGED:
         {
-            return (new Animation(1, 40, false, 2,
+            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
                      {0.4 , -0.1 },
                      {0.5 ,  0.0 },
@@ -222,7 +223,7 @@ GetAnimation(AnimationValue anim)
         }
         case ATTACK_ANIMATION_MELEE: 
         {
-            return (new Animation(1, 40, false, 2,
+            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
                      {0.4 ,  0.0 },
                      {0.5 ,  1.0 },
@@ -235,7 +236,7 @@ GetAnimation(AnimationValue anim)
         }
         case ATTACK_ANIMATION_LEAP:
         {
-            return (new Animation(1, 40, false, 2,
+            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
                      {0.4 ,  0.0 },
                      {0.5 ,  1.0 },
@@ -251,7 +252,7 @@ GetAnimation(AnimationValue anim)
         }
         case ATTACK_ANIMATION_MISS:
         {
-            return (new Animation(1, 40, false, 2,
+            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
                      {0.4 ,  0.0 },
                      {0.5 ,  1.0 },
@@ -265,10 +266,16 @@ GetAnimation(AnimationValue anim)
         }
         case MOVE_ANIMATION:
         {
-            return (new Animation(1, 5, false, 1,
+            return (new Animation(1, (int)(5 * frame_modulation), false, 1,
                     {{0.0 ,  1.0 },  // channel 1
-                     {0.5 ,  0.5 },
                      {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case MOVE_UNIT_ANIMATION:
+        {
+            return (new Animation(1, (int)(5 * frame_modulation), false, 1,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {1.0 ,  1.0 }},
                      Identity));
         }
         default:
@@ -287,7 +294,7 @@ struct AnimationSystem
     void
     PlayAnimation(AnimationValue in)
     {
-        current = GetAnimation(in);
+        current = GetAnimation(in, 1.0f);
     }
 
     void

@@ -10,7 +10,7 @@
 void
 RenderTileColor(const position &pos, const SDL_Color &color)
 {
-    //assert(col >= 0 && row >= 0);
+    SDL_assert(pos.col >= 0 && pos.row >= 0);
     SDL_Rect tileRect = {TILE_SIZE / 16 + pos.col * TILE_SIZE, TILE_SIZE / 16 + pos.row * TILE_SIZE, 
                          TILE_SIZE - (TILE_SIZE / 16) * 2, 
                          TILE_SIZE - (TILE_SIZE / 16) * 2};
@@ -59,7 +59,7 @@ RenderPortrait(int x, int y, const Unit &unit,
         case EXPR_HAPPY: portrait = &unit.happy; break;
         case EXPR_ANGRY: portrait = &unit.angry; break;
         case EXPR_WINCE: portrait = &unit.wince; break;
-        default: assert(!"ERROR RenderPortrait: Invalid expression."); break;
+        default: SDL_assert(!"ERROR RenderPortrait: Invalid expression."); break;
     }
     SDL_Rect destination = {x, y, 
                             PORTRAIT_SIZE,
@@ -81,16 +81,17 @@ RenderText(const Texture &texture, int x, int y)
 
 // Renders a Health Bar (For use underneath units)
 void
-RenderHealthBarSmall(const position &p, int hp, int maxHp)
+RenderHealthBarSmall(const position &p, int hp, int maxHp,
+                     const position &animation_offset = position(0, 0))
 {
     float ratio = (float)hp / maxHp;
     SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
 
-    SDL_Rect bar_rect = {p.col * TILE_SIZE + 7, 
-                            p.row * TILE_SIZE + 50,
+    SDL_Rect bar_rect = {p.col * TILE_SIZE + 7     + animation_offset.col, 
+                            p.row * TILE_SIZE + 50 + animation_offset.row,
                             50, 8};
-    SDL_Rect health_rect = {p.col * TILE_SIZE + 7,
-                            p.row * TILE_SIZE + 50,
+    SDL_Rect health_rect = {p.col * TILE_SIZE + 7  + animation_offset.col,
+                            p.row * TILE_SIZE + 50 + animation_offset.row,
                             (int)(50 * ratio), 8};
 
     SDL_SetRenderDrawColor(GlobalRenderer, darkGray.r, darkGray.g, darkGray.b, darkGray.a);
@@ -307,7 +308,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 
                 position screen_pos = {col - viewportCol, row - viewportRow};
                 RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally, tileToRender.occupant->animation_offset);
-                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
+                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health, tileToRender.occupant->animation_offset);
             }
         }
     }
@@ -419,7 +420,7 @@ Render(const Tilemap &map, const Cursor &cursor,
 	   GlobalInterfaceState == ENEMY_INFO)
     {
         const Unit *subject = map.tiles[cursor.pos.col][cursor.pos.row].occupant;
-        assert(subject);
+        SDL_assert(subject);
         int x_pos = 480;
         if(subject->is_ally)
             x_pos = -50;
@@ -432,7 +433,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(GlobalInterfaceState == PREVIEW_ATTACK ||
 	   GlobalInterfaceState == PREVIEW_ABILITY)
     {
-        assert(cursor.selected);
+        SDL_assert(cursor.selected);
 
         RenderPortrait(-100, 0, *cursor.selected, 
                        GlobalInterfaceState == PREVIEW_ABILITY ? EXPR_HAPPY : EXPR_ANGRY, 
@@ -462,10 +463,10 @@ Render(const Tilemap &map, const Cursor &cursor,
 
         if(conversation.active.first)
             RenderPortrait(-50, 0, *conversation.one,
-                           conversation.one->expression, true);
+                           conversation.expressions.first, true);
         if(conversation.active.second)
             RenderPortrait(400, 0, *conversation.two,
-                           conversation.two->expression, false);
+                           conversation.expressions.second, false);
 
         SDL_Rect conv_rect = {20, 400, 860, 180};
         SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);

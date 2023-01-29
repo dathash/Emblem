@@ -135,22 +135,22 @@ struct Attack
         {
             case RANGED:
             {
-                animation = GetAnimation(ATTACK_ANIMATION_RANGED);
+                animation = GetAnimation(ATTACK_ANIMATION_RANGED, 1.0f);
             } break;
 
             case MELEE:
             {
                 if(hit && !crit)
                 {
-                    animation = GetAnimation(ATTACK_ANIMATION_MELEE);
+                    animation = GetAnimation(ATTACK_ANIMATION_MELEE, 1.0f);
                 }
                 else if(hit && crit)
                 {
-                    animation = GetAnimation(ATTACK_ANIMATION_LEAP);
+                    animation = GetAnimation(ATTACK_ANIMATION_LEAP, 1.0f);
                 }
                 else
                 {
-                    animation = GetAnimation(ATTACK_ANIMATION_MISS);
+                    animation = GetAnimation(ATTACK_ANIMATION_MISS, 1.0f);
                 }
             } break;
         }

@@ -223,12 +223,6 @@ public:
 
     virtual void Execute()
     {
-        map->tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;
-        map->tiles[cursor->pos.col][cursor->pos.row].occupant = cursor->selected;
-
-        cursor->selected->pos = cursor->pos;
-        cursor->selected->sheet.ChangeTrack(1);
-
         // Determine interactible squares
         map->attackable.clear();
         map->ability.clear();
@@ -314,7 +308,7 @@ public:
             } break;
             default:
             {
-                assert(!"ERROR Unimplemented Ability in AbilityCommand!\n");
+                SDL_assert(!"ERROR Unimplemented Ability in AbilityCommand!\n");
             }
         }
 
@@ -346,10 +340,22 @@ public:
 
         menu->AddOption("Wait");
 
-        EmitEvent(PLACE_UNIT_EVENT);
+        if(cursor->path_draw.empty())
+        {
+            GlobalInterfaceState = UNIT_MENU_ROOT;
+            map->tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;
+            map->tiles[cursor->pos.col][cursor->pos.row].occupant = cursor->selected;
+
+            cursor->selected->pos = cursor->pos;
+            cursor->selected->sheet.ChangeTrack(TRACK_ACTIVE);
+            EmitEvent(PLACE_UNIT_EVENT);
+            return;
+        }
+
+        cursor->unit_animation = GetAnimation(MOVE_UNIT_ANIMATION, cursor->path_draw.size());
 
         // change state
-        GlobalInterfaceState = UNIT_MENU_ROOT;
+        GlobalInterfaceState = ANIMATING_UNIT_MOVEMENT;
     }
 
 private:
@@ -378,7 +384,7 @@ public:
         cursor->path_draw = {};
 
         cursor->selected->pos = cursor->pos;
-        cursor->selected->sheet.ChangeTrack(0);
+        cursor->selected->sheet.ChangeTrack(TRACK_IDLE);
 
         EmitEvent(PICK_UP_UNIT_EVENT);
 
@@ -403,7 +409,7 @@ public:
 
     virtual void Execute()
     {
-        assert(map->attackable.size() > 0);
+        SDL_assert(map->attackable.size() > 0);
         if(map->attackable.size() == 1)
             return;
 
@@ -438,7 +444,7 @@ public:
 
     virtual void Execute()
     {
-        assert(map->ability.size() > 0);
+        SDL_assert(map->ability.size() > 0);
         if(map->ability.size() == 1)
             return;
 
@@ -473,7 +479,7 @@ public:
 
     virtual void Execute()
     {
-        assert(map->adjacent.size() > 0);
+        SDL_assert(map->adjacent.size() > 0);
         if(map->adjacent.size() == 1)
             return;
 
@@ -664,7 +670,7 @@ public:
             } break;
             default:
             {
-                assert(!"ERROR Unimplemented Ability in AbilityCommand!\n");
+                SDL_assert(!"ERROR Unimplemented Ability in AbilityCommand!\n");
             }
         }
 
@@ -919,7 +925,7 @@ public:
 
         if(option == "Attack")
         {
-            assert(map.attackable.size());
+            SDL_assert(map.attackable.size());
             cursor->source = cursor->pos;
 
             cursor->PlaceAt(map.attackable[0]);
@@ -929,7 +935,7 @@ public:
         if(option == "Heal" || option == "Dance" ||
            option == "Buff")
         {
-            assert(map.ability.size());
+            SDL_assert(map.ability.size());
             cursor->source = cursor->pos;
 
             cursor->PlaceAt(map.ability[0]);
@@ -938,7 +944,7 @@ public:
         }
         if(option == "Talk")
         {
-            assert(map.adjacent.size());
+            SDL_assert(map.adjacent.size());
             cursor->source = cursor->pos;
 
             cursor->PlaceAt(map.adjacent[0]);
@@ -958,7 +964,7 @@ public:
             return;
         }
 
-        assert(!"ERROR ChooseUnitMenuOptionCommand | How did you get here?\n");
+        SDL_assert(!"ERROR ChooseUnitMenuOptionCommand | How did you get here?\n");
     }
 
 private:
@@ -1030,7 +1036,7 @@ public:
             return;
         }
 
-        assert(!"ERROR ChooseLevelMenuOptionCommand | How did you get here?\n");
+        SDL_assert(!"ERROR ChooseLevelMenuOptionCommand | How did you get here?\n");
     }
 
 private:
@@ -1090,7 +1096,7 @@ public:
             return;
         }
 
-        assert(!"ERROR ChooseConversationMenuOptionCommand | How did you get here?\n");
+        SDL_assert(!"ERROR ChooseConversationMenuOptionCommand | How did you get here?\n");
     }
 
 private:
@@ -1513,6 +1519,18 @@ public:
                 BindR(make_shared<NullCommand>());
             } break;
 
+            case(ANIMATING_UNIT_MOVEMENT):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
             case(UNIT_MENU_ROOT):
             {
                 BindUp(make_shared<UpdateMenuCommand>(unitMenu, -1));
@@ -1656,7 +1674,7 @@ public:
 
             default:
             {
-                assert(!"Unimplemented GlobalInterfaceState!\n");
+                SDL_assert(!"Unimplemented GlobalInterfaceState!\n");
             } break;
         }
     }

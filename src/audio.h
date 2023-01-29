@@ -43,7 +43,7 @@ struct Sound
             } break;
             default:
             {
-                assert(!"Shouldn't get here!\n");
+                SDL_assert(!"Shouldn't get here!\n");
             } break;
         }
     }
@@ -88,7 +88,7 @@ GetMusic(const string &name)
     for(Sound *sound : GlobalMusic.sounds)
         if(sound->name == name)
             return sound;
-    assert(!"ERROR GetMusic: Song name doesn't exist\n");
+    SDL_assert(!"ERROR GetMusic: Song name doesn't exist\n");
     return nullptr;
 }
 
