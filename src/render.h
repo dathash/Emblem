@@ -157,6 +157,16 @@ Render(const Tilemap &map, const Cursor &cursor,
        GlobalInterfaceState == SELECTED_OVER_ALLY ||
        GlobalInterfaceState == SELECTED_OVER_ENEMY)
     {
+        for(const position &cell : map.vis_range)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           attackColor);
+            }
+        }
+
         for(const position &cell : map.accessible)
         {
             if(WithinViewport(cell))
@@ -185,6 +195,16 @@ Render(const Tilemap &map, const Cursor &cursor,
                 RenderTileColor({cell.col - viewportCol, 
                            cell.row - viewportRow}, 
                            aiMoveColor);
+            }
+        }
+
+        for(const position &cell : map.vis_range)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           attackColor);
             }
         }
     }
@@ -251,6 +271,16 @@ Render(const Tilemap &map, const Cursor &cursor,
 // ================================ ai visualization  =============================
     if(GlobalAIState == SELECTED)
     {
+        for(const position &cell : map.vis_range)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           attackColor);
+            }
+        }
+
         for(const position &cell : map.accessible)
         {
             if(WithinViewport(cell))

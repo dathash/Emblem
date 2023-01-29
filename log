@@ -5,6 +5,7 @@ log
 Plan
 > Build a fun little game!
 
+# Design
 What is appealing to me about tactics games?
     Individual Characters
         Strong Characterization
@@ -67,18 +68,20 @@ Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 PROTOTYPE ///////////////////////////////////////////////////
     5 levels
 
-    Placing Unit moves them smoothly to that square (A-star)
-
-    display enemy damage range, unit damage range, plus abilities too.
-    
     Do some real design thinking.
 
+    display abilities range.
+    
     Fire Tile?
     Heal Tile?
 
     Slick Turn transitions
 
     Healing Animation
+
+    AI Also moves units on paths.
+
+    Conversation Music
 
 ////////////////////////////////////////////////////////////
 
@@ -126,6 +129,7 @@ PROTOTYPE ///////////////////////////////////////////////////
         * Bolsters until attacked, then changes to Pursue.
         State Machine?
     "Guard" action
+    Canto? Mounted?
 
 ////////////////////////////////////////////////////////////
 
@@ -143,10 +147,10 @@ POLISH
     Smooth Screen Scroll (Render tiles one tile off of the screen.)
 
 QA
-    Controller added mid-game doesn't register joystick, only buttons.
     Take junk out of main
         The Next-Level code is so flimsy...
         So is the Game Over code.
+    BUG | Controller added mid-game doesn't register joystick, only buttons.
     BUG | Enemy attacks on targets outside the viewport don't get the target
     in view.
     BUG | Enemies that can actually reach you don't believe that they can due to

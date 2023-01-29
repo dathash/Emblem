@@ -113,18 +113,17 @@ public:
     {
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
         cursor->redo = cursor->pos;
-        map->accessible = AccessibleFrom(*map, cursor->redo,
-                                         cursor->selected->movement,
-                                         cursor->selected->is_ally);
-        // TODO: This condition should be dynamic based on what they do.
-        // OR, we do what the new FE game does and overlay both with a sin wave between them.
-        //if(cursor->selected->aptitude > cursor->selected->attack)
-        //{
-        //}
-        //map->prospective = AccessibleFrom(*map, cursor->redo,
-        //                                  cursor->selected->movement + cursor->selected->max_range,
-        //                                  cursor->selected->is_ally);
-        //cout << map->prospective.size() << "\n";
+
+        map->accessible.clear();
+        map->vis_range.clear();
+        pair<vector<position>, vector<position>> result = 
+            AccessibleAndAttackableFrom(*map, cursor->redo,
+                                        cursor->selected->movement,
+                                        cursor->selected->min_range,
+                                        cursor->selected->max_range,
+                                        cursor->selected->is_ally);
+        map->accessible = result.first;
+        map->vis_range = result.second;
 
         EmitEvent(PICK_UP_UNIT_EVENT);
 
@@ -782,9 +781,16 @@ public:
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
         cursor->redo = cursor->pos;
 
-        map->accessible = AccessibleFrom(*map, cursor->redo,
-                                         cursor->selected->movement,
-                                         cursor->selected->is_ally);
+        map->accessible.clear();
+        map->vis_range.clear();
+        pair<vector<position>, vector<position>> result = 
+            AccessibleAndAttackableFrom(*map, cursor->redo,
+                                        cursor->selected->movement,
+                                        cursor->selected->min_range,
+                                        cursor->selected->max_range,
+                                        cursor->selected->is_ally);
+        map->accessible = result.first;
+        map->vis_range = result.second;
 
         GlobalInterfaceState = ENEMY_RANGE;
     }

@@ -34,78 +34,6 @@ VectorHasElement(const position &pos_in, const vector<position> &vector_in)
 
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
-AccessibleFrom(const Tilemap &map, position origin, int max, bool sourceIsAlly)
-{
-    vector<position> accessible;
-
-	// initialize costs matrix
-	vector<vector<int>> costs;
-	for(int col = 0; col < map.width; ++col)
-	{
-        vector<int> currentColumn = {};
-        for(int row = 0; row < map.height; ++row)
-        {
-            currentColumn.push_back(100);
-        }
-        costs.push_back(currentColumn);
-	}
-
-    int directionsRow[] = { -1,  0,  1,  0 };
-    int directionsCol[] = {  0,  1,  0, -1 };
-
-    queue<position> unexplored;
-    unexplored.push(origin);
-    costs[origin.col][origin.row] = 0;
-    
-    while(!unexplored.empty())
-    { 
-        position current = unexplored.front();
-        unexplored.pop();
-
-        accessible.push_back(current);
-
-        // Add adjacent tiles to the list!
-        for(int i = 0; i < 4; ++i)
-        {
-            position new_pos = {current.col + directionsCol[i],
-                                current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(map.width, map.height, new_pos))
-            {
-                int newCost;
-                if(map.tiles[new_pos.col][new_pos.row].occupant && 
-                   map.tiles[new_pos.col][new_pos.row].occupant->is_ally != sourceIsAlly)
-                {
-                    newCost = 100;
-                }
-                else
-                {
-                    newCost = costs[current.col][current.row] + 
-                              map.tiles[new_pos.col][new_pos.row].penalty;
-                }
-                if(newCost < costs[new_pos.col][new_pos.row])
-                {
-                    costs[new_pos.col][new_pos.row] = newCost;
-                    if(costs[new_pos.col][new_pos.row] <= max)
-                    {
-                        unexplored.push(new_pos);
-                    }
-                }
-            }
-        }
-    }
-
-    accessible.erase(remove_if(accessible.begin(), accessible.end(),
-            [map, origin](const position &p)
-            {
-                return (!(p == origin) &&
-                        map.tiles[p.col][p.row].occupant);
-            }),
-            accessible.end());
-    return accessible;
-}
-
-// returns a vector of positions representing accessible squares for a given unit.
-vector<position>
 InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
 {
     vector<position> interactible;
@@ -160,6 +88,107 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
             [&costs, min](const position &p) { return costs[p.col][p.row] < min; }),
             interactible.end());
     return interactible;
+}
+
+// returns a vector of positions representing accessible squares for a given unit.
+// NOTE: This may be the most hideous function I have ever written.
+// TODO: Immolate this
+// TODO: This produces doubles. For accessible and attackable. Fix!
+pair<vector<position>, vector<position>>
+AccessibleAndAttackableFrom(const Tilemap &map, position origin, 
+                            int mov, int min, int max, 
+                            bool sourceIsAlly)
+{
+    vector<position> accessible;
+    vector<position> attackable;
+
+	// initialize costs matrix
+	vector<vector<int>> costs;
+	for(int col = 0; col < map.width; ++col)
+	{
+        vector<int> currentColumn = {};
+        for(int row = 0; row < map.height; ++row)
+        {
+            currentColumn.push_back(100);
+        }
+        costs.push_back(currentColumn);
+	}
+
+    int directionsRow[] = { -1,  0,  1,  0 };
+    int directionsCol[] = {  0,  1,  0, -1 };
+
+    queue<position> unexplored;
+    unexplored.push(origin);
+    costs[origin.col][origin.row] = 0;
+    
+    while(!unexplored.empty())
+    { 
+        position current = unexplored.front();
+        unexplored.pop();
+
+        accessible.push_back(current);
+
+        // Add adjacent tiles to the list!
+        for(int i = 0; i < 4; ++i)
+        {
+            position new_pos = {current.col + directionsCol[i],
+                                current.row + directionsRow[i]};
+            if(IsValidBoundsPosition(map.width, map.height, new_pos))
+            {
+                int newCost;
+                if(map.tiles[new_pos.col][new_pos.row].occupant && 
+                   map.tiles[new_pos.col][new_pos.row].occupant->is_ally != sourceIsAlly)
+                {
+                    newCost = 100;
+                }
+                else
+                {
+                    newCost = costs[current.col][current.row] + 
+                              map.tiles[new_pos.col][new_pos.row].penalty;
+                }
+                if(newCost < costs[new_pos.col][new_pos.row])
+                {
+                    costs[new_pos.col][new_pos.row] = newCost;
+                    if(costs[new_pos.col][new_pos.row] <= mov)
+                    {
+                        unexplored.push(new_pos);
+                    }
+                }
+            }
+        }
+    }
+
+    accessible.erase(remove_if(accessible.begin(), accessible.end(),
+            [map, origin](const position &p)
+            {
+                return (!(p == origin) &&
+                        map.tiles[p.col][p.row].occupant);
+            }),
+            accessible.end());
+
+    for(const position &p : accessible)
+    {
+        vector<position> from_here = InteractibleFrom(map, p, min, max);
+        for(const position &res : from_here)
+        {
+            attackable.push_back(res);
+        }
+    }
+
+    // SO SLOOOOOW
+    attackable.erase(remove_if(attackable.begin(), attackable.end(),
+            [map, accessible](const position &p)
+            {
+                for(const position &mask : accessible)
+                {
+                    if(p == mask)
+                        return true;
+                }
+                return false;
+            }),
+            attackable.end());
+
+    return pair<vector<position>, vector<position>>(accessible, attackable);
 }
 
 // Finds the manhattan distance between two positions.
@@ -330,7 +359,7 @@ GetPath(const Tilemap &map,
     {
         path_result.push_back(next);
         from = field[next.col][next.row];
-// TODO: Col and row get swapped for some reason. I put in a hotfix.
+        // TODO: Col and row get swapped for some reason. I put in a hotfix.
         next = position(next.col + from.row,
                         next.row + from.col);
     }

@@ -478,7 +478,7 @@ struct Tilemap
     vector<position> ability = {};
     vector<position> range = {};
     vector<position> adjacent = {};
-    //vector<position> prospective = {}; // TODO
+    vector<position> vis_range = {};
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 

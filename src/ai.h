@@ -53,9 +53,16 @@ public:
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
         cursor->redo = cursor->pos;
 
-        map->accessible = AccessibleFrom(*map, cursor->redo,
-                                         cursor->selected->movement,
-                                         cursor->selected->is_ally);
+        map->accessible.clear();
+        map->vis_range.clear();
+        pair<vector<position>, vector<position>> result = 
+            AccessibleAndAttackableFrom(*map, cursor->redo,
+                                        cursor->selected->movement,
+                                        cursor->selected->min_range,
+                                        cursor->selected->max_range,
+                                        cursor->selected->is_ally);
+        map->accessible = result.first;
+        map->vis_range = result.second;
 
         GlobalAIState = SELECTED;
     }
