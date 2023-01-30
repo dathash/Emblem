@@ -16,10 +16,13 @@
 
 enum AnimationValue
 {
-    ATTACK_ANIMATION_RANGED,
-    ATTACK_ANIMATION_MELEE,
-    ATTACK_ANIMATION_LEAP,
-    ATTACK_ANIMATION_MISS,
+    FADE_IN_ANIMATION,
+    FADE_OUT_ANIMATION,
+    FADE_IN_OUT_ANIMATION,
+    ATTACK_RANGED_ANIMATION,
+    ATTACK_MELEE_ANIMATION,
+    ATTACK_LEAP_ANIMATION,
+    ATTACK_MISS_ANIMATION,
     MOVE_ANIMATION,
     MOVE_UNIT_ANIMATION,
 };
@@ -190,11 +193,33 @@ struct Animation
 };
 
 Animation *
-GetAnimation(AnimationValue anim, float frame_modulation)
+GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
 {
     switch(anim)
     {
-        case ATTACK_ANIMATION_RANGED:
+        case FADE_IN_ANIMATION:
+        {
+            return (new Animation(1, (int)(100 * frame_modulation), false, 1,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {1.0 ,  1.0 }},
+                     Identity));
+        }
+        case FADE_OUT_ANIMATION:
+        {
+            return (new Animation(1, (int)(100 * frame_modulation), false, 1,
+                    {{0.0 ,  1.0 },  // channel 1
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case FADE_IN_OUT_ANIMATION:
+        {
+            return (new Animation(1, (int)(100 * frame_modulation), false, 1,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.5 ,  1.0 },
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case ATTACK_RANGED_ANIMATION:
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
@@ -207,7 +232,7 @@ GetAnimation(AnimationValue anim, float frame_modulation)
                      {1.0 ,  0.0 }},
                      Identity));
         }
-        case ATTACK_ANIMATION_MELEE: 
+        case ATTACK_MELEE_ANIMATION: 
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
@@ -220,7 +245,7 @@ GetAnimation(AnimationValue anim, float frame_modulation)
                      {1.0 ,  0.0 }},
                      Identity));
         }
-        case ATTACK_ANIMATION_LEAP:
+        case ATTACK_LEAP_ANIMATION:
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
@@ -236,7 +261,7 @@ GetAnimation(AnimationValue anim, float frame_modulation)
                      {1.0 ,  0.0 }},
                      Identity));
         }
-        case ATTACK_ANIMATION_MISS:
+        case ATTACK_MISS_ANIMATION:
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1

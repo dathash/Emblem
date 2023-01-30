@@ -15,8 +15,10 @@
 //       OR Decide on one input system or the other.
 #define JOYSTICK_COOLDOWN_TIME 6 // Frames
 
+#define EPSILON 0.00001
+
 // defaults
-#define DEFAULT_MUSIC_VOLUME 0.5f
+#define DEFAULT_MUSIC_VOLUME 0.0f
 #define DEFAULT_SFX_VOLUME 0.05f
 
 // rendering
@@ -120,6 +122,8 @@ enum InterfaceState
     GAME_OVER, // 29
 };
 
+
+// AI
 enum AIState
 {
     FINDING_NEXT, // 0
@@ -139,6 +143,8 @@ enum AIBehavior
     WAIT_THEN_ATTACK,
 };
 
+
+// UI
 enum quadrant
 {
     TOP_LEFT,
@@ -147,6 +153,7 @@ enum quadrant
     BOTTOM_RIGHT,
 };
 
+// MAP
 enum TileType
 {
     FLOOR,
@@ -160,21 +167,21 @@ enum TileType
 
 // ============================ color palette ==================================
 // Tile overlays
-const SDL_Color moveColor =     {100, 100, 180, 100};
-const SDL_Color pathColor =     {150, 150, 150, 100};
-const SDL_Color aiMoveColor =   {150, 0, 0, 100};
-const SDL_Color attackColor =   {250, 0, 0, 100};
-const SDL_Color healColor =     {0, 255, 0, 100};
-const SDL_Color clearColor =    {0, 0, 0, 0};
+const SDL_Color moveColor =         {100, 100, 180, 100};
+const SDL_Color pathColor =         {100, 250, 250, 100};
+const SDL_Color aiMoveColor =       {150, 0, 0, 100};
+const SDL_Color attackColor =       {250, 0, 0, 100};
+const SDL_Color healColor =         {0, 255, 0, 100};
+const SDL_Color clearColor =        {0, 0, 0, 0};
 
-const SDL_Color exhaustedMod =  {50,    0,  50, 0};
-const SDL_Color buffAtkMod =    {255,   0,   0, 0};
-const SDL_Color buffDefMod =    {0,   255, 255, 0};
-const SDL_Color buffAptMod =    {255, 150, 255, 0};
-const SDL_Color buffSpdMod =    {255, 255,   0, 0};
-const SDL_Color readyMod =      {255, 255, 255, 0};
+const SDL_Color exhaustedMod =      {50,    0,  50, 0};
+const SDL_Color buffAtkMod =        {255,   0,   0, 0};
+const SDL_Color buffDefMod =        {0,   255, 255, 0};
+const SDL_Color buffAptMod =        {255, 150, 255, 0};
+const SDL_Color buffSpdMod =        {255, 255,   0, 0};
+const SDL_Color readyMod =          {255, 255, 255, 0};
 
-const SDL_Color editorColor =   {255, 255, 0, 100};
+const SDL_Color editorColor =       {255, 255, 0, 100};
 
 // UI
 const SDL_Color backgroundColor =   {165, 179, 201, 255};
@@ -186,27 +193,20 @@ const SDL_Color uiAltColor =        {60, 100, 30, 255};
 const SDL_Color enemyColor =        {150, 60, 30, 255};
 const SDL_Color uiTextColor =       {0, 0, 0, 255};
 const SDL_Color uiSelectorColor =   {119, 100, 55, 100};
-const SDL_Color black =             {0, 0, 0, 255};
 
 // Palette Colors
-const SDL_Color red =       {205, 35, 67, 255};
-const SDL_Color darkRed =   {94, 1, 18, 255};
-const SDL_Color green =     {101, 204, 55, 255};
-const SDL_Color darkGreen = {21, 85, 51, 255};
-const SDL_Color blue =      {42, 101, 205, 255};
-const SDL_Color darkBlue =  {22, 50, 125, 255};
+const SDL_Color black =             {0,   0,   0,   255};
+const SDL_Color white =             {255, 255, 255, 255};
+const SDL_Color red =               {205, 35,  67,  255};
+const SDL_Color darkRed =           {94,  1,   18,  255};
+const SDL_Color green =             {101, 204, 55,  255};
+const SDL_Color darkGreen =         {21, 85, 51, 255};
+const SDL_Color blue =              {42, 101, 205, 255};
+const SDL_Color darkBlue =          {22, 50, 125, 255};
 
-const SDL_Color yellow =  {200, 200, 50, 255};
-const SDL_Color darkGray =  {100, 100, 100, 255};
-const SDL_Color accentBlue = {106, 150, 250, 255};
-
-// Combat
-const SDL_Color allyHealthBarColor = {10, 10, 200, 255};
-const SDL_Color allyHealthBarLosingColor = {10, 10, 70, 255};
-
-const SDL_Color enemyHealthBarColor = {200, 10, 10, 255};
-const SDL_Color enemyHealthBarLosingColor = {70, 10, 10, 255};
-
-const SDL_Color healthBarLostColor = {10, 10, 10, 255};
+const SDL_Color yellow =            {200, 200, 50, 255};
+const SDL_Color darkGray =          {100, 100, 100, 255};
+const SDL_Color accentBlue =        {106, 150, 250, 255};
+const SDL_Color cerulean =          {0, 128, 255, 255};
 
 #endif

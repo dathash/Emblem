@@ -44,6 +44,7 @@ struct Cursor
             {
                 delete animation;
                 animation = nullptr;
+
                 animation_offset = {0, 0};
             }
         }

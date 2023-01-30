@@ -575,18 +575,19 @@ struct Level
     void
     CheckForRemaining()
     {
-        for(auto const &u : combatants)
+        if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT)
         {
-            if(u->is_ally && !u->is_exhausted)
-                return;
+            for(auto const &u : combatants)
+            {
+                if(u->is_ally && !u->is_exhausted)
+                    return;
+            }
+
+            // End player turn
+            GlobalInterfaceState = NO_OP;
+            GlobalPlayerTurn = false;
+            GlobalTurnStart = true;
         }
-
-        // End player turn
-        GlobalInterfaceState = NO_OP;
-        GlobalPlayerTurn = false;
-        GlobalTurnStart = true;
-
-        return;
     }
 
     void

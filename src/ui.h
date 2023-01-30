@@ -190,6 +190,35 @@ struct UI_State
     }
 };
 
+void
+DisplayTitleScreen(ImGuiWindowFlags wf)
+{
+	// Window sizing
+    ImGui::SetNextWindowPos(ImVec2(200, 100));
+    ImGui::SetNextWindowSize(ImVec2(800, 600));
+
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Emblem", NULL, wf);
+    {
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontMedium);
+			ImGui::Text("Welcome to Tyrian.");
+			ImGui::Text("The year is 399, CE.");
+			ImGui::TextWrapped("The empires of Imrryr and Tolmec struggle against the plagues of the middle dark ages.");
+			ImGui::TextWrapped("The hidden nomads of Gaul sit in gentle repose, watching the world from the spires of Erenor.");
+			ImGui::TextWrapped("And beneath the cerulean skies, the gears of fate are set into motion.");
+			ImGui::NewLine();
+			TextCentered("-WASD- to move.");
+			TextCentered("-[SPACE]- to select");
+			TextCentered("-[SHIFT]- to deselect");
+			TextCentered("-E- to display information");
+		ImGui::PopFont();
+    }
+    ImGui::End();
+
+    return;
+}
+
 void 
 DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile, enum quadrant quad)
 {
@@ -624,9 +653,6 @@ RenderUI(UI_State *ui,
          const Tilemap &map,
          const Fight &fight)
 {
-    if(GlobalInterfaceState == TITLE_SCREEN)
-        return;
-
     if(GlobalEditorMode)
         return;
 
@@ -642,6 +668,15 @@ RenderUI(UI_State *ui,
 	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, SdlToImColor(uiTitleColor));
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
+
+    // TITLE SCREEN
+    if(GlobalInterfaceState == TITLE_SCREEN)
+    {
+        DisplayTitleScreen(window_flags);
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(3);
+        return;
+    }
 
     // USER/AI UI
     if(ui->combat_screen)

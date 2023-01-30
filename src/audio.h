@@ -19,7 +19,7 @@ struct Sound
 {
     ma_sound sound;
     string name;
-
+    Animation *volume_animation = nullptr;
 
     Sound(const string &name_in, AudioType type_in)
     : name(name_in)
@@ -51,6 +51,26 @@ struct Sound
     ~Sound()
     {
         ma_sound_uninit(&sound);
+        delete volume_animation;
+    }
+
+    void
+    Update()
+    {
+        if(volume_animation)
+        {
+            float value = volume_animation->Value(CHANNEL_ONE);
+            ma_sound_set_volume(&sound, value);
+            if(volume_animation->Update())
+            {
+                delete volume_animation;
+                volume_animation = nullptr;
+
+                ma_sound_stop(&sound);
+                ma_sound_set_volume(&sound, 1.0f);
+                ma_sound_seek_to_pcm_frame(&sound, 0);
+            }
+        }
     }
 
     void
@@ -67,9 +87,26 @@ struct Sound
     }
 
     void
+    FadeOut()
+    {
+        volume_animation = GetAnimation(FADE_OUT_ANIMATION, 2.0f);
+    }
+
+    void
     Start()
     {
+        delete volume_animation;
+        volume_animation = nullptr;
+
+        ma_sound_set_volume(&sound, 1.0f);
         ma_sound_start(&sound);
+    }
+
+    void
+    Restart()
+    {
+        ma_sound_seek_to_pcm_frame(&sound, 0);
+        Start();
     }
 };
 

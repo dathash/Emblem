@@ -72,8 +72,6 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     Slick Turn transitions
 
-    Startup Screen
-
     Cutscenes
 
 ////////////////////////////////////////////////////////////
@@ -81,17 +79,17 @@ PROTOTYPE ///////////////////////////////////////////////////
 0.1 ////////////////////////////////////////////////////////
     10 levels
 
-    Inbetween Levels | Metagame
-    * Recruit new units?
-    * Allocate stats?
-    * Equipment?
-
     RPG Mechanics
     * Boosted stats?
     * New abilities?
     * Improved abilities?
     * Experience points?
     * Levels?
+
+    Inbetween Levels | Metagame
+    * Recruit new units?
+    * Allocate stats?
+    * Equipment?
 
     More complex conversations
     * Unit Death Screens

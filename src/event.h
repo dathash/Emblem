@@ -5,44 +5,8 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-enum EventType
-{
-    START_GAME_EVENT,
-    MOVE_CURSOR_EVENT,
-    MOVE_MENU_EVENT,
-    SELECT_MENU_OPTION_EVENT,
-    NEXT_SENTENCE_EVENT,
-    PICK_UP_UNIT_EVENT,
-    PLACE_UNIT_EVENT,
-    UNIT_INFO_EVENT,
-    ATTACK_HIT_EVENT,
-    ATTACK_CRIT_EVENT,
-    ATTACK_MISS_EVENT,
-    ATTACK_RANGED_EVENT,
-    BUFF_EVENT,
-    HEAL_EVENT,
-    DANCE_EVENT,
-};
-
-struct Event
-{
-    EventType type;
-
-    Event(EventType type_in)
-    : type(type_in)
-    {}
-};
-
-static queue<Event> GlobalEvents;
-
 void
-EmitEvent(Event event)
-{
-    GlobalEvents.push(event);
-}
-
-void
-GlobalHandleEvents()
+GlobalHandleEvents(Fade *fade)
 {
     while(!GlobalEvents.empty())
     {
@@ -54,6 +18,14 @@ GlobalHandleEvents()
             case START_GAME_EVENT:
             {
                 PlaySfx("start.wav");
+                fade->amount = 1.0f;
+                fade->animation = GetAnimation(FADE_OUT_ANIMATION);
+            } break;
+            case NEXT_LEVEL_EVENT:
+            {
+                PlaySfx("start.wav");
+                fade->amount = 1.0f;
+                fade->animation = GetAnimation(FADE_OUT_ANIMATION);
             } break;
             case MOVE_CURSOR_EVENT:
             {

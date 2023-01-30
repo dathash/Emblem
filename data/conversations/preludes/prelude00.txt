@@ -19,9 +19,14 @@ TWO -huff- -huff-
 TWO You're right, it's pitiful.
 
 ONE Not pitiful. All beings begin this life in the same way.
-ONE It is only through the innumerable days that strength is gained.
 
 EX2 Neutral
+ONE It is only through the innumerable days that strength is gained.
+
+EX1 Happy
+ONE I am proud of you, my daughter. You are worthy of our village.
+
+EX2 Happy
 ONE Lucina, your days are just beginning.
 ONE Be calm in this knowledge.
 

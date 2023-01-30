@@ -42,7 +42,6 @@ static ImFont *uiFontLarge;
 // Transitories:
 // * StartPlayerTurn
 // * StartEnemyTurn
-// * Resetting
 // * Next Level
 
 // Note: I don't have anything against global state in this program, since I
@@ -67,14 +66,56 @@ static unsigned int GlobalAIState;
 static int viewportCol = 0;
 static int viewportRow = 0;
 
+////////////////////////////////
+
+// EVENTS
+// TODO: Fix these circular dependencies.
+enum EventType
+{
+    START_GAME_EVENT,
+    NEXT_LEVEL_EVENT,
+    MOVE_CURSOR_EVENT,
+    MOVE_MENU_EVENT,
+    SELECT_MENU_OPTION_EVENT,
+    NEXT_SENTENCE_EVENT,
+    PICK_UP_UNIT_EVENT,
+    PLACE_UNIT_EVENT,
+    UNIT_INFO_EVENT,
+    ATTACK_HIT_EVENT,
+    ATTACK_CRIT_EVENT,
+    ATTACK_MISS_EVENT,
+    ATTACK_RANGED_EVENT,
+    BUFF_EVENT,
+    HEAL_EVENT,
+    DANCE_EVENT,
+};
+
+struct Event
+{
+    EventType type;
+
+    Event(EventType type_in)
+    : type(type_in)
+    {}
+};
+
+static queue<Event> GlobalEvents;
+
+void
+EmitEvent(Event event)
+{
+    GlobalEvents.push(event);
+}
+
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
 #include "utils.h"
+#include "animation.h"
 #include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
+#include "vfx.h"
 #include "event.h" // NOTE: Includes a GlobalEvents queue.
 #include "structs.h"
-#include "animation.h"
 #include "cursor.h"
 #include "load.h"
 #include "init.h"
@@ -157,6 +198,7 @@ int main(int argc, char *argv[])
 							 };
     int level_index = 0;
     Level level = LoadLevel(DATA_PATH + levels[level_index], units);
+
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
 
@@ -166,6 +208,8 @@ int main(int argc, char *argv[])
     Menu unit_menu({"Wait"});
     Menu level_menu({"Next", "Redo", "Conv"});
     Menu conversation_menu({"Return"});
+
+    Fade fade;
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
@@ -180,7 +224,6 @@ int main(int argc, char *argv[])
 // ========================= game loop =========================================
     while(GlobalRunning)
     {
-        GlobalHandleEvents();
         HandleEvents(&input, gamepad);
 
         // Update
@@ -198,9 +241,13 @@ int main(int argc, char *argv[])
             fight.Update();
             level.Update();
             ui.Update();
+            fade.Update();
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
+
+            for(Sound *sound : GlobalMusic.sounds)
+                sound->Update();
         }
 
         // Resolve State
@@ -252,10 +299,11 @@ int main(int argc, char *argv[])
             ai.clearQueue();
         }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
+        GlobalHandleEvents(&fade);
 
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
-               level.conversations, fight);
+               level.conversations, fight, fade);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

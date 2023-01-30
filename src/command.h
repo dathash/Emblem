@@ -914,10 +914,12 @@ private:
 class ChooseUnitMenuOptionCommand : public Command
 {
 public:
-    ChooseUnitMenuOptionCommand(Cursor *cursor_in, const Tilemap &map_in, const Menu &menu_in)
+    ChooseUnitMenuOptionCommand(Cursor *cursor_in, const Tilemap &map_in, const Menu &menu_in,
+                                Sound *level_song_in)
     : cursor(cursor_in),
       map(map_in),
-      menu(menu_in)
+      menu(menu_in),
+      level_song(level_song_in)
     {}
 
     virtual void Execute()
@@ -933,6 +935,8 @@ public:
             cursor->selected = nullptr;
             cursor->redo = {-1, -1};
             cursor->path_draw = {};
+
+            level_song->FadeOut();
 
             // Move onto next level!
             GlobalInterfaceState = LEVEL_MENU;
@@ -987,6 +991,7 @@ private:
     Cursor *cursor;
     const Tilemap &map;
     const Menu &menu;
+    Sound *level_song;
 };
 
 class OpenUnitInfoCommand : public Command
@@ -1034,12 +1039,15 @@ public:
         {
             GlobalNextLevel = true;
             GlobalTurnStart = true;
+            EmitEvent(NEXT_LEVEL_EVENT);
             GlobalInterfaceState = PRELUDE;
             return;
         }
         if(option == "Redo")
         {
             *level = LoadLevel(level->name, units);
+            level->song->Restart();
+
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
             return;
@@ -1176,7 +1184,7 @@ public:
             }
             if(GlobalInterfaceState == CONVERSATION)
             {
-                conversation->song->Stop();
+                conversation->song->FadeOut();
 
                 GlobalInterfaceState = CONVERSATION_MENU;
                 return;
@@ -1227,7 +1235,7 @@ public:
         }
         if(GlobalInterfaceState == CONVERSATION)
         {
-            conversation->song->Stop();
+            conversation->song->FadeOut();
 
             GlobalInterfaceState = CONVERSATION_MENU;
             return;
@@ -1277,6 +1285,8 @@ public:
     virtual void Execute()
     {
         *level = LoadLevel(level->name, units);
+        level->song->Restart();
+
         GlobalPlayerTurn = true;
         GlobalTurnStart = true;
     }
@@ -1640,7 +1650,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, level->map, *unitMenu));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, level->map, *unitMenu, level->song));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, &(level->map)));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
