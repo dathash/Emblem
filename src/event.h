@@ -7,6 +7,7 @@
 
 enum EventType
 {
+    START_GAME_EVENT,
     MOVE_CURSOR_EVENT,
     MOVE_MENU_EVENT,
     SELECT_MENU_OPTION_EVENT,
@@ -50,6 +51,10 @@ GlobalHandleEvents()
 
         switch(event.type)
         {
+            case START_GAME_EVENT:
+            {
+                PlaySfx("start.wav");
+            } break;
             case MOVE_CURSOR_EVENT:
             {
                 PlaySfx("mov.wav");

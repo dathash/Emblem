@@ -56,8 +56,7 @@ static bool GlobalPlayerTurn = true;
 
 // Transitory
 static bool GlobalNextLevel = false;
-static bool GlobalRestart = false;
-static bool GlobalTurnStart = true;
+static bool GlobalTurnStart = false;
 
 static unsigned int GlobalInterfaceState;
 static unsigned int GlobalAIState;
@@ -74,7 +73,6 @@ static int viewportRow = 0;
 #include "utils.h"
 #include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
 #include "event.h" // NOTE: Includes a GlobalEvents queue.
-#include "state.h"
 #include "structs.h"
 #include "animation.h"
 #include "cursor.h"
@@ -145,6 +143,7 @@ int main(int argc, char *argv[])
         new Sound("sel1.wav", SFX),
         new Sound("sel2.wav", SFX),
         new Sound("sel3.wav", SFX),
+        new Sound("start.wav", SFX),
         new Sound("dance.wav", SFX)
     };
 
@@ -174,23 +173,24 @@ int main(int argc, char *argv[])
 
     Fight fight;
 
-    GlobalInterfaceState = PRELUDE;
+    GlobalInterfaceState = TITLE_SCREEN;
     GlobalAIState = PLAYER_TURN;
 
     GlobalRunning = true;
 // ========================= game loop =========================================
     while(GlobalRunning)
     {
-        GlobalHandleEvents(); // TODO: Better naming scheme, or make this not global.
+        GlobalHandleEvents();
         HandleEvents(&input, gamepad);
 
         // Update
         if(!GlobalEditorMode)
         {
             handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level.map,
-                                   &game_menu, &unit_menu, &level_menu, &conversation_menu,
-                                   &level.conversations, &fight);
+            handler.UpdateCommands(&cursor, &level, units,
+                                   &game_menu, &unit_menu, 
+                                   &level_menu, &conversation_menu,
+                                   &fight);
 
             ai.Update(&cursor, &level.map, &fight);
 
@@ -205,45 +205,17 @@ int main(int argc, char *argv[])
 
         // Resolve State
         //////////////// TO BE EXTRICATED //////////////////
-        if(GlobalRestart)
-        {
-            GlobalRestart = false;
-            level = LoadLevel(DATA_PATH + levels[level_index], units);
-            GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
-        }
-
         if(GlobalNextLevel)
         {
             GlobalNextLevel = false;
 
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
 
-            /*
-            // Persistence (Naive)
-            vector<shared_ptr<Unit>> party = {};
-            for(shared_ptr<Unit> unit : level.combatants)
-            {
-                if(unit->is_ally && 
-                   unit->ID() != LEADER_ID)
-                    party.push_back(unit);
-            }
-            */
-
             level = LoadLevel(DATA_PATH + levels[level_index], units);
-
-            /*
-            // Persistence (Naive)
-            for(shared_ptr<Unit> unit : party)
-            {
-                level.AddCombatant(unit, level.map.GetNextSpawnLocation());
-            }
-            */
 
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
         }
-
         if(GlobalTurnStart)
         {
             GlobalTurnStart = false;

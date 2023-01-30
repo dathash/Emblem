@@ -138,6 +138,9 @@ Render(const Tilemap &map, const Cursor &cursor,
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     SDL_RenderClear(GlobalRenderer);
 
+    if(GlobalInterfaceState == TITLE_SCREEN)
+        return;
+
 // ================================= render map tiles ============================================
     for(int col = viewportCol; col < VIEWPORT_WIDTH + viewportCol; ++col)
     {

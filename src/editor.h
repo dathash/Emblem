@@ -363,7 +363,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             *units = LoadUnits(DATA_PATH + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
             *level = LoadLevel(DATA_PATH + string(levelFileName), *units);
-            ReloadLevel();
+            GlobalAIState = PLAYER_TURN;
+            GlobalPlayerTurn = true;
+            GlobalTurnStart = true;
             cout << "Level loaded: " << levelFileName << "\n";
         }
         ImGui::SameLine();
@@ -383,7 +385,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         {
             *level = LoadLevel(DATA_PATH + string("test.txt"), *units);
             sprintf(levelFileName, "test.txt");
-            ReloadLevel();
+            GlobalAIState = PLAYER_TURN;
+            GlobalPlayerTurn = true;
+            GlobalTurnStart = true;
         }
 
         int wrap = 0;
@@ -393,7 +397,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             {
                 *level = LoadLevel(DATA_PATH + s, *units);
                 sprintf(levelFileName, "%s", s.c_str());
-                ReloadLevel();
+                GlobalAIState = PLAYER_TURN;
+                GlobalPlayerTurn = true;
+                GlobalTurnStart = true;
             }
             if(++wrap % 4)
                 ImGui::SameLine();

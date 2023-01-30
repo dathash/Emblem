@@ -116,7 +116,8 @@ enum InterfaceState
 
     NO_OP, // 27
 
-    GAME_OVER, // 28
+    TITLE_SCREEN, // 28
+    GAME_OVER, // 29
 };
 
 enum AIState

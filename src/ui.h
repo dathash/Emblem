@@ -624,6 +624,9 @@ RenderUI(UI_State *ui,
          const Tilemap &map,
          const Fight &fight)
 {
+    if(GlobalInterfaceState == TITLE_SCREEN)
+        return;
+
     if(GlobalEditorMode)
         return;
 

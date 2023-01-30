@@ -509,6 +509,7 @@ struct Level
     vector<shared_ptr<Unit>> combatants;
     //Sound *music = nullptr; // TODO: Move GlobalSong in here.
     ConversationList conversations;
+    string name = "";
 
     // Puts a piece on the board
     void
@@ -579,7 +580,12 @@ struct Level
             if(u->is_ally && !u->is_exhausted)
                 return;
         }
-        EndPlayerTurn();
+
+        // End player turn
+        GlobalInterfaceState = NO_OP;
+        GlobalPlayerTurn = false;
+        GlobalTurnStart = true;
+
         return;
     }
 

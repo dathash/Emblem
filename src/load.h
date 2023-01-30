@@ -156,9 +156,10 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
     int mapRow = 0;
 
     Level level;
+    level.name = filename_in;
 
     ifstream fp;
-    fp.open(filename_in);
+    fp.open(DATA_PATH + filename_in);
     if(!fp.is_open())
         SDL_assert(!"ERROR LoadLevel: File could not be opened!\n");
 
@@ -294,7 +295,6 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp.close();
 
     GlobalInterfaceState = PRELUDE;
-
     if(level.conversations.prelude.song)
     {
         GlobalSong->Pause();

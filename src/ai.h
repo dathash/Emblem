@@ -31,7 +31,9 @@ public:
         }
         else
         {
-            EndAITurn();
+            GlobalAIState = PLAYER_TURN;
+            GlobalPlayerTurn = true;
+            GlobalTurnStart = true;
         }
     }
 private: 

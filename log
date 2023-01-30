@@ -138,6 +138,8 @@ POLISH
     Shrink Tilesets to absolute necessity, also enforce consistency across them.
     Create polished tilemaps with Tiled and overlay them onto the in-game maps.
     Smooth Screen Scroll (Render tiles one tile off of the screen.)
+    Huge visual flourishes (start of the level causes the tiles to flash in
+                            waves, etc.)
 
 QA
     Take junk out of main
