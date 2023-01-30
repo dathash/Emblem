@@ -4,6 +4,8 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
+MUS hamduche.wav
+
 SP1 Lucina
 SP2 Priam
 

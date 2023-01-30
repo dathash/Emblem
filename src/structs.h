@@ -363,6 +363,7 @@ struct Conversation
     Texture words_texture;
     Texture speaker_texture;
     bool done = false;
+    Sound *song = nullptr;
 
     Conversation() = default;
 
@@ -371,6 +372,7 @@ struct Conversation
       two(two_in),
       prose({})
     {
+        cout << "CONVERSATION\n";
     }
 
     string

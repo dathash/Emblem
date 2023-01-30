@@ -4,8 +4,24 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
+MUS wind.wav
+
 SP1 Lucina
-SP2 Lucina
+SP2 Flavia
 
 EVE ONE Enters
-ONE TODO
+ONE So that's Tolmec city out there?
+
+EVE TWO Enters
+EX2 Happy
+TWO Indeed. It's not much to look at, but it's a sight for sore eyes.
+
+EX1 Happy
+ONE Well then let's go ahead and hurry up! I'm starving!
+
+EX2 Wince
+TWO Wait!
+
+EX1 Neutral
+TWO I think I heard something... Let's tread carefully.
+TWO I have a feeling those highwaymen from before we're the end of it.

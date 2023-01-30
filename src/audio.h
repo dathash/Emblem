@@ -88,6 +88,7 @@ GetMusic(const string &name)
     for(Sound *sound : GlobalMusic.sounds)
         if(sound->name == name)
             return sound;
+    cout << "Name: " << name << "\n";
     SDL_assert(!"ERROR GetMusic: Song name doesn't exist\n");
     return nullptr;
 }

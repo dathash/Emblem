@@ -115,6 +115,16 @@ int main(int argc, char *argv[])
         new Sound("21.wav", MUSIC),
         new Sound("tripod.wav", MUSIC),
         new Sound("fs.wav", MUSIC),
+        new Sound("spacelion.wav", MUSIC),
+        new Sound("fire.wav", MUSIC),
+        new Sound("boat.wav", MUSIC),
+        new Sound("forest.wav", MUSIC),
+        new Sound("town.wav", MUSIC),
+        new Sound("gerudo.wav", MUSIC),
+        new Sound("village.wav", MUSIC),
+        new Sound("hamduche.wav", MUSIC),
+        new Sound("wind.wav", MUSIC),
+        new Sound("chrono.wav", MUSIC),
         new Sound("title.wav", MUSIC)
     };
 
@@ -232,7 +242,6 @@ int main(int argc, char *argv[])
 
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
-            GlobalInterfaceState = PRELUDE;
         }
 
         if(GlobalTurnStart)

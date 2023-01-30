@@ -25,6 +25,12 @@ struct Cursor
     : sheet(sheet_in)
     {}
 
+    ~Cursor()
+    {
+        delete animation;
+        delete unit_animation;
+    }
+
     void
     Update(Tilemap *map)
     {

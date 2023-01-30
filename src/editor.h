@@ -316,9 +316,12 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         }
         */
 
-        RenderTileColor({editor_cursor.col - viewportCol,
-                   editor_cursor.row - viewportRow},
-                   editorColor);
+        if(WithinViewport(editor_cursor))
+        {
+            RenderTileColor({editor_cursor.col - viewportCol,
+                       editor_cursor.row - viewportRow},
+                       editorColor);
+        }
 	}
 	ImGui::End();
 }

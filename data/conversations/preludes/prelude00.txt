@@ -4,6 +4,8 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
+MUS boat.wav
+
 SP1 Priam
 SP2 Lucina
 

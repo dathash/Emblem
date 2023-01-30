@@ -70,16 +70,11 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     Do some real design thinking.
 
-    Fire Tile?
-    Heal Tile?
-
     Slick Turn transitions
 
-    Healing Animation
+    Startup Screen
 
-    AI Also moves units on paths.
-
-    Conversation Music
+    Cutscenes
 
 ////////////////////////////////////////////////////////////
 
@@ -98,21 +93,21 @@ PROTOTYPE ///////////////////////////////////////////////////
     * Experience points?
     * Levels?
 
-    Cycle units with L trigger.
-    * CONTROLLER TESTING
-
     More complex conversations
     * Unit Death Screens
     * Up to four conversationists
     * Solo Conversations
     * Multiple preludes in a row.
     * Animated stuff inbetween.
-
-    Startup Screen
 ////////////////////////////////////////////////////////////
 
 0.2 ////////////////////////////////////////////////////////
     15 levels
+
+    Fire Tile?
+    Heal Tile?
+
+    Healing Animation
 
     Real-time color editing in the editor
 

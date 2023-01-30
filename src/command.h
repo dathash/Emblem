@@ -583,6 +583,11 @@ public:
                 cursor->targeted->ID() == conv.one->ID()))
             {
                 conversations->current = &conv;
+                if(conv.song)
+                {
+                    GlobalSong->Pause();
+                    conv.song->Start();
+                }
             }
         }
 
@@ -925,6 +930,7 @@ public:
             cursor->path_draw = {};
 
             // Move onto next level!
+            GlobalSong->Stop();
             GlobalInterfaceState = LEVEL_MENU;
             return;
         }
@@ -1088,6 +1094,12 @@ public:
                 return;
 
             conversations->index = menu.current;
+
+            if(conversations->list[menu.current].song)
+            {
+                GlobalSong->Pause();
+                conversations->list[menu.current].song->Start();
+            }
             GlobalInterfaceState = CONVERSATION;
             return;
         }
@@ -1127,11 +1139,17 @@ public:
         {
             if(GlobalInterfaceState == PRELUDE)
             {
+                conversation->song->Stop();
+                GlobalSong->Start();
+
                 GlobalInterfaceState = NEUTRAL_OVER_UNIT;
                 return;
             }
             if(GlobalInterfaceState == BATTLE_CONVERSATION)
             {
+                conversation->song->Stop();
+                GlobalSong->Start();
+
                 cursor->pos = cursor->selected->pos;
                 cursor->selected->Deactivate();
                 GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -1139,6 +1157,8 @@ public:
             }
             if(GlobalInterfaceState == CONVERSATION)
             {
+                conversation->song->Stop();
+
                 GlobalInterfaceState = CONVERSATION_MENU;
                 return;
             }
@@ -1167,11 +1187,17 @@ public:
 
         if(GlobalInterfaceState == PRELUDE)
         {
+            conversation->song->Stop();
+            GlobalSong->Start();
+
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
             return;
         }
         if(GlobalInterfaceState == BATTLE_CONVERSATION)
         {
+            conversation->song->Stop();
+            GlobalSong->Start();
+
             cursor->pos = cursor->selected->pos;
             cursor->selected->Deactivate();
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -1179,6 +1205,8 @@ public:
         }
         if(GlobalInterfaceState == CONVERSATION)
         {
+            conversation->song->Stop();
+
             GlobalInterfaceState = CONVERSATION_MENU;
             return;
         }

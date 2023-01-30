@@ -4,6 +4,8 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
+MUS town.wav
+
 SP1 Donnel
 SP2 Lon'qu
 

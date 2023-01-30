@@ -4,6 +4,8 @@ COM File: Conversation
 
 COM NOTE: Don't use tabs in here!
 
+MUS boat.wav
+
 SP1 Donnel
 SP2 Lon'qu
 
@@ -25,8 +27,7 @@ TWO The people are harder, the water tastes sweeter...
 EX1 Neutral
 ONE You really like it out here?
 ONE I mean, it's alright, I guess.
-ONE It's just... I kinda miss mom, and the way the sun goes down 
-ONE over the mountains.
+ONE It's just... I kinda miss mom, and the way the sun goes down over the mountains.
 
 EX2 Neutral
 TWO Yeah, that's pretty special too. But out here... It's just different.

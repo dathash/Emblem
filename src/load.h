@@ -37,7 +37,11 @@ LoadConversation(string path, string filename,
         type = line.substr(0, 3);
         rest = line.substr(4);
 
-        if(type == "SP1")
+        if(type == "MUS")
+        {
+            conversation.song = GetMusic(rest);
+        }
+        else if(type == "SP1")
         {
             conversation.one = GetUnitByName(units, rest);
         }
@@ -289,6 +293,14 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
     }
     fp.close();
 
+    GlobalInterfaceState = PRELUDE;
+
+    if(level.conversations.prelude.song)
+    {
+        GlobalSong->Pause();
+        level.conversations.prelude.song->Start();
+    }
+
 	return level;
 }
 
@@ -403,8 +415,11 @@ SaveLevel(string filename_in, const Level &level)
 
     fp << "ATL " << level.map.atlas.filename << "\n\n";
 
-    fp << "PRE " << level.conversations.prelude.filename << "\n";
-    fp << "\n";
+    if(level.conversations.prelude.one)
+    {
+        fp << "PRE " << level.conversations.prelude.filename << "\n";
+        fp << "\n";
+    }
     for(const Conversation &conv : level.conversations.mid_battle)
     {
         fp << "MID " << conv.filename << "\n";

@@ -6,9 +6,7 @@ ATL sunset.png
 
 PRE prelude03.txt
 
-
-
-MUS spiny.wav
+MUS gerudo.wav
 
 WDT 20
 HGT 20

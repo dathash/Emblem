@@ -138,20 +138,6 @@ struct Animation
         channel_four = Channel(samples_four, ease_four);
     }
 
-    Animation(const Animation &other)
-    : speed(other.speed),
-      finish(other.finish),
-      repeat(other.repeat),
-      num_channels(other.num_channels)
-    {
-        // TODO: This is still suspect
-        channel_one = other.channel_one;
-        channel_two = other.channel_two;
-        channel_three = other.channel_three;
-        channel_four = other.channel_four;
-        event_channel = other.event_channel;
-    }
-
     float
     Value(ChannelIndex index)
     {
@@ -289,7 +275,6 @@ GetAnimation(AnimationValue anim, float frame_modulation)
 struct AnimationSystem
 {
     Animation *current = nullptr;
-    // TODO: Array of animations
 
     void
     PlayAnimation(AnimationValue in)
