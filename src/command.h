@@ -565,10 +565,12 @@ class InitiateConversationCommand : public Command
 {
 public:
     InitiateConversationCommand(ConversationList *conversations_in,
-                                Cursor *cursor_in, const Tilemap &map_in)
+                                Cursor *cursor_in, const Tilemap &map_in,
+                                Sound *level_song_in)
     : conversations(conversations_in),
       cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      level_song(level_song_in)
     {}
 
     virtual void Execute()
@@ -585,7 +587,7 @@ public:
                 conversations->current = &conv;
                 if(conv.song)
                 {
-                    GlobalSong->Pause();
+                    level_song->Pause();
                     conv.song->Start();
                 }
             }
@@ -598,6 +600,7 @@ private:
     ConversationList *conversations;
     Cursor *cursor;
     const Tilemap &map;
+    Sound *level_song;
 };
 
 class AttackCommand : public Command
@@ -932,7 +935,6 @@ public:
             cursor->path_draw = {};
 
             // Move onto next level!
-            GlobalSong->Stop();
             GlobalInterfaceState = LEVEL_MENU;
             return;
         }
@@ -1032,6 +1034,7 @@ public:
         {
             GlobalNextLevel = true;
             GlobalTurnStart = true;
+            GlobalInterfaceState = PRELUDE;
             return;
         }
         if(option == "Redo")
@@ -1088,9 +1091,11 @@ private:
 class ChooseConversationMenuOptionCommand : public Command
 {
 public:
-    ChooseConversationMenuOptionCommand(const Menu &menu_in, ConversationList *conversations_in)
+    ChooseConversationMenuOptionCommand(const Menu &menu_in, ConversationList *conversations_in,
+                                        Sound *level_song_in)
     : menu(menu_in),
-      conversations(conversations_in)
+      conversations(conversations_in),
+      level_song(level_song_in)
     {}
 
     virtual void Execute()
@@ -1108,7 +1113,7 @@ public:
 
             if(conversations->list[menu.current].song)
             {
-                GlobalSong->Pause();
+                level_song->Pause();
                 conversations->list[menu.current].song->Start();
             }
             GlobalInterfaceState = CONVERSATION;
@@ -1131,6 +1136,7 @@ public:
 private:
     const Menu &menu;
     ConversationList *conversations;
+    Sound *level_song;
 };
 
 
@@ -1138,9 +1144,11 @@ private:
 class NextSentenceCommand : public Command
 {
 public:
-    NextSentenceCommand(Cursor *cursor_in, Conversation *conversation_in)
+    NextSentenceCommand(Cursor *cursor_in, Conversation *conversation_in,
+                        Sound *level_song_in)
     : cursor(cursor_in),
-      conversation(conversation_in)
+      conversation(conversation_in),
+      level_song(level_song_in)
     {}
 
     virtual void Execute()
@@ -1151,7 +1159,7 @@ public:
             if(GlobalInterfaceState == PRELUDE)
             {
                 conversation->song->Stop();
-                GlobalSong->Start();
+                level_song->Start();
 
                 GlobalInterfaceState = NEUTRAL_OVER_UNIT;
                 return;
@@ -1159,7 +1167,7 @@ public:
             if(GlobalInterfaceState == BATTLE_CONVERSATION)
             {
                 conversation->song->Stop();
-                GlobalSong->Start();
+                level_song->Start();
 
                 cursor->pos = cursor->selected->pos;
                 cursor->selected->Deactivate();
@@ -1182,14 +1190,17 @@ public:
 private:
     Cursor *cursor;
     Conversation *conversation;
+    Sound *level_song;
 };
 
 class EndConversationEarlyCommand : public Command
 {
 public:
-    EndConversationEarlyCommand(Cursor *cursor_in, Conversation *conversation_in)
+    EndConversationEarlyCommand(Cursor *cursor_in, Conversation *conversation_in,
+                                Sound *level_song_in)
     : cursor(cursor_in),
-      conversation(conversation_in)
+      conversation(conversation_in),
+      level_song(level_song_in)
     {}
 
     virtual void Execute()
@@ -1199,7 +1210,7 @@ public:
         if(GlobalInterfaceState == PRELUDE)
         {
             conversation->song->Stop();
-            GlobalSong->Start();
+            level_song->Start();
 
             GlobalInterfaceState = NEUTRAL_OVER_UNIT;
             return;
@@ -1207,7 +1218,7 @@ public:
         if(GlobalInterfaceState == BATTLE_CONVERSATION)
         {
             conversation->song->Stop();
-            GlobalSong->Start();
+            level_song->Start();
 
             cursor->pos = cursor->selected->pos;
             cursor->selected->Deactivate();
@@ -1226,6 +1237,7 @@ public:
 private:
     Cursor *cursor;
     Conversation *conversation;
+    Sound *level_song;
 };
 
 // ================================= Game Over =================================
@@ -1277,16 +1289,27 @@ private:
 class StartGameCommand : public Command
 {
 public:
-    StartGameCommand()
+    StartGameCommand(Level *level_in,
+                     const vector<shared_ptr<Unit>> &units_in)
+    : level(level_in),
+      units(units_in)
     {}
 
     virtual void Execute()
     {
         GlobalPlayerTurn = true;
         GlobalTurnStart = true;
+        *level = LoadLevel(level->name, units);
+        level->conversations.prelude.song->Start();
+
         EmitEvent(START_GAME_EVENT);
         GlobalInterfaceState = PRELUDE;
+        return;
     }
+
+private:
+    Level *level;
+    const vector<shared_ptr<Unit>> &units;
 };
 
 // ============================== Input Handler ================================
@@ -1536,7 +1559,7 @@ public:
                 BindDown(make_shared<NextTalkTargetCommand>(cursor, &(level->map), false));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<InitiateConversationCommand>(&(level->conversations), cursor, level->map));
+                BindA(make_shared<InitiateConversationCommand>(&(level->conversations), cursor, level->map, level->song));
                 BindB(make_shared<DetargetCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1674,7 +1697,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(conversationMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseConversationMenuOptionCommand>(*conversationMenu, &(level->conversations)));
+                BindA(make_shared<ChooseConversationMenuOptionCommand>(*conversationMenu, &(level->conversations), level->song));
                 BindB(make_shared<ReturnToLevelMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1686,8 +1709,8 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.list[level->conversations.index])));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(level->conversations.list[level->conversations.index])));
+                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.list[level->conversations.index]), level->song));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(level->conversations.list[level->conversations.index]), level->song));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1698,8 +1721,8 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, level->conversations.current));
+                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current, level->song));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, level->conversations.current, level->song));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1710,8 +1733,8 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.prelude)));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(level->conversations.prelude)));
+                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.prelude), level->song));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(level->conversations.prelude), level->song));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1734,7 +1757,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<StartGameCommand>());
+                BindA(make_shared<StartGameCommand>(level, units));
                 BindB(make_shared<QuitGameCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

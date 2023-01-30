@@ -9,7 +9,7 @@
 #if DEV_MODE
 
 void
-Meta()
+Meta(Level *level)
 {
 	ImGui::Begin("Meta");
 	{
@@ -20,13 +20,13 @@ Meta()
         if(ImGui::SliderFloat("SFX", &sfx_volume, 0.0f, 1.0f))
             SetSfxVolume(sfx_volume);
         if(ImGui::Button("Play"))
-            GlobalSong->Start();
+            level->song->Start();
         ImGui::SameLine();
         if(ImGui::Button("Pause"))
-            GlobalSong->Pause();
+            level->song->Pause();
         ImGui::SameLine();
         if(ImGui::Button("Stop"))
-            GlobalSong->Stop();
+            level->song->Stop();
     }
     ImGui::End();
 }
@@ -424,7 +424,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
     if(showGlobals)
         GlobalsViewer();
     if(showMeta)
-        Meta();
+        Meta(level);
 
     /*
 	// debug

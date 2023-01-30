@@ -193,11 +193,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         }
         else if(type == "MUS")
         {
-            if(GlobalSong)
-                GlobalSong->Stop();
-
-            GlobalSong = GetMusic(rest);
-            GlobalSong->Start();
+            level.song = GetMusic(rest);
         }
         else if(type == "WDT")
         {
@@ -293,13 +289,6 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         }
     }
     fp.close();
-
-    GlobalInterfaceState = PRELUDE;
-    if(level.conversations.prelude.song)
-    {
-        GlobalSong->Pause();
-        level.conversations.prelude.song->Start();
-    }
 
 	return level;
 }
@@ -431,7 +420,7 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "MUS " << GlobalSong->name << "\n\n";
+    fp << "MUS " << level.song->name << "\n\n";
 
     // Save Map Data
     fp << "WDT " << level.map.width << "\n";

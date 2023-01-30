@@ -507,7 +507,7 @@ struct Level
 {
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
-    //Sound *music = nullptr; // TODO: Move GlobalSong in here.
+    Sound *song = nullptr;
     ConversationList conversations;
     string name = "";
 

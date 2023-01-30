@@ -156,8 +156,6 @@ PlaySfx(const string &filename)
 
 ///////////////////////////////////////////////////////////////////////////
 
-static Sound *GlobalSong;
-
 void
 SetMusicVolume(float volume)
 {

@@ -211,7 +211,9 @@ int main(int argc, char *argv[])
 
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
 
+            level.song->Stop();
             level = LoadLevel(DATA_PATH + levels[level_index], units);
+            level.conversations.prelude.song->Start();
 
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
@@ -243,6 +245,7 @@ int main(int argc, char *argv[])
             handler.clearQueue();
         }
 
+        // TODO : Definitely get rid of this.
         if(GlobalInterfaceState == GAME_OVER)
         {
             GlobalPlayerTurn = true;
