@@ -68,6 +68,11 @@
 #define DOUBLE_RATIO 2    // How much a unit must beat another by to double them.
 #define CRIT_MULTIPLIER 2 // The multiplier on damage.
 
+#define EXP_FOR_COMBAT 10
+#define EXP_FOR_HEALING 13
+#define EXP_FOR_DANCE 11
+#define EXP_FOR_BUFF 9
+
 #define FLOOR_TILE {FLOOR, 1, 0, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 1, 20, 0, nullptr, {0, 6}}

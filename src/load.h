@@ -352,13 +352,14 @@ LoadUnits(string filename_in)
                     stoi(tokens[10]),							// aptitude
                     stoi(tokens[11]),							// defense
                     stoi(tokens[12]),							// speed
-                    stoi(tokens[13]),						    // accuracy
-                    stoi(tokens[14]),						    // avoid
-                    stoi(tokens[15]),						    // crit
-                    stoi(tokens[16]),						    // short range
-                    stoi(tokens[17]),						    // long range
+                    stoi(tokens[13]),						    // skill
+                    stoi(tokens[14]),						    // short range
+                    stoi(tokens[15]),						    // long range
+                    stoi(tokens[16]),						    // level
+                    stoi(tokens[17]),						    // experience
                     (Ability)stoi(tokens[18]),				    // ability
-                    (AIBehavior)stoi(tokens[19])                // ai behavior
+                    (AIBehavior)stoi(tokens[19]),               // ai behavior
+                    stoi(tokens[20])                            // xp value
                 ));
             }
         }
@@ -382,7 +383,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <apt> <def> <spd> <acc> <avo> <crit> <short> <long> <abi> <ai>>\n";
+    fp << "COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <apt> <def> <spd> <acc> <avo> <crit> <short> <long> <level> <exp> <abi> <ai> <xpv>>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << " "
@@ -398,13 +399,14 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->aptitude << " "
                      << unit->defense << " "
                      << unit->speed << " "
-                     << unit->accuracy << " "
-                     << unit->avoid << " "
-                     << unit->crit << " "
+                     << unit->skill << " "
                      << unit->min_range << " "
                      << unit->max_range << " "
+                     << unit->level << " "
+                     << unit->experience << " "
                      << unit->ability << " "
                      << unit->ai_behavior << " "
+                     << unit->xp_value << " "
                      << "\n";
     }
     fp.close();
@@ -463,7 +465,7 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "COM <UNT <name> <col> <row> <ai>\n";
+    fp << "COM <UNT <name> <col> <row> <ai>>\n";
     for(const shared_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "

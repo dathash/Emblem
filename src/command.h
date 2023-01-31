@@ -672,7 +672,7 @@ public:
             } break;
             case ABILITY_BUFF:
             {
-                cursor->targeted->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
+                SimulateBuff(cursor->selected, cursor->targeted);
                 EmitEvent(BUFF_EVENT);
             } break;
             case ABILITY_SHIELD:
@@ -1317,6 +1317,7 @@ public:
 
     virtual void Execute()
     {
+        cout << "ToTitleScreenCommand | Unimplemented command!\n";
         GlobalInterfaceState = TITLE_SCREEN;
     }
 };
@@ -1840,7 +1841,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<StartGameCommand>(level, units));
-                BindB(make_shared<QuitGameCommand>());
+                BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

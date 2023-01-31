@@ -86,11 +86,12 @@ PROTOTYPE ///////////////////////////////////////////////////
         * General Manipulation
 
     RPG Mechanics
-    * EXP Points
     * Levels
-    * Stat boosts
-    * Permanence
-      * Save/Load files
+      * Variable based on exp rates
+      * Display
+      * Stat boosts
+      * Permanence
+        * Save/Load files
 
     Better AI
     * Attack in 2

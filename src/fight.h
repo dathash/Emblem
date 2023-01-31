@@ -16,7 +16,7 @@ d100()
 int
 HitChance(const Unit &predator, const Unit &prey, int bonus)
 {
-    return (predator.accuracy - prey.avoid - bonus);
+    return (predator.Accuracy() - prey.Avoid() - bonus);
 }
 
 // Returns the chance to crit a unit
@@ -24,7 +24,7 @@ HitChance(const Unit &predator, const Unit &prey, int bonus)
 int
 CritChance(const Unit &predator, const Unit &prey)
 {
-    return (predator.crit);
+    return (predator.Crit());
 }
 
 // Determines what damage a hit will do.
@@ -93,7 +93,7 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     outcome.one_attacks = true;
     outcome.one_damage = CalculateDamage(one, two, two_defense_bonus);
     outcome.one_hit = HitChance(one, two, two_avoid_bonus);
-    outcome.one_crit = one.crit;
+    outcome.one_crit = one.Crit();
     outcome.one_doubles = Doubles(one, two);
 
     if(distance >= two.min_range && distance <= two.max_range)
@@ -101,7 +101,7 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
         outcome.two_attacks = true;
         outcome.two_damage = CalculateDamage(two, one, one_defense_bonus);
         outcome.two_hit = HitChance(two, one, one_avoid_bonus);
-        outcome.two_crit = two.crit;
+        outcome.two_crit = two.Crit();
         outcome.two_doubles = Doubles(two, one);
     }
 
@@ -264,28 +264,39 @@ struct Fight
             }
             else
             {
-                // TODO: Put an extra animation in
-                // here which waits to kill units
-                // until the fight is resolved.
                 if(one->health <= 0)
                     one->should_die = true;
                 if(two->health <= 0)
                     two->should_die = true;
+
+                Unit *experience_recipient = nullptr;
+                int experience_amount = EXP_FOR_COMBAT;
+
                 if(GlobalPlayerTurn)
                 {
-                    one->Deactivate();
+                    experience_recipient = one;
+                    if(two->should_die)
+                        experience_amount += two->xp_value;
 
+                    one->Deactivate();
                     GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+
                     if(one->should_die)
                     {
+                        // TODO: Put DEATH CONVERSATION HERE!!!
                         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
                     }
                 }
                 else
                 {
+                    experience_recipient = two;
+                    if(one->should_die)
+                        experience_amount += two->xp_value;
+
                     one->Deactivate();
                     GlobalAIState = FINDING_NEXT;
                 }
+                experience_recipient->GrantExperience(experience_amount);
 
                 //EmitEvent(EVENT_COMBAT_OVER);
             }
@@ -402,20 +413,28 @@ Outcome PredictHealing(const Unit &one, const Unit &two)
     return outcome;
 }
 
+void SimulateBuff(Unit *one, Unit *two)
+{
+    two->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
 
-// Simulates one unit healing another.
+    one->GrantExperience(EXP_FOR_BUFF);
+}
+
 void SimulateHealing(Unit *one, Unit *two)
 {
     // one -> two
     int healing = one->aptitude;
     two->health = min(healing + two->health, two->max_health);
+
+    two->GrantExperience(EXP_FOR_BUFF);
 }
 
-// Simulates one unit healing another.
 void SimulateDancing(Unit *one, Unit *two)
 {
     // one -> two
     two->Activate();
+
+    one->GrantExperience(EXP_FOR_DANCE);
 }
 
 #endif

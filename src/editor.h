@@ -60,7 +60,8 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 				3,
 				3,
 				ABILITY_NONE,
-                NO_BEHAVIOR
+                NO_BEHAVIOR,
+                3
 			));
 		}
 		ImGui::SameLine();
@@ -95,11 +96,11 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		ImGui::SliderInt("def", &selected->defense, 0, 20);
 		ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
 		ImGui::SliderInt("spd", &selected->speed, 0, 20);
-		ImGui::SliderInt("acc", &selected->accuracy, 0, 150);
-		ImGui::SliderInt("avo", &selected->avoid, 0, 100);
-		ImGui::SliderInt("crit", &selected->crit, 0, 100);
+		ImGui::SliderInt("skl", &selected->skill, 0, 20);
 		ImGui::SliderInt("min", &selected->min_range, 1, 4);
 		ImGui::SliderInt("max", &selected->max_range, 1, 4);
+		ImGui::SliderInt("level", &selected->level, 1, 20);
+		ImGui::SliderInt("exp", &selected->experience, 0, 99);
 		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
         ImGui::Text("ability");
         ImGui::SameLine();
@@ -117,6 +118,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::SameLine();
         if(ImGui::Button("D"))
             selected->ability = ABILITY_DANCE;
+		ImGui::SliderInt("xpv", &selected->xp_value, 0, 200);
 	}
 	ImGui::End();
 }

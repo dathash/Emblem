@@ -140,6 +140,7 @@ enum Stat
     STAT_DEFENSE,
     STAT_APTITUDE,
     STAT_SPEED,
+    STAT_SKILL,
 };
 
 struct Buff
@@ -180,13 +181,14 @@ struct Unit
     int aptitude;
     int defense;
     int speed;
-    int accuracy;
-    int avoid;
-    int crit;
+    int skill;
     int min_range;
     int max_range;
+    int level;
+    int experience;
     Ability ability;
 
+    int xp_value = 0;
     AIBehavior ai_behavior = NO_BEHAVIOR;
     position pos = {0, 0};
     bool is_exhausted = false;
@@ -220,11 +222,12 @@ struct Unit
          bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
          int attack_in, int aptitude_in, int defense_in,
-         int speed_in,
-         int accuracy_in, int avoid_in, int crit_in,
+         int speed_in, int skill_in,
          int min_range_in, int max_range_in,
+         int level_in, int experience_in,
          Ability ability_in,
-         AIBehavior ai_behavior_in)
+         AIBehavior ai_behavior_in,
+         int xp_value_in)
     : name(name_in),
       sheet(sheet_in),
       neutral(neutral_in),
@@ -239,13 +242,14 @@ struct Unit
       aptitude(aptitude_in),
       defense(defense_in),
       speed(speed_in),
-      accuracy(accuracy_in),
-      avoid(avoid_in),
-      crit(crit_in),
+      skill(skill_in),
       min_range(min_range_in),
       max_range(max_range_in),
+      level(level_in),
+      experience(experience_in),
       ability(ability_in),
-      ai_behavior(ai_behavior_in)
+      ai_behavior(ai_behavior_in),
+      xp_value(xp_value_in)
     {} // haha c++
     // This little thing is like a vestigial organ
     // disgusting
@@ -285,6 +289,41 @@ struct Unit
             delete buff;
             buff = nullptr;
         }
+    }
+
+    void
+    GrantExperience(int amount)
+    {
+        if(level == 10)
+            return;
+
+        experience += amount;
+        while(experience > 100) // Just in case you get a ton of experience at once haha
+        {
+            level += 1;
+            experience -= 100;
+        }
+        if(level == 10)
+            experience = 0;
+    }
+
+    int
+    Accuracy() const
+    {
+        return 50 + (skill * 5);
+    }
+
+    int
+    Avoid() const
+    {
+        return skill * 5;
+    }
+
+    int
+    Crit() const
+    {
+        return skill * 2;
+        // TODO: Make this less for enemies.
     }
 };
 
