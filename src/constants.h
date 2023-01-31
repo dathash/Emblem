@@ -73,6 +73,8 @@
 #define EXP_FOR_DANCE 11
 #define EXP_FOR_BUFF 9
 
+#define EXP_FOR_VILLAGE_SAVED 50
+
 #define FLOOR_TILE {FLOOR, 1, 0, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, 0, nullptr, {6, 22}}
 #define FOREST_TILE {FOREST, 1, 20, 0, nullptr, {0, 6}}

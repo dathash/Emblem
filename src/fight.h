@@ -263,13 +263,18 @@ struct Fight
                     two->should_die = true;
 
                 Unit *experience_recipient = nullptr;
-                int experience_amount = EXP_FOR_COMBAT;
+                int experience_amount = 0;
 
                 if(GlobalPlayerTurn)
                 {
                     experience_recipient = one;
+
+                    experience_amount = EXP_FOR_COMBAT;
                     if(two->should_die)
                         experience_amount += two->xp_value;
+
+                    if(one->level > two->level)
+                        experience_amount /= 2;
 
                     one->Deactivate();
                     GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
@@ -283,12 +288,18 @@ struct Fight
                 else
                 {
                     experience_recipient = two;
+
+                    experience_amount = 1;
                     if(one->should_die)
                         experience_amount += two->xp_value;
+
+                    if(two->level > one->level)
+                        experience_amount /= 2;
 
                     one->Deactivate();
                     GlobalAIState = FINDING_NEXT;
                 }
+
                 experience_recipient->GrantExperience(experience_amount);
 
                 //EmitEvent(EVENT_COMBAT_OVER);

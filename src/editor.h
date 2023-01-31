@@ -379,6 +379,7 @@ GlobalsViewer()
 // Contains static variables that might trip some stuff up, just a heads up.
 void
 EditorPass(vector<shared_ptr<Unit>> *units,
+           const vector<shared_ptr<Unit>> &party,
            Level *level, const vector<string> &levels)
 {
     // Internal variables
@@ -396,7 +397,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         {
             *units = LoadUnits(DATA_PATH + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
-            *level = LoadLevel(DATA_PATH + string(levelFileName), *units);
+            *level = LoadLevel(DATA_PATH + string(levelFileName), *units, party);
             GlobalAIState = PLAYER_TURN;
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
@@ -417,7 +418,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
 
         if(ImGui::Button("Test Zone"))
         {
-            *level = LoadLevel(DATA_PATH + string("test.txt"), *units);
+            *level = LoadLevel(DATA_PATH + string("test.txt"), *units, party);
             sprintf(levelFileName, "test.txt");
             GlobalAIState = PLAYER_TURN;
             GlobalPlayerTurn = true;
@@ -429,7 +430,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         {
             if(ImGui::Button(s.c_str()))
             {
-                *level = LoadLevel(DATA_PATH + s, *units);
+                *level = LoadLevel(DATA_PATH + s, *units, party);
                 sprintf(levelFileName, "%s", s.c_str());
                 GlobalAIState = PLAYER_TURN;
                 GlobalPlayerTurn = true;

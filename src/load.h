@@ -147,7 +147,8 @@ vector<string> split(const string &text, char sep) {
 
 // loads a level from a file.
 Level
-LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
+LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
+          const vector<shared_ptr<Unit>> &party)
 {
     string line;
     string type;
@@ -281,14 +282,28 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
         }
         else if(type == "UNT")
         {
+            // NOTE: We go through party first. If we have any matches, we plop those down.
+            // Otherwise, we'll grab them from the base units file.
             shared_ptr<Unit> unitCopy;
-            for(const shared_ptr<Unit> &unit : units)
+            for(const shared_ptr<Unit> &unit : party)
             {
                 if(hash<string>{}(tokens[0]) == unit->ID())
                 {
                     unitCopy = make_shared<Unit>(*unit);
                 }
             }
+
+            if(!unitCopy)
+            {
+                for(const shared_ptr<Unit> &unit : units)
+                {
+                    if(hash<string>{}(tokens[0]) == unit->ID())
+                    {
+                        unitCopy = make_shared<Unit>(*unit);
+                    }
+                }
+            }
+
             SDL_assert(unitCopy);
             int col = stoi(tokens[1]);
             int row = stoi(tokens[2]);

@@ -1056,11 +1056,13 @@ public:
     ChooseLevelMenuOptionCommand(const Menu &menu_in,
                                  Level *level_in,
                                  const vector<shared_ptr<Unit>> &units_in,
+                                 const vector<shared_ptr<Unit>> &party_in,
                                  Menu *conversation_menu_in,
                                  ConversationList *conversations_in)
     : menu(menu_in),
       level(level_in),
       units(units_in),
+      party(party_in),
       conversation_menu(conversation_menu_in),
       conversations(conversations_in)
     {}
@@ -1081,7 +1083,7 @@ public:
         }
         if(option == "Redo")
         {
-            *level = LoadLevel(level->name, units);
+            *level = LoadLevel(level->name, units, party);
             level->song->Restart();
 
             GlobalPlayerTurn = true;
@@ -1111,6 +1113,7 @@ private:
     const Menu &menu;
     Level *level;
     const vector<shared_ptr<Unit>> &units;
+    const vector<shared_ptr<Unit>> &party;
     Menu *conversation_menu;
     ConversationList *conversations;
 };
@@ -1227,6 +1230,7 @@ public:
                 level_song->Start();
 
                 cursor->selected->Deactivate();
+                cursor->selected->GrantExperience(EXP_FOR_VILLAGE_SAVED);
                 cursor->selected = nullptr;
                 cursor->targeted = nullptr;
                 cursor->path_draw = {};
@@ -1281,6 +1285,9 @@ public:
 
             cursor->pos = cursor->selected->pos;
             cursor->selected->Deactivate();
+            cursor->selected = nullptr;
+            cursor->targeted = nullptr;
+            cursor->path_draw = {};
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
             return;
         }
@@ -1290,6 +1297,10 @@ public:
             level_song->Start();
 
             cursor->selected->Deactivate();
+            cursor->selected->GrantExperience(EXP_FOR_VILLAGE_SAVED);
+            cursor->selected = nullptr;
+            cursor->targeted = nullptr;
+            cursor->path_draw = {};
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
             return;
         }
@@ -1338,14 +1349,17 @@ class RestartGameCommand : public Command
 {
 public:
     RestartGameCommand(Level *level_in,
-                       const vector<shared_ptr<Unit>> &units_in)
+                       const vector<shared_ptr<Unit>> &units_in,
+                       const vector<shared_ptr<Unit>> &party_in
+                       )
     : level(level_in),
-      units(units_in)
+      units(units_in),
+      party(party_in)
     {}
 
     virtual void Execute()
     {
-        *level = LoadLevel(level->name, units);
+        *level = LoadLevel(level->name, units, party);
         level->song->Restart();
 
         GlobalPlayerTurn = true;
@@ -1355,22 +1369,26 @@ public:
 private:
     Level *level;
     const vector<shared_ptr<Unit>> &units;
+    const vector<shared_ptr<Unit>> &party;
 };
 
 class StartGameCommand : public Command
 {
 public:
     StartGameCommand(Level *level_in,
-                     const vector<shared_ptr<Unit>> &units_in)
+                     const vector<shared_ptr<Unit>> &units_in,
+                     const vector<shared_ptr<Unit>> &party_in
+                     )
     : level(level_in),
-      units(units_in)
+      units(units_in),
+      party(party_in)
     {}
 
     virtual void Execute()
     {
         GlobalPlayerTurn = true;
         GlobalTurnStart = true;
-        *level = LoadLevel(level->name, units);
+        *level = LoadLevel(level->name, units, party);
         level->conversations.prelude.song->Start();
 
         EmitEvent(START_GAME_EVENT);
@@ -1381,6 +1399,7 @@ public:
 private:
     Level *level;
     const vector<shared_ptr<Unit>> &units;
+    const vector<shared_ptr<Unit>> &party;
 };
 
 // ============================== Input Handler ================================
@@ -1497,7 +1516,9 @@ public:
     // updates what the user can do with their buttons.
     // contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
-    void UpdateCommands(Cursor *cursor, Level *level, const vector<shared_ptr<Unit>> &units,
+    void UpdateCommands(Cursor *cursor, Level *level, 
+                        const vector<shared_ptr<Unit>> &units,
+                        const vector<shared_ptr<Unit>> &party,
                         Menu *gameMenu, Menu *unitMenu,
                         Menu *levelMenu, Menu *conversationMenu, 
                         Fight *fight)
@@ -1756,7 +1777,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(levelMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu, level, units, conversationMenu, &(level->conversations)));
+                BindA(make_shared<ChooseLevelMenuOptionCommand>(*levelMenu, level, units, party, conversationMenu, &(level->conversations)));
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1828,7 +1849,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<RestartGameCommand>(level, units));
+                BindA(make_shared<RestartGameCommand>(level, units, party));
                 BindB(make_shared<ToTitleScreenCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1840,7 +1861,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<StartGameCommand>(level, units));
+                BindA(make_shared<StartGameCommand>(level, units, party));
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

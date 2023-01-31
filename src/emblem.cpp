@@ -192,6 +192,8 @@ int main(int argc, char *argv[])
 
 // ================================== load =================================
     vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
+    vector<shared_ptr<Unit>> party = {};
+
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
                              string("l2.txt"), string("l3.txt"),
@@ -199,7 +201,7 @@ int main(int argc, char *argv[])
                              string("l6.txt"), string("l7.txt")
 							 };
     int level_index = 0;
-    Level level = LoadLevel(DATA_PATH + levels[level_index], units);
+    Level level = LoadLevel(DATA_PATH + levels[level_index], units, party);
 
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		32, ANIMATION_SPEED));
@@ -233,7 +235,7 @@ int main(int argc, char *argv[])
         if(!GlobalEditorMode)
         {
             handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level, units,
+            handler.UpdateCommands(&cursor, &level, units, party,
                                    &game_menu, &unit_menu, 
                                    &level_menu, &conversation_menu,
                                    &fight);
@@ -262,8 +264,15 @@ int main(int argc, char *argv[])
 
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
 
+            party = {};
+            for(shared_ptr<Unit> unit : level.combatants)
+            {
+                if(unit->is_ally)
+                    party.push_back(unit);
+            }
+
             level.song->Stop();
-            level = LoadLevel(DATA_PATH + levels[level_index], units);
+            level = LoadLevel(DATA_PATH + levels[level_index], units, party);
             level.conversations.prelude.song->Start();
 
             GlobalPlayerTurn = true;
@@ -317,7 +326,7 @@ int main(int argc, char *argv[])
 
 #if DEV_MODE
         if(GlobalEditorMode)
-            EditorPass(&units, &level, levels);
+            EditorPass(&units, party, &level, levels);
 #endif
 
 		ImGui::EndFrame();

@@ -85,15 +85,19 @@ PROTOTYPE ///////////////////////////////////////////////////
         * Equipping Items
         * Trading Items
         * General Manipulation
+    * Enemies pursue and destroy villages
 
     RPG Mechanics
     * Levels
       * Display
         * Level
         * Exp Gain
-      * Permanence
-        * Save/Load files
-      * Variable based on unit level and enemy level.
+    * Classes
+      * Growth Bonuses
+      * Base Bonuses
+      * Weapon Proficiencies
+
+    Combine speed and skill?
 
     Better AI
     * Attack in 2
@@ -104,6 +108,8 @@ PROTOTYPE ///////////////////////////////////////////////////
     Slick Turn transitions
     Optional Conversation backgrounds
     BUG | Can Buff when there are no targets?
+
+    Save/Load files
 
 ////////////////////////////////////////////////////////////
 
