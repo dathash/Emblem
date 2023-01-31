@@ -124,6 +124,16 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
+struct Growths
+{
+    int health;
+    int attack;
+    int aptitude;
+    int defense;
+    int speed;
+    int skill;
+};
+
 enum Ability
 {
     ABILITY_NONE,
@@ -168,11 +178,6 @@ enum Expression
 struct Unit
 {
     string name;
-    Spritesheet sheet;
-    Texture neutral;
-    Texture happy;
-    Texture angry;
-    Texture wince;
     bool is_ally;
     int movement;
     int health;
@@ -188,6 +193,8 @@ struct Unit
     int experience;
     Ability ability;
 
+    Growths growths = {};
+
     int xp_value = 0;
     AIBehavior ai_behavior = NO_BEHAVIOR;
     position pos = {0, 0};
@@ -196,6 +203,12 @@ struct Unit
     position animation_offset = {0, 0};
 
     Buff *buff = nullptr;
+
+    Spritesheet sheet;
+    Texture neutral;
+    Texture happy;
+    Texture angry;
+    Texture wince;
 
     ~Unit()
     {
@@ -214,11 +227,8 @@ struct Unit
         sheet.Update();
     }
 
-    Unit(string name_in, Spritesheet sheet_in,
-         Texture neutral_in,
-         Texture happy_in,
-         Texture angry_in,
-         Texture wince_in,
+    Unit(
+         string name_in,
          bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
          int attack_in, int aptitude_in, int defense_in,
@@ -227,13 +237,22 @@ struct Unit
          int level_in, int experience_in,
          Ability ability_in,
          AIBehavior ai_behavior_in,
-         int xp_value_in)
+         int xp_value_in,
+
+         int health_growth_in,
+         int attack_growth_in,
+         int aptitude_growth_in,
+         int defense_growth_in,
+         int speed_growth_in,
+         int skill_growth_in,
+
+         Spritesheet sheet_in,
+         Texture neutral_in,
+         Texture happy_in,
+         Texture angry_in,
+         Texture wince_in
+         )
     : name(name_in),
-      sheet(sheet_in),
-      neutral(neutral_in),
-      happy(happy_in),
-      angry(angry_in),
-      wince(wince_in),
       is_ally(is_ally_in),
       movement(movement_in),
       health(health_in),
@@ -249,11 +268,20 @@ struct Unit
       experience(experience_in),
       ability(ability_in),
       ai_behavior(ai_behavior_in),
-      xp_value(xp_value_in)
-    {} // haha c++
-    // This little thing is like a vestigial organ
-    // disgusting
-
+      xp_value(xp_value_in),
+      sheet(sheet_in),
+      neutral(neutral_in),
+      happy(happy_in),
+      angry(angry_in),
+      wince(wince_in)
+    {
+      growths.health = health_growth_in;
+      growths.attack = attack_growth_in;
+      growths.aptitude = aptitude_growth_in;
+      growths.defense = defense_growth_in;
+      growths.speed = speed_growth_in;
+      growths.skill = skill_growth_in;
+    }
 
     // Damages a unit and resolves things involved with that process.
     void
@@ -291,6 +319,41 @@ struct Unit
         }
     }
 
+    int
+    StatBoost(int growth)
+    {
+        int result = 0;
+        while(growth > 100)
+        {
+            result += 1;
+            growth -= 100;
+        }
+
+        if(d100() < growth)
+        {
+            result += 1;
+        }
+
+        return result;
+    }
+
+    void
+    LevelUp()
+    {
+        level += 1;
+        
+        max_health += StatBoost(growths.health);
+        attack += StatBoost(growths.attack);
+        defense += StatBoost(growths.defense);
+        aptitude += StatBoost(growths.aptitude);
+        speed += StatBoost(growths.speed);
+        skill += StatBoost(growths.skill);
+
+        experience -= 100;
+        if(level == 10)
+            experience = 0;
+    }
+
     void
     GrantExperience(int amount)
     {
@@ -298,19 +361,14 @@ struct Unit
             return;
 
         experience += amount;
-        while(experience > 100) // Just in case you get a ton of experience at once haha
-        {
-            level += 1;
-            experience -= 100;
-        }
-        if(level == 10)
-            experience = 0;
+        while(experience >= 100) // Just in case you get a ton of experience at once haha
+            LevelUp();
     }
 
     int
     Accuracy() const
     {
-        return 50 + (skill * 5);
+        return 50 + (skill * 10);
     }
 
     int

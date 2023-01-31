@@ -75,6 +75,7 @@ PROTOTYPE ///////////////////////////////////////////////////
     * Rout
 
     Secondary Objectives
+    * Green Units
     * Recruit allies
     * Recruit enemies
     * Chests
@@ -87,11 +88,12 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     RPG Mechanics
     * Levels
-      * Variable based on exp rates
       * Display
-      * Stat boosts
+        * Level
+        * Exp Gain
       * Permanence
         * Save/Load files
+      * Variable based on unit level and enemy level.
 
     Better AI
     * Attack in 2
@@ -102,7 +104,6 @@ PROTOTYPE ///////////////////////////////////////////////////
     Slick Turn transitions
     Optional Conversation backgrounds
     BUG | Can Buff when there are no targets?
-
 
 ////////////////////////////////////////////////////////////
 

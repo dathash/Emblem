@@ -5,6 +5,14 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+
+// Rolls a d100. range: 00 to 99.
+int
+d100()
+{
+    return rand() % 100;
+}
+
 struct Timer
 {
     Uint32 current = 0;

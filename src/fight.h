@@ -5,13 +5,6 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-// Rolls a d100. range: 00 to 99.
-int
-d100()
-{
-    return rand() % 100;
-}
-
 // Returns the chance to hit a unit
 int
 HitChance(const Unit &predator, const Unit &prey, int bonus)

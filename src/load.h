@@ -117,7 +117,6 @@ LoadTextureImage(string path, string filename)
     SDL_Texture *texture = nullptr;
     SDL_Surface *surface = nullptr;
 
-    //cout << path + filename << "\n";
     surface = IMG_Load((path + filename).c_str());
     SDL_assert(surface);
     int width = surface->w;
@@ -336,30 +335,45 @@ LoadUnits(string filename_in)
 
             if(type == "UNT")
             {
-                tokens = split(rest, ' ');
+                tokens = split(rest, '\t');
                 units.push_back(make_shared<Unit>(
                     tokens[0],									// name
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[1]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(FULLS_PATH, tokens[2]),    // neutral
-                    LoadTextureImage(FULLS_PATH, tokens[3]),    // happy
-                    LoadTextureImage(FULLS_PATH, tokens[4]),    // angry
-                    LoadTextureImage(FULLS_PATH, tokens[5]),    // wince
-                    tokens[6] == "Ally" ? true : false,			// team
-                    stoi(tokens[7]),							// movement
-                    stoi(tokens[8]),							// health
-                    stoi(tokens[8]),							// max health
-                    stoi(tokens[9]),							// attack
-                    stoi(tokens[10]),							// aptitude
-                    stoi(tokens[11]),							// defense
-                    stoi(tokens[12]),							// speed
-                    stoi(tokens[13]),						    // skill
-                    stoi(tokens[14]),						    // short range
-                    stoi(tokens[15]),						    // long range
-                    stoi(tokens[16]),						    // level
-                    stoi(tokens[17]),						    // experience
-                    (Ability)stoi(tokens[18]),				    // ability
-                    (AIBehavior)stoi(tokens[19]),               // ai behavior
-                    stoi(tokens[20])                            // xp value
+                    tokens[1] == "Ally" ? true : false,			// team
+
+                    // Bases
+                    stoi(tokens[2]),							// movement
+                    stoi(tokens[3]),							// health
+                    stoi(tokens[3]),							// max health
+                    stoi(tokens[4]),							// attack
+                    stoi(tokens[5]),							// aptitude
+                    stoi(tokens[6]),							// defense
+                    stoi(tokens[7]),							// speed
+                    stoi(tokens[8]),						    // skill
+                    stoi(tokens[9]),						    // short range
+                    stoi(tokens[10]),						    // long range
+
+                    stoi(tokens[11]),						    // level
+                    stoi(tokens[12]),						    // experience
+
+                    (Ability)stoi(tokens[13]),				    // ability
+
+                    (AIBehavior)stoi(tokens[14]),               // ai behavior
+                    stoi(tokens[15]),                           // xp value
+
+                    // Growths
+                    stoi(tokens[16]),                           // health
+                    stoi(tokens[17]),                           // attack
+                    stoi(tokens[18]),                           // aptitude
+                    stoi(tokens[19]),                           // defense
+                    stoi(tokens[20]),                           // speed
+                    stoi(tokens[21]),                           // skill
+
+                    // Textures
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[22]), 32, ANIMATION_SPEED), // path to texture
+                    LoadTextureImage(FULLS_PATH, tokens[23]),   // neutral
+                    LoadTextureImage(FULLS_PATH, tokens[24]),   // happy
+                    LoadTextureImage(FULLS_PATH, tokens[25]),   // angry
+                    LoadTextureImage(FULLS_PATH, tokens[26])    // wince
                 ));
             }
         }
@@ -383,30 +397,38 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM <UNT <name> <texture> <portrait> <team> <mov> <hp> <atk> <apt> <def> <spd> <acc> <avo> <crit> <short> <long> <level> <exp> <abi> <ai> <xpv>>\n";
+    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<atk>\t<apt>\t<def>\t<spd>\t<skl>\t<short>\t<long>\t<level>\t<exp>\t<abi>\t<ai>\t<xpv>\t<ghp>\t<gat>\t<gap>\t<gdf>\t<gsp>\t<gsk>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
-        fp << "UNT " << unit->name << " "
-                     << unit->sheet.texture.filename << " "
-                     << unit->neutral.filename << " "
-                     << unit->happy.filename << " "
-                     << unit->angry.filename << " "
-                     << unit->wince.filename << " "
-                     << (unit->is_ally ? "Ally" : "Enemy") << " "
-                     << unit->movement << " "
-                     << unit->max_health << " "
-                     << unit->attack << " "
-                     << unit->aptitude << " "
-                     << unit->defense << " "
-                     << unit->speed << " "
-                     << unit->skill << " "
-                     << unit->min_range << " "
-                     << unit->max_range << " "
-                     << unit->level << " "
-                     << unit->experience << " "
-                     << unit->ability << " "
-                     << unit->ai_behavior << " "
-                     << unit->xp_value << " "
+        fp << "UNT " << unit->name << "\t"
+                     << (unit->is_ally ? "Ally" : "Enemy") << "\t"
+                     << unit->movement << "\t"
+                     << unit->max_health << "\t"
+                     << unit->attack << "\t"
+                     << unit->aptitude << "\t"
+                     << unit->defense << "\t"
+                     << unit->speed << "\t"
+                     << unit->skill << "\t"
+                     << unit->min_range << "\t"
+                     << unit->max_range << "\t"
+                     << unit->level << "\t"
+                     << unit->experience << "\t"
+                     << unit->ability << "\t"
+                     << unit->ai_behavior << "\t"
+                     << unit->xp_value << "\t"
+
+                     << unit->growths.health << "\t"
+                     << unit->growths.attack << "\t"
+                     << unit->growths.aptitude << "\t"
+                     << unit->growths.defense << "\t"
+                     << unit->growths.speed << "\t"
+                     << unit->growths.skill << "\t"
+
+                     << unit->sheet.texture.filename << "\t"
+                     << unit->neutral.filename << "\t"
+                     << unit->happy.filename << "\t"
+                     << unit->angry.filename << "\t"
+                     << unit->wince.filename << "\t"
                      << "\n";
     }
     fp.close();

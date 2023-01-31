@@ -41,11 +41,6 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 		{
 			units->push_back(make_shared<Unit>(
 				string("DEFAULT_CHANGE"),
-				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
 				false,
 				3,
 				3,
@@ -61,7 +56,20 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 				3,
 				ABILITY_NONE,
                 NO_BEHAVIOR,
-                3
+                3,
+
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+
+				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
+				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT))
 			));
 		}
 		ImGui::SameLine();
@@ -289,7 +297,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             ImGui::Text("Over unit.");
             ImGui::SameLine();
             ImGui::Text("Behavior: %d", hover_tile->occupant->ai_behavior);
-            ImGui::SameLine();
+
             if(ImGui::Button("Dmg"))
             {
                 hover_tile->occupant->Damage(1);
@@ -298,6 +306,16 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             if(ImGui::Button("Heal"))
             {
                 hover_tile->occupant->Damage(-1);
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("lvl+"))
+            {
+                hover_tile->occupant->GrantExperience(100);
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("25xp"))
+            {
+                hover_tile->occupant->GrantExperience(25);
             }
 
             ImGui::Text("AI Behavior");

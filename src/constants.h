@@ -43,7 +43,7 @@
 
 // startup
 #define INITIAL_LEVEL "l0.txt"
-#define INITIAL_UNITS "units.txt"
+#define INITIAL_UNITS "units.tsv"
 
 // data
 #define DATA_PATH "../data/"
