@@ -11,10 +11,12 @@
 // ============================== loading data =================================
 Conversation
 LoadConversation(string path, string filename,
-                 const vector<shared_ptr<Unit>> units)
+                 const vector<shared_ptr<Unit>> units,
+                 const position &pos_in = position(-1, -1))
 {
     Conversation conversation = {};
     conversation.filename = filename;
+    conversation.pos = pos_in;
 
     string line;
     string type;
@@ -191,6 +193,14 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
             level.conversations.list.push_back(
                     LoadConversation(CONVERSATIONS_PATH, rest, units));
         }
+        else if(type == "VIL")
+        {
+            int col = stoi(tokens[0]);
+            int row = stoi(tokens[1]);
+
+            level.conversations.villages.push_back(
+                    LoadConversation(VILLAGES_PATH, tokens[2], units, position(col, row)));
+        }
         else if(type == "MUS")
         {
             level.song = GetMusic(rest);
@@ -251,6 +261,16 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units)
                     {
                         level.map.tiles[col][mapRow] = 
                             SPAWN_TILE;
+                    } break;
+                    case(VILLAGE):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            VILLAGE_TILE;
+                    } break;
+                    case(CHEST):
+                    {
+                        level.map.tiles[col][mapRow] = 
+                            CHEST_TILE;
                     } break;
                     default:
                     {
@@ -414,6 +434,13 @@ SaveLevel(string filename_in, const Level &level)
         fp << "MID " << conv.filename << "\n";
     }
     fp << "\n";
+
+    for(const Conversation &conv : level.conversations.villages)
+    {
+        fp << "VIL " << conv.pos.col << " " << conv.pos.row << " " << conv.filename << "\n";
+    }
+    fp << "\n";
+
     for(const Conversation &conv : level.conversations.list)
     {
         fp << "CNV " << conv.filename << "\n";

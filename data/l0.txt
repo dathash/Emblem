@@ -5,7 +5,13 @@ COM File: Level
 ATL ruins.png
 
 PRE prelude00.txt
+
 MID lucina_priam_1.txt
+
+VIL 4 1 village01.txt
+VIL 10 4 village02.txt
+VIL 8 6 village03.txt
+
 CNV lucina_priam_2.txt
 
 MUS 21.wav
@@ -13,12 +19,12 @@ MUS 21.wav
 WDT 15
 HGT 10
 MAP 0 0 0 0 0 2 2 2 2 2 1 1 1 1 1 
-MAP 0 5 5 5 0 0 0 2 2 2 1 1 1 1 1 
+MAP 0 5 5 5 7 0 0 2 2 2 1 1 1 1 1 
 MAP 0 5 6 5 4 0 0 0 2 2 1 1 0 4 1 
 MAP 0 5 5 5 0 0 0 0 2 1 1 2 2 2 2 
-MAP 0 0 0 0 0 3 0 0 1 1 2 0 2 0 2 
+MAP 0 0 0 0 0 3 0 0 1 1 7 0 2 0 2 
 MAP 0 0 0 0 0 3 3 1 1 1 0 2 2 2 2 
-MAP 0 0 0 0 3 3 3 0 0 1 1 2 0 2 0 
+MAP 0 0 0 0 3 3 3 0 7 1 1 2 0 2 0 
 MAP 1 1 0 0 3 3 0 0 0 0 1 0 2 0 2 
 MAP 1 1 1 0 0 0 0 0 6 0 0 0 0 0 0 
 MAP 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 

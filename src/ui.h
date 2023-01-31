@@ -29,6 +29,8 @@ GetTileNameString(TileType type)
     case GOAL: return "Goal";
     case SPAWN: return "Spawn";
     case FORT: return "Fort";
+    case VILLAGE: return "Village";
+    case CHEST: return "Chest";
 	default:
 		assert(!"ERROR: Unhandled Tile name string in UI.\n");
 		return "";
@@ -120,15 +122,18 @@ struct UI_State
 
 		// Tile Info
         if(
-           !(GlobalInterfaceState == LEVEL_MENU ||
-             GlobalInterfaceState == CONVERSATION_MENU ||
-             GlobalInterfaceState == CONVERSATION ||
-             GlobalInterfaceState == PREVIEW_ATTACK ||
-             GlobalInterfaceState == PREVIEW_ABILITY ||
-             GlobalInterfaceState == PLAYER_FIGHT ||
-             GlobalInterfaceState == BATTLE_CONVERSATION ||
-             GlobalInterfaceState == PRELUDE
-             )
+            GlobalInterfaceState == NEUTRAL_OVER_GROUND || 
+            GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
+            GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
+            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+            GlobalInterfaceState == SELECTED_OVER_GROUND ||
+            GlobalInterfaceState == SELECTED_OVER_INACCESSIBLE ||
+            GlobalInterfaceState == SELECTED_OVER_ALLY ||
+            GlobalInterfaceState == SELECTED_OVER_ENEMY ||
+            GlobalInterfaceState == ATTACK_TARGETING ||
+            GlobalInterfaceState == ABILITY_TARGETING ||
+            GlobalInterfaceState == ENEMY_INFO ||
+            GlobalInterfaceState == UNIT_MENU_ROOT
 			)
         {
             tile_info = true;

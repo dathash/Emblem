@@ -48,6 +48,7 @@
 // data
 #define DATA_PATH "../data/"
 #define CONVERSATIONS_PATH "../data/conversations/"
+#define VILLAGES_PATH "../data/conversations/villages/"
 #define PRELUDES_PATH "../data/conversations/preludes/"
 
 // assets
@@ -74,7 +75,8 @@
 #define FORT_TILE {FORT, 1, 10, 4, nullptr, {1, 0}}
 #define GOAL_TILE {GOAL, 1, 0, 2, nullptr, {31, 0}}
 #define SPAWN_TILE {SPAWN, 1, 0, 0, nullptr, {14, 1}}
-
+#define VILLAGE_TILE {VILLAGE, 1, 0, 0, nullptr, {31, 25}}
+#define CHEST_TILE {CHEST, 1, 0, 0, nullptr, {0, 1}}
 
 enum InterfaceState
 {
@@ -112,14 +114,15 @@ enum InterfaceState
     CONVERSATION_MENU, // 22
     CONVERSATION, // 23
     BATTLE_CONVERSATION, // 24
-    PRELUDE, // 25
+    VILLAGE_CONVERSATION, // 25
+    PRELUDE, // 26
 
-    PLAYER_FIGHT, // 26
+    PLAYER_FIGHT, // 27
 
-    NO_OP, // 27
+    NO_OP, // 28
 
-    TITLE_SCREEN, // 28
-    GAME_OVER, // 29
+    TITLE_SCREEN, // 29
+    GAME_OVER, // 30
 };
 
 
@@ -163,6 +166,8 @@ enum TileType
     GOAL,
     SPAWN,
     FORT,
+    VILLAGE,
+    CHEST,
 };
 
 // ============================ color palette ==================================

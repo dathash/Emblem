@@ -491,13 +491,15 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     if(GlobalInterfaceState == CONVERSATION ||
        GlobalInterfaceState == BATTLE_CONVERSATION ||
-       GlobalInterfaceState == PRELUDE)
+       GlobalInterfaceState == PRELUDE ||
+       GlobalInterfaceState == VILLAGE_CONVERSATION)
     {
         Conversation conversation;
         if(GlobalInterfaceState == CONVERSATION)
             conversation = conversations.list[conversations.index];
 
-        if(GlobalInterfaceState == BATTLE_CONVERSATION)
+        if(GlobalInterfaceState == BATTLE_CONVERSATION ||
+           GlobalInterfaceState == VILLAGE_CONVERSATION)
             conversation = *conversations.current;
 
         if(GlobalInterfaceState == PRELUDE)

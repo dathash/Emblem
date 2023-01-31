@@ -70,28 +70,47 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     Do some real design thinking.
 
+    Other Primary Objectives
+    * Defeat Boss
+    * Rout
+
+    Secondary Objectives
+    * Recruit allies
+    * Recruit enemies
+    * Chests
+      * Items
+        * Inventory
+        * Using Items
+        * Equipping Items
+        * Trading Items
+        * General Manipulation
+
+    RPG Mechanics
+    * EXP Points
+    * Levels
+    * Stat boosts
+    * Permanence
+      * Save/Load files
+
+    Better AI
+    * Attack in 2
+    * Pursue after X turns
+    * Accuracy, health after combat, etc.
+    * Bolsters until attacked, then changes to Pursue.
+
     Slick Turn transitions
+    Optional Conversation backgrounds
+    BUG | Can Buff when there are no targets?
 
-    Cutscenes
-
-    Can Buff when there are no targets?
 
 ////////////////////////////////////////////////////////////
 
 0.1 ////////////////////////////////////////////////////////
     10 levels
 
-    RPG Mechanics
-    * Boosted stats?
-    * New abilities?
-    * Improved abilities?
-    * Experience points?
-    * Levels?
-
     Inbetween Levels | Metagame
     * Recruit new units?
     * Allocate stats?
-    * Equipment?
 
     More complex conversations
     * Unit Death Screens
@@ -104,6 +123,8 @@ PROTOTYPE ///////////////////////////////////////////////////
 0.2 ////////////////////////////////////////////////////////
     15 levels
 
+    Cutscenes
+
     Fire Tile?
     Heal Tile?
 
@@ -111,16 +132,6 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     Real-time color editing in the editor
 
-    Better enemy AI
-        Pursuing Enemies only come for you when you get near.
-        * Bresenham's line plus a certain distance (maybe 7 tiles?)
-        Enemy Units have more complex decision-making process.
-        * More factors like accuracy and whether they will die in the process.
-        Enemies need to treat their own units as walls in a sort of sense
-        * Waits until you're within a certain number of squares (probably like 5),
-          then pursues
-        * Bolsters until attacked, then changes to Pursue.
-        State Machine?
     "Guard" action
     Canto? Mounted?
 
@@ -142,9 +153,6 @@ POLISH
                             waves, etc.)
 
 QA
-    Take junk out of main
-        The Next-Level code is so flimsy...
-        So is the Game Over code.
     BUG | Controller added mid-game doesn't register joystick, only buttons.
     BUG | Enemy attacks on targets outside the viewport don't get the target
     in view.

@@ -221,6 +221,20 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
 
+        if(ImGui::Button("village"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = VILLAGE_TILE;
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("chest"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = CHEST_TILE;
+            hover_tile->occupant = tmp;
+        }
+
 
         ImGui::Text("Units:");
         if(ImGui::Button("add"))

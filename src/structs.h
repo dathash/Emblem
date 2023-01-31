@@ -356,24 +356,17 @@ struct Conversation
     string filename = "";
     Unit *one = nullptr;
     Unit *two = nullptr;
+    position pos = {-1, -1};
     pair<bool, bool> active = {true, false};
     pair<Expression, Expression> expressions = {EXPR_NEUTRAL, EXPR_NEUTRAL};
-    vector<Sentence> prose;
     int current = 0;
-    Texture words_texture;
-    Texture speaker_texture;
     bool done = false;
     Sound *song = nullptr;
+    vector<Sentence> prose;
+    Texture words_texture;
+    Texture speaker_texture;
 
     Conversation() = default;
-
-    Conversation(Unit *one_in, Unit *two_in)
-    : one(one_in),
-      two(two_in),
-      prose({})
-    {
-        cout << "CONVERSATION\n";
-    }
 
     string
     Words() const
@@ -454,6 +447,7 @@ struct ConversationList
     vector<Conversation> list = {};
     int index = 0;
     vector<Conversation> mid_battle = {};
+    vector<Conversation> villages = {};
     Conversation *current = nullptr;
     Conversation prelude;
 };
@@ -470,6 +464,7 @@ struct Tile
     Unit *occupant = nullptr;
     position atlas_index = {0, 16};
 };
+
 struct Tilemap
 {
     int width;

@@ -233,6 +233,15 @@ public:
         // Update unit menu with available actions
         *menu = Menu({});
 
+        if(map->tiles[cursor->pos.col][cursor->pos.row].type == VILLAGE)
+        {
+            for(const Conversation &conv : conversations->villages)
+            {
+                if(conv.pos == cursor->pos && !conv.done)
+                    menu->AddOption("Visit");
+            }
+        }
+
         if(map->tiles[cursor->pos.col][cursor->pos.row].type == GOAL &&
            cursor->selected->ID() == LEADER_ID)
         {
@@ -916,11 +925,12 @@ class ChooseUnitMenuOptionCommand : public Command
 {
 public:
     ChooseUnitMenuOptionCommand(Cursor *cursor_in, const Tilemap &map_in, const Menu &menu_in,
-                                Sound *level_song_in)
+                                Sound *level_song_in, ConversationList *conversations_in)
     : cursor(cursor_in),
       map(map_in),
       menu(menu_in),
-      level_song(level_song_in)
+      level_song(level_song_in),
+      conversations(conversations_in)
     {}
 
     virtual void Execute()
@@ -928,6 +938,30 @@ public:
         EmitEvent(SELECT_MENU_OPTION_EVENT);
 
         string option = menu.optionText[menu.current];
+
+        if(option == "Visit")
+        {
+            for(Conversation &conv : conversations->villages)
+            {
+                if(conv.pos == cursor->pos)
+                {
+                    conversations->current = &conv;
+                }
+            }
+            assert(conversations->current);
+            conversations->current->one = cursor->selected;
+            conversations->current->ReloadTextures(); // NOTE: For name to update
+
+            if(conversations->current->song)
+            {
+                level_song->Pause();
+                conversations->current->song->Start();
+            }
+
+            // Move onto next level!
+            GlobalInterfaceState = VILLAGE_CONVERSATION;
+            return;
+        }
 
         if(option == "Capture")
         {
@@ -993,6 +1027,7 @@ private:
     const Tilemap &map;
     const Menu &menu;
     Sound *level_song;
+    ConversationList *conversations;
 };
 
 class OpenUnitInfoCommand : public Command
@@ -1180,6 +1215,21 @@ public:
 
                 cursor->pos = cursor->selected->pos;
                 cursor->selected->Deactivate();
+                cursor->selected = nullptr;
+                cursor->targeted = nullptr;
+                cursor->path_draw = {};
+                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                return;
+            }
+            if(GlobalInterfaceState == VILLAGE_CONVERSATION)
+            {
+                conversation->song->Stop();
+                level_song->Start();
+
+                cursor->selected->Deactivate();
+                cursor->selected = nullptr;
+                cursor->targeted = nullptr;
+                cursor->path_draw = {};
                 GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
                 return;
             }
@@ -1230,6 +1280,15 @@ public:
             level_song->Start();
 
             cursor->pos = cursor->selected->pos;
+            cursor->selected->Deactivate();
+            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            return;
+        }
+        if(GlobalInterfaceState == VILLAGE_CONVERSATION)
+        {
+            conversation->song->Stop();
+            level_song->Start();
+
             cursor->selected->Deactivate();
             GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
             return;
@@ -1651,7 +1710,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(unitMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, level->map, *unitMenu, level->song));
+                BindA(make_shared<ChooseUnitMenuOptionCommand>(cursor, level->map, *unitMenu, level->song, &(level->conversations)));
                 BindB(make_shared<UndoPlaceUnitCommand>(cursor, &(level->map)));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1727,6 +1786,18 @@ public:
             } break;
 
             case(BATTLE_CONVERSATION):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current, level->song));
+                BindB(make_shared<EndConversationEarlyCommand>(cursor, level->conversations.current, level->song));
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(VILLAGE_CONVERSATION):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
