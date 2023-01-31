@@ -34,6 +34,7 @@ public:
             GlobalAIState = PLAYER_TURN;
             GlobalPlayerTurn = true;
             GlobalTurnStart = true;
+            EmitEvent(END_AI_TURN_EVENT);
         }
     }
 private: 

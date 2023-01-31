@@ -132,7 +132,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu,
        const Menu &conversationMenu,
        const ConversationList &conversations, 
-       const Fight &fight, const Fade &fade)
+       const Fight &fight, const Fade &level_fade, const Fade &turn_fade)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -539,7 +539,10 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
     SDL_Rect fade_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_SetRenderDrawColor(GlobalRenderer, fade.color.r, fade.color.g, fade.color.b, (int)(255 * fade.amount));
+    SDL_SetRenderDrawColor(GlobalRenderer, level_fade.color.r, level_fade.color.g, level_fade.color.b, (int)(255 * level_fade.amount));
+    SDL_RenderFillRect(GlobalRenderer, &fade_rect);
+
+    SDL_SetRenderDrawColor(GlobalRenderer, turn_fade.color.r, turn_fade.color.g, turn_fade.color.b, (int)(255 * turn_fade.amount));
     SDL_RenderFillRect(GlobalRenderer, &fade_rect);
 }
 

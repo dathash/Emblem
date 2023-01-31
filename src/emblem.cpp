@@ -74,6 +74,8 @@ enum EventType
 {
     START_GAME_EVENT,
     NEXT_LEVEL_EVENT,
+    END_PLAYER_TURN_EVENT,
+    END_AI_TURN_EVENT,
     MOVE_CURSOR_EVENT,
     MOVE_MENU_EVENT,
     SELECT_MENU_OPTION_EVENT,
@@ -209,7 +211,8 @@ int main(int argc, char *argv[])
     Menu level_menu({"Next", "Redo", "Conv"});
     Menu conversation_menu({"Return"});
 
-    Fade fade;
+    Fade level_fade;
+    Fade turn_fade = {darkGray, "Player Turn"};
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
@@ -241,7 +244,8 @@ int main(int argc, char *argv[])
             fight.Update();
             level.Update();
             ui.Update();
-            fade.Update();
+            level_fade.Update();
+            turn_fade.Update();
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
@@ -299,11 +303,11 @@ int main(int argc, char *argv[])
             ai.clearQueue();
         }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
-        GlobalHandleEvents(&fade);
+        GlobalHandleEvents(&level_fade, &turn_fade);
 
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
-               level.conversations, fight, fade);
+               level.conversations, fight, level_fade, turn_fade);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

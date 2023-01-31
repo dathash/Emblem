@@ -866,6 +866,7 @@ public:
                 GlobalInterfaceState = NO_OP;
                 GlobalPlayerTurn = false;
                 GlobalTurnStart = true;
+                EmitEvent(END_PLAYER_TURN_EVENT);
             } break;
         }
     }

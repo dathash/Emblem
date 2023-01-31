@@ -6,7 +6,8 @@
 #define EVENT_H
 
 void
-GlobalHandleEvents(Fade *fade)
+GlobalHandleEvents(Fade *level_fade,
+                   Fade *turn_fade)
 {
     while(!GlobalEvents.empty())
     {
@@ -18,15 +19,27 @@ GlobalHandleEvents(Fade *fade)
             case START_GAME_EVENT:
             {
                 PlaySfx("start.wav");
-                fade->amount = 1.0f;
-                fade->animation = GetAnimation(FADE_OUT_ANIMATION);
+                level_fade->amount = 1.0f;
+                level_fade->animation = GetAnimation(FADE_OUT_ANIMATION);
             } break;
             case NEXT_LEVEL_EVENT:
             {
                 PlaySfx("start.wav");
-                fade->amount = 1.0f;
-                fade->animation = GetAnimation(FADE_OUT_ANIMATION);
+                level_fade->amount = 1.0f;
+                level_fade->animation = GetAnimation(FADE_OUT_ANIMATION);
             } break;
+            case END_PLAYER_TURN_EVENT:
+            {
+                PlaySfx("start.wav");
+                turn_fade->amount = 0.0f;
+                turn_fade->animation = GetAnimation(FADE_IN_OUT_ANIMATION, 0.25f);
+            }
+            case END_AI_TURN_EVENT:
+            {
+                PlaySfx("start.wav");
+                turn_fade->amount = 0.0f;
+                turn_fade->animation = GetAnimation(FADE_IN_OUT_ANIMATION, 0.25f);
+            }
             case MOVE_CURSOR_EVENT:
             {
                 PlaySfx("mov.wav");

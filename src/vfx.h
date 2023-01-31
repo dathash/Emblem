@@ -9,6 +9,7 @@
 struct Fade
 {
     SDL_Color color = black;
+    string text = "";
     float amount = 0.0f;
     Animation *animation = nullptr;
 
