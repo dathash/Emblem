@@ -125,11 +125,12 @@ enum InterfaceState
     PRELUDE, // 26
 
     PLAYER_FIGHT, // 27
+    RESOLVING_EXPERIENCE, // 28
 
-    NO_OP, // 28
+    NO_OP, // 29
 
-    TITLE_SCREEN, // 29
-    GAME_OVER, // 30
+    TITLE_SCREEN, // 30
+    GAME_OVER, // 31
 };
 
 
@@ -139,9 +140,11 @@ enum AIState
     FINDING_NEXT, // 0
     SELECTED, // 1
 
-    AI_FIGHT, // 2
+    AI_RESOLVING_EXPERIENCE, // 2
 
-    PLAYER_TURN, // 3
+    AI_FIGHT, // 3
+
+    PLAYER_TURN, // 4
 };
 
 enum AIBehavior

@@ -90,14 +90,26 @@ enum EventType
     BUFF_EVENT,
     HEAL_EVENT,
     DANCE_EVENT,
+    EXPERIENCE_EVENT,
 };
 
+struct Unit;
 struct Event
 {
     EventType type;
+    Unit *unit = nullptr;
+    int integer = 0;
 
     Event(EventType type_in)
     : type(type_in)
+    {}
+
+    Event(EventType type_in,
+          Unit *unit_in,
+          int integer_in)
+    : type(type_in),
+      unit(unit_in),
+      integer(integer_in)
     {}
 };
 
@@ -115,9 +127,9 @@ EmitEvent(Event event)
 #include "utils.h"
 #include "animation.h"
 #include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
+#include "structs.h"
 #include "vfx.h"
 #include "event.h" // NOTE: Includes a GlobalEvents queue.
-#include "structs.h"
 #include "cursor.h"
 #include "load.h"
 #include "init.h"
@@ -215,6 +227,7 @@ int main(int argc, char *argv[])
 
     Fade level_fade;
     Fade turn_fade = {darkGray, "Player Turn"};
+    Parcel parcel;
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
@@ -244,8 +257,8 @@ int main(int argc, char *argv[])
 
             cursor.Update(&level.map);
             fight.Update();
+            parcel.Update();
             level.Update();
-            ui.Update();
             level_fade.Update();
             turn_fade.Update();
 
@@ -312,7 +325,7 @@ int main(int argc, char *argv[])
             ai.clearQueue();
         }
         //////////////// ABOVE TO BE EXTRICATED //////////////////
-        GlobalHandleEvents(&level_fade, &turn_fade);
+        GlobalHandleEvents(&level_fade, &turn_fade, &parcel);
 
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
@@ -322,7 +335,7 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level, fight);
+        RenderUI(&ui, cursor, level, fight, parcel);
 
 #if DEV_MODE
         if(GlobalEditorMode)

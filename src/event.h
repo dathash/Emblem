@@ -7,7 +7,8 @@
 
 void
 GlobalHandleEvents(Fade *level_fade,
-                   Fade *turn_fade)
+                   Fade *turn_fade,
+                   Parcel *parcel)
 {
     while(!GlobalEvents.empty())
     {
@@ -94,6 +95,13 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case DANCE_EVENT:
             {
+                PlaySfx("dance.wav");
+            } break;
+            case EXPERIENCE_EVENT:
+            {
+                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, 0.05f * (float)event.integer);
+                parcel->recipient = event.unit;
+                parcel->total = event.integer;
                 PlaySfx("dance.wav");
             } break;
             default:

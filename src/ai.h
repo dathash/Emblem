@@ -324,11 +324,16 @@ struct AI
         if(GlobalPlayerTurn)
             return;
 
-        if(GlobalAIState == AI_FIGHT) // TODO: Simplify these states. Reduce bugs.
+        if(GlobalAIState == AI_FIGHT ||
+           GlobalAIState == AI_RESOLVING_EXPERIENCE) // TODO: Simplify these states. Reduce bugs.
             return;
 
         if(commandQueue.empty())
+        {
             Plan(cursor, map, fight);
+            // TODO: Bug with Experience Parceling
+        }
+        
 
         ++frame;
         // Every __ frames.

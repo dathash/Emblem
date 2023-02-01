@@ -245,6 +245,7 @@ public:
         if(map->tiles[cursor->pos.col][cursor->pos.row].type == GOAL &&
            cursor->selected->ID() == LEADER_ID)
         {
+            // TODO: Don't allow this option at all if the level isn't a capture objective.
             menu->AddOption("Capture");
         }
 
@@ -1230,11 +1231,13 @@ public:
                 level_song->Start();
 
                 cursor->selected->Deactivate();
-                cursor->selected->GrantExperience(EXP_FOR_VILLAGE_SAVED);
+                int experience = EXP_FOR_VILLAGE_SAVED;
+                cursor->selected->GrantExperience(experience);
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
                 cursor->selected = nullptr;
                 cursor->targeted = nullptr;
                 cursor->path_draw = {};
-                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                GlobalInterfaceState = RESOLVING_EXPERIENCE;
                 return;
             }
             if(GlobalInterfaceState == CONVERSATION)
@@ -1297,11 +1300,14 @@ public:
             level_song->Start();
 
             cursor->selected->Deactivate();
-            cursor->selected->GrantExperience(EXP_FOR_VILLAGE_SAVED);
+
+            int experience = EXP_FOR_VILLAGE_SAVED;
+            cursor->selected->GrantExperience(experience);
+            EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             cursor->selected = nullptr;
             cursor->targeted = nullptr;
             cursor->path_draw = {};
-            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            GlobalInterfaceState = RESOLVING_EXPERIENCE;
             return;
         }
         if(GlobalInterfaceState == CONVERSATION)
@@ -1868,6 +1874,18 @@ public:
             } break;
 
             case(PLAYER_FIGHT):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(RESOLVING_EXPERIENCE):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());

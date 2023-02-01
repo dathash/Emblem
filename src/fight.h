@@ -276,13 +276,17 @@ struct Fight
                     if(one->level > two->level)
                         experience_amount /= 2;
 
-                    one->Deactivate();
-                    GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-
                     if(one->should_die)
                     {
                         // TODO: Put DEATH CONVERSATION HERE!!!
                         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+                    }
+
+                    else
+                    {
+                        one->Deactivate();
+                        EmitEvent(Event(EXPERIENCE_EVENT, one, experience_amount));
+                        GlobalInterfaceState = RESOLVING_EXPERIENCE;
                     }
                 }
                 else
@@ -297,10 +301,9 @@ struct Fight
                         experience_amount /= 2;
 
                     one->Deactivate();
-                    GlobalAIState = FINDING_NEXT;
+                    EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount));
+                    GlobalAIState = AI_RESOLVING_EXPERIENCE;
                 }
-
-                experience_recipient->GrantExperience(experience_amount);
 
                 //EmitEvent(EVENT_COMBAT_OVER);
             }

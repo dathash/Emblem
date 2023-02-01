@@ -79,9 +79,7 @@ PROTOTYPE ///////////////////////////////////////////////////
     * Enemies pursue and destroy villages
 
     RPG Mechanics
-    * Display Experience Stuff
-      * Exp Gain
-      * Level
+    * Display Level Up
     * Classes
       * Growth Bonuses
       * Base Bonuses
@@ -115,6 +113,10 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     Slick Turn transitions
     BUG | Can Buff when there are no targets?
+    BUG | Enemy gets stuck parceling EXP when it uses the last unit it has.
+          No plan, we switch back the AI State, but it doesn't have any clue
+          what to do.
+
 ////////////////////////////////////////////////////////////
 
 0.2 ////////////////////////////////////////////////////////

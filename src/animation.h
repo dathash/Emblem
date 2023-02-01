@@ -16,6 +16,7 @@
 
 enum AnimationValue
 {
+    EXPERIENCE_PARCEL_ANIMATION,
     FADE_IN_ANIMATION,
     FADE_OUT_ANIMATION,
     FADE_IN_OUT_ANIMATION,
@@ -197,6 +198,14 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
 {
     switch(anim)
     {
+        case EXPERIENCE_PARCEL_ANIMATION:
+        {
+            return (new Animation(1, (int)(100 * frame_modulation), false, 1,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.5 ,  1.0 },
+                     {1.0 ,  1.0 }},
+                     Identity));
+        }
         case FADE_IN_ANIMATION:
         {
             return (new Animation(1, (int)(100 * frame_modulation), false, 1,

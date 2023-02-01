@@ -108,11 +108,13 @@ struct UI_State
     bool game_over = false;
     bool unit_menu = false;
     bool combat_screen = false;
+    bool experience = false;
 
     void
     Clear()
     {
         tile_info = false;
+        outlook = false;
         unit_blurb = false;
         unit_info = false;
         combat_preview = false;
@@ -120,6 +122,7 @@ struct UI_State
         game_over = false;
         unit_menu = false;
         combat_screen = false;
+        experience = false;
     }
 
     void 
@@ -133,6 +136,16 @@ struct UI_State
         else
         {
             combat_screen = false;
+        }
+
+        if(GlobalInterfaceState == RESOLVING_EXPERIENCE ||
+           GlobalAIState == AI_RESOLVING_EXPERIENCE)
+        {
+            experience = true;
+        }
+        else
+        {
+            experience = false;
         }
 
 		// Tile Info
@@ -252,8 +265,8 @@ void
 DisplayOutlook(ImGuiWindowFlags wf, const Level &level)
 {
 	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(350, 200));
-    ImGui::SetNextWindowSize(ImVec2(300, 160));
+    ImGui::SetNextWindowPos(ImVec2(340, 200));
+    ImGui::SetNextWindowSize(ImVec2(360, 160));
 
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Outlook", NULL, wf);
@@ -683,6 +696,35 @@ DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
 	ImGui::PopFont(); // Large
 }
 
+
+void 
+DisplayExperienceBar(int experience)
+{
+	float percent = ((float)experience / 100.0f);
+    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(0, 255, 0, 255));
+	ImGui::ProgressBar(percent, ImVec2(-1.0f, 0.0f));
+	ImGui::PopStyleColor();
+}
+
+// Displays combat preview when initiating combat
+void
+DisplayExperience(ImGuiWindowFlags wf, const Parcel &parcel)
+{
+	// Window sizing
+    ImGui::SetNextWindowSize(ImVec2(500, 200));
+    ImGui::SetNextWindowPos(ImVec2(50, 400));
+
+    // Render
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin(parcel.recipient->name.c_str(), NULL, wf);
+    {
+        DisplayExperienceBar(parcel.Amount());
+        ImGui::Text("Experience");
+    }
+    ImGui::End();
+	ImGui::PopFont();
+}
+
 // Displays options menu
 void 
 DisplayGameOver(ImGuiWindowFlags wf)
@@ -709,8 +751,11 @@ void
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
          const Level &level,
-         const Fight &fight)
+         const Fight &fight,
+         const Parcel &parcel)
 {
+    ui->Update();
+
     if(GlobalEditorMode)
         return;
 
@@ -739,6 +784,8 @@ RenderUI(UI_State *ui,
     // USER/AI UI
     if(ui->combat_screen)
 		DisplayCombatScreen(window_flags, fight);
+    if(ui->experience)
+        DisplayExperience(window_flags, parcel);
 
     if(!GlobalPlayerTurn)
     {
