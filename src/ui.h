@@ -29,7 +29,7 @@ GetTileNameString(TileType type)
     case GOAL: return "Goal";
     case SPAWN: return "Spawn";
     case FORT: return "Fort";
-    case VILLAGE: return "Village";
+    case VILLAGE: return "House";
     case CHEST: return "Chest";
 	default:
 		assert(!"ERROR: Unhandled Tile name string in UI.\n");
@@ -237,7 +237,7 @@ DisplayTitleScreen(ImGuiWindowFlags wf)
 {
 	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(200, 100));
-    ImGui::SetNextWindowSize(ImVec2(800, 600));
+    ImGui::SetNextWindowSize(ImVec2(800, 550));
 
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Emblem", NULL, wf);
@@ -711,15 +711,15 @@ void
 DisplayExperience(ImGuiWindowFlags wf, const Parcel &parcel)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(500, 200));
-    ImGui::SetNextWindowPos(ImVec2(50, 400));
+    ImGui::SetNextWindowSize(ImVec2(350, 150));
+    ImGui::SetNextWindowPos(ImVec2(300, 150));
 
     // Render
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin(parcel.recipient->name.c_str(), NULL, wf);
     {
         DisplayExperienceBar(parcel.Amount());
-        ImGui::Text("Experience");
+        TextCentered("Experience");
     }
     ImGui::End();
 	ImGui::PopFont();

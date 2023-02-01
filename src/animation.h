@@ -204,7 +204,7 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                     {{0.0 ,  0.0 },  // channel 1
                      {0.5 ,  1.0 },
                      {1.0 ,  1.0 }},
-                     Identity));
+                     SmoothStartStop));
         }
         case FADE_IN_ANIMATION:
         {

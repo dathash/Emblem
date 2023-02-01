@@ -423,8 +423,6 @@ Outcome PredictHealing(const Unit &one, const Unit &two)
 void SimulateBuff(Unit *one, Unit *two)
 {
     two->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
-
-    one->GrantExperience(EXP_FOR_BUFF);
 }
 
 void SimulateHealing(Unit *one, Unit *two)
@@ -432,8 +430,6 @@ void SimulateHealing(Unit *one, Unit *two)
     // one -> two
     int healing = one->aptitude;
     two->health = min(healing + two->health, two->max_health);
-
-    two->GrantExperience(EXP_FOR_BUFF);
 }
 
 void SimulateDancing(Unit *one, Unit *two)

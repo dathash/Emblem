@@ -99,7 +99,7 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case EXPERIENCE_EVENT:
             {
-                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, 0.05f * (float)event.integer);
+                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, event.integer > 0 ? 0.05f * (float)event.integer : 1.0f);
                 parcel->recipient = event.unit;
                 parcel->total = event.integer;
                 PlaySfx("dance.wav");

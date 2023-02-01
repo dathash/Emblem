@@ -670,11 +670,19 @@ public:
             {
                 SimulateHealing(cursor->selected, cursor->targeted);
                 EmitEvent(HEAL_EVENT);
+
+                int experience = EXP_FOR_HEALING;
+                cursor->selected->GrantExperience(experience);
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             } break;
             case ABILITY_BUFF:
             {
                 SimulateBuff(cursor->selected, cursor->targeted);
                 EmitEvent(BUFF_EVENT);
+
+                int experience = EXP_FOR_BUFF;
+                cursor->selected->GrantExperience(experience);
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             } break;
             case ABILITY_SHIELD:
             {
@@ -684,6 +692,10 @@ public:
             {
                 SimulateDancing(cursor->selected, cursor->targeted);
                 EmitEvent(DANCE_EVENT);
+
+                int experience = EXP_FOR_DANCE;
+                cursor->selected->GrantExperience(experience);
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             } break;
             default:
             {
@@ -697,7 +709,7 @@ public:
         cursor->PlaceAt(cursor->source);
         cursor->path_draw = {};
 
-        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+        GlobalInterfaceState = RESOLVING_EXPERIENCE;
     }
 
 private:
