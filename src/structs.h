@@ -195,6 +195,7 @@ struct Unit
 
     Growths growths = {};
 
+    int turns_active = -1;
     int xp_value = 0;
     AIBehavior ai_behavior = NO_BEHAVIOR;
     position pos = {0, 0};
@@ -573,6 +574,10 @@ struct Tilemap
     vector<position> range = {};
     vector<position> adjacent = {};
     vector<position> vis_range = {};
+
+    // NOTE: For AI decision-making purposes
+    vector<position> double_range = {};
+
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 

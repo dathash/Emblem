@@ -405,12 +405,13 @@ PrintPossibilities(const vector<pair<position, Unit *>> &v)
 // SLOW: This shouldn't have to do exhaustive search. How about going through
 // the enemy units instead?
 vector<pair<position, Unit *>>
-FindAttackingSquares(const Tilemap &map, const Unit &unit)
+FindAttackingSquares(const Tilemap &map, const Unit &unit,
+                     const vector<position> &range)
 {
     vector<pair<position, Unit *>> result = {};
     vector<position> interactible;
 
-    for(const position &pos : map.accessible)
+    for(const position &pos : range)
     {
         interactible = InteractibleFrom(map, pos, unit.min_range, unit.max_range);
         for(const position &i : interactible)

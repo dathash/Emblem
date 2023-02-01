@@ -335,17 +335,38 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             }
 
             ImGui::Text("AI Behavior");
-            if(ImGui::Button("NONE"))
+            if(ImGui::Button("-"))
                 hover_tile->occupant->ai_behavior = NO_BEHAVIOR;
             ImGui::SameLine();
-            if(ImGui::Button("PURSUE"))
+            if(ImGui::Button("P"))
                 hover_tile->occupant->ai_behavior = PURSUE;
             ImGui::SameLine();
-            if(ImGui::Button("BOLSTER"))
-                hover_tile->occupant->ai_behavior = BOLSTER;
+            if(ImGui::Button("Pa1"))
+                hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
             ImGui::SameLine();
-            if(ImGui::Button("wta"))
-                hover_tile->occupant->ai_behavior = WAIT_THEN_ATTACK;
+            if(ImGui::Button("Pa2"))
+                hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
+            ImGui::SameLine();
+            if(ImGui::Button("Pa3"))
+                hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
+
+            if(ImGui::Button("BOSS"))
+                hover_tile->occupant->ai_behavior = BOSS;
+            ImGui::SameLine();
+            if(ImGui::Button("BtM"))
+                hover_tile->occupant->ai_behavior = BOSS_THEN_MOVE;
+            ImGui::SameLine();
+            if(ImGui::Button("Range"))
+                hover_tile->occupant->ai_behavior = ATTACK_IN_RANGE;
+            ImGui::SameLine();
+            if(ImGui::Button("AI2"))
+                hover_tile->occupant->ai_behavior = ATTACK_IN_TWO;
+
+            if(ImGui::Button("Flee"))
+                hover_tile->occupant->ai_behavior = FLEE;
+            ImGui::SameLine();
+            if(ImGui::Button("Plunder"))
+                hover_tile->occupant->ai_behavior = TREASURE_THEN_FLEE;
         }
 
         //static bool showDebugPaths = false;

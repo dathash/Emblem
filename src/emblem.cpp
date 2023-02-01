@@ -280,8 +280,17 @@ int main(int argc, char *argv[])
             party = {};
             for(shared_ptr<Unit> unit : level.combatants)
             {
+            // Reset the party's statistics
                 if(unit->is_ally)
+                {
+                    unit->health = unit->max_health;
+                    if(unit->buff)
+                        delete unit->buff;
+                        unit->buff = nullptr;
+                    unit->turns_active = 0;
+                    unit->is_exhausted = false;
                     party.push_back(unit);
+                }
             }
 
             level.song->Stop();
@@ -299,8 +308,23 @@ int main(int argc, char *argv[])
             {
                 for(auto const &unit : level.combatants)
                 {
+                    if(!unit->is_ally) // Increment enemy units
+                    {
+                        ++unit->turns_active;
+                    }
                     if(unit->buff)
                         unit->TickBuff();
+                }
+            }
+            else
+            {
+                for(auto const &unit : level.combatants)
+                {
+                    if(unit->is_ally)
+                    {
+                        ++unit->turns_active;
+                        cout << unit->turns_active << "\n";;
+                    }
                 }
             }
 
