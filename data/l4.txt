@@ -2,6 +2,8 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
+OBJ 1
+
 ATL frozen.png
 
 PRE prelude04.txt

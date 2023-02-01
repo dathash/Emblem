@@ -82,10 +82,25 @@ GetStatString(Stat stat)
 	}
 }
 
+string
+GetObjectiveString(Objective obj)
+{
+    switch (obj)
+    {
+    case OBJECTIVE_ROUT: return "Rout";
+    case OBJECTIVE_CAPTURE: return "Capture";
+    case OBJECTIVE_BOSS: return "Boss";
+	default:
+		assert(!"ERROR: Unhandled Objective string in UI.\n");
+		return "";
+	}
+}
+
 // ============================ New UI =========================================
 struct UI_State
 {
     bool tile_info = false;
+    bool outlook = false;
     bool unit_blurb = false;
     bool unit_info = false;
     bool combat_preview = false;
@@ -141,6 +156,15 @@ struct UI_State
         else
         {
             tile_info = false;
+        }
+
+        if(GlobalInterfaceState == GAME_MENU_OUTLOOK)
+        {
+            outlook = true;
+        }
+        else
+        {
+            outlook = false;
         }
 
 		// Unit Blurb
@@ -217,6 +241,28 @@ DisplayTitleScreen(ImGuiWindowFlags wf)
 			TextCentered("-[SPACE]- to select");
 			TextCentered("-[SHIFT]- to deselect");
 			TextCentered("-E- to display information");
+		ImGui::PopFont();
+    }
+    ImGui::End();
+
+    return;
+}
+
+void
+DisplayOutlook(ImGuiWindowFlags wf, const Level &level)
+{
+	// Window sizing
+    ImGui::SetNextWindowPos(ImVec2(350, 200));
+    ImGui::SetNextWindowSize(ImVec2(300, 160));
+
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Outlook", NULL, wf);
+    {
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontMedium);
+			ImGui::Text("Objective - %s", GetObjectiveString(level.objective).c_str());
+			ImGui::Text("Enemies - %d", level.GetNumberOf(false));
+			ImGui::Text("Allies  - %d", level.GetNumberOf(true));
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -662,7 +708,7 @@ DisplayGameOver(ImGuiWindowFlags wf)
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
-         const Tilemap &map,
+         const Level &level,
          const Fight &fight)
 {
     if(GlobalEditorMode)
@@ -702,18 +748,20 @@ RenderUI(UI_State *ui,
     }
 
     // USER MODE UI
+    if(ui->outlook)
+        DisplayOutlook(window_flags, level);
 	if(ui->tile_info)
-		DisplayTileInfo(window_flags, map.tiles[cursor.pos.col][cursor.pos.row], Quadrant(cursor.pos));
+		DisplayTileInfo(window_flags, level.map.tiles[cursor.pos.col][cursor.pos.row], Quadrant(cursor.pos));
 	if(ui->unit_blurb)
-		DisplayUnitBlurb(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, Quadrant(cursor.pos));
+		DisplayUnitBlurb(window_flags, *level.map.tiles[cursor.pos.col][cursor.pos.row].occupant, Quadrant(cursor.pos));
 	if(ui->unit_info)
-		DisplayUnitInfo(window_flags, *map.tiles[cursor.pos.col][cursor.pos.row].occupant, Quadrant(cursor.pos));
+		DisplayUnitInfo(window_flags, *level.map.tiles[cursor.pos.col][cursor.pos.row].occupant, Quadrant(cursor.pos));
 	if(ui->combat_preview)
 		DisplayCombatPreview(window_flags, *cursor.selected, *cursor.targeted, 
-                                           map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,
-                                           map.tiles[cursor.pos.col][cursor.pos.row].avoid,
-                                           map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].defense,
-                                           map.tiles[cursor.pos.col][cursor.pos.row].defense
+                                           level.map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].avoid,
+                                           level.map.tiles[cursor.pos.col][cursor.pos.row].avoid,
+                                           level.map.tiles[cursor.selected->pos.col][cursor.selected->pos.row].defense,
+                                           level.map.tiles[cursor.pos.col][cursor.pos.row].defense
                                            );
     if(ui->game_over)
         DisplayGameOver(window_flags);

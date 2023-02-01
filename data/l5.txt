@@ -2,6 +2,8 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
+OBJ 0
+
 ATL ruins.png
 
 PRE prelude05.txt

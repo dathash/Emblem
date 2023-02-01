@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level.map, fight);
+        RenderUI(&ui, cursor, level, fight);
 
 #if DEV_MODE
         if(GlobalEditorMode)

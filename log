@@ -68,36 +68,24 @@ Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 PROTOTYPE ///////////////////////////////////////////////////
     5 levels
 
-    Do some real design thinking.
-
-    Other Primary Objectives
-    * Defeat Boss
-    * Rout
-
     Secondary Objectives
-    * Green Units
-    * Recruit allies
-    * Recruit enemies
     * Chests
       * Items
         * Inventory
         * Using Items
         * Equipping Items
         * Trading Items
-        * General Manipulation
+        * General Item Manipulation
     * Enemies pursue and destroy villages
 
     RPG Mechanics
-    * Levels
-      * Display
-        * Level
-        * Exp Gain
+    * Display Experience Stuff
+      * Exp Gain
+      * Level
     * Classes
       * Growth Bonuses
       * Base Bonuses
       * Weapon Proficiencies
-
-    Combine speed and skill?
 
     Better AI
     * Attack in 2
@@ -105,27 +93,28 @@ PROTOTYPE ///////////////////////////////////////////////////
     * Accuracy, health after combat, etc.
     * Bolsters until attacked, then changes to Pursue.
 
-    Slick Turn transitions
-    Optional Conversation backgrounds
-    BUG | Can Buff when there are no targets?
-
-    Save/Load files
-
 ////////////////////////////////////////////////////////////
 
 0.1 ////////////////////////////////////////////////////////
     10 levels
-
-    Inbetween Levels | Metagame
-    * Recruit new units?
-    * Allocate stats?
 
     More complex conversations
     * Unit Death Screens
     * Up to four conversationists
     * Solo Conversations
     * Multiple preludes in a row.
+    * Sometimes Conversation backgrounds
     * Animated stuff inbetween.
+
+    Combine speed and skill?
+
+    Save/Load files
+    * Green Units
+    * Recruit allies
+    * Recruit enemies
+
+    Slick Turn transitions
+    BUG | Can Buff when there are no targets?
 ////////////////////////////////////////////////////////////
 
 0.2 ////////////////////////////////////////////////////////

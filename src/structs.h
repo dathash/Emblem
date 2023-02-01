@@ -595,8 +595,16 @@ struct Tilemap
     }
 };
 
+enum Objective
+{
+    OBJECTIVE_ROUT,
+    OBJECTIVE_CAPTURE,
+    OBJECTIVE_BOSS,
+};
+
 struct Level
 {
+    Objective objective;
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
     Sound *song = nullptr;
@@ -680,6 +688,18 @@ struct Level
             GlobalPlayerTurn = false;
             GlobalTurnStart = true;
         }
+    }
+
+    int
+    GetNumberOf(bool is_ally = true) const
+    {
+        int result = 0;
+        for(shared_ptr<Unit> unit : combatants)
+        {
+            if(unit->is_ally == is_ally)
+                ++result;
+        }
+        return result;
     }
 
     void

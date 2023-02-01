@@ -2,6 +2,8 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
+OBJ 0
+
 ATL ruins.png
 
 PRE prelude00.txt
@@ -29,7 +31,7 @@ MAP 1 1 0 0 3 3 0 0 0 0 1 0 2 0 2
 MAP 1 1 1 0 0 0 0 0 6 0 0 0 0 0 0 
 MAP 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 
 
-COM <UNT <name> <col> <row> <ai>
+COM <UNT <name> <col> <row> <ai>>
 UNT Priam 1 4 0 
 UNT Thief 4 5 1 
 UNT Archer 8 8 2 

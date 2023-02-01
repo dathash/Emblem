@@ -2,6 +2,8 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
+OBJ 1
+
 ATL sunset.png
 
 PRE prelude03.txt

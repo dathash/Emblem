@@ -174,7 +174,11 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         rest = line.substr(4);
         tokens = split(rest, ' ');
 
-        if(type == "ATL")
+        if(type == "OBJ")
+        {
+            level.objective = (Objective)stoi(rest);
+        }
+        else if(type == "ATL")
         {
             level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
         }
@@ -460,6 +464,8 @@ SaveLevel(string filename_in, const Level &level)
     fp << "COM Author: Alex Hartford\n";
     fp << "COM Program: Emblem\n";
     fp << "COM File: Level\n\n";
+
+    fp << "OBJ " << level.objective << "\n\n";
 
     fp << "ATL " << level.map.atlas.filename << "\n\n";
 

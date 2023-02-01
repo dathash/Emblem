@@ -180,6 +180,22 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
         Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
 
+        ImGui::Text("Objective: %s", GetObjectiveString(level->objective).c_str());
+        if(ImGui::Button("rout"))
+        {
+            level->objective = OBJECTIVE_ROUT;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("capture"))
+        {
+            level->objective = OBJECTIVE_CAPTURE;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("boss"))
+        {
+            level->objective = OBJECTIVE_BOSS;
+        }
+
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
         if(ImGui::Button("none"))
