@@ -3,7 +3,7 @@ COM Program: Emblem
 COM File: Units
 
 COM	<name>	<team>	<mov>	<hp>	<atk>	<apt>	<def>	<spd>	<skl>	<short>	<long>	<level>	<exp>	<abi>	<ai>	<xpv>	<ghp>	<gat>	<gap>	<gdf>	<gsp>	<gsk>	<texture>	<neutral>	<happy>	<angry>	<wince>
-UNT Lucina	Ally	4	14	8	0	2	9	7	1	1	1	0	2	0	50	100	40	0	30	40	50	lucina.png	lucina_neutral.png	lucina_happy.png	lucina_angry.png	lucina_wince.png	
+UNT Lucina	Ally	4	14	8	0	2	11	7	1	1	1	0	2	0	50	100	40	0	30	40	50	lucina.png	lucina_neutral.png	lucina_happy.png	lucina_angry.png	lucina_wince.png	
 UNT Priam	Ally	3	25	12	5	6	6	5	1	1	5	0	1	0	50	50	40	0	40	20	30	priam.png	priam_neutral.png	priam_happy.png	priam_angry.png	priam_wince.png	
 UNT Stahl	Ally	4	13	8	0	0	9	7	2	2	4	0	0	0	50	90	40	0	40	60	100	stahl.png	stahl_neutral.png	stahl_happy.png	stahl_angry.png	stahl_wince.png	
 UNT Donnel	Ally	3	22	6	10	8	2	3	1	1	1	0	1	0	50	110	20	0	90	10	10	donnel.png	donnel_neutral.png	donnel_happy.png	donnel_angry.png	donnel_wince.png	
