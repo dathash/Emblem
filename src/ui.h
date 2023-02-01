@@ -42,11 +42,40 @@ GetInterfaceString(InterfaceState state)
 {
     switch (state)
     {
-    case NO_OP: return "No-Op";
-                // TODO: Fill these in!!
+    case NEUTRAL_OVER_GROUND:           return "Neutral over ground";
+    case NEUTRAL_OVER_ENEMY:            return "Neutral over enemy";
+    case NEUTRAL_OVER_UNIT:             return "Neutral over unit";
+    case NEUTRAL_OVER_DEACTIVATED_UNIT: return "Neutral over deactivated unit";
+    case SELECTED_OVER_GROUND:          return "Selected over ground";
+    case SELECTED_OVER_INACCESSIBLE:    return "Selected over inaccessible";
+    case SELECTED_OVER_ALLY:            return "Selected over ally";
+    case SELECTED_OVER_ENEMY:           return "Selected over enemy";
+    case ATTACK_TARGETING:              return "Attack targeting";
+    case ABILITY_TARGETING:             return "Ability targeting";
+    case TALK_TARGETING:                return "Talk targeting";
+    case PREVIEW_ATTACK:                return "Preview attack";
+    case PREVIEW_ABILITY:               return "Preview ability";
+    case GAME_MENU:                     return "Game menu";
+    case GAME_MENU_OUTLOOK:             return "Game menu outlook";
+    case GAME_MENU_OPTIONS:             return "Game menu options";
+    case ANIMATING_UNIT_MOVEMENT:       return "Animating unit movement";
+    case UNIT_MENU_ROOT:                return "Unit menu root";
+    case UNIT_INFO:                     return "Unit info";
+    case ENEMY_INFO:                    return "Enemy info";
+    case ENEMY_RANGE:                   return "Enemy range";
+    case LEVEL_MENU:                    return "Level menu";
+    case CONVERSATION_MENU:             return "Conversation menu";
+    case CONVERSATION:                  return "Conversation";
+    case BATTLE_CONVERSATION:           return "Battle conversation";
+    case VILLAGE_CONVERSATION:          return "Village conversation";
+    case PRELUDE:                       return "Prelude";
+    case PLAYER_FIGHT:                  return "Player fight";
+    case RESOLVING_EXPERIENCE:          return "Resolving experience";
+    case NO_OP:                         return "No-Op";
+    case TITLE_SCREEN:                  return "Title screen";
+    case GAME_OVER:                     return "Game over";
 	default:
-		assert(!"ERROR: Unhandled InterfaceState name string in UI.\n");
-		return "";
+		assert(!"ERROR: Unhandled InterfaceState name string in UI.\n"); return "";
 	}
 }
 
@@ -402,11 +431,19 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 		ImGui::PushFont(uiFontMedium);
 			ImGui::Text("%s", unit.name.c_str());
 
-			ImGui::SameLine();
-			ImGui::Text("[%d/%d]", unit.health, unit.max_health);
+            if(unit.is_boss)
+            {
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(red));
+                ImGui::Text("BOSS");
+                ImGui::PopStyleColor();
+            }
 
             ImGui::SameLine();
             ImGui::Text("lv %d+%d xp", unit.level, unit.experience);
+
+            ImGui::SameLine(ImGui::GetWindowWidth() - 120);
+			ImGui::Text("[%d/%d]", unit.health, unit.max_health);
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);

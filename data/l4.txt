@@ -24,25 +24,25 @@ MAP 1 1 1 1 1 1 0 0 1 1 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 0 0 0 4 1
 MAP 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Lucina 3 2 0 
-UNT Archer 8 3 2 
-UNT Archer 8 1 2 
-UNT Archer 10 2 2 
-UNT Archer 10 5 2 
-UNT Thief 11 3 1 
-UNT Thief 11 6 1 
-UNT Archer 8 6 2 
-UNT Flavia 3 4 0 
-UNT Donnel 2 6 0 
-UNT Sniper 10 7 3 
-UNT Stahl 2 1 0 
-UNT Lon'qu 3 5 0 
-UNT Diane 28 8 2 
-UNT Brigand 24 6 4 
-UNT Sniper 25 5 4 
-UNT Brute 21 4 4 
-UNT Brute 21 5 4 
-UNT Sniper 23 4 4 
-UNT Sniper 23 5 4 
-UNT Brute 19 1 2 
+UNT Lucina 3 2 0 0
+UNT Archer 8 3 2 0
+UNT Archer 8 1 2 0
+UNT Archer 10 2 2 0
+UNT Archer 10 5 2 0
+UNT Thief 11 3 1 0
+UNT Thief 11 6 1 0
+UNT Archer 8 6 2 0
+UNT Flavia 3 4 0 0
+UNT Donnel 2 6 0 0
+UNT Sniper 10 7 3 0
+UNT Stahl 2 1 0 0
+UNT Lon'qu 3 5 0 0
+UNT Diane 28 8 2 1
+UNT Brigand 24 6 4 0
+UNT Sniper 25 5 4 0
+UNT Brute 21 4 4 0
+UNT Brute 21 5 4 0
+UNT Sniper 23 4 4 0
+UNT Sniper 23 5 4 0
+UNT Brute 19 1 2 0
 

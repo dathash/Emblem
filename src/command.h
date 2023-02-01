@@ -212,57 +212,56 @@ private:
 class PlaceUnitCommand : public Command
 {
 public:
-    PlaceUnitCommand(Cursor *cursor_in, Tilemap *map_in, Menu *menu_in,
-                     ConversationList *conversations_in)
+    PlaceUnitCommand(Cursor *cursor_in, Level *level_in, Menu *menu_in)
     : cursor(cursor_in),
-      map(map_in),
-      menu(menu_in),
-      conversations(conversations_in)
+      level(level_in),
+      menu(menu_in)
     {}
 
     virtual void Execute()
     {
         // Determine interactible squares
-        map->attackable.clear();
-        map->ability.clear();
-        map->range.clear();
-        map->adjacent.clear();
-        vector<position> interactible = InteractibleFrom(*map, cursor->pos,
-                                             cursor->selected->min_range, cursor->selected->max_range);
+        level->map.attackable.clear();
+        level->map.ability.clear();
+        level->map.range.clear();
+        level->map.adjacent.clear();
 
         // Update unit menu with available actions
         *menu = Menu({});
 
-        if(map->tiles[cursor->pos.col][cursor->pos.row].type == VILLAGE)
+        if(level->map.tiles[cursor->pos.col][cursor->pos.row].type == VILLAGE)
         {
-            for(const Conversation &conv : conversations->villages)
+            for(const Conversation &conv : level->conversations.villages)
             {
                 if(conv.pos == cursor->pos && !conv.done)
                     menu->AddOption("Visit");
             }
         }
 
-        if(map->tiles[cursor->pos.col][cursor->pos.row].type == GOAL &&
+        if(level->objective == OBJECTIVE_CAPTURE &&
+           level->map.tiles[cursor->pos.col][cursor->pos.row].type == GOAL &&
            cursor->selected->ID() == LEADER_ID)
         {
             // TODO: Don't allow this option at all if the level isn't a capture objective.
             menu->AddOption("Capture");
         }
 
+        vector<position> interactible = InteractibleFrom(level->map, cursor->pos,
+                                             cursor->selected->min_range, cursor->selected->max_range);
         // for attacking
         for(const position &p : interactible)
         {
-            map->range.push_back(p);
-            if(map->tiles[p.col][p.row].occupant &&
-               !map->tiles[p.col][p.row].occupant->is_ally)
+            level->map.range.push_back(p);
+            if(level->map.tiles[p.col][p.row].occupant &&
+               !level->map.tiles[p.col][p.row].occupant->is_ally)
             {
-                map->attackable.push_back(p);
+                level->map.attackable.push_back(p);
             }
         }
-        if(map->attackable.size() > 0)
+        if(level->map.attackable.size() > 0)
             menu->AddOption("Attack");
 
-        interactible = InteractibleFrom(*map, cursor->pos, 1, 1);
+        interactible = InteractibleFrom(level->map, cursor->pos, 1, 1);
         // for ability
         switch(cursor->selected->ability)
         {
@@ -274,27 +273,29 @@ public:
             {
                 for(const position &p : interactible)
                 {
-                    if(map->tiles[p.col][p.row].occupant &&
-                       map->tiles[p.col][p.row].occupant->is_ally &&
-                       map->tiles[p.col][p.row].occupant->health < map->tiles[p.col][p.row].occupant->max_health)
+                    if(level->map.tiles[p.col][p.row].occupant &&
+                       level->map.tiles[p.col][p.row].occupant->is_ally &&
+                       level->map.tiles[p.col][p.row].occupant->health < level->map.tiles[p.col][p.row].occupant->max_health &&
+                       level->map.tiles[p.col][p.row].occupant->ID() != cursor->selected->ID())
                     {
-                        map->ability.push_back(p);
+                        level->map.ability.push_back(p);
                     }
                 }
-                if(map->ability.size() > 0)
+                if(level->map.ability.size() > 0)
                     menu->AddOption("Heal");
             } break;
             case ABILITY_BUFF:
             {
                 for(const position &p : interactible)
                 {
-                    if(map->tiles[p.col][p.row].occupant &&
-                       map->tiles[p.col][p.row].occupant->is_ally)
+                    if(level->map.tiles[p.col][p.row].occupant &&
+                       level->map.tiles[p.col][p.row].occupant->is_ally &&
+                       level->map.tiles[p.col][p.row].occupant->ID() != cursor->selected->ID())
                     {
-                        map->ability.push_back(p);
+                        level->map.ability.push_back(p);
                     }
                 }
-                if(map->ability.size() > 0)
+                if(level->map.ability.size() > 0)
                     menu->AddOption("Buff");
             } break;
             case ABILITY_SHIELD:
@@ -305,14 +306,14 @@ public:
             {
                 for(const position &p : interactible)
                 {
-                    if(map->tiles[p.col][p.row].occupant &&
-                       map->tiles[p.col][p.row].occupant->is_ally &&
-                       map->tiles[p.col][p.row].occupant->is_exhausted)
+                    if(level->map.tiles[p.col][p.row].occupant &&
+                       level->map.tiles[p.col][p.row].occupant->is_ally &&
+                       level->map.tiles[p.col][p.row].occupant->is_exhausted)
                     {
-                        map->ability.push_back(p);
+                        level->map.ability.push_back(p);
                     }
                 }
-                if(map->ability.size() > 0)
+                if(level->map.ability.size() > 0)
                     menu->AddOption("Dance");
             } break;
             default:
@@ -321,30 +322,30 @@ public:
             }
         }
 
-        interactible = InteractibleFrom(*map, cursor->pos, 1, 1);
+        interactible = InteractibleFrom(level->map, cursor->pos, 1, 1);
         // for talking
         for(const position &p : interactible)
         {
-            if(map->tiles[p.col][p.row].occupant &&
-               map->tiles[p.col][p.row].occupant->is_ally)
+            if(level->map.tiles[p.col][p.row].occupant &&
+               level->map.tiles[p.col][p.row].occupant->is_ally)
             {
-                for(const Conversation &conv : conversations->mid_battle)
+                for(const Conversation &conv : level->conversations.mid_battle)
                 {
                     if(((cursor->selected->ID() == conv.one->ID() &&
-                         map->tiles[p.col][p.row].occupant->ID() == conv.two->ID())
+                         level->map.tiles[p.col][p.row].occupant->ID() == conv.two->ID())
                             ||
                         (cursor->selected->ID() == conv.two->ID() &&
-                         map->tiles[p.col][p.row].occupant->ID() == conv.one->ID()))
+                         level->map.tiles[p.col][p.row].occupant->ID() == conv.one->ID()))
                             &&
                         !conv.done
                       )
                     {
-                        map->adjacent.push_back(p);
+                        level->map.adjacent.push_back(p);
                     }
                 }
             }
         }
-        if(map->adjacent.size() > 0)
+        if(level->map.adjacent.size() > 0)
             menu->AddOption("Talk");
 
         menu->AddOption("Wait");
@@ -352,8 +353,8 @@ public:
         if(cursor->path_draw.empty())
         {
             GlobalInterfaceState = UNIT_MENU_ROOT;
-            map->tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;
-            map->tiles[cursor->pos.col][cursor->pos.row].occupant = cursor->selected;
+            level->map.tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;
+            level->map.tiles[cursor->pos.col][cursor->pos.row].occupant = cursor->selected;
 
             cursor->selected->pos = cursor->pos;
             cursor->selected->sheet.ChangeTrack(TRACK_ACTIVE);
@@ -369,9 +370,8 @@ public:
 
 private:
     Cursor *cursor; 
-    Tilemap *map;
     Menu *menu;
-    ConversationList *conversations;
+    Level *level;
 };
 
 
@@ -672,7 +672,6 @@ public:
                 EmitEvent(HEAL_EVENT);
 
                 int experience = EXP_FOR_HEALING;
-                cursor->selected->GrantExperience(experience);
                 EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             } break;
             case ABILITY_BUFF:
@@ -681,7 +680,6 @@ public:
                 EmitEvent(BUFF_EVENT);
 
                 int experience = EXP_FOR_BUFF;
-                cursor->selected->GrantExperience(experience);
                 EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             } break;
             case ABILITY_SHIELD:
@@ -694,7 +692,6 @@ public:
                 EmitEvent(DANCE_EVENT);
 
                 int experience = EXP_FOR_DANCE;
-                cursor->selected->GrantExperience(experience);
                 EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
             } break;
             default:
@@ -985,8 +982,6 @@ public:
             cursor->path_draw = {};
 
             level_song->FadeOut();
-
-            // Move onto next level!
             GlobalInterfaceState = LEVEL_MENU;
             return;
         }
@@ -1600,7 +1595,7 @@ public:
                 BindDown(make_shared<MoveSCommand>(cursor, level->map, direction(0, 1)));
                 BindLeft(make_shared<MoveSCommand>(cursor, level->map, direction(-1, 0)));
                 BindRight(make_shared<MoveSCommand>(cursor, level->map, direction(1, 0)));
-                BindA(make_shared<PlaceUnitCommand>(cursor, &(level->map), unitMenu, &(level->conversations)));
+                BindA(make_shared<PlaceUnitCommand>(cursor, level, unitMenu));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

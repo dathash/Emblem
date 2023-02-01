@@ -313,6 +313,8 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             ImGui::Text("Over unit.");
             ImGui::SameLine();
             ImGui::Text("Behavior: %d", hover_tile->occupant->ai_behavior);
+            ImGui::SameLine();
+            ImGui::Checkbox("boss?", &hover_tile->occupant->is_boss);
 
             if(ImGui::Button("Dmg"))
             {

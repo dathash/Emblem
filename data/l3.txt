@@ -34,19 +34,19 @@ MAP 1 1 1 1 1 1 0 1 0 0 0 0 0 0 1 1 1 0 4 0
 MAP 1 1 1 1 1 1 1 0 0 1 0 1 1 1 1 1 1 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>
-UNT Donnel 15 0 0 
-UNT Lon'qu 16 1 0 
-UNT Flavia 15 2 0 
-UNT Lucina 18 1 0 
-UNT Charles 18 18 2 
-UNT Brigand 16 17 2 
-UNT Brigand 16 15 2 
-UNT Archer 17 15 2 
-UNT Archer 17 17 2 
-UNT Brute 15 13 4 
-UNT Brute 13 15 4 
-UNT Thief 11 13 4 
-UNT Thief 10 11 4 
-UNT Thief 12 10 4 
-UNT Brute 16 8 4 
+UNT Donnel 15 0 0 0
+UNT Lon'qu 16 1 0 0
+UNT Flavia 15 2 0 0
+UNT Lucina 18 1 0 0
+UNT Charles 18 18 2 1
+UNT Brigand 16 17 2 0
+UNT Brigand 16 15 2 0
+UNT Archer 17 15 2 0
+UNT Archer 17 17 2 0
+UNT Brute 15 13 4 0
+UNT Brute 13 15 4 0
+UNT Thief 11 13 4 0
+UNT Thief 10 11 4 0
+UNT Thief 12 10 4 0
+UNT Brute 16 8 4 0
 

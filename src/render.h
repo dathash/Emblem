@@ -33,6 +33,50 @@ RenderTileTexture(const Tilemap &map, const Tile &tile,
     SDL_RenderCopy(GlobalRenderer, map.atlas.sdl_texture, &source, &destination);
 }
 
+// Sets color modifiers based on the unit's properties.
+void
+SetSpriteModifiers(Unit *unit)
+{
+    if(unit->is_exhausted)
+    {
+        SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
+    }
+    else if(unit->buff)
+    {
+        switch(unit->buff->stat)
+        {
+            case STAT_ATTACK:
+            {
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
+            } break;
+            case STAT_DEFENSE:
+            {
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffDefMod.r, buffDefMod.g, buffDefMod.b);
+            } break;
+            case STAT_APTITUDE:
+            {
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAptMod.r, buffAptMod.g, buffAptMod.b);
+            } break;
+            case STAT_SPEED:
+            {
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
+            } break;
+            default:
+            {
+                cout << "WARN Render(): Unit has unhandled buff color mod\n";
+            } break;
+        }
+    }
+    else if(unit->is_boss)
+    {
+        SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
+    }
+    else
+    {
+        SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
+    }
+}
+
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
 RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false,
@@ -303,43 +347,10 @@ Render(const Tilemap &map, const Cursor &cursor,
             const Tile &tileToRender = map.tiles[col][row];
             if(tileToRender.occupant)
             {
-                if(tileToRender.occupant->is_exhausted)
-                {
-                    SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
-                }
-                else
-                {
-                    if(tileToRender.occupant->buff)
-                    {
-                        switch(tileToRender.occupant->buff->stat)
-                        {
-                            case STAT_ATTACK:
-                            {
-                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
-                            } break;
-                            case STAT_DEFENSE:
-                            {
-                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffDefMod.r, buffDefMod.g, buffDefMod.b);
-                            } break;
-                            case STAT_APTITUDE:
-                            {
-                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffAptMod.r, buffAptMod.g, buffAptMod.b);
-                            } break;
-                            case STAT_SPEED:
-                            {
-                                SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
-                            } break;
-                            default:
-                            {
-                                cout << "WARN Render(): Unit has unhandled buff color mod\n";
-                            } break;
-                        }
-                    }
-                    else
-                        SDL_SetTextureColorMod(tileToRender.occupant->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
-                }
-
                 position screen_pos = {col - viewportCol, row - viewportRow};
+
+                SetSpriteModifiers(tileToRender.occupant);
+
                 RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally, tileToRender.occupant->animation_offset);
                 RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health, tileToRender.occupant->animation_offset);
             }

@@ -2,7 +2,7 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
-OBJ 0
+OBJ 1
 
 ATL ruins.png
 
@@ -37,6 +37,7 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai>>
-UNT Lucina 2 2 0 
-UNT Brute 9 2 8 
+UNT Lucina 2 2 0 0
+UNT Brute 4 1 1 0
+UNT Priam 0 1 0 0
 

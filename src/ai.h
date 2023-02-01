@@ -268,11 +268,11 @@ GetAction(const Unit &unit, const Tilemap &map)
     switch(unit.ai_behavior)
     {
         case PURSUE:             return PursueBehavior(unit, map);
-        case PURSUE_AFTER_1:     return ((unit.turns_active > 1) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
-        case PURSUE_AFTER_2:     return ((unit.turns_active > 2) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
-        case PURSUE_AFTER_3:     return ((unit.turns_active > 3) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
+        case PURSUE_AFTER_1:     return ((unit.turns_active >= 1) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
+        case PURSUE_AFTER_2:     return ((unit.turns_active >= 2) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
+        case PURSUE_AFTER_3:     return ((unit.turns_active >= 3) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
         case BOSS:               return BossBehavior(unit, map);
-        case BOSS_THEN_MOVE:     return ((unit.health < unit.max_health) ? BossBehavior(unit, map): PursueBehavior(unit, map));
+        case BOSS_THEN_MOVE:     return ((unit.health == unit.max_health) ? BossBehavior(unit, map) : PursueBehavior(unit, map));
         case ATTACK_IN_RANGE:    return AttackInRangeBehavior(unit, map, false);
         case ATTACK_IN_TWO:      return AttackInRangeBehavior(unit, map, true);
         case FLEE:               return {unit.pos, NULL};

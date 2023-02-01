@@ -68,10 +68,13 @@ struct Parcel
 
                 recipient->GrantExperience(total);
 
-                if(GlobalPlayerTurn)
-                    GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-                else
-                    GlobalAIState = FINDING_NEXT;
+                if(GlobalInterfaceState != LEVEL_MENU)
+                {
+                    if(GlobalPlayerTurn)
+                        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                    else
+                        GlobalAIState = FINDING_NEXT;
+                }
                 recipient = nullptr;
                 value = 0.0f;
                 total = 0;

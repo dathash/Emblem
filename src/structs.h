@@ -202,6 +202,7 @@ struct Unit
     bool is_exhausted = false;
     bool should_die = false;
     position animation_offset = {0, 0};
+    bool is_boss = false;
 
     Buff *buff = nullptr;
 
@@ -626,12 +627,6 @@ struct Level
         map.tiles[pos.col][pos.row].occupant = newcomer.get();
     }
 
-    // Scans the whole board to find the next available spawn point
-    void
-    GetNextSpawnLocation()
-    {
-    }
-
     // Returns the position of the leader.
     position
     Leader()
@@ -643,6 +638,17 @@ struct Level
         }
         SDL_assert(!"ERROR Level.Leader(): No leader!\n");
         return position(0, 0);
+    }
+
+    bool
+    IsBossDead()
+    {
+        for(const shared_ptr<Unit> &unit : combatants)
+        {
+            if(unit->is_boss)
+                return false;
+        }
+        return true;
     }
 
     void
@@ -664,7 +670,9 @@ struct Level
         for(const shared_ptr<Unit> &unit : combatants)
         {
             if(unit->should_die)
+            {
                 tiles.push_back(unit->pos);
+            }
         }
 
         combatants.erase(remove_if(combatants.begin(), combatants.end(),

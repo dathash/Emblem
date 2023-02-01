@@ -281,7 +281,6 @@ struct Fight
                         // TODO: Put DEATH CONVERSATION HERE!!!
                         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
                     }
-
                     else
                     {
                         one->Deactivate();
@@ -295,17 +294,25 @@ struct Fight
 
                     experience_amount = 1;
                     if(one->should_die)
-                        experience_amount += two->xp_value;
+                        experience_amount += one->xp_value;
 
-                    if(two->level > one->level)
+                    if(two->level > one->level + 3) // Arbitrary threshold
+                        experience_amount /= 4;
+                    else if(two->level > one->level)
                         experience_amount /= 2;
 
-                    one->Deactivate();
-                    EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount));
-                    GlobalAIState = AI_RESOLVING_EXPERIENCE;
+                    if(two->should_die)
+                    {
+                        // TODO: Put DEATH CONVERSATION HERE!!!
+                        GlobalAIState = FINDING_NEXT;
+                    }
+                    else
+                    {
+                        one->Deactivate();
+                        EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount));
+                        GlobalAIState = AI_RESOLVING_EXPERIENCE;
+                    }
                 }
-
-                //EmitEvent(EVENT_COMBAT_OVER);
             }
             ready = false;
         }
@@ -436,8 +443,6 @@ void SimulateDancing(Unit *one, Unit *two)
 {
     // one -> two
     two->Activate();
-
-    one->GrantExperience(EXP_FOR_DANCE);
 }
 
 #endif

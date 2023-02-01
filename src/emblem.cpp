@@ -57,9 +57,6 @@ static bool GlobalPlayerTurn = true;
 static bool GlobalNextLevel = false;
 static bool GlobalTurnStart = false;
 
-static unsigned int GlobalInterfaceState;
-static unsigned int GlobalAIState;
-
 ////////////////////////////////
 
 // TODO: Refactor these to only be where they need to be.
@@ -124,6 +121,9 @@ EmitEvent(Event event)
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This is all that the game includes.
 #include "constants.h"
+static InterfaceState GlobalInterfaceState;
+static AIState GlobalAIState;
+
 #include "utils.h"
 #include "animation.h"
 #include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
@@ -267,6 +267,18 @@ int main(int argc, char *argv[])
 
             for(Sound *sound : GlobalMusic.sounds)
                 sound->Update();
+
+            if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT &&
+               ((level.objective == OBJECTIVE_ROUT &&
+                 level.GetNumberOf(false) == 0)
+                 ||
+                (level.objective == OBJECTIVE_BOSS && 
+                 level.IsBossDead())))
+            {
+                cout << "IN CONDITION\n";
+                level.song->FadeOut();
+                GlobalInterfaceState = LEVEL_MENU;
+            }
         }
 
         // Resolve State
@@ -287,7 +299,7 @@ int main(int argc, char *argv[])
                     if(unit->buff)
                         delete unit->buff;
                         unit->buff = nullptr;
-                    unit->turns_active = 0;
+                    unit->turns_active = -1;
                     unit->is_exhausted = false;
                     party.push_back(unit);
                 }
@@ -323,7 +335,6 @@ int main(int argc, char *argv[])
                     if(unit->is_ally)
                     {
                         ++unit->turns_active;
-                        cout << unit->turns_active << "\n";;
                     }
                 }
             }

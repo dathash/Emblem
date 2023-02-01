@@ -99,10 +99,11 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case EXPERIENCE_EVENT:
             {
-                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, event.integer > 0 ? 0.05f * (float)event.integer : 1.0f);
+                //parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, event.integer > 0 ? 0.05f * (float)event.integer : 1.0f);
+                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION);
                 parcel->recipient = event.unit;
                 parcel->total = event.integer;
-                PlaySfx("dance.wav");
+                //PlaySfx("dance.wav"); // TODO: Get the actual exp bar sound
             } break;
             default:
             {

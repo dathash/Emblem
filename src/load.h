@@ -8,6 +8,33 @@
 #include <fstream>
 #include <vector>
 
+Tile
+TileTypeToTile(TileType type)
+{
+    switch(type)
+    {
+        case(FLOOR):
+            return FLOOR_TILE;
+        case(WALL):
+            return WALL_TILE;
+        case(FOREST):
+            return FOREST_TILE;
+        case(SWAMP):
+            return SWAMP_TILE;
+        case(FORT):
+            return FORT_TILE;
+        case(GOAL):
+            return GOAL_TILE;
+        case(SPAWN):
+            return SPAWN_TILE;
+        case(VILLAGE):
+            return VILLAGE_TILE;
+        case(CHEST):
+            return CHEST_TILE;
+        default: cout << "ERROR: Unhandled tile type in load.h::TileTypeToTile!\n"; return {};
+    }
+}
+
 // ============================== loading data =================================
 Conversation
 LoadConversation(string path, string filename,
@@ -228,60 +255,8 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         else if(type == "MAP")
         {
             for(int col = 0; col < level.map.width; ++col)
-            {
-                switch(stoi(tokens[col]))
-                {
-                    case(FLOOR):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            FLOOR_TILE;
-                    } break;
-                    case(WALL):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            WALL_TILE;
-                    } break;
-                    case(FOREST):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            FOREST_TILE;
-                    } break;
-                    case(SWAMP):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            SWAMP_TILE;
-                    } break;
-                    case(FORT):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            FORT_TILE;
-                    } break;
-                    case(GOAL):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            GOAL_TILE;
-                    } break;
-                    case(SPAWN):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            SPAWN_TILE;
-                    } break;
-                    case(VILLAGE):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            VILLAGE_TILE;
-                    } break;
-                    case(CHEST):
-                    {
-                        level.map.tiles[col][mapRow] = 
-                            CHEST_TILE;
-                    } break;
-                    default:
-                    {
-                        cout << "ERROR: Unhandled tile type in loader!\n";
-                    } break;
-                }
-            }
+                level.map.tiles[col][mapRow] = TileTypeToTile((TileType)stoi(tokens[col]));
+
             ++mapRow;
         }
         else if(type == "UNT")
@@ -292,9 +267,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             for(const shared_ptr<Unit> &unit : party)
             {
                 if(hash<string>{}(tokens[0]) == unit->ID())
-                {
                     unitCopy = make_shared<Unit>(*unit);
-                }
             }
 
             if(!unitCopy)
@@ -302,9 +275,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
                 for(const shared_ptr<Unit> &unit : units)
                 {
                     if(hash<string>{}(tokens[0]) == unit->ID())
-                    {
                         unitCopy = make_shared<Unit>(*unit);
-                    }
                 }
             }
 
@@ -315,6 +286,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             unitCopy->pos.col = col;
             unitCopy->pos.row = row;
             unitCopy->ai_behavior = (AIBehavior)stoi(tokens[3]);
+            unitCopy->is_boss = (bool)stoi(tokens[4]);
             level.combatants.push_back(move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
         }
@@ -508,13 +480,14 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "COM <UNT <name> <col> <row> <ai>>\n";
+    fp << "COM <UNT <name> <col> <row> <ai> <boss>>\n";
     for(const shared_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "
                      << unit->pos.col << " "
                      << unit->pos.row << " "
                      << unit->ai_behavior << " "
+                     << unit->is_boss << " "
                      << "\n";
     }
     fp << "\n";
