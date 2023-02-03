@@ -5,6 +5,50 @@ log
 Plan
 > Build a fun little game!
 
+What I need for release:
+* Plan out the hours.
+  * Forty Days and Forty nights = 320 Hours remaining.
+  * Priorities: Engine and Design.
+* Engine
+  * 180 Hours
+    * Save/Load
+    * Cutscenes
+    * Items
+    * Conversation Features
+    * Green Units
+* Design
+  * 100 Hours
+    * New Mechanics
+    * 20 Levels
+    * Experience Curves
+    * 50 Items
+    * 25 Characters
+    * 15 Enemies
+* Writing
+  * 20 Hours
+* Art
+  * Outsource
+  * 10 Hours
+* Polish
+  * 20 Hours
+    * Multi-platform
+    * Resolution
+    * Animation tweaks
+    * Color tweaks
+* QA
+  * 20 Hours
+    * Bug passes
+    * Profiling
+
+* Marketing
+  * 10 Hours
+    * Develop Brand
+    * Posts to various forums
+
+* Playtesting
+  * 50 Hours
+    * Get it in front of 100 people.
+
 # Design
 What is appealing to me about tactics games?
     Individual Characters
@@ -66,8 +110,15 @@ Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
 # TODO
 PROTOTYPE ///////////////////////////////////////////////////
+
+
     NOTE: An object being const doesn't guarantee that its contained
     objects/pointers will be const
+
+    Little things:
+    * Edit enemies or allies, not both at once.
+    * Enemies that spawn after a certain amount of time.
+    * Cutscene events on turn change.
 
     5 levels
 
@@ -129,7 +180,7 @@ PROTOTYPE ///////////////////////////////////////////////////
 
     Real-time color editing in the editor
 
-    "Guard" action
+    "Guard" action?
     Canto? Mounted?
 
 ////////////////////////////////////////////////////////////
@@ -137,10 +188,7 @@ PROTOTYPE ///////////////////////////////////////////////////
 POLISH
     Switch Options menu to internal system.
     * Music Volume
-    * Resolution?
-      * This would require constructing some kind of anchor system, which would
-        be an enormous amount of work. If we want to allow for variable
-        resolutions, we will need to probably use Qt or something similar.
+    * Resolution
     * Quit
 
     Shrink Tilesets to absolute necessity, also enforce consistency across them.

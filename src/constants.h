@@ -18,7 +18,7 @@
 #define EPSILON 0.00001
 
 // defaults
-#define DEFAULT_MUSIC_VOLUME 0.5f
+#define DEFAULT_MUSIC_VOLUME 0.0f
 #define DEFAULT_SFX_VOLUME 0.05f
 
 // rendering
@@ -77,8 +77,8 @@
 
 #define FLOOR_TILE {FLOOR, 1, 0, 0, nullptr, {14, 1}}
 #define WALL_TILE {WALL, 99, 0, 0, nullptr, {6, 22}}
-#define FOREST_TILE {FOREST, 1, 20, 0, nullptr, {0, 6}}
-#define SWAMP_TILE {SWAMP, 2, 0, 0, nullptr, {18, 29}}
+#define FOREST_TILE {FOREST, 2, 20, 0, nullptr, {0, 6}}
+#define SWAMP_TILE {SWAMP, 3, 0, 0, nullptr, {18, 29}}
 #define FORT_TILE {FORT, 1, 10, 4, nullptr, {1, 0}}
 #define GOAL_TILE {GOAL, 1, 0, 2, nullptr, {31, 0}}
 #define SPAWN_TILE {SPAWN, 1, 0, 0, nullptr, {14, 1}}

@@ -344,27 +344,27 @@ LoadUnits(string filename_in)
                     stoi(tokens[10]),						    // long range
 
                     stoi(tokens[11]),						    // level
-                    stoi(tokens[12]),						    // experience
 
-                    (Ability)stoi(tokens[13]),				    // ability
+                    (Ability)stoi(tokens[12]),				    // ability
 
-                    (AIBehavior)stoi(tokens[14]),               // ai behavior
-                    stoi(tokens[15]),                           // xp value
+                    (AIBehavior)stoi(tokens[13]),               // ai behavior
+
+                    stoi(tokens[14]),                           // xp value
 
                     // Growths
-                    stoi(tokens[16]),                           // health
-                    stoi(tokens[17]),                           // attack
-                    stoi(tokens[18]),                           // aptitude
-                    stoi(tokens[19]),                           // defense
-                    stoi(tokens[20]),                           // speed
-                    stoi(tokens[21]),                           // skill
+                    stoi(tokens[15]),                           // health
+                    stoi(tokens[16]),                           // attack
+                    stoi(tokens[17]),                           // aptitude
+                    stoi(tokens[18]),                           // defense
+                    stoi(tokens[19]),                           // speed
+                    stoi(tokens[20]),                           // skill
 
                     // Textures
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[22]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(FULLS_PATH, tokens[23]),   // neutral
-                    LoadTextureImage(FULLS_PATH, tokens[24]),   // happy
-                    LoadTextureImage(FULLS_PATH, tokens[25]),   // angry
-                    LoadTextureImage(FULLS_PATH, tokens[26])    // wince
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[21]), 32, ANIMATION_SPEED), // path to texture
+                    LoadTextureImage(FULLS_PATH, tokens[22]),   // neutral
+                    LoadTextureImage(FULLS_PATH, tokens[23]),   // happy
+                    LoadTextureImage(FULLS_PATH, tokens[24]),   // angry
+                    LoadTextureImage(FULLS_PATH, tokens[25])    // wince
                 ));
             }
         }
@@ -388,7 +388,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<atk>\t<apt>\t<def>\t<spd>\t<skl>\t<short>\t<long>\t<level>\t<exp>\t<abi>\t<ai>\t<xpv>\t<ghp>\t<gat>\t<gap>\t<gdf>\t<gsp>\t<gsk>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
+    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<atk>\t<apt>\t<def>\t<spd>\t<skl>\t<short>\t<long>\t<level>\t<abi>\t<ai>\t<xpv>\t<ghp>\t<gat>\t<gap>\t<gdf>\t<gsp>\t<gsk>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << "\t"
@@ -403,7 +403,6 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->min_range << "\t"
                      << unit->max_range << "\t"
                      << unit->level << "\t"
-                     << unit->experience << "\t"
                      << unit->ability << "\t"
                      << unit->ai_behavior << "\t"
                      << unit->xp_value << "\t"

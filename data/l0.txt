@@ -2,7 +2,7 @@ COM Author: Alex Hartford
 COM Program: Emblem
 COM File: Level
 
-OBJ 2
+OBJ 1
 
 ATL ruins.png
 
@@ -18,30 +18,51 @@ CNV lucina_priam_2.txt
 
 MUS 21.wav
 
-WDT 15
-HGT 10
-MAP 0 0 0 0 0 2 2 2 2 2 1 1 1 1 1 
-MAP 0 5 5 5 7 0 0 2 2 2 1 1 1 1 1 
-MAP 0 5 6 5 4 0 0 0 2 2 1 1 0 4 1 
-MAP 0 5 5 5 0 0 0 0 2 1 1 2 2 2 2 
-MAP 0 0 0 0 0 3 0 0 1 1 7 0 2 0 2 
-MAP 0 0 0 0 0 3 3 1 1 1 0 2 2 2 2 
-MAP 0 0 0 0 3 3 3 0 7 1 1 2 0 2 0 
-MAP 1 1 0 0 3 3 0 0 0 0 1 0 2 0 2 
-MAP 1 1 1 0 0 0 0 0 6 0 0 0 0 0 0 
-MAP 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 
+WDT 20
+HGT 15
+MAP 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+MAP 0 5 5 5 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+MAP 0 5 0 5 0 0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 
+MAP 0 5 5 5 0 0 0 0 2 1 1 1 1 1 1 1 1 1 1 1 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 
+MAP 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 2 2 7 7 
+MAP 0 0 0 0 2 2 2 1 0 0 0 0 0 0 0 0 0 2 0 0 
+MAP 1 0 0 0 2 2 2 1 1 2 0 0 0 2 2 0 0 2 2 2 
+MAP 7 1 0 0 0 2 2 1 1 0 0 2 3 3 3 0 0 0 2 1 
+MAP 0 0 0 1 0 0 0 0 1 1 0 2 3 6 3 2 0 0 1 1 
+MAP 0 0 0 1 0 0 0 0 0 1 0 0 3 3 3 2 0 1 1 1 
+MAP 0 0 0 0 0 0 0 0 0 0 0 0 2 2 0 0 1 1 0 0 
+MAP 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 
+MAP 1 1 7 0 0 0 1 1 1 1 1 0 0 0 0 0 0 0 4 0 
+MAP 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai> <boss>>
 UNT Priam 1 4 0 0 
-UNT Thief 4 5 1 1 
-UNT Archer 8 8 2 0 
-UNT Brute 11 8 8 0 
-UNT Brute 11 9 8 0 
-UNT Brute 13 2 2 0 
-UNT Thief 13 4 2 0 
-UNT Archer 10 5 8 0 
 UNT Lucina 2 2 0 0 
-UNT Brute 13 7 2 0 
-UNT Brute 14 8 2 0 
-UNT Thief 13 9 2 0 
+UNT Noire 4 1 0 0 
+UNT Sully 4 3 0 0 
+UNT Donnel 3 4 0 0 
+UNT Brigand 1 10 7 0 
+UNT Brute 11 5 2 0 
+UNT Brute 10 6 2 0 
+UNT Brigand 13 9 6 0 
+UNT Archer 5 11 8 0 
+UNT Archer 6 10 8 0 
+UNT Brute 5 10 8 0 
+UNT Brigand 18 13 5 0 
+UNT Archer 17 9 2 0 
+UNT Archer 18 8 2 0 
+UNT Archer 16 10 2 0 
+UNT Archer 12 14 2 0 
+UNT Archer 13 13 2 0 
+UNT Brute 12 13 2 0 
+UNT Brute 4 13 8 0 
+UNT Brute 2 12 8 0 
+UNT Brute 7 12 8 0 
+UNT Brute 9 11 6 0 
+UNT Brute 16 5 8 0 
+UNT Brute 17 6 8 0 
+UNT Thief 5 5 1 0 
+UNT Thief 6 4 1 0 
+UNT Brute 2 7 1 0 
 

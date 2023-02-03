@@ -190,10 +190,10 @@ struct Unit
     int min_range;
     int max_range;
     int level;
-    int experience;
     Ability ability;
 
     Growths growths = {};
+    int experience = 0;
 
     int turns_active = -1;
     int xp_value = 0;
@@ -236,7 +236,7 @@ struct Unit
          int attack_in, int aptitude_in, int defense_in,
          int speed_in, int skill_in,
          int min_range_in, int max_range_in,
-         int level_in, int experience_in,
+         int level_in,
          Ability ability_in,
          AIBehavior ai_behavior_in,
          int xp_value_in,
@@ -267,7 +267,6 @@ struct Unit
       min_range(min_range_in),
       max_range(max_range_in),
       level(level_in),
-      experience(experience_in),
       ability(ability_in),
       ai_behavior(ai_behavior_in),
       xp_value(xp_value_in),

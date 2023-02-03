@@ -1,4 +1,5 @@
 
+
 // Author: Alex Hartford                                                                                 
 // Program: Emblem
 // File: Editor
@@ -11,8 +12,8 @@
 void
 Meta(Level *level)
 {
-	ImGui::Begin("Meta");
-	{
+    ImGui::Begin("Meta");
+    {
         static float music_volume = DEFAULT_MUSIC_VOLUME;
         static float sfx_volume = DEFAULT_SFX_VOLUME;
         if(ImGui::SliderFloat("Music", &music_volume, 0.0f, 1.0f))
@@ -32,29 +33,30 @@ Meta(Level *level)
 }
 
 static uint8_t selectedIndex = 0;
+static bool editing_allies = false;
 void
 UnitEditor(vector<shared_ptr<Unit>> *units)
 {
-	ImGui::Begin("unit editor");
-	{
-		if(ImGui::Button("create"))
-		{
-			units->push_back(make_shared<Unit>(
-				string("DEFAULT_CHANGE"),
-				false,
-				3,
-				3,
-				3,
-				3,
-				3,
+    ImGui::Begin("unit editor");
+    {
+        ImGui::Checkbox("allies", &editing_allies);
+        if(ImGui::Button("create"))
+        {
+            units->push_back(make_shared<Unit>(
+                string("DEFAULT_CHANGE"),
+                false,
                 3,
-				3,
-				3,
-				3,
-				3,
-				3,
-				3,
-				ABILITY_NONE,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                ABILITY_NONE,
                 NO_BEHAVIOR,
                 3,
 
@@ -65,52 +67,64 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 3,
                 3,
 
-				Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-				LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT))
-			));
-		}
-		ImGui::SameLine();
-		if(ImGui::Button("destroy"))
-		{
-			units->erase(units->begin() + selectedIndex);
-			if(selectedIndex > 0)
-			{
-				--selectedIndex;
-			}
-		}
+                Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
+                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT))
+            ));
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("destroy"))
+        {
+            units->erase(units->begin() + selectedIndex);
+            if(selectedIndex > 0)
+            {
+                --selectedIndex;
+            }
+        }
 
-		for(int i = 0; i < units->size(); ++i)
-		{
-			char buffer[256];
-			sprintf(buffer, "%d", i);
-			if (ImGui::Button(buffer))
-				selectedIndex = i;
-            if(i % 7 || i == 0)
-                ImGui::SameLine();
-		}
-		ImGui::NewLine();
+        for(int i = 0; i < units->size(); ++i)
+        {
+            if((*units)[i]->is_ally == editing_allies)
+            {
+                char buffer[256];
+                sprintf(buffer, "%d", i);
+                if (ImGui::Button(buffer))
+                    selectedIndex = i;
+                if(i % 7 || i == 0)
+                    ImGui::SameLine();
+            }
+        }
+        ImGui::NewLine();
 
-		SDL_assert(selectedIndex < units->size());
-		Unit *selected = (*units)[selectedIndex].get();
+        SDL_assert(selectedIndex < units->size());
+        Unit *selected = (*units)[selectedIndex].get();
 
-		ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
+        ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("name", &(selected->name));
-		ImGui::SliderInt("mov", &selected->movement, 0, 10);
-		ImGui::SliderInt("hp", &selected->max_health, 1, 50);
-		ImGui::SliderInt("atk", &selected->attack, 0, 20);
-		ImGui::SliderInt("def", &selected->defense, 0, 20);
-		ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
-		ImGui::SliderInt("spd", &selected->speed, 0, 20);
-		ImGui::SliderInt("skl", &selected->skill, 0, 20);
-		ImGui::SliderInt("min", &selected->min_range, 1, 4);
-		ImGui::SliderInt("max", &selected->max_range, 1, 4);
-		ImGui::SliderInt("level", &selected->level, 1, 20);
-		ImGui::SliderInt("exp", &selected->experience, 0, 99);
-		ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
-        ImGui::Text("ability");
+        ImGui::SliderInt("mov", &selected->movement, 0, 10);
+        ImGui::SliderInt("hp", &selected->max_health, 1, 50);
+        ImGui::SliderInt("atk", &selected->attack, 0, 20);
+        ImGui::SliderInt("def", &selected->defense, 0, 20);
+        ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
+        ImGui::SliderInt("spd", &selected->speed, 0, 20);
+        ImGui::SliderInt("skl", &selected->skill, 0, 20);
+        ImGui::SliderInt("min", &selected->min_range, 1, 4);
+        ImGui::SliderInt("max", &selected->max_range, 1, 4);
+        ImGui::SliderInt("level", &selected->level, 1, 20);
+        ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
+
+        ImGui::Text("growths");
+        ImGui::SliderInt("health", (int *)&selected->growths.health, 0, 100);
+        ImGui::SliderInt("attack", (int *)&selected->growths.attack, 0, 100);
+        ImGui::SliderInt("aptitude", (int *)&selected->growths.aptitude, 0, 100);
+        ImGui::SliderInt("defense", (int *)&selected->growths.defense, 0, 100);
+        ImGui::SliderInt("speed", (int *)&selected->growths.speed, 0, 100);
+        ImGui::SliderInt("skill", (int *)&selected->growths.skill, 0, 100);
+
+
+        ImGui::Text("ability: %d", selected->ability);
         ImGui::SameLine();
         if(ImGui::Button("N"))
             selected->ability = ABILITY_NONE;
@@ -126,9 +140,9 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::SameLine();
         if(ImGui::Button("D"))
             selected->ability = ABILITY_DANCE;
-		ImGui::SliderInt("xpv", &selected->xp_value, 0, 200);
-	}
-	ImGui::End();
+        ImGui::SliderInt("xpv", &selected->xp_value, 0, 200);
+    }
+    ImGui::End();
 }
 
 // Generate arbitrary debug paths
@@ -172,8 +186,8 @@ EditorPollForKeyboardInput(position *editor_cursor, int width, int height)
 
 void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 {
-	ImGui::Begin("level editor");
-	{
+    ImGui::Begin("level editor");
+    {
         static position editor_cursor = {0, 0};
         static path path_debug = {};
 
@@ -347,10 +361,10 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
                 hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
             ImGui::SameLine();
             if(ImGui::Button("Pa2"))
-                hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
+                hover_tile->occupant->ai_behavior = PURSUE_AFTER_2;
             ImGui::SameLine();
             if(ImGui::Button("Pa3"))
-                hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
+                hover_tile->occupant->ai_behavior = PURSUE_AFTER_3;
 
             if(ImGui::Button("BOSS"))
                 hover_tile->occupant->ai_behavior = BOSS;
@@ -395,8 +409,8 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
                        editor_cursor.row - viewportRow},
                        editorColor);
         }
-	}
-	ImGui::End();
+    }
+    ImGui::End();
 }
 
 void
@@ -501,9 +515,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         Meta(level);
 
     /*
-	// debug
-	ImGui::ShowStyleEditor();
-	ImGui::ShowDemoWindow();
+    // debug
+    ImGui::ShowStyleEditor();
+    ImGui::ShowDemoWindow();
     */
 }
 #endif // EDITOR
