@@ -414,8 +414,8 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->growths.speed << "\t"
                      << unit->growths.skill << "\t"
 
-                     << unit->primary_item->type << "\t"
-                     << unit->secondary_item->type << "\t"
+                     << (unit->primary_item ? unit->primary_item->type : 0) << "\t"
+                     << (unit->secondary_item ? unit->secondary_item->type : 0) << "\t"
 
                      << unit->sheet.texture.filename << "\t"
                      << unit->neutral.filename << "\t"

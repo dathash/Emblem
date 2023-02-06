@@ -65,8 +65,8 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 3,
                 3,
 
-                IV_NONE,
-                IV_NONE,
+                ITEM_NONE,
+                ITEM_NONE,
 
                 Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
@@ -124,7 +124,6 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::SliderInt("speed", (int *)&selected->growths.speed, 0, 100);
         ImGui::SliderInt("skill", (int *)&selected->growths.skill, 0, 100);
 
-
         ImGui::Text("ability: %d", selected->ability);
         ImGui::SameLine();
         if(ImGui::Button("N"))
@@ -146,21 +145,28 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::Text("Items");
         if(selected->primary_item)
         {
-            ImGui::Text("Primary | Type: %d, Components: %p %p %p", 
-                        selected->primary_item->type,
-                        selected->primary_item->weapon,
-                        selected->primary_item->consumable,
-                        selected->primary_item->equipment
-                        );
+            ImGui::Text("Primary | %s", GetItemString(selected->primary_item->type).c_str());
         }
         if(selected->secondary_item)
         {
-            ImGui::Text("Secondary | Type: %d, Components: %p %p %p", 
-                        selected->secondary_item->type,
-                        selected->secondary_item->weapon,
-                        selected->secondary_item->consumable,
-                        selected->secondary_item->equipment
-                        );
+            ImGui::Text("Secondary | %s", GetItemString(selected->secondary_item->type).c_str());
+        }
+
+        static int item_type = 0;
+        ImGui::Text("%s", GetItemString((ItemType)item_type).c_str());
+        ImGui::SliderInt("type", &item_type, 0, 30);
+        if(ImGui::Button("Primary"))
+        {
+            delete selected->primary_item;
+            if(item_type != 0)
+                selected->primary_item = GetItem((ItemType)item_type);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Secondary"))
+        {
+            delete selected->secondary_item;
+            if(item_type != 0)
+                selected->secondary_item = GetItem((ItemType)item_type);
         }
     }
     ImGui::End();

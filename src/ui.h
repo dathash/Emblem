@@ -404,19 +404,47 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
     ImGui::End();
 }
 
+void
+DisplayItemInfo(Item *item)
+{
+    if(item->weapon)
+    {
+        ImGui::Text("[%s, %d mt %d wt [%d-%d] %d hit]", 
+                    GetItemString(item->type).c_str(),
+                    item->weapon->might,
+                    item->weapon->weight,
+                    item->weapon->min_range, item->weapon->max_range,
+                    item->weapon->hit);
+    }
+    if(item->consumable)
+    {
+        ImGui::Text("[%s, %d, %d]", 
+                    GetItemString(item->type).c_str(),
+                    item->consumable->amount,
+                    item->consumable->uses);
+    }
+    if(item->equipment)
+    {
+        ImGui::Text("[%s, %d]", 
+                    GetItemString(item->type).c_str(),
+                    item->consumable->amount);
+    }
+}
+
+
 // Full display of unit's stats
 void 
 DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(480, 200));
+    ImGui::SetNextWindowSize(ImVec2(480, 250));
 
     int x_pos = 410;
     if(!unit.is_ally)
         x_pos = 170;
 
     ImVec2 top_right = ImVec2(x_pos, 10);
-    ImVec2 bottom_right = ImVec2(x_pos, 390);
+    ImVec2 bottom_right = ImVec2(x_pos, 340);
 
     if(quad == TOP_LEFT || quad == TOP_RIGHT)
         ImGui::SetNextWindowPos(bottom_right);
@@ -447,8 +475,17 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
-
 			DisplayHealthBar(unit.health, unit.max_health, 0);
+
+            if(unit.primary_item)
+            {
+                DisplayItemInfo(unit.primary_item);
+            }
+            if(unit.secondary_item)
+            {
+                if(unit.primary_item)
+                DisplayItemInfo(unit.secondary_item);
+            }
 
 			// Second line
             int attack = unit.attack;
@@ -527,14 +564,6 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::Text("[CRT %d%%]", unit.Crit());
 			ImGui::SameLine();
 			ImGui::Text("[RG %d-%d]", unit.min_range, unit.max_range);
-
-            if(unit.ability != ABILITY_NONE)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                ImGui::Text("[%s]", GetAbilityString(unit.ability).c_str());
-                ImGui::PopStyleColor();
-            }
-
 		ImGui::PopFont();
     }
     ImGui::End();
