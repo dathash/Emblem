@@ -65,6 +65,9 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 3,
                 3,
 
+                IV_NONE,
+                IV_NONE,
+
                 Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
@@ -139,6 +142,26 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         if(ImGui::Button("D"))
             selected->ability = ABILITY_DANCE;
         ImGui::SliderInt("xpv", &selected->xp_value, 0, 200);
+
+        ImGui::Text("Items");
+        if(selected->primary_item)
+        {
+            ImGui::Text("Primary | Type: %d, Components: %p %p %p", 
+                        selected->primary_item->type,
+                        selected->primary_item->weapon,
+                        selected->primary_item->consumable,
+                        selected->primary_item->equipment
+                        );
+        }
+        if(selected->secondary_item)
+        {
+            ImGui::Text("Secondary | Type: %d, Components: %p %p %p", 
+                        selected->secondary_item->type,
+                        selected->secondary_item->weapon,
+                        selected->secondary_item->consumable,
+                        selected->secondary_item->equipment
+                        );
+        }
     }
     ImGui::End();
 }

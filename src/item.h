@@ -49,10 +49,12 @@ struct ConsumableComponent
 {
     ConsumableType type = CONS_NOTHING;
     int amount = -1;
+    int uses = -1;
     
-    ConsumableComponent(ConsumableType type_in, int amount_in)
+    ConsumableComponent(ConsumableType type_in, int amount_in, int uses_in)
     : type(type_in),
-      amount(amount_in)
+      amount(amount_in),
+      uses(uses_in)
     {}
 };
 
@@ -77,29 +79,7 @@ struct EquipmentComponent
 
 enum ItemType
 {
-    ITEM_NOTHING,
-    ITEM_WEAPON,
-    ITEM_CONSUMABLE,
-    ITEM_EQUIPMENT,
-};
-
-struct Item
-{
-    //ItemType type = ITEM_NOTHING;
-    WeaponComponent *weapon = nullptr;
-    ConsumableComponent *consumable = nullptr;
-    EquipmentComponent *equipment = nullptr;
-
-    ~Item()
-    {
-        delete weapon;
-        delete consumable;
-        delete equipment;
-    }
-};
-
-enum ItemValue
-{
+    IV_NONE,
     IV_SWORD_IRON,
     IV_SWORD_STEEL,
     IV_SWORD_SILVER,
@@ -131,51 +111,89 @@ enum ItemValue
     IV_WIND_RING,
 };
 
-Item
-ItemIndex(int index)
+struct Item
 {
-    switch(index)
+    ItemType type = IV_NONE;
+    WeaponComponent *weapon = nullptr;
+    ConsumableComponent *consumable = nullptr;
+    EquipmentComponent *equipment = nullptr;
+
+    Item(ItemType type_in,
+         WeaponComponent *weapon_in = nullptr,
+         ConsumableComponent *consumable_in = nullptr,
+         EquipmentComponent *equipment_in = nullptr)
+    : type(type_in),
+      weapon(weapon_in),
+      consumable(consumable_in),
+      equipment(equipment_in)
     {
+    }
+
+    ~Item()
+    {
+        delete weapon;
+        delete consumable;
+        delete equipment;
+    }
+
+    Item(const Item &other)
+    {
+        type = other.type;
+        if(other.weapon)
+            weapon = new WeaponComponent(*other.weapon);
+        if(other.consumable)
+            consumable = new ConsumableComponent(*other.consumable);
+        if(other.equipment)
+            equipment = new EquipmentComponent(*other.equipment);
+    }
+};
+
+Item *
+GetItem(ItemType type)
+{
+    switch(type)
+    {
+        case IV_NONE:           return nullptr;
         // Weapons
-        case IV_SWORD_IRON:     return {new WeaponComponent(WEAPON_SWORD,   5, 1, 1, 3)};
-        case IV_SWORD_STEEL:    return {new WeaponComponent(WEAPON_SWORD,   8, 1, 1, 5)};
-        case IV_SWORD_SILVER:   return {new WeaponComponent(WEAPON_SWORD,   10, 1, 1, 5)};
+        case IV_SWORD_IRON:     return new Item(type, new WeaponComponent(WEAPON_SWORD,   5, 1, 1, 3));
+        case IV_SWORD_STEEL:    return new Item(type, new WeaponComponent(WEAPON_SWORD,   8, 1, 1, 5));
+        case IV_SWORD_SILVER:   return new Item(type, new WeaponComponent(WEAPON_SWORD,   10, 1, 1, 5));
 
-        case IV_SPEAR_IRON:     return {new WeaponComponent(WEAPON_SPEAR,   7, 1, 1, 6)};
-        case IV_SPEAR_STEEL:    return {new WeaponComponent(WEAPON_SPEAR,   10, 1, 1, 8)};
-        case IV_SPEAR_SILVER:   return {new WeaponComponent(WEAPON_SPEAR,   14, 1, 1, 9)};
-        case IV_SPEAR_JAVELIN:  return {new WeaponComponent(WEAPON_SPEAR,   6, 1, 2, 10)};
+        case IV_SPEAR_IRON:     return new Item(type, new WeaponComponent(WEAPON_SPEAR,   7, 1, 1, 6));
+        case IV_SPEAR_STEEL:    return new Item(type, new WeaponComponent(WEAPON_SPEAR,   10, 1, 1, 8));
+        case IV_SPEAR_SILVER:   return new Item(type, new WeaponComponent(WEAPON_SPEAR,   14, 1, 1, 9));
+        case IV_SPEAR_JAVELIN:  return new Item(type, new WeaponComponent(WEAPON_SPEAR,   6, 1, 2, 10));
 
-        case IV_AXE_IRON:       return {new WeaponComponent(WEAPON_AXE,     6, 1, 1, 5)};
-        case IV_AXE_STEEL:      return {new WeaponComponent(WEAPON_AXE,     9, 1, 1, 7)};
-        case IV_AXE_SILVER:     return {new WeaponComponent(WEAPON_AXE,     13, 1, 1, 8)};
-        case IV_AXE_HANDAXE:    return {new WeaponComponent(WEAPON_AXE,     5, 1, 2, 8)};
+        case IV_AXE_IRON:       return new Item(type, new WeaponComponent(WEAPON_AXE,     6, 1, 1, 5));
+        case IV_AXE_STEEL:      return new Item(type, new WeaponComponent(WEAPON_AXE,     9, 1, 1, 7));
+        case IV_AXE_SILVER:     return new Item(type, new WeaponComponent(WEAPON_AXE,     13, 1, 1, 8));
+        case IV_AXE_HANDAXE:    return new Item(type, new WeaponComponent(WEAPON_AXE,     5, 1, 2, 8));
 
-        case IV_BOW_IRON:       return {new WeaponComponent(WEAPON_BOW,     5, 2, 2, 4)};
-        case IV_BOW_STEEL:      return {new WeaponComponent(WEAPON_BOW,     7, 2, 2, 5)};
-        case IV_BOW_SILVER:     return {new WeaponComponent(WEAPON_BOW,     9, 2, 2, 6)};
-        case IV_BOW_LONGBOW:    return {new WeaponComponent(WEAPON_BOW,     5, 2, 3, 7)};
+        case IV_BOW_IRON:       return new Item(type, new WeaponComponent(WEAPON_BOW,     5, 2, 2, 4));
+        case IV_BOW_STEEL:      return new Item(type, new WeaponComponent(WEAPON_BOW,     7, 2, 2, 5));
+        case IV_BOW_SILVER:     return new Item(type, new WeaponComponent(WEAPON_BOW,     9, 2, 2, 6));
+        case IV_BOW_LONGBOW:    return new Item(type, new WeaponComponent(WEAPON_BOW,     5, 2, 3, 7));
 
-        case IV_TOME_SPARK:     return {new WeaponComponent(WEAPON_TOME,    3, 1, 1, 1)};
-        case IV_TOME_BOLT:      return {new WeaponComponent(WEAPON_TOME,    9, 1, 1, 2)};
-        case IV_TOME_STORM:     return {new WeaponComponent(WEAPON_TOME,    16, 1, 1, 3)};
+        case IV_TOME_SPARK:     return new Item(type, new WeaponComponent(WEAPON_TOME,    3, 1, 1, 1));
+        case IV_TOME_BOLT:      return new Item(type, new WeaponComponent(WEAPON_TOME,    9, 1, 1, 2));
+        case IV_TOME_STORM:     return new Item(type, new WeaponComponent(WEAPON_TOME,    16, 1, 1, 3));
 
-        case IV_STAFF_HEAL:     return {new WeaponComponent(WEAPON_STAFF,   10, 1, 1, 1)};
-        case IV_STAFF_MEND:     return {new WeaponComponent(WEAPON_STAFF,   15, 1, 1, 1)};
-        case IV_STAFF_REVIVE:   return {new WeaponComponent(WEAPON_STAFF,   30, 1, 3, 1)};
+        case IV_STAFF_HEAL:     return new Item(type, new WeaponComponent(WEAPON_STAFF,   10, 1, 1, 1));
+        case IV_STAFF_MEND:     return new Item(type, new WeaponComponent(WEAPON_STAFF,   15, 1, 1, 1));
+        case IV_STAFF_REVIVE:   return new Item(type, new WeaponComponent(WEAPON_STAFF,   30, 1, 3, 1));
 
         // Consumables
-        case IV_POTION_LOW:     return {nullptr, new ConsumableComponent(CONS_POTION, 10)};
-        case IV_POTION_MID:     return {nullptr, new ConsumableComponent(CONS_POTION, 20)};
-        case IV_POTION_HIGH:    return {nullptr, new ConsumableComponent(CONS_POTION, 30)};
+        case IV_POTION_LOW:     return new Item(type, nullptr, new ConsumableComponent(CONS_POTION, 10, 3));
+        case IV_POTION_MID:     return new Item(type, nullptr, new ConsumableComponent(CONS_POTION, 20, 3));
+        case IV_POTION_HIGH:    return new Item(type, nullptr, new ConsumableComponent(CONS_POTION, 30, 3));
 
         // Equipment
-        case IV_SHIELD:         return {nullptr, nullptr, new EquipmentComponent(EQUIP_ARMOR, 2)};
-        case IV_HELMET:         return {nullptr, nullptr, new EquipmentComponent(EQUIP_ARMOR, 1)};
+        case IV_SHIELD:         return new Item(type, nullptr, nullptr, new EquipmentComponent(EQUIP_ARMOR, 2));
+        case IV_HELMET:         return new Item(type, nullptr, nullptr, new EquipmentComponent(EQUIP_ARMOR, 1));
 
-        case IV_WIND_RING:      return {nullptr, nullptr, new EquipmentComponent(EQUIP_RING,  3)};
+        case IV_WIND_RING:      return new Item(type, nullptr, nullptr, new EquipmentComponent(EQUIP_RING,  3));
 
-        default: cout << "WARNING ItemIndex: No item at index " << index << "\n"; return {};
+        default: cout << "WARNING ItemIndex: No item at index " << type << "\n"; return nullptr;
     }
 }
 

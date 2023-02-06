@@ -194,6 +194,9 @@ struct Unit
     Growths growths = {};
     int experience = 0;
 
+    Item *primary_item;
+    Item *secondary_item;
+
     int turns_active = -1;
     int xp_value = 0;
     AIBehavior ai_behavior = NO_BEHAVIOR;
@@ -214,6 +217,8 @@ struct Unit
     ~Unit()
     {
         delete buff;
+        delete primary_item;
+        delete secondary_item;
     }
 
     size_t
@@ -246,6 +251,9 @@ struct Unit
          int defense_growth_in,
          int speed_growth_in,
          int skill_growth_in,
+
+         ItemType primary_item_type_in,
+         ItemType secondary_item_type_in,
 
          Spritesheet sheet_in,
          Texture neutral_in,
@@ -281,6 +289,45 @@ struct Unit
       growths.defense = defense_growth_in;
       growths.speed = speed_growth_in;
       growths.skill = skill_growth_in;
+
+      primary_item = GetItem(primary_item_type_in);
+      secondary_item = GetItem(secondary_item_type_in);
+    }
+
+    Unit(const Unit &other)
+    : name(other.name),
+      is_ally(other.is_ally),
+      movement(other.movement),
+      health(other.health),
+      max_health(other.max_health),
+      attack(other.attack),
+      aptitude(other.aptitude),
+      defense(other.defense),
+      speed(other.speed),
+      skill(other.skill),
+      min_range(other.min_range),
+      max_range(other.max_range),
+      level(other.level),
+      ability(other.ability),
+      ai_behavior(other.ai_behavior),
+      xp_value(other.xp_value),
+      sheet(other.sheet),
+      neutral(other.neutral),
+      happy(other.happy),
+      angry(other.angry),
+      wince(other.wince)
+    {
+      growths.health = other.growths.health;
+      growths.attack = other.growths.attack;
+      growths.aptitude = other.growths.aptitude;
+      growths.defense = other.growths.defense;
+      growths.speed = other.growths.speed;
+      growths.skill = other.growths.skill;
+
+      if(other.primary_item)
+          primary_item = new Item(*other.primary_item);
+      if(other.secondary_item)
+          secondary_item = new Item(*other.secondary_item);
     }
 
     // Damages a unit and resolves things involved with that process.
