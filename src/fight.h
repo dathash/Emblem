@@ -9,7 +9,11 @@
 int
 HitChance(const Unit &predator, const Unit &prey, int bonus)
 {
-    return (predator.Accuracy() - prey.Avoid() - bonus);
+    int hit = predator.Hit();
+
+    int avoid = prey.Avoid() + bonus;
+
+    return (hit - avoid - bonus);
 }
 
 // Returns the chance to crit a unit
@@ -24,7 +28,8 @@ CritChance(const Unit &predator, const Unit &prey)
 int
 CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
 {
-    int attack = predator.attack;
+    int attack = predator.Attack();
+
     int defense = prey.defense + defense_bonus;
     if(predator.buff && predator.buff->stat == STAT_ATTACK)
         attack += predator.buff->amount;
@@ -37,8 +42,8 @@ CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
 bool
 Doubles(const Unit &predator, const Unit &prey)
 {
-    int pred_spd = predator.speed;
-    int prey_spd = prey.speed;
+    int pred_spd = predator.AttackSpeed();
+    int prey_spd = prey.AttackSpeed();
     if(predator.buff && predator.buff->stat == STAT_SPEED)
         pred_spd += predator.buff->amount;
     if(prey.buff && prey.buff->stat == STAT_SPEED)
@@ -49,7 +54,7 @@ Doubles(const Unit &predator, const Unit &prey)
 int
 CalculateHealing(const Unit &healer, const Unit &healee)
 {
-    int healing = healer.aptitude;
+    int healing = healer.magic;
     if(healer.buff && healer.buff->stat == STAT_SPEED)
         healing += healer.buff->amount;
     return healing;
@@ -89,7 +94,7 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     outcome.one_crit = one.Crit();
     outcome.one_doubles = Doubles(one, two);
 
-    if(distance >= two.min_range && distance <= two.max_range)
+    if(distance >= two.MinRange() && distance <= two.MaxRange())
     {
         outcome.two_attacks = true;
         outcome.two_damage = CalculateDamage(two, one, one_defense_bonus);
@@ -349,7 +354,7 @@ struct Fight
         if(attack.hit && two->health - two_accum <= 0)
             return;
 
-        if(distance >= two->min_range && distance <= two->max_range)
+        if(distance >= two->MinRange() && distance <= two->MaxRange())
         {
             attack = {two, one, two_dmg};
             if(distance > 1)
@@ -392,7 +397,7 @@ struct Fight
                 return;
         }
 
-        if(distance >= two->min_range && distance <= two->max_range)
+        if(distance >= two->MinRange() && distance <= two->MaxRange())
         {
             attack = {two, one, two_dmg};
             if(distance > 1)
@@ -435,7 +440,7 @@ void SimulateBuff(Unit *one, Unit *two)
 void SimulateHealing(Unit *one, Unit *two)
 {
     // one -> two
-    int healing = one->aptitude;
+    int healing = one->magic;
     two->health = min(healing + two->health, two->max_health);
 }
 

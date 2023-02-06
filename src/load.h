@@ -335,13 +335,14 @@ LoadUnits(string filename_in)
                     stoi(tokens[2]),							// movement
                     stoi(tokens[3]),							// health
                     stoi(tokens[3]),							// max health
-                    stoi(tokens[4]),							// attack
-                    stoi(tokens[5]),							// aptitude
-                    stoi(tokens[6]),							// defense
-                    stoi(tokens[7]),							// speed
-                    stoi(tokens[8]),						    // skill
-                    stoi(tokens[9]),						    // short range
-                    stoi(tokens[10]),						    // long range
+
+                    stoi(tokens[4]),							// strength
+                    stoi(tokens[5]),							// magic
+                    stoi(tokens[6]),							// speed
+                    stoi(tokens[7]),						    // skill
+                    stoi(tokens[8]),						    // luck
+                    stoi(tokens[9]),							// defense
+                    stoi(tokens[10]),							// resistance
 
                     stoi(tokens[11]),						    // level
 
@@ -353,22 +354,24 @@ LoadUnits(string filename_in)
 
                     // Growths
                     stoi(tokens[15]),                           // health
-                    stoi(tokens[16]),                           // attack
-                    stoi(tokens[17]),                           // aptitude
-                    stoi(tokens[18]),                           // defense
-                    stoi(tokens[19]),                           // speed
-                    stoi(tokens[20]),                           // skill
+                    stoi(tokens[16]),                           // strength
+                    stoi(tokens[17]),                           // magic
+                    stoi(tokens[18]),                           // speed
+                    stoi(tokens[19]),                           // skill
+                    stoi(tokens[20]),                           // luck
+                    stoi(tokens[21]),                           // defense
+                    stoi(tokens[22]),                           // resistance
 
                     // Items
-                    (ItemType)stoi(tokens[21]),        // primary
-                    (ItemType)stoi(tokens[22]),        // secondary
+                    (ItemType)stoi(tokens[23]),                 // primary
+                    (ItemType)stoi(tokens[24]),                 // secondary
 
                     // Textures
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[23]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(FULLS_PATH, tokens[24]),   // neutral
-                    LoadTextureImage(FULLS_PATH, tokens[25]),   // happy
-                    LoadTextureImage(FULLS_PATH, tokens[26]),   // angry
-                    LoadTextureImage(FULLS_PATH, tokens[27])    // wince
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[25]), 32, ANIMATION_SPEED), // path to texture
+                    LoadTextureImage(FULLS_PATH, tokens[26]),   // neutral
+                    LoadTextureImage(FULLS_PATH, tokens[27]),   // happy
+                    LoadTextureImage(FULLS_PATH, tokens[28]),   // angry
+                    LoadTextureImage(FULLS_PATH, tokens[29])    // wince
                 ));
             }
         }
@@ -379,7 +382,6 @@ LoadUnits(string filename_in)
 }
 
 // ================================ saving ====================================
-
 // saves the units to a file.
 void
 SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
@@ -388,31 +390,35 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
 
-    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<atk>\t<apt>\t<def>\t<spd>\t<skl>\t<short>\t<long>\t<level>\t<abi>\t<ai>\t<xpv>\t<ghp>\t<gat>\t<gap>\t<gdf>\t<gsp>\t<gsk>\t<item1>\t<item2>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
+    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<str>\t<mag>\t<spd>\t<skl>\t<lck>\t<def>\t<res>\t<short>\t<long>\t<level>\t<abi>\t<ai>\t<xpv>\t<ghp>\t<gst>\t<gmg>\t<msp>\t<gsk>\t<glk>\t<gdf>\t<grs>\t<item1>\t<item2>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << "\t"
                      << (unit->is_ally ? "Ally" : "Enemy") << "\t"
                      << unit->movement << "\t"
                      << unit->max_health << "\t"
-                     << unit->attack << "\t"
-                     << unit->aptitude << "\t"
-                     << unit->defense << "\t"
+
+                     << unit->strength << "\t"
+                     << unit->magic << "\t"
                      << unit->speed << "\t"
                      << unit->skill << "\t"
-                     << unit->min_range << "\t"
-                     << unit->max_range << "\t"
+                     << unit->luck << "\t"
+                     << unit->defense << "\t"
+                     << unit->resistance << "\t"
+
                      << unit->level << "\t"
                      << unit->ability << "\t"
                      << unit->ai_behavior << "\t"
                      << unit->xp_value << "\t"
 
                      << unit->growths.health << "\t"
-                     << unit->growths.attack << "\t"
-                     << unit->growths.aptitude << "\t"
-                     << unit->growths.defense << "\t"
+                     << unit->growths.strength << "\t"
+                     << unit->growths.magic << "\t"
                      << unit->growths.speed << "\t"
                      << unit->growths.skill << "\t"
+                     << unit->growths.luck << "\t"
+                     << unit->growths.defense << "\t"
+                     << unit->growths.resistance << "\t"
 
                      << (unit->primary_item ? unit->primary_item->type : 0) << "\t"
                      << (unit->secondary_item ? unit->secondary_item->type : 0) << "\t"
