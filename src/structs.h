@@ -166,7 +166,6 @@ struct Buff
     {}
 };
 
-
 enum Expression
 {
     EXPR_NEUTRAL,

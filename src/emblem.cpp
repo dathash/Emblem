@@ -127,6 +127,7 @@ static AIState GlobalAIState;
 #include "utils.h"
 #include "animation.h"
 #include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
+#include "item.h"
 #include "structs.h"
 #include "vfx.h"
 #include "event.h" // NOTE: Includes a GlobalEvents queue.

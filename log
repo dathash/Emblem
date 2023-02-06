@@ -116,7 +116,6 @@ PROTOTYPE ///////////////////////////////////////////////////
     objects/pointers will be const
 
     Little things:
-    * Edit enemies or allies, not both at once.
     * Enemies that spawn after a certain amount of time.
     * Cutscene events on turn change.
 

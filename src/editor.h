@@ -1,5 +1,3 @@
-
-
 // Author: Alex Hartford                                                                                 
 // Program: Emblem
 // File: Editor
