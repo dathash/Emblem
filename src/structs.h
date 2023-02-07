@@ -552,6 +552,7 @@ struct Unit
             return 0;
         return primary_item->weapon->hit + 2 * skill;
     }
+    // COMMENT
 
     int
     Avoid() const
