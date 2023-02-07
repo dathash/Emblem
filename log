@@ -125,7 +125,6 @@ PROTOTYPE ///////////////////////////////////////////////////
     * Chests
       * Items
         * Using Items
-        * Equipping Items
         * Trading Items
         * General Item Manipulation
     * Enemies pursue and destroy villages, steal items from chests
