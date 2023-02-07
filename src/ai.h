@@ -61,8 +61,8 @@ public:
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
                                         cursor->selected->movement,
-                                        cursor->selected->MinRange(),
-                                        cursor->selected->MaxRange(),
+                                        cursor->selected->min_range,
+                                        cursor->selected->max_range,
                                         cursor->selected->is_ally);
         map->accessible = result.first;
         map->vis_range = result.second;
@@ -70,8 +70,8 @@ public:
         map->double_range = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
                                         cursor->selected->movement * 2,
-                                        cursor->selected->MinRange(),
-                                        cursor->selected->MaxRange(),
+                                        cursor->selected->min_range,
+                                        cursor->selected->max_range,
                                         cursor->selected->is_ally).first;
 
         GlobalAIState = SELECTED;

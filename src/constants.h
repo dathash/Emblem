@@ -197,7 +197,7 @@ const SDL_Color clearColor =        {0, 0, 0, 0};
 const SDL_Color exhaustedMod =      {50,    0,  50, 0};
 const SDL_Color buffAtkMod =        {255,   0,   0, 0};
 const SDL_Color buffDefMod =        {0,   255, 255, 0};
-const SDL_Color buffMagMod =        {255, 150, 255, 0};
+const SDL_Color buffAptMod =        {255, 150, 255, 0};
 const SDL_Color buffSpdMod =        {255, 255,   0, 0};
 const SDL_Color readyMod =          {255, 255, 255, 0};
 

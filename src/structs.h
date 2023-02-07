@@ -127,13 +127,11 @@ struct Spritesheet
 struct Growths
 {
     int health;
-    int strength;
-    int magic;
+    int attack;
+    int aptitude;
+    int defense;
     int speed;
     int skill;
-    int luck;
-    int defense;
-    int resistance;
 };
 
 enum Ability
@@ -150,7 +148,7 @@ enum Stat
     STAT_NONE,
     STAT_ATTACK,
     STAT_DEFENSE,
-    STAT_MAGIC,
+    STAT_APTITUDE,
     STAT_SPEED,
     STAT_SKILL,
 };
@@ -183,15 +181,13 @@ struct Unit
     int movement;
     int health;
     int max_health;
-
-    int strength;
-    int magic;
-    int skill;
-    int speed;
-    int luck;
+    int attack;
+    int aptitude;
     int defense;
-    int resistance;
-
+    int speed;
+    int skill;
+    int min_range;
+    int max_range;
     int level;
     Ability ability;
 
@@ -241,23 +237,20 @@ struct Unit
          string name_in,
          bool is_ally_in, int movement_in,
          int health_in, int max_health_in,
-         int strength_in, int magic_in,
+         int attack_in, int aptitude_in, int defense_in,
          int speed_in, int skill_in,
-         int luck_in,
-         int defense_in, int resistance_in,
+         int min_range_in, int max_range_in,
          int level_in,
          Ability ability_in,
          AIBehavior ai_behavior_in,
          int xp_value_in,
 
          int health_growth_in,
-         int strength_growth_in,
-         int magic_growth_in,
+         int attack_growth_in,
+         int aptitude_growth_in,
+         int defense_growth_in,
          int speed_growth_in,
          int skill_growth_in,
-         int luck_growth_in,
-         int defense_growth_in,
-         int resistance_growth_in,
 
          ItemType primary_item_type_in,
          ItemType secondary_item_type_in,
@@ -273,15 +266,13 @@ struct Unit
       movement(movement_in),
       health(health_in),
       max_health(max_health_in),
-
-      strength(strength_in),
-      magic(magic_in),
+      attack(attack_in),
+      aptitude(aptitude_in),
+      defense(defense_in),
       speed(speed_in),
       skill(skill_in),
-      luck(luck_in),
-      defense(defense_in),
-      resistance(resistance_in),
-
+      min_range(min_range_in),
+      max_range(max_range_in),
       level(level_in),
       ability(ability_in),
       ai_behavior(ai_behavior_in),
@@ -293,13 +284,11 @@ struct Unit
       wince(wince_in)
     {
       growths.health = health_growth_in;
-      growths.strength = strength_growth_in;
-      growths.magic = magic_growth_in;
+      growths.attack = attack_growth_in;
+      growths.aptitude = aptitude_growth_in;
+      growths.defense = defense_growth_in;
       growths.speed = speed_growth_in;
       growths.skill = skill_growth_in;
-      growths.luck = luck_growth_in;
-      growths.defense = defense_growth_in;
-      growths.resistance = resistance_growth_in;
 
       primary_item = GetItem(primary_item_type_in);
       secondary_item = GetItem(secondary_item_type_in);
@@ -311,13 +300,13 @@ struct Unit
       movement(other.movement),
       health(other.health),
       max_health(other.max_health),
-      strength(other.strength),
-      magic(other.magic),
+      attack(other.attack),
+      aptitude(other.aptitude),
+      defense(other.defense),
       speed(other.speed),
       skill(other.skill),
-      luck(other.luck),
-      defense(other.defense),
-      resistance(other.resistance),
+      min_range(other.min_range),
+      max_range(other.max_range),
       level(other.level),
       ability(other.ability),
       ai_behavior(other.ai_behavior),
@@ -329,95 +318,16 @@ struct Unit
       wince(other.wince)
     {
       growths.health = other.growths.health;
-      growths.strength = other.growths.strength;
-      growths.magic = other.growths.magic;
+      growths.attack = other.growths.attack;
+      growths.aptitude = other.growths.aptitude;
+      growths.defense = other.growths.defense;
       growths.speed = other.growths.speed;
       growths.skill = other.growths.skill;
-      growths.luck = other.growths.luck;
-      growths.defense = other.growths.defense;
-      growths.resistance = other.growths.resistance;
 
       if(other.primary_item)
           primary_item = new Item(*other.primary_item);
       if(other.secondary_item)
           secondary_item = new Item(*other.secondary_item);
-    }
-
-    bool
-    PrimaryRange(int distance) const
-    {
-        if(primary_item && primary_item->weapon && 
-           primary_item->weapon->min_range <= distance &&
-           primary_item->weapon->max_range >= distance)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    bool
-    SecondaryRange(int distance) const
-    {
-        if(secondary_item && secondary_item->weapon && 
-           secondary_item->weapon->min_range <= distance &&
-           secondary_item->weapon->max_range >= distance)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    void
-    SwitchWeapons()
-    {
-        Item *tmp = primary_item;
-        primary_item = secondary_item;
-        secondary_item = tmp;
-    }
-
-    int
-    MinRange() const
-    {
-        if(primary_item && primary_item->weapon)
-            return primary_item->weapon->min_range;
-        return 0;
-    }
-    int
-    MaxRange() const
-    {
-        if(primary_item && primary_item->weapon)
-            return primary_item->weapon->max_range;
-        return 0;
-    }
-
-    int
-    OverallMinRange() const
-    {
-        int result = 0;
-        if(primary_item && primary_item->weapon)
-        {
-            result = primary_item->weapon->min_range;
-        }
-        if(secondary_item && secondary_item->weapon)
-        {
-            result = min(result, secondary_item->weapon->min_range);
-        }
-        return result;
-    }
-
-    int
-    OverallMaxRange() const
-    {
-        int result = 0;
-        if(primary_item && primary_item->weapon)
-        {
-            result = primary_item->weapon->max_range;
-        }
-        if(secondary_item && secondary_item->weapon)
-        {
-            result = max(result, secondary_item->weapon->max_range);
-        }
-        return result;
     }
 
     // Damages a unit and resolves things involved with that process.
@@ -480,13 +390,11 @@ struct Unit
         level += 1;
         
         max_health += StatBoost(growths.health);
-        strength += StatBoost(growths.strength);
-        magic += StatBoost(growths.magic);
+        attack += StatBoost(growths.attack);
+        defense += StatBoost(growths.defense);
+        aptitude += StatBoost(growths.aptitude);
         speed += StatBoost(growths.speed);
         skill += StatBoost(growths.skill);
-        luck += StatBoost(growths.luck);
-        defense += StatBoost(growths.defense);
-        resistance += StatBoost(growths.resistance);
 
         experience -= 100;
         if(level == 10)
@@ -505,41 +413,15 @@ struct Unit
     }
 
     int
-    Hit() const
+    Accuracy() const
     {
-        if(!Armed())
-            return 0;
-        return primary_item->weapon->hit + 2 * skill;
+        return 50 + (skill * 10);
     }
 
     int
     Avoid() const
     {
-        return 2 * AttackSpeed();
-    }
-
-    int
-    Attack() const
-    {
-        if(!Armed())
-            return 0;
-        return primary_item->weapon->might + strength;
-    }
-
-    bool
-    Armed() const
-    {
-        return primary_item && primary_item->weapon;
-    }
-
-    int
-    AttackSpeed() const
-    {
-        if(Armed())
-        {
-            return speed - primary_item->weapon->weight; // TODO; + CON!!!
-        }
-        return speed;
+        return skill * 5;
     }
 
     int

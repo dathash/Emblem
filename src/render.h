@@ -53,9 +53,9 @@ SetSpriteModifiers(Unit *unit)
             {
                 SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffDefMod.r, buffDefMod.g, buffDefMod.b);
             } break;
-            case STAT_MAGIC:
+            case STAT_APTITUDE:
             {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffMagMod.r, buffMagMod.g, buffMagMod.b);
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAptMod.r, buffAptMod.g, buffAptMod.b);
             } break;
             case STAT_SPEED:
             {

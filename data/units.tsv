@@ -1,24 +1,24 @@
-COM	<name>	<team>	<mov>	<hp>	<str>	<mag>	<spd>	<skl>	<lck>	<def>	<res>	<short>	<long>	<level>	<abi>	<ai>	<xpv>	<ghp>	<gat>	<gap>	<gdf>	<gsp>	<gsk>	<gsk>	<gsk>	<item1>	<item2>	<texture>	<neutral>	<happy>	<angry>	<wince>
-UNT Lucina	Ally	5	14	8	3	8	7	0	1	0	1	2	0	50	100	40	0	30	40	50	1	22	22	22	lucina.png	lucina_neutral.png	lucina_happy.png	lucina_angry.png	lucina_wince.png	
-UNT Priam	Ally	4	25	10	5	6	5	0	3	0	5	0	0	50	50	40	0	40	20	30	0	0	0	0	priam.png	priam_neutral.png	priam_happy.png	priam_angry.png	priam_wince.png	
-UNT Sully	Ally	7	18	8	0	8	5	0	4	0	1	0	0	50	40	40	0	40	30	10	4	7	7	7	sully.png	ph.png	ph.png	ph.png	ph.png	
-UNT Vaike	Ally	5	20	11	0	7	3	0	0	0	1	0	0	50	70	80	0	10	30	10	8	0	0	0	vaike.png	ph.png	ph.png	ph.png	ph.png	
-UNT Nowi	Ally	5	14	0	12	9	7	0	0	0	1	0	0	50	40	10	80	20	50	40	12	0	0	0	nowi.png	ph.png	ph.png	ph.png	ph.png	
-UNT Yen'fay	Ally	5	20	10	5	5	10	0	5	0	5	0	0	50	39	40	0	10	40	40	3	0	0	0	yen'fay.png	ph.png	ph.png	ph.png	ph.png	
-UNT Severa	Ally	5	18	9	4	9	9	0	4	0	3	0	0	50	80	60	0	10	70	70	3	0	0	0	severa.png	ph.png	ph.png	ph.png	ph.png	
-UNT Noire	Ally	5	14	8	0	8	9	0	0	0	1	0	0	50	80	40	0	19	60	80	12	0	0	0	noire.png	ph.png	ph.png	ph.png	ph.png	
-UNT Gaius	Ally	5	18	10	12	8	8	0	2	0	5	0	0	50	80	60	60	10	60	60	0	0	0	0	gaius.png	ph.png	ph.png	ph.png	ph.png	
-UNT Stahl	Ally	4	13	8	0	9	7	0	0	0	4	0	0	50	90	40	0	40	60	100	10	0	0	0	stahl.png	stahl_neutral.png	stahl_happy.png	stahl_angry.png	stahl_wince.png	
-UNT Donnel	Ally	3	22	5	10	2	5	0	7	0	1	1	0	50	110	20	0	90	10	10	4	0	0	0	donnel.png	donnel_neutral.png	donnel_happy.png	donnel_angry.png	donnel_wince.png	
-UNT Olivia	Ally	3	11	0	10	5	0	0	0	0	2	4	0	50	70	10	60	20	30	30	0	0	0	0	olivia.png	olivia_neutral.png	olivia_happy.png	olivia_angry.png	olivia_wince.png	
-UNT Tiki	Ally	4	13	2	12	6	5	0	8	0	4	1	0	50	90	10	60	70	20	20	0	0	0	0	tiki.png	tiki_neutral.png	tiki_happy.png	tiki_angry.png	tiki_wince.png	
-UNT Flavia	Ally	4	16	10	0	7	6	0	5	0	3	0	0	50	110	60	0	40	40	40	0	0	0	0	flavia.png	flavia_neutral.png	flavia_happy.png	flavia_angry.png	flavia_wince.png	
-UNT Lon'qu	Ally	5	13	12	0	12	10	0	0	0	1	0	0	50	70	60	0	10	70	70	0	0	0	0	lonqu.png	lonqu_neutral.png	lonqu_happy.png	lonqu_angry.png	lonqu_wince.png	
-UNT Tharja	Ally	4	14	8	12	6	8	0	0	0	2	1	0	50	80	0	120	50	40	20	0	0	0	0	tharja.png	tharja_neutral.png	tharja_happy.png	tharja_angry.png	tharja_wince.png	
-UNT Thief	Enemy	4	14	8	0	8	6	0	0	0	2	0	1	12	0	0	0	0	0	0	1	0	0	0	thief.png	fighter_full.png	fighter_full.png	fighter_full.png	fighter_full.png	
-UNT Brute	Enemy	3	18	10	0	7	2	0	2	0	3	0	1	15	0	0	0	0	0	0	8	0	0	0	brute.png	brute_full.png	brute_full.png	brute_full.png	brute_full.png	
-UNT Archer	Enemy	3	12	10	0	6	4	0	0	0	2	0	1	12	0	0	0	0	0	0	12	0	0	0	archer.png	archer_full.png	archer_full.png	archer_full.png	archer_full.png	
-UNT Charles	Enemy	5	30	10	0	6	6	0	5	0	5	0	2	100	0	0	0	0	0	0	5	0	0	0	axeknight.png	boss1_full.png	boss1_full.png	boss1_full.png	boss1_full.png	
-UNT Diane	Enemy	5	30	10	0	6	8	0	5	0	5	0	2	120	0	0	0	0	0	0	5	0	0	0	axeknight.png	boss2_full.png	boss2_full.png	boss2_full.png	boss2_full.png	
-UNT Sniper	Enemy	5	14	10	0	8	7	0	0	0	4	0	4	30	0	0	0	0	0	0	15	0	0	0	sniper.png	sniper_full.png	sniper_full.png	sniper_full.png	sniper_full.png	
-UNT Brigand	Enemy	4	24	10	0	4	5	0	4	0	4	0	1	40	0	0	0	0	0	0	9	11	11	11	savage.png	savage_full.png	savage_full.png	savage_full.png	savage_full.png	
+COM	<name>	<team>	<mov>	<hp>	<atk>	<apt>	<def>	<spd>	<skl>	<short>	<long>	<level>	<abi>	<ai>	<xpv>	<ghp>	<gat>	<gap>	<gdf>	<gsp>	<gsk>	<item1>	<item2>	<texture>	<neutral>	<happy>	<angry>	<wince>
+UNT Lucina	Ally	5	14	8	3	1	8	7	1	1	1	2	0	50	100	40	0	30	40	50	1	22	lucina.png	lucina_neutral.png	lucina_happy.png	lucina_angry.png	lucina_wince.png	
+UNT Priam	Ally	4	25	10	5	3	6	5	1	1	5	0	0	50	50	40	0	40	20	30	2	0	priam.png	priam_neutral.png	priam_happy.png	priam_angry.png	priam_wince.png	
+UNT Sully	Ally	7	18	8	0	4	8	5	1	1	1	0	0	50	40	40	0	40	30	10	4	0	sully.png	ph.png	ph.png	ph.png	ph.png	
+UNT Vaike	Ally	5	20	11	0	0	7	3	1	1	1	0	0	50	70	80	0	10	30	10	8	0	vaike.png	ph.png	ph.png	ph.png	ph.png	
+UNT Nowi	Ally	5	14	0	12	0	9	7	1	2	1	0	0	50	40	10	80	20	50	40	12	0	nowi.png	ph.png	ph.png	ph.png	ph.png	
+UNT Yen'fay	Ally	5	20	10	5	5	5	10	1	1	5	0	0	50	39	40	0	10	40	40	3	0	yen'fay.png	ph.png	ph.png	ph.png	ph.png	
+UNT Severa	Ally	5	18	9	4	4	9	9	1	1	3	0	0	50	80	60	0	10	70	70	3	0	severa.png	ph.png	ph.png	ph.png	ph.png	
+UNT Noire	Ally	5	14	8	0	0	8	9	2	2	1	0	0	50	80	40	0	19	60	80	10	0	noire.png	ph.png	ph.png	ph.png	ph.png	
+UNT Gaius	Ally	5	18	10	12	2	8	8	1	2	5	0	0	50	80	60	60	10	60	60	0	0	gaius.png	ph.png	ph.png	ph.png	ph.png	
+UNT Stahl	Ally	4	13	8	0	0	9	7	2	2	4	0	0	50	90	40	0	40	60	100	10	0	stahl.png	stahl_neutral.png	stahl_happy.png	stahl_angry.png	stahl_wince.png	
+UNT Donnel	Ally	3	22	5	10	7	2	5	1	1	1	1	0	50	110	20	0	90	10	10	4	0	donnel.png	donnel_neutral.png	donnel_happy.png	donnel_angry.png	donnel_wince.png	
+UNT Olivia	Ally	3	11	0	10	0	5	0	1	1	2	4	0	50	70	10	60	20	30	30	0	0	olivia.png	olivia_neutral.png	olivia_happy.png	olivia_angry.png	olivia_wince.png	
+UNT Tiki	Ally	4	13	2	12	8	6	5	2	2	4	1	0	50	90	10	60	70	20	20	0	0	tiki.png	tiki_neutral.png	tiki_happy.png	tiki_angry.png	tiki_wince.png	
+UNT Flavia	Ally	4	16	10	0	5	7	6	1	1	3	0	0	50	110	60	0	40	40	40	0	0	flavia.png	flavia_neutral.png	flavia_happy.png	flavia_angry.png	flavia_wince.png	
+UNT Lon'qu	Ally	5	13	12	0	0	12	10	1	1	1	0	0	50	70	60	0	10	70	70	0	0	lonqu.png	lonqu_neutral.png	lonqu_happy.png	lonqu_angry.png	lonqu_wince.png	
+UNT Tharja	Ally	4	14	8	12	0	6	8	2	3	2	1	0	50	80	0	120	50	40	20	0	0	tharja.png	tharja_neutral.png	tharja_happy.png	tharja_angry.png	tharja_wince.png	
+UNT Thief	Enemy	4	14	8	0	0	8	6	1	1	2	0	1	12	0	0	0	0	0	0	0	0	thief.png	fighter_full.png	fighter_full.png	fighter_full.png	fighter_full.png	
+UNT Brute	Enemy	3	18	10	0	2	7	2	1	1	3	0	1	15	0	0	0	0	0	0	0	0	brute.png	brute_full.png	brute_full.png	brute_full.png	brute_full.png	
+UNT Archer	Enemy	3	12	10	0	0	6	4	2	2	2	0	1	12	0	0	0	0	0	0	0	0	archer.png	archer_full.png	archer_full.png	archer_full.png	archer_full.png	
+UNT Charles	Enemy	5	30	10	0	5	6	6	1	1	5	0	2	100	0	0	0	0	0	0	0	0	axeknight.png	boss1_full.png	boss1_full.png	boss1_full.png	boss1_full.png	
+UNT Diane	Enemy	5	30	10	0	5	6	8	1	1	5	0	2	120	0	0	0	0	0	0	0	0	axeknight.png	boss2_full.png	boss2_full.png	boss2_full.png	boss2_full.png	
+UNT Sniper	Enemy	5	14	10	0	0	8	7	2	3	4	0	4	30	0	0	0	0	0	0	0	0	sniper.png	sniper_full.png	sniper_full.png	sniper_full.png	sniper_full.png	
+UNT Brigand	Enemy	4	24	10	0	4	4	5	1	1	4	0	1	40	0	0	0	0	0	0	0	0	savage.png	savage_full.png	savage_full.png	savage_full.png	savage_full.png	

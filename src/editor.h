@@ -64,8 +64,6 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 3,
                 3,
                 3,
-                3,
-                3,
 
                 ITEM_NONE,
                 ITEM_NONE,
@@ -108,21 +106,23 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::InputText("name", &(selected->name));
         ImGui::SliderInt("mov", &selected->movement, 0, 10);
         ImGui::SliderInt("hp", &selected->max_health, 1, 50);
-        ImGui::SliderInt("str", &selected->strength, 0, 20);
-        ImGui::SliderInt("mag", &selected->magic, 0, 20);
+        ImGui::SliderInt("atk", &selected->attack, 0, 20);
+        ImGui::SliderInt("def", &selected->defense, 0, 20);
+        ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
         ImGui::SliderInt("spd", &selected->speed, 0, 20);
         ImGui::SliderInt("skl", &selected->skill, 0, 20);
-        ImGui::SliderInt("def", &selected->defense, 0, 20);
+        ImGui::SliderInt("min", &selected->min_range, 1, 4);
+        ImGui::SliderInt("max", &selected->max_range, 1, 4);
         ImGui::SliderInt("level", &selected->level, 1, 20);
         ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
 
         ImGui::Text("growths");
         ImGui::SliderInt("health", (int *)&selected->growths.health, 0, 100);
-        ImGui::SliderInt("strength", (int *)&selected->growths.strength, 0, 100);
-        ImGui::SliderInt("magic", (int *)&selected->growths.magic, 0, 100);
+        ImGui::SliderInt("attack", (int *)&selected->growths.attack, 0, 100);
+        ImGui::SliderInt("aptitude", (int *)&selected->growths.aptitude, 0, 100);
+        ImGui::SliderInt("defense", (int *)&selected->growths.defense, 0, 100);
         ImGui::SliderInt("speed", (int *)&selected->growths.speed, 0, 100);
         ImGui::SliderInt("skill", (int *)&selected->growths.skill, 0, 100);
-        ImGui::SliderInt("defense", (int *)&selected->growths.defense, 0, 100);
 
         ImGui::Text("ability: %d", selected->ability);
         ImGui::SameLine();
@@ -158,7 +158,6 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         if(ImGui::Button("Primary"))
         {
             delete selected->primary_item;
-            selected->primary_item = nullptr;
             if(item_type != 0)
                 selected->primary_item = GetItem((ItemType)item_type);
         }
@@ -166,7 +165,6 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         if(ImGui::Button("Secondary"))
         {
             delete selected->secondary_item;
-            selected->secondary_item = nullptr;
             if(item_type != 0)
                 selected->secondary_item = GetItem((ItemType)item_type);
         }
