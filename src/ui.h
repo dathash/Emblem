@@ -102,8 +102,8 @@ GetStatString(Stat stat)
     {
     case STAT_NONE: return "N/A";
     case STAT_ATTACK: return "Atk";
+    case STAT_MAGIC: return "Mag";
     case STAT_DEFENSE: return "Def";
-    case STAT_APTITUDE: return "Apt";
     case STAT_SPEED: return "Spd";
 	default:
 		assert(!"ERROR: Unhandled Ability name string in UI.\n");
@@ -488,17 +488,17 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             }
 
 			// Second line
-            int attack = unit.attack;
+            int strength = unit.strength;
             if(unit.buff && unit.buff->stat == STAT_ATTACK)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                attack += unit.buff->amount;
+                strength += unit.buff->amount;
             }
             else
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
             }
-			ImGui::Text("[ATK %d]", attack);
+			ImGui::Text("[STR %d]", strength);
             ImGui::PopStyleColor();
 
             int defense = unit.defense;
@@ -515,18 +515,18 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			ImGui::Text("[DEF %d]", defense);
             ImGui::PopStyleColor();
 
-            int aptitude = unit.aptitude;
+            int magic = unit.magic;
 			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_APTITUDE)
+            if(unit.buff && unit.buff->stat == STAT_MAGIC)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                aptitude += unit.buff->amount;
+                magic += unit.buff->amount;
             }
             else
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
             }
-			ImGui::Text("[APT %d]", aptitude);
+			ImGui::Text("[MAG %d]", magic);
             ImGui::PopStyleColor();
 
             int speed = unit.speed;
@@ -557,13 +557,13 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             ImGui::Text("[SKL %d]", unit.skill);
             ImGui::PopStyleColor();
 
-			ImGui::Text("[HIT %d%%]", unit.Accuracy());
+			ImGui::Text("[HIT %d%%]", unit.Hit());
 			ImGui::SameLine();
 			ImGui::Text("[AVO %d%%]", unit.Avoid());
 			ImGui::SameLine();
 			ImGui::Text("[CRT %d%%]", unit.Crit());
 			ImGui::SameLine();
-			ImGui::Text("[RG %d-%d]", unit.min_range, unit.max_range);
+			ImGui::Text("[RG %d-%d]", unit.OverallMinRange(), unit.OverallMaxRange());
 		ImGui::PopFont();
     }
     ImGui::End();

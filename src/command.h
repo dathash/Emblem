@@ -119,8 +119,8 @@ public:
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
                                         cursor->selected->movement,
-                                        cursor->selected->min_range,
-                                        cursor->selected->max_range,
+                                        cursor->selected->MinRange(),
+                                        cursor->selected->MaxRange(),
                                         cursor->selected->is_ally);
         map->accessible = result.first;
         map->vis_range = result.second;
@@ -246,20 +246,25 @@ public:
             menu->AddOption("Capture");
         }
 
-        vector<position> interactible = InteractibleFrom(level->map, cursor->pos,
-                                             cursor->selected->min_range, cursor->selected->max_range);
-        // for attacking
-        for(const position &p : interactible)
+        vector<position> interactible;
+        if(cursor->selected->Armed())
         {
-            level->map.range.push_back(p);
-            if(level->map.tiles[p.col][p.row].occupant &&
-               !level->map.tiles[p.col][p.row].occupant->is_ally)
+            interactible = InteractibleFrom(level->map, cursor->pos,
+                                            cursor->selected->OverallMinRange(), 
+                                            cursor->selected->OverallMaxRange());
+            // for attacking
+            for(const position &p : interactible)
             {
-                level->map.attackable.push_back(p);
+                level->map.range.push_back(p);
+                if(level->map.tiles[p.col][p.row].occupant &&
+                   !level->map.tiles[p.col][p.row].occupant->is_ally)
+                {
+                    level->map.attackable.push_back(p);
+                }
             }
+            if(level->map.attackable.size() > 0)
+                menu->AddOption("Attack");
         }
-        if(level->map.attackable.size() > 0)
-            menu->AddOption("Attack");
 
         interactible = InteractibleFrom(level->map, cursor->pos, 1, 1);
         // for ability
@@ -551,6 +556,32 @@ private:
     const Tilemap &map;
 };
 
+class SwitchWeaponCommand : public Command
+{
+public:
+    SwitchWeaponCommand(Cursor *cursor_in, Tilemap *map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        int distance = ManhattanDistance(cursor->selected->pos, cursor->targeted->pos);
+        if(cursor->selected->Armed() &&
+           cursor->selected->secondary_item &&
+           cursor->selected->secondary_item->weapon &&
+           cursor->selected->SecondaryRange(distance)
+           )
+        {
+            cursor->selected->SwitchWeapons();
+        }
+    }
+
+private:
+    Cursor *cursor;
+    Tilemap *map;
+};
+
 class InitiateAbilityCommand : public Command
 {
 public:
@@ -813,8 +844,8 @@ public:
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
                                         cursor->selected->movement,
-                                        cursor->selected->min_range,
-                                        cursor->selected->max_range,
+                                        cursor->selected->MinRange(),
+                                        cursor->selected->MaxRange(),
                                         cursor->selected->is_ally);
         map->accessible = result.first;
         map->vis_range = result.second;
@@ -988,10 +1019,15 @@ public:
 
         if(option == "Attack")
         {
-            SDL_assert(map.attackable.size());
-            cursor->source = cursor->pos;
+            SDL_assert(!map.attackable.empty());
 
+            cursor->source = cursor->pos;
             cursor->PlaceAt(map.attackable[0]);
+
+            int distance = ManhattanDistance(cursor->source, cursor->pos);
+            if(cursor->selected->SecondaryRange(distance))
+                cursor->selected->SwitchWeapons();
+
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
         }
@@ -1672,8 +1708,8 @@ public:
 
             case(PREVIEW_ATTACK):
             {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
+                BindUp(make_shared<SwitchWeaponCommand>(cursor, &(level->map)));
+                BindDown(make_shared<SwitchWeaponCommand>(cursor, &(level->map)));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<AttackCommand>(cursor, level->map, fight));
