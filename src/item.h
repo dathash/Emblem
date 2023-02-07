@@ -45,8 +45,6 @@ enum ConsumableType
 {
     CONS_NOTHING,
     CONS_POTION,
-    CONS_STATBOOST,
-    CONS_BUFF,
 };
 
 struct ConsumableComponent

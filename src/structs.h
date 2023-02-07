@@ -149,12 +149,10 @@ enum Stat
 {
     STAT_NONE,
     STAT_ATTACK,
+    STAT_DEFENSE,
     STAT_MAGIC,
     STAT_SPEED,
     STAT_SKILL,
-    STAT_LUCK,
-    STAT_DEFENSE,
-    STAT_RESISTANCE,
 };
 
 struct Buff
@@ -345,46 +343,6 @@ struct Unit
           secondary_item = new Item(*other.secondary_item);
     }
 
-    // Switches the primary item with the secondary item
-    void
-    SwitchItems()
-    {
-        Item *tmp = primary_item;
-        primary_item = secondary_item;
-        secondary_item = tmp;
-    }
-
-    // Uses the primary item
-    void
-    Use()
-    {
-        assert(primary_item);
-        if(!primary_item->consumable)
-        {
-            cout << "WARNING: Item.Use() not right. Item type: " << GetItemString(primary_item->type) << "\n";
-            return;
-        }
-
-        switch(primary_item->consumable->type)
-        {
-            case CONS_NOTHING: cout << "WARNING: Item.Use() not right. Item type: " << GetItemString(primary_item->type) << "\n";
-            case CONS_POTION: Heal(primary_item->consumable->amount); break;
-            case CONS_STATBOOST: cout << "Unimplemented STATBOOST item in Use()\n"; break;
-            case CONS_BUFF: cout << "Unimplemented BUFF item in Use()\n"; break;
-            default: cout << "UNIMPLEMENTED DEFAULT Item in USE()\n"; break;
-        }
-        cout << "Used item: " << GetItemString(primary_item->type) << "\n";
-        Discard();
-    }
-
-    // Deletes the unit's primary item.
-    void
-    Discard()
-    {
-        delete primary_item;
-        primary_item = nullptr;
-    }
-
     bool
     PrimaryRange(int distance) const
     {
@@ -407,6 +365,14 @@ struct Unit
             return true;
         }
         return false;
+    }
+
+    void
+    SwitchWeapons()
+    {
+        Item *tmp = primary_item;
+        primary_item = secondary_item;
+        secondary_item = tmp;
     }
 
     int
@@ -456,16 +422,9 @@ struct Unit
 
     // Damages a unit and resolves things involved with that process.
     void
-    Damage(int amount)
+    Damage(int damage)
     {
-        health = clamp(health - amount, 0, max_health);
-    }
-
-    // Heals a unit and resolves things involved with that process.
-    void
-    Heal(int amount)
-    {
-        health = clamp(health + amount, 0, max_health);
+        health = clamp(health - damage, 0, max_health);
     }
 
     void

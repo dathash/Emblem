@@ -432,7 +432,6 @@ Outcome PredictHealing(const Unit &one, const Unit &two)
     return outcome;
 }
 
-
 void SimulateBuff(Unit *one, Unit *two)
 {
     two->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
@@ -440,12 +439,14 @@ void SimulateBuff(Unit *one, Unit *two)
 
 void SimulateHealing(Unit *one, Unit *two)
 {
-    int amount = one->magic;
-    two->Heal(amount);
+    // one -> two
+    int healing = one->magic;
+    two->health = min(healing + two->health, two->max_health);
 }
 
 void SimulateDancing(Unit *one, Unit *two)
 {
+    // one -> two
     two->Activate();
 }
 
