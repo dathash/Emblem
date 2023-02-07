@@ -371,6 +371,7 @@ struct Unit
     {
         return 50 + (skill * 10);
     }
+    // COMMENT
 
     int
     Avoid() const
