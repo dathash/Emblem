@@ -71,6 +71,7 @@ GetInterfaceString(InterfaceState state)
     case PRELUDE:                       return "Prelude";
     case PLAYER_FIGHT:                  return "Player fight";
     case RESOLVING_EXPERIENCE:          return "Resolving experience";
+    case CHOOSE_ITEM:                   return "Choose Item";
     case NO_OP:                         return "No-Op";
     case TITLE_SCREEN:                  return "Title screen";
     case GAME_OVER:                     return "Game over";
@@ -103,8 +104,11 @@ GetStatString(Stat stat)
     case STAT_NONE: return "N/A";
     case STAT_ATTACK: return "Atk";
     case STAT_MAGIC: return "Mag";
-    case STAT_DEFENSE: return "Def";
     case STAT_SPEED: return "Spd";
+    case STAT_SKILL: return "Skl";
+    case STAT_LUCK: return "Lck";
+    case STAT_DEFENSE: return "Def";
+    case STAT_RESISTANCE: return "Res";
 	default:
 		assert(!"ERROR: Unhandled Ability name string in UI.\n");
 		return "";
@@ -498,21 +502,7 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
             }
-			ImGui::Text("[STR %d]", strength);
-            ImGui::PopStyleColor();
-
-            int defense = unit.defense;
-			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_DEFENSE)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                defense += unit.buff->amount;
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
-            }
-			ImGui::Text("[DEF %d]", defense);
+			ImGui::Text("S %d", strength);
             ImGui::PopStyleColor();
 
             int magic = unit.magic;
@@ -526,7 +516,7 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
             }
-			ImGui::Text("[MAG %d]", magic);
+			ImGui::Text("M %d", magic);
             ImGui::PopStyleColor();
 
             int speed = unit.speed;
@@ -538,9 +528,9 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             }
             else
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(yellow));
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(cerulean));
             }
-			ImGui::Text("[SPD %d]", speed);
+			ImGui::Text("SP %d", speed);
             ImGui::PopStyleColor();
 
             int skill = unit.skill;
@@ -554,16 +544,59 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGray));
             }
-            ImGui::Text("[SKL %d]", unit.skill);
+            ImGui::Text("SK %d", unit.skill);
             ImGui::PopStyleColor();
 
-			ImGui::Text("[HIT %d%%]", unit.Hit());
+            int luck = unit.luck;
 			ImGui::SameLine();
-			ImGui::Text("[AVO %d%%]", unit.Avoid());
+            if(unit.buff && unit.buff->stat == STAT_LUCK)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                luck += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(yellow));
+            }
+			ImGui::Text("L %d", luck);
+            ImGui::PopStyleColor();
+
+            int defense = unit.defense;
 			ImGui::SameLine();
-			ImGui::Text("[CRT %d%%]", unit.Crit());
+            if(unit.buff && unit.buff->stat == STAT_DEFENSE)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                defense += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
+            }
+			ImGui::Text("D %d", defense);
+            ImGui::PopStyleColor();
+
+            int resistance = unit.resistance;
 			ImGui::SameLine();
-			ImGui::Text("[RG %d-%d]", unit.OverallMinRange(), unit.OverallMaxRange());
+            if(unit.buff && unit.buff->stat == STAT_RESISTANCE)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                defense += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(purple));
+            }
+			ImGui::Text("R %d", resistance);
+            ImGui::PopStyleColor();
+
+
+			ImGui::Text("HIT %d%%]", unit.Hit());
+			ImGui::SameLine();
+			ImGui::Text("AVO %d%%]", unit.Avoid());
+			ImGui::SameLine();
+			ImGui::Text("CRT %d%%]", unit.Crit());
+			ImGui::SameLine();
+			ImGui::Text("RANGE %d-%d]", unit.OverallMinRange(), unit.OverallMaxRange());
 		ImGui::PopFont();
     }
     ImGui::End();

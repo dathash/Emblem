@@ -242,7 +242,6 @@ public:
            level->map.tiles[cursor->pos.col][cursor->pos.row].type == GOAL &&
            cursor->selected->ID() == LEADER_ID)
         {
-            // TODO: Don't allow this option at all if the level isn't a capture objective.
             menu->AddOption("Capture");
         }
 
@@ -352,6 +351,16 @@ public:
         }
         if(level->map.adjacent.size() > 0)
             menu->AddOption("Talk");
+
+        if(cursor->selected->primary_item && cursor->selected->primary_item->consumable)
+        {
+            menu->AddOption("Item");
+        }
+
+        else if(cursor->selected->secondary_item && cursor->selected->secondary_item->consumable)
+        {
+            menu->AddOption("Item");
+        }
 
         menu->AddOption("Wait");
 
@@ -573,13 +582,54 @@ public:
            cursor->selected->SecondaryRange(distance)
            )
         {
-            cursor->selected->SwitchWeapons();
+            cursor->selected->SwitchItems();
         }
     }
 
 private:
     Cursor *cursor;
     Tilemap *map;
+};
+
+class NextItemCommand : public Command
+{
+public:
+    NextItemCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
+
+    virtual void Execute()
+    {
+        if(cursor->selected->secondary_item && 
+           cursor->selected->secondary_item->consumable)
+        {
+            cursor->selected->SwitchItems();
+        }
+    }
+
+private:
+    Cursor *cursor;
+};
+
+class UseItemCommand : public Command
+{
+public:
+    UseItemCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
+    {}
+
+    virtual void Execute()
+    {
+        cursor->selected->Use();
+        cursor->selected->Deactivate();
+        cursor->selected = nullptr;
+        cursor->targeted = nullptr;
+        cursor->path_draw = {};
+        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+    }
+
+private:
+    Cursor *cursor;
 };
 
 class InitiateAbilityCommand : public Command
@@ -779,6 +829,16 @@ public:
 private:
     Cursor *cursor;
 };
+
+class BackDownFromItemCommand : public Command
+{
+public:
+    virtual void Execute()
+    {
+        GlobalInterfaceState = UNIT_MENU_ROOT;
+    }
+};
+
 
 
 // ======================= selecting enemy commands ==========================
@@ -1026,7 +1086,7 @@ public:
 
             int distance = ManhattanDistance(cursor->source, cursor->pos);
             if(cursor->selected->SecondaryRange(distance))
-                cursor->selected->SwitchWeapons();
+                cursor->selected->SwitchItems();
 
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
@@ -1048,6 +1108,15 @@ public:
 
             cursor->PlaceAt(map.adjacent[0]);
             GlobalInterfaceState = TALK_TARGETING;
+            return;
+        }
+
+        if(option == "Item")
+        {
+            if(cursor->selected->primary_item && !cursor->selected->primary_item->consumable)
+                cursor->selected->SwitchItems();
+
+            GlobalInterfaceState = CHOOSE_ITEM;
             return;
         }
 
@@ -1936,6 +2005,18 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(CHOOSE_ITEM):
+            {
+                BindUp(make_shared<NextItemCommand>(cursor));
+                BindDown(make_shared<NextItemCommand>(cursor));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<UseItemCommand>(cursor));
+                BindB(make_shared<BackDownFromItemCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

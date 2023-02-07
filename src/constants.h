@@ -127,10 +127,12 @@ enum InterfaceState
     PLAYER_FIGHT, // 27
     RESOLVING_EXPERIENCE, // 28
 
-    NO_OP, // 29
+    CHOOSE_ITEM, // 29
 
-    TITLE_SCREEN, // 30
-    GAME_OVER, // 31
+    NO_OP, // 30
+
+    TITLE_SCREEN, // 31
+    GAME_OVER, // 32
 };
 
 
@@ -223,6 +225,7 @@ const SDL_Color green =             {101, 204, 55,  255};
 const SDL_Color darkGreen =         {21, 85, 51, 255};
 const SDL_Color blue =              {42, 101, 205, 255};
 const SDL_Color darkBlue =          {22, 50, 125, 255};
+const SDL_Color purple =            {150, 50, 150, 255};
 
 const SDL_Color yellow =            {200, 200, 50, 255};
 const SDL_Color darkGray =          {100, 100, 100, 255};
