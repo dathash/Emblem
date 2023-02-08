@@ -8,45 +8,53 @@ ATL sunset.png
 
 PRE prelude03.txt
 
+
+
+
 MUS gerudo.wav
 
-WDT 20
+WDT 15
 HGT 20
-MAP 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 5 5 5 
-MAP 0 0 0 0 0 0 0 1 0 1 0 0 0 1 0 0 0 5 0 5 
-MAP 0 0 0 0 0 0 0 6 0 0 0 1 0 0 0 0 0 5 5 5 
-MAP 0 0 0 1 1 1 0 1 0 1 0 0 1 1 1 0 0 1 1 1 
-MAP 0 0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 4 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 1 0 1 0 1 1 1 1 0 0 1 1 1 0 0 
-MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 
-MAP 0 1 0 0 0 1 0 1 0 0 0 0 1 0 0 0 0 0 1 0 
-MAP 1 1 1 0 0 0 0 1 0 1 0 0 0 1 0 0 1 0 0 0 
-MAP 0 1 0 0 1 0 0 0 0 1 0 1 0 0 0 1 0 0 1 0 
-MAP 1 0 1 1 1 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
-MAP 1 1 1 1 1 1 0 1 0 1 0 0 1 1 1 0 1 1 1 1 
-MAP 1 1 1 1 1 1 0 0 0 1 0 0 0 0 0 0 1 1 1 1 
-MAP 1 1 1 1 1 1 0 1 0 1 0 1 1 0 1 0 6 0 1 1 
-MAP 1 1 1 1 1 1 0 1 0 1 0 0 0 0 0 0 1 0 1 1 
-MAP 1 1 1 1 1 1 0 0 0 1 1 1 1 0 1 0 6 0 0 1 
-MAP 1 1 1 1 1 1 0 1 0 0 0 0 0 0 1 1 1 0 4 0 
-MAP 1 1 1 1 1 1 1 0 0 1 0 1 1 1 1 1 1 0 0 0 
+MAP 0 0 1 0 0 0 0 1 0 0 0 0 5 5 5 
+MAP 0 0 1 0 1 0 0 0 1 0 0 0 5 0 5 
+MAP 0 0 0 0 0 0 1 0 0 0 0 0 5 5 5 
+MAP 1 0 1 0 1 0 0 1 1 1 0 0 1 1 1 
+MAP 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 1 1 1 0 0 1 1 1 0 0 
+MAP 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 
+MAP 1 0 1 0 0 0 0 1 0 0 0 0 0 1 0 
+MAP 7 0 1 0 1 0 0 0 1 0 0 1 0 0 0 
+MAP 7 0 0 0 1 0 1 0 0 0 1 0 0 1 0 
+MAP 7 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 0 0 1 1 1 0 1 1 1 1 
+MAP 1 0 0 0 1 0 0 0 0 0 0 1 1 1 1 
+MAP 1 0 1 0 1 0 1 1 0 1 0 6 0 1 1 
+MAP 1 0 1 0 1 0 0 0 0 0 0 1 0 1 1 
+MAP 1 0 0 0 1 1 1 1 0 1 0 6 0 0 1 
+MAP 1 0 1 0 0 0 0 0 0 1 1 1 0 4 0 
+MAP 1 1 0 0 1 0 1 1 1 1 1 1 0 0 0 
 
-COM <UNT <name> <col> <row> <ai>
-UNT Donnel 15 0 0 0
-UNT Lon'qu 16 1 0 0
-UNT Flavia 15 2 0 0
-UNT Lucina 18 1 0 0
-UNT Charles 18 18 2 1
-UNT Brigand 16 17 2 0
-UNT Brigand 16 15 2 0
-UNT Archer 17 15 2 0
-UNT Archer 17 17 2 0
-UNT Brute 15 13 4 0
-UNT Brute 13 15 4 0
-UNT Thief 11 13 4 0
-UNT Thief 10 11 4 0
-UNT Thief 12 10 4 0
-UNT Brute 16 8 4 0
+COM <UNT <name> <col> <row> <ai> <boss>>
+UNT Donnel 10 0 0 0 0 
+UNT Lon'qu 11 1 0 0 0 
+UNT Flavia 10 2 0 0 0 
+UNT Lucina 13 1 0 0 0 
+UNT Charles 13 18 2 1 0 
+UNT Brigand 11 17 2 0 0 
+UNT Brigand 11 15 2 0 0 
+UNT Archer 12 15 2 0 0 
+UNT Archer 12 17 2 0 0 
+UNT Brute 10 13 4 0 0 
+UNT Brute 8 15 8 0 0 
+UNT Thief 10 13 8 0 0 
+UNT Thief 5 11 8 0 0 
+UNT Thief 7 10 8 0 0 
+UNT Brute 11 8 8 0 0 
+UNT Soldier 2 5 7 0 0 
+UNT Soldier 4 8 7 0 0 
+UNT Soldier 4 9 7 0 0 
+UNT Gypsy 1 11 4 0 0 
+UNT Gypsy 3 12 4 0 0 
 

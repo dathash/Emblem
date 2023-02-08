@@ -79,7 +79,7 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case ATTACK_MISS_EVENT:
             {
-                PlaySfx("miss01.wav");
+                PlaySfx("miss04.wav");
             } break;
             case ATTACK_RANGED_EVENT:
             {
@@ -99,7 +99,6 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case EXPERIENCE_EVENT:
             {
-                //parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, event.integer > 0 ? 0.05f * (float)event.integer : 1.0f);
                 parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION);
                 parcel->recipient = event.unit;
                 parcel->total = event.integer;

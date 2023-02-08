@@ -24,7 +24,7 @@ CritChance(const Unit &predator, const Unit &prey)
 int
 CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
 {
-    int attack = predator.attack;
+    int attack = max(predator.attack, predator.aptitude);
     int defense = prey.defense + defense_bonus;
     if(predator.buff && predator.buff->stat == STAT_ATTACK)
         attack += predator.buff->amount;
@@ -301,14 +301,13 @@ struct Fight
                     else if(two->level > one->level)
                         experience_amount /= 2;
 
+                    one->Deactivate();
                     if(two->should_die)
                     {
-                        // TODO: Put DEATH CONVERSATION HERE!!!
                         GlobalAIState = FINDING_NEXT;
                     }
                     else
                     {
-                        one->Deactivate();
                         EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount));
                         GlobalAIState = AI_RESOLVING_EXPERIENCE;
                     }
@@ -434,14 +433,12 @@ void SimulateBuff(Unit *one, Unit *two)
 
 void SimulateHealing(Unit *one, Unit *two)
 {
-    // one -> two
     int healing = one->aptitude;
-    two->health = min(healing + two->health, two->max_health);
+    two->Heal(healing);
 }
 
 void SimulateDancing(Unit *one, Unit *two)
 {
-    // one -> two
     two->Activate();
 }
 

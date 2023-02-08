@@ -146,6 +146,8 @@ LoadTextureImage(string path, string filename)
 
     surface = IMG_Load((path + filename).c_str());
     SDL_assert(surface);
+    if(!surface)
+        cout << "ERROR: " << filename << "\n";
     int width = surface->w;
     int height = surface->h;
     texture = SDL_CreateTextureFromSurface(GlobalRenderer, surface);
@@ -287,8 +289,16 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             unitCopy->pos.row = row;
             unitCopy->ai_behavior = (AIBehavior)stoi(tokens[3]);
             unitCopy->is_boss = (bool)stoi(tokens[4]);
-            level.combatants.push_back(move(unitCopy));
-            level.map.tiles[col][row].occupant = level.combatants.back().get();
+            unitCopy->arrival = stoi(tokens[5]);
+            if(unitCopy->arrival > 0)
+            {
+                level.bench.push_back(move(unitCopy));
+            }
+            else
+            {
+                level.combatants.push_back(move(unitCopy));
+                level.map.tiles[col][row].occupant = level.combatants.back().get();
+            }
         }
         else if(type == "COM")
         {
@@ -479,7 +489,7 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "COM <UNT <name> <col> <row> <ai> <boss>>\n";
+    fp << "COM <UNT <name> <col> <row> <ai> <boss> <start>>\n";
     for(const shared_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "
@@ -487,6 +497,7 @@ SaveLevel(string filename_in, const Level &level)
                      << unit->pos.row << " "
                      << unit->ai_behavior << " "
                      << unit->is_boss << " "
+                     << unit->arrival << " "
                      << "\n";
     }
     fp << "\n";

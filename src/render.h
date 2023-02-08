@@ -357,7 +357,6 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
-
 // ================================= render cursor ================================================
     if(
         GlobalInterfaceState == NEUTRAL_OVER_GROUND ||

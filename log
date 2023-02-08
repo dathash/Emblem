@@ -109,39 +109,25 @@ Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
 # TODO
-PROTOTYPE ///////////////////////////////////////////////////
+    AI doesn't wait on every unit that won't act.
+    * Run a first pass that just gathers the units that will act, then run with
+      those.
+    * This will be faster anyways.
 
+    AI Combat keeping everyone in frame
 
-    NOTE: An object being const doesn't guarantee that its contained
-    objects/pointers will be const
+    Enemies that spawn after a certain amount of time.
 
-    Little things:
-    * Edit enemies or allies, not both at once.
-    * Enemies that spawn after a certain amount of time.
-    * Cutscene events on turn change.
+    Chests (Just Experience Points)
+    Enemies pursue and destroy villages and chests.
 
-    5 levels
+    Display Level Up
 
-    Secondary Objectives
-    * Chests
-      * Items
-        * Inventory
-        * Using Items
-        * Equipping Items
-        * Trading Items
-        * General Item Manipulation
-    * Enemies pursue and destroy villages, steal items from chests
-      * Can take enemies' items?
-
-    RPG Mechanics
-    * Display Level Up
-
-////////////////////////////////////////////////////////////
-
-0.1 ////////////////////////////////////////////////////////
+# Later
     10 levels
 
     More complex conversations
+    * Cutscene events on turn change.
     * Unit Death Screens
     * Up to four conversationists
     * Solo Conversations

@@ -9,16 +9,16 @@
 class AIFindNextUnitCommand : public Command
 {
 public:
-    AIFindNextUnitCommand(Cursor *cursor_in, const Tilemap &map_in)
+    AIFindNextUnitCommand(Cursor *cursor_in, Level *level_in)
     : cursor(cursor_in),
-      map(map_in)
+      level(level_in)
     {}
 
     virtual void Execute()
     {
         // find a unit that hasn't acted yet.
         Unit *selected = nullptr;
-        selected = FindNearest(map, cursor->pos,
+        selected = FindNearest(level->map, cursor->pos,
                 [](const Unit &unit) -> bool
                 {
                     return !unit.is_ally && !unit.is_exhausted;
@@ -33,13 +33,13 @@ public:
         {
             GlobalAIState = PLAYER_TURN;
             GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
+            level->turn_start = true;
             EmitEvent(END_AI_TURN_EVENT);
         }
     }
 private: 
     Cursor *cursor;
-    const Tilemap &map;
+    Level *level;
 };
 
 
@@ -356,15 +356,15 @@ struct AI
     int frame = 0;
 
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Tilemap *map, Fight *fight)
+    void Plan(Cursor *cursor, Level *level, Fight *fight)
     {
-        commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, *map));
-        commandQueue.push(make_shared<AISelectUnitCommand>(cursor, map));
-        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, map, fight));
+        commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, level));
+        commandQueue.push(make_shared<AISelectUnitCommand>(cursor, &(level->map)));
+        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map), fight));
     }
 
     // Passes the args through to plan.
-    void Update(Cursor *cursor, Tilemap *map, Fight *fight)
+    void Update(Cursor *cursor, Level *level, Fight *fight)
     {
         if(GlobalPlayerTurn)
             return;
@@ -375,7 +375,7 @@ struct AI
 
         if(commandQueue.empty())
         {
-            Plan(cursor, map, fight);
+            Plan(cursor, level, fight);
             // TODO: Bug with Experience Parceling
         }
         

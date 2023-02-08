@@ -8,6 +8,9 @@ ATL ruins.png
 
 PRE prelude07.txt
 
+
+
+
 MUS title.wav
 
 WDT 15
@@ -23,6 +26,7 @@ MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 4 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
-COM <UNT <name> <col> <row> <ai>
-UNT Lucina 2 2 0 0
-UNT Priam 0 4 0 0
+COM <UNT <name> <col> <row> <ai> <boss>>
+UNT Lucina 2 2 0 0 0 
+UNT Priam 0 4 0 0 0 
+

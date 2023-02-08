@@ -195,6 +195,7 @@ struct Unit
     Growths growths = {};
     int experience = 0;
 
+    int arrival = 0;
     int turns_active = -1;
     int xp_value = 0;
     AIBehavior ai_behavior = NO_BEHAVIOR;
@@ -286,9 +287,16 @@ struct Unit
 
     // Damages a unit and resolves things involved with that process.
     void
-    Damage(int damage)
+    Damage(int amount)
     {
-        health = clamp(health - damage, 0, max_health);
+        health = clamp(health - amount, 0, max_health);
+    }
+
+    // Damages a unit and resolves things involved with that process.
+    void
+    Heal(int amount)
+    {
+        health = clamp(health + amount, 0, max_health);
     }
 
     void
@@ -607,14 +615,110 @@ enum Objective
     OBJECTIVE_BOSS,
 };
 
+
+
+// CIRCULAR: What a joke...
+struct Level;
+Level
+LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
+          const vector<shared_ptr<Unit>> &party);
 struct Level
 {
+    string name = "";
     Objective objective;
+
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
-    Sound *song = nullptr;
+    vector<shared_ptr<Unit>> bench;
+
     ConversationList conversations;
-    string name = "";
+    Sound *song = nullptr;
+
+    int turn_count = -1;
+    //bool player_turn = false;
+    bool next_level = false;
+    bool turn_start = false;
+
+    Level
+    LoadNextLevel(const string &name, 
+                  const vector<shared_ptr<Unit>> &units,
+                  vector<shared_ptr<Unit>> *party)
+    {
+        Level next;
+
+        *party = {};
+        for(shared_ptr<Unit> unit : combatants)
+        {
+        // Reset the party's statistics
+            if(unit->is_ally)
+            {
+                unit->health = unit->max_health;
+                if(unit->buff)
+                    delete unit->buff;
+                    unit->buff = nullptr;
+                unit->turns_active = -1;
+                unit->is_exhausted = false;
+                party->push_back(unit);
+            }
+        }
+
+        song->Stop();
+        next = LoadLevel(DATA_PATH + name, units, *party);
+        next.conversations.prelude.song->Start();
+
+        GlobalPlayerTurn = true;
+        next.turn_start = true;
+
+        return next;
+    }
+
+    bool
+    CheckNextTurn()
+    {
+        if(turn_start)
+        {
+            turn_start = false;
+
+            if(GlobalPlayerTurn)
+            {
+                ++turn_count;
+                for(auto const &unit : combatants)
+                {
+                    if(!unit->is_ally) // Increment enemy units
+                    {
+                        ++unit->turns_active;
+                    }
+                    if(unit->buff)
+                        unit->TickBuff();
+                }
+
+                for(auto unit : bench)
+                {
+                    if(unit->is_ally && unit->arrival >= turn_count)
+                    {
+                        // TODO: MOVE FROM BENCH TO COMBATANTS
+                    }
+                }
+            }
+            else
+            {
+                for(auto const &unit : combatants)
+                {
+                    if(unit->is_ally)
+                    {
+                        ++unit->turns_active;
+                    }
+                }
+            }
+
+            for(auto const &unit : combatants)
+                unit->Activate();
+
+            return true;
+        }
+
+        return false;
+    }
 
     // Puts a piece on the board
     void
@@ -660,6 +764,7 @@ struct Level
             if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
             {
                 GlobalInterfaceState = GAME_OVER;
+                GlobalPlayerTurn = true;
                 return;
             }
         }
@@ -698,7 +803,7 @@ struct Level
             // End player turn
             GlobalInterfaceState = NO_OP;
             GlobalPlayerTurn = false;
-            GlobalTurnStart = true;
+            turn_start = true;
         }
     }
 

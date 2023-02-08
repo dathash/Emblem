@@ -232,11 +232,11 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
-                     {0.4 , -0.1 },
-                     {0.5 ,  0.0 },
+                     {0.1 , -0.1 },
+                     {0.2 ,  0.0 },
                      {1.0 ,  0.0 }},
                      Identity,
-                    {{0.5, ATTACK_RANGED_EVENT}}, // Events
+                    {{0.1, ATTACK_RANGED_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
                      {1.0 ,  0.0 }},
                      Identity));
@@ -245,11 +245,12 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
+                     {0.1 ,  0.0 },
+                     {0.2 ,  1.0 },
                      {0.4 ,  0.0 },
-                     {0.5 ,  1.0 },
                      {1.0 ,  0.0 }},
                      Identity,
-                    {{0.5, ATTACK_HIT_EVENT}}, // Events
+                    {{0.2, ATTACK_HIT_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
                      {1.0 ,  0.0 }},
                      Identity));
@@ -258,15 +259,17 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
                     {{0.0 ,  0.0 },  // channel 1
+                     {0.1 ,  0.0 },
+                     {0.2 ,  1.0 },
                      {0.4 ,  0.0 },
-                     {0.5 ,  1.0 },
                      {1.0 ,  0.0 }},
                      Identity,
-                    {{0.5, ATTACK_CRIT_EVENT}}, // Events
+                    {{0.2, ATTACK_CRIT_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
-                     {0.40,  0.0 },
-                     {0.45,  0.5 },
-                     {0.5 ,  0.0 },
+                     {0.1 ,  0.0 },
+                     {0.15,  0.5 },
+                     {0.2 ,  0.0 },
+                     {0.4 ,  0.0 },
                      {1.0 ,  0.0 }},
                      Identity));
         }

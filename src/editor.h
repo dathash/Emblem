@@ -116,12 +116,12 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
 
         ImGui::Text("growths");
-        ImGui::SliderInt("health", (int *)&selected->growths.health, 0, 100);
-        ImGui::SliderInt("attack", (int *)&selected->growths.attack, 0, 100);
-        ImGui::SliderInt("aptitude", (int *)&selected->growths.aptitude, 0, 100);
-        ImGui::SliderInt("defense", (int *)&selected->growths.defense, 0, 100);
-        ImGui::SliderInt("speed", (int *)&selected->growths.speed, 0, 100);
-        ImGui::SliderInt("skill", (int *)&selected->growths.skill, 0, 100);
+        ImGui::SliderInt("health", (int *)&selected->growths.health, 0, 200);
+        ImGui::SliderInt("attack", (int *)&selected->growths.attack, 0, 200);
+        ImGui::SliderInt("aptitude", (int *)&selected->growths.aptitude, 0, 200);
+        ImGui::SliderInt("defense", (int *)&selected->growths.defense, 0, 200);
+        ImGui::SliderInt("speed", (int *)&selected->growths.speed, 0, 200);
+        ImGui::SliderInt("skill", (int *)&selected->growths.skill, 0, 200);
 
 
         ImGui::Text("ability: %d", selected->ability);
@@ -383,6 +383,8 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             ImGui::SameLine();
             if(ImGui::Button("Plunder"))
                 hover_tile->occupant->ai_behavior = TREASURE_THEN_FLEE;
+
+            ImGui::SliderInt("Arrival", &hover_tile->occupant->arrival, 0, 10);
         }
 
         //static bool showDebugPaths = false;
@@ -453,7 +455,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             *level = LoadLevel(DATA_PATH + string(levelFileName), *units, party);
             GlobalAIState = PLAYER_TURN;
             GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
+            level->turn_start = true;
             cout << "Level loaded: " << levelFileName << "\n";
         }
         ImGui::SameLine();
@@ -475,7 +477,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             sprintf(levelFileName, "test.txt");
             GlobalAIState = PLAYER_TURN;
             GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
+            level->turn_start = true;
         }
 
         int wrap = 0;
@@ -487,7 +489,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
                 sprintf(levelFileName, "%s", s.c_str());
                 GlobalAIState = PLAYER_TURN;
                 GlobalPlayerTurn = true;
-                GlobalTurnStart = true;
+                level->turn_start = true;
             }
             if(++wrap % 4)
                 ImGui::SameLine();

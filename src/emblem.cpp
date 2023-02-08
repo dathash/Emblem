@@ -53,10 +53,6 @@ static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
 static bool GlobalPlayerTurn = true;
 
-// Transitory
-static bool GlobalNextLevel = false;
-static bool GlobalTurnStart = false;
-
 ////////////////////////////////
 
 // TODO: Refactor these to only be where they need to be.
@@ -190,7 +186,8 @@ int main(int argc, char *argv[])
         new Sound("hit2.wav", SFX),
         new Sound("hit3.wav", SFX),
         new Sound("magic.wav", SFX),
-        new Sound("miss.wav", SFX),
+        new Sound("miss01.wav", SFX),
+        new Sound("miss04.wav", SFX),
         new Sound("pickup.wav", SFX),
         new Sound("place.wav", SFX),
         new Sound("powerup.wav", SFX),
@@ -253,7 +250,7 @@ int main(int argc, char *argv[])
                                    &level_menu, &conversation_menu,
                                    &fight);
 
-            ai.Update(&cursor, &level.map, &fight);
+            ai.Update(&cursor, &level, &fight);
 
             cursor.Update(&level.map);
             fight.Update();
@@ -282,66 +279,15 @@ int main(int argc, char *argv[])
         }
 
         // Resolve State
-        //////////////// TO BE EXTRICATED //////////////////
-        if(GlobalNextLevel)
+        if(level.next_level)
         {
-            GlobalNextLevel = false;
-
+            level.next_level = false;
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
 
-            party = {};
-            for(shared_ptr<Unit> unit : level.combatants)
-            {
-            // Reset the party's statistics
-                if(unit->is_ally)
-                {
-                    unit->health = unit->max_health;
-                    if(unit->buff)
-                        delete unit->buff;
-                        unit->buff = nullptr;
-                    unit->turns_active = -1;
-                    unit->is_exhausted = false;
-                    party.push_back(unit);
-                }
-            }
-
-            level.song->Stop();
-            level = LoadLevel(DATA_PATH + levels[level_index], units, party);
-            level.conversations.prelude.song->Start();
-
-            GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
+            level = level.LoadNextLevel(levels[level_index], units, &party);
         }
-        if(GlobalTurnStart)
+        if(level.CheckNextTurn())
         {
-            GlobalTurnStart = false;
-
-            if(GlobalPlayerTurn)
-            {
-                for(auto const &unit : level.combatants)
-                {
-                    if(!unit->is_ally) // Increment enemy units
-                    {
-                        ++unit->turns_active;
-                    }
-                    if(unit->buff)
-                        unit->TickBuff();
-                }
-            }
-            else
-            {
-                for(auto const &unit : level.combatants)
-                {
-                    if(unit->is_ally)
-                    {
-                        ++unit->turns_active;
-                    }
-                }
-            }
-
-            for(auto const &unit : level.combatants)
-                unit->Activate();
-
             cursor.PlaceAt(level.Leader());
             SetViewport(cursor.pos, level.map.width, level.map.height);
 
@@ -353,13 +299,7 @@ int main(int argc, char *argv[])
             handler.clearQueue();
         }
 
-        // TODO : Definitely get rid of this.
-        if(GlobalInterfaceState == GAME_OVER)
-        {
-            GlobalPlayerTurn = true;
-            ai.clearQueue();
-        }
-        //////////////// ABOVE TO BE EXTRICATED //////////////////
+
         GlobalHandleEvents(&level_fade, &turn_fade, &parcel);
 
         // Render

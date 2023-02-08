@@ -863,8 +863,9 @@ public:
 class ChooseGameMenuOptionCommand : public Command
 {
 public:
-    ChooseGameMenuOptionCommand(Menu *menu_in)
-    : menu(menu_in)
+    ChooseGameMenuOptionCommand(Menu *menu_in, Level *level_in)
+    : menu(menu_in),
+      level(level_in)
     {}
 
     virtual void Execute()
@@ -884,7 +885,7 @@ public:
             {
                 GlobalInterfaceState = NO_OP;
                 GlobalPlayerTurn = false;
-                GlobalTurnStart = true;
+                level->turn_start = true;
                 EmitEvent(END_PLAYER_TURN_EVENT);
             } break;
         }
@@ -892,6 +893,7 @@ public:
 
 private:
     Menu *menu;
+    Level *level;
 };
 
 class BackToGameMenuCommand : public Command
@@ -1083,8 +1085,8 @@ public:
 
         if(option == "Next")
         {
-            GlobalNextLevel = true;
-            GlobalTurnStart = true;
+            level->next_level = true;
+            level->turn_start = true;
             EmitEvent(NEXT_LEVEL_EVENT);
             GlobalInterfaceState = PRELUDE;
             return;
@@ -1095,7 +1097,7 @@ public:
             level->song->Restart();
 
             GlobalPlayerTurn = true;
-            GlobalTurnStart = true;
+            level->turn_start = true;
             return;
         }
         if(option == "Conv")
@@ -1373,10 +1375,10 @@ public:
     virtual void Execute()
     {
         *level = LoadLevel(level->name, units, party);
-        level->song->Restart();
-
         GlobalPlayerTurn = true;
-        GlobalTurnStart = true;
+        level->turn_start = true;
+
+        level->song->Restart();
     }
 
 private:
@@ -1400,8 +1402,8 @@ public:
     virtual void Execute()
     {
         GlobalPlayerTurn = true;
-        GlobalTurnStart = true;
         *level = LoadLevel(level->name, units, party);
+        level->turn_start = true;
         level->conversations.prelude.song->Start();
 
         EmitEvent(START_GAME_EVENT);
@@ -1699,7 +1701,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
+                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level));
                 BindB(make_shared<ExitGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
