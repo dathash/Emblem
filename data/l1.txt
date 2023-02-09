@@ -36,12 +36,12 @@ MAP 1 1 1 1 1 1 1 0 0 0 0 2 2 2 2
 MAP 1 1 1 1 1 1 0 0 0 0 0 0 2 2 2 
 MAP 1 1 1 0 2 0 0 0 0 0 0 0 1 1 1 
 MAP 1 0 0 0 0 0 0 0 2 0 0 0 1 1 1 
-MAP 1 0 5 5 5 0 0 2 0 0 0 0 0 1 1 
-MAP 1 1 5 0 5 4 2 0 0 0 0 0 0 0 1 
-MAP 1 1 5 5 5 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 0 0 0 0 0 2 0 0 0 0 0 1 1 
+MAP 1 1 0 0 0 4 2 0 0 0 0 0 0 0 1 
+MAP 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 
 
-COM <UNT <name> <col> <row> <ai> <boss>>
+COM <UNT <name> <col> <row> <ai> <boss> <start>>
 UNT Brute 8 4 1 0 0 
 UNT Brute 6 6 1 0 0 
 UNT Lucina 3 17 0 0 0 
@@ -51,9 +51,10 @@ UNT Brute 5 4 2 0 0
 UNT Brute 8 15 1 0 0 
 UNT Thief 9 16 1 0 0 
 UNT Archer 6 9 4 0 0 
-UNT Lon'qu 13 18 0 0 0 
 UNT Donnel 10 19 0 0 0 
 UNT Archer 8 5 4 0 0 
 UNT Archer 10 4 4 0 0 
 UNT Thief 3 5 4 0 0 
-
+UNT Sully 7 18 0 0 0 
+UNT Noire 4 15 0 0 0 
+UNT Lon'qu 13 18 0 0 1

@@ -69,6 +69,7 @@ enum EventType
     NEXT_LEVEL_EVENT,
     END_PLAYER_TURN_EVENT,
     END_AI_TURN_EVENT,
+    FADE_DONE_EVENT,
     MOVE_CURSOR_EVENT,
     MOVE_MENU_EVENT,
     SELECT_MENU_OPTION_EVENT,
@@ -84,6 +85,9 @@ enum EventType
     HEAL_EVENT,
     DANCE_EVENT,
     EXPERIENCE_EVENT,
+    EXPERIENCE_DONE_EVENT,
+    ADVANCEMENT_EVENT,
+    LEVEL_BOOST_EVENT,
 };
 
 struct Unit;
@@ -92,6 +96,7 @@ struct Event
     EventType type;
     Unit *unit = nullptr;
     int integer = 0;
+    float number = 0.0f;
 
     Event(EventType type_in)
     : type(type_in)
@@ -99,10 +104,12 @@ struct Event
 
     Event(EventType type_in,
           Unit *unit_in,
-          int integer_in)
+          int integer_in = 0,
+          float number_in = 0.0f)
     : type(type_in),
       unit(unit_in),
-      integer(integer_in)
+      integer(integer_in),
+      number(number_in)
     {}
 };
 
@@ -196,6 +203,12 @@ int main(int argc, char *argv[])
         new Sound("sel2.wav", SFX),
         new Sound("sel3.wav", SFX),
         new Sound("start.wav", SFX),
+        new Sound("click.wav", SFX),
+        new Sound("minor_click.wav", SFX),
+        new Sound("turn.wav", SFX),
+        new Sound("experience.wav", SFX),
+        new Sound("levelup.wav", SFX),
+        new Sound("boost.wav", SFX),
         new Sound("dance.wav", SFX)
     };
 
@@ -222,9 +235,10 @@ int main(int argc, char *argv[])
     Menu level_menu({"Next", "Redo", "Conv"});
     Menu conversation_menu({"Return"});
 
-    Fade level_fade;
-    Fade turn_fade = {darkGray, "Player Turn"};
+    Fade level_fade = {"t", "t"};
+    Fade turn_fade = {"Player Turn", "Enemy Turn"};
     Parcel parcel;
+    Advancement advancement;
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
@@ -233,7 +247,7 @@ int main(int argc, char *argv[])
     Fight fight;
 
     GlobalInterfaceState = TITLE_SCREEN;
-    GlobalAIState = PLAYER_TURN;
+    GlobalAIState = AI_PLAYER_TURN;
 
     GlobalRunning = true;
 // ========================= game loop =========================================
@@ -255,6 +269,7 @@ int main(int argc, char *argv[])
             cursor.Update(&level.map);
             fight.Update();
             parcel.Update();
+            advancement.Update();
             level.Update();
             level_fade.Update();
             turn_fade.Update();
@@ -291,26 +306,21 @@ int main(int argc, char *argv[])
             cursor.PlaceAt(level.Leader());
             SetViewport(cursor.pos, level.map.width, level.map.height);
 
-            // TODO: This is pretty bad. Just work out how the logic should actually go.
-            if(GlobalInterfaceState != PRELUDE)
-                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-
             ai.clearQueue();
             handler.clearQueue();
         }
 
-
-        GlobalHandleEvents(&level_fade, &turn_fade, &parcel);
+        GlobalHandleEvents(&level_fade, &turn_fade, &parcel, &advancement);
 
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
-               level.conversations, fight, level_fade, turn_fade);
+               level.conversations, fight, level_fade, turn_fade, advancement);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level, fight, parcel);
+        RenderUI(&ui, cursor, level, fight, parcel, advancement);
 
 #if DEV_MODE
         if(GlobalEditorMode)

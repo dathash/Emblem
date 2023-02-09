@@ -81,7 +81,6 @@
 #define SWAMP_TILE {SWAMP, 3, 0, 0, nullptr, {18, 29}}
 #define FORT_TILE {FORT, 1, 10, 4, nullptr, {1, 0}}
 #define GOAL_TILE {GOAL, 1, 0, 2, nullptr, {31, 0}}
-#define SPAWN_TILE {SPAWN, 1, 0, 0, nullptr, {14, 1}}
 #define VILLAGE_TILE {VILLAGE, 1, 0, 0, nullptr, {31, 25}}
 #define CHEST_TILE {CHEST, 1, 0, 0, nullptr, {0, 1}}
 
@@ -126,25 +125,28 @@ enum InterfaceState
 
     PLAYER_FIGHT, // 27
     RESOLVING_EXPERIENCE, // 28
+    RESOLVING_ADVANCEMENT, // 29
 
-    NO_OP, // 29
+    NO_OP, // 31
 
-    TITLE_SCREEN, // 30
-    GAME_OVER, // 31
+    TITLE_SCREEN, // 32
+    GAME_OVER, // 33
 };
 
 
 // AI
 enum AIState
 {
-    FINDING_NEXT, // 0
-    SELECTED, // 1
+    AI_FINDING_NEXT, // 0
+    AI_SELECTED, // 1
 
     AI_RESOLVING_EXPERIENCE, // 2
+    AI_RESOLVING_ADVANCEMENT, // 2
 
     AI_FIGHT, // 3
 
-    PLAYER_TURN, // 4
+    AI_PLAYER_TURN, // 4
+    AI_NO_OP, // 5
 };
 
 enum AIBehavior
@@ -179,7 +181,6 @@ enum TileType
     FOREST,
     SWAMP,
     GOAL,
-    SPAWN,
     FORT,
     VILLAGE,
     CHEST,

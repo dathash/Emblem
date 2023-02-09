@@ -247,13 +247,6 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("spawn"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = SPAWN_TILE;
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
         if(ImGui::Button("fort"))
         {
             Unit *tmp = hover_tile->occupant;
@@ -384,7 +377,18 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             if(ImGui::Button("Plunder"))
                 hover_tile->occupant->ai_behavior = TREASURE_THEN_FLEE;
 
-            ImGui::SliderInt("Arrival", &hover_tile->occupant->arrival, 0, 10);
+            if(ImGui::Button("Bench"))
+            {
+                hover_tile->occupant->arrival = 1;
+            }
+        }
+
+        for(auto unit : level->bench)
+        {
+            ImGui::Text("%s", unit->name.c_str());
+            ImGui::SliderInt("Arrival", &unit->arrival, 0, 10);
+            ImGui::SliderInt("col", &unit->pos.col, 0, level->map.height);
+            ImGui::SliderInt("row", &unit->pos.row, 0, level->map.width);
         }
 
         //static bool showDebugPaths = false;
@@ -453,9 +457,11 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             *units = LoadUnits(DATA_PATH + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
             *level = LoadLevel(DATA_PATH + string(levelFileName), *units, party);
-            GlobalAIState = PLAYER_TURN;
+            GlobalAIState = AI_PLAYER_TURN;
+            GlobalInterfaceState = NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
+            EmitEvent(END_AI_TURN_EVENT);
             cout << "Level loaded: " << levelFileName << "\n";
         }
         ImGui::SameLine();
@@ -475,9 +481,11 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         {
             *level = LoadLevel(DATA_PATH + string("test.txt"), *units, party);
             sprintf(levelFileName, "test.txt");
-            GlobalAIState = PLAYER_TURN;
+            GlobalAIState = AI_PLAYER_TURN;
+            GlobalInterfaceState = NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
+            EmitEvent(END_AI_TURN_EVENT);
         }
 
         int wrap = 0;
@@ -487,9 +495,11 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             {
                 *level = LoadLevel(DATA_PATH + s, *units, party);
                 sprintf(levelFileName, "%s", s.c_str());
-                GlobalAIState = PLAYER_TURN;
+                GlobalAIState = AI_PLAYER_TURN;
+                GlobalInterfaceState = NO_OP;
                 GlobalPlayerTurn = true;
                 level->turn_start = true;
+                EmitEvent(END_AI_TURN_EVENT);
             }
             if(++wrap % 4)
                 ImGui::SameLine();

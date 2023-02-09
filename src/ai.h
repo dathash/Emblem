@@ -31,7 +31,7 @@ public:
         }
         else
         {
-            GlobalAIState = PLAYER_TURN;
+            GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
             EmitEvent(END_AI_TURN_EVENT);
@@ -74,7 +74,7 @@ public:
                                         cursor->selected->max_range,
                                         cursor->selected->is_ally).first;
 
-        GlobalAIState = SELECTED;
+        GlobalAIState = AI_SELECTED;
     }
 private:
     Cursor *cursor;
@@ -98,7 +98,7 @@ public:
 
         cursor->redo = {-1, -1};
 
-        GlobalAIState = FINDING_NEXT;
+        GlobalAIState = AI_FINDING_NEXT;
     }
 private:
     Cursor *cursor; 
@@ -277,7 +277,7 @@ GetAction(const Unit &unit, const Tilemap &map)
         case ATTACK_IN_TWO:      return AttackInRangeBehavior(unit, map, true);
         case FLEE:               return {unit.pos, NULL};
         case TREASURE_THEN_FLEE: return {unit.pos, NULL};
-        case NO_BEHAVIOR: cout << "WARN AIPerformUnitActionCommand: This AI Unit has no behavior specified.\n"; return {};
+        case NO_BEHAVIOR: cout << "WARN GetAction: This AI Unit has no behavior specified: " << unit.name << "\n"; return {};
         default: SDL_assert(!"Shouldn't get here!\n"); return {};
     }
 }
@@ -324,11 +324,6 @@ public:
                           distance, dir);
             fight->ready = true;
 
-            // resolution
-            cursor->selected = nullptr;
-            cursor->targeted = nullptr;
-            cursor->pos = cursor->source;
-
             GlobalAIState = AI_FIGHT;
             return;
         }
@@ -340,7 +335,7 @@ public:
         cursor->pos = cursor->source;
 
         // change state
-        GlobalAIState = FINDING_NEXT;
+        GlobalAIState = AI_FINDING_NEXT;
         return;
     }
 
@@ -370,7 +365,8 @@ struct AI
             return;
 
         if(GlobalAIState == AI_FIGHT ||
-           GlobalAIState == AI_RESOLVING_EXPERIENCE) // TODO: Simplify these states. Reduce bugs.
+           GlobalAIState == AI_RESOLVING_EXPERIENCE ||
+           GlobalAIState == AI_RESOLVING_ADVANCEMENT)
             return;
 
         if(commandQueue.empty())
@@ -378,7 +374,6 @@ struct AI
             Plan(cursor, level, fight);
             // TODO: Bug with Experience Parceling
         }
-        
 
         ++frame;
         // Every __ frames.

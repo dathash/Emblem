@@ -202,6 +202,34 @@ WithinViewport(const position &p)
             p.row >= viewportRow);
 }
 
+// Checks if a point is within the current viewport.
+void
+MoveViewportDirection(const direction &d)
+{
+    viewportCol += d.col;
+    viewportRow += d.row;
+}
+
+bool
+WithinSoftViewport(const position &p)
+{
+    return (p.col < VIEWPORT_WIDTH + viewportCol - 3 &&
+            p.col >= viewportCol + 3 &&
+            p.row < VIEWPORT_HEIGHT + viewportRow - 2 &&
+            p.row >= viewportRow + 2);
+}
+
+bool
+WithinRect(const position &p, 
+           const position &upper_left, 
+           const position &lower_right)
+{
+    return (p.col < lower_right.col &&
+            p.col >= upper_left.col &&
+            p.row < lower_right.row &&
+            p.row >= upper_left.row);
+}
+
 // moves the cursor's viewport once so that the given tile is on screen.
 // Very Impure
 void

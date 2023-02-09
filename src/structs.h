@@ -175,6 +175,18 @@ enum Expression
     EXPR_WINCE,
 };
 
+
+struct Boosts
+{
+    int health = 0;
+    int attack = 0;
+    int aptitude = 0;
+    int defense = 0;
+    int speed = 0;
+    int skill = 0;
+};
+
+
 struct Unit
 {
     string name;
@@ -346,32 +358,51 @@ struct Unit
         return result;
     }
 
+    Boosts
+    CalculateLevelUp()
+    {
+        Boosts boosts;
+
+        boosts.health = StatBoost(growths.health);
+        boosts.attack = StatBoost(growths.attack);
+        boosts.defense = StatBoost(growths.defense);
+        boosts.aptitude = StatBoost(growths.aptitude);
+        boosts.speed = StatBoost(growths.speed);
+        boosts.skill = StatBoost(growths.skill);
+
+        return boosts;
+    }
+
     void
-    LevelUp()
+    LevelUp(Boosts boosts)
     {
         level += 1;
         
-        max_health += StatBoost(growths.health);
-        attack += StatBoost(growths.attack);
-        defense += StatBoost(growths.defense);
-        aptitude += StatBoost(growths.aptitude);
-        speed += StatBoost(growths.speed);
-        skill += StatBoost(growths.skill);
+        health += boosts.health;
+        attack += boosts.attack;
+        defense += boosts.defense;
+        aptitude += boosts.aptitude;
+        speed += boosts.speed;
+        skill += boosts.skill;
 
         experience -= 100;
         if(level == 10)
             experience = 0;
     }
 
-    void
+    bool
     GrantExperience(int amount)
     {
         if(level == 10)
-            return;
+            return false;;
 
         experience += amount;
-        while(experience >= 100) // Just in case you get a ton of experience at once haha
-            LevelUp();
+        if(experience >= 100)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     int
@@ -588,24 +619,6 @@ struct Tilemap
 
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
-
-    position
-    GetNextSpawnLocation()
-    {
-        for(int col = 0; col < width; ++col)
-        {
-            for(int row = 0; row < height; ++row)
-            {
-                if(tiles[col][row].type == SPAWN &&
-                   !tiles[col][row].occupant)
-                {
-                    return position(col, row);
-                }
-            }
-        }
-        SDL_assert(!"ERROR GetNextSpawnLocation: No spawn locations available.");
-        return position(0, 0);
-    }
 };
 
 enum Objective
@@ -615,13 +628,12 @@ enum Objective
     OBJECTIVE_BOSS,
 };
 
-
-
 // CIRCULAR: What a joke...
 struct Level;
 Level
 LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
           const vector<shared_ptr<Unit>> &party);
+
 struct Level
 {
     string name = "";
@@ -694,9 +706,10 @@ struct Level
 
                 for(auto unit : bench)
                 {
-                    if(unit->is_ally && unit->arrival >= turn_count)
+                    if(unit->is_ally && (unit->arrival == turn_count))
                     {
-                        // TODO: MOVE FROM BENCH TO COMBATANTS
+                        map.tiles[unit->pos.col][unit->pos.row].occupant = unit.get();
+                        combatants.push_back(move(unit));
                     }
                 }
             }

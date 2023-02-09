@@ -85,6 +85,7 @@ struct Cursor
         }
 
         sheet.Update();
+
         if(!WithinViewport(pos)) // Catch-all
         {
             MoveViewport(pos);
@@ -111,7 +112,5 @@ struct Cursor
         path_draw = {};
     }
 };
-
-
 
 #endif

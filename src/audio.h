@@ -166,6 +166,17 @@ PlaySfx(const string &name)
         }
 }
 
+void
+StopSfx(const string &name)
+{
+    for(Sound *sound : GlobalSfx.sounds)
+        if(sound->name == name)
+        {
+            sound->Stop();
+        }
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////
 /*

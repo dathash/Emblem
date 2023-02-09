@@ -17,9 +17,11 @@
 enum AnimationValue
 {
     EXPERIENCE_PARCEL_ANIMATION,
+    ADVANCEMENT_ANIMATION,
     FADE_IN_ANIMATION,
     FADE_OUT_ANIMATION,
     FADE_IN_OUT_ANIMATION,
+    TURN_FADE_IN_OUT_ANIMATION,
     ATTACK_RANGED_ANIMATION,
     ATTACK_MELEE_ANIMATION,
     ATTACK_LEAP_ANIMATION,
@@ -204,7 +206,24 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                     {{0.0 ,  0.0 },  // channel 1
                      {0.5 ,  1.0 },
                      {1.0 ,  1.0 }},
-                     SmoothStartStop));
+                     Identity,
+                    {{0.45 , EXPERIENCE_DONE_EVENT}}
+                   ));
+        }
+        case ADVANCEMENT_ANIMATION:
+        {
+            return (new Animation(1, (int)(300 * frame_modulation), false, 1,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.5 ,  1.0 },
+                     {1.0 ,  2.0 }},
+                     Identity,
+                    {{0.08, LEVEL_BOOST_EVENT}, // Events
+                     {0.17, LEVEL_BOOST_EVENT},
+                     {0.25, LEVEL_BOOST_EVENT},
+                     {0.33, LEVEL_BOOST_EVENT},
+                     {0.42, LEVEL_BOOST_EVENT},
+                     {0.50, LEVEL_BOOST_EVENT}}
+                   ));
         }
         case FADE_IN_ANIMATION:
         {
@@ -224,6 +243,15 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
         {
             return (new Animation(1, (int)(100 * frame_modulation), false, 1,
                     {{0.0 ,  0.0 },  // channel 1
+                     {0.5 ,  1.0 },
+                     {1.0 ,  0.0 }},
+                     Identity));
+        }
+        case TURN_FADE_IN_OUT_ANIMATION:
+        {
+            return (new Animation(1, (int)(100 * frame_modulation), false, 1,
+                    {{0.0 ,  0.0 },  // channel 1
+                     {0.1 ,  1.0 },
                      {0.5 ,  1.0 },
                      {1.0 ,  0.0 }},
                      Identity));

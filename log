@@ -108,92 +108,50 @@ Misty Step
 Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
+# Story
+The story of the game is delivered through the characters.
+We randomly generate which characters you have, and therefore create an
+experience where you end up with different dynamics every time?
+
 # TODO
+    Enemies pursue and destroy villages and chests.
+
+    BUG | Enemy gets stuck parceling EXP when it uses the last unit it has.
+          No plan, we switch back the AI State, but it doesn't have any clue
+          what to do.
+
     AI doesn't wait on every unit that won't act.
     * Run a first pass that just gathers the units that will act, then run with
       those.
     * This will be faster anyways.
 
-    AI Combat keeping everyone in frame
+    Conversations
+    * Cutscene events on turn change.
+    * Unit Death Screens
+    * Up to four conversationists
 
-    Enemies that spawn after a certain amount of time.
-
-    Chests (Just Experience Points)
-    Enemies pursue and destroy villages and chests.
-
-    Display Level Up
+    Let combat resolution have more downtime after the fact.
 
 # Later
     10 levels
 
+    Smooth reinforcements
+
     More complex conversations
-    * Cutscene events on turn change.
-    * Unit Death Screens
-    * Up to four conversationists
-    * Solo Conversations
     * Multiple preludes in a row.
-    * Sometimes Conversation backgrounds
     * Animated stuff inbetween.
-
-    Combine speed and skill?
-
-    Save/Load files
-    * Green Units
-    * Recruit allies
-    * Recruit enemies
-
-    Slick Turn transitions
-    BUG | Enemy gets stuck parceling EXP when it uses the last unit it has.
-          No plan, we switch back the AI State, but it doesn't have any clue
-          what to do.
-
-    * Classes
-      * Growth Bonuses
-      * Base Bonuses
-      * Weapon Proficiencies
-
-////////////////////////////////////////////////////////////
-
-0.2 ////////////////////////////////////////////////////////
-    15 levels
-
-    Cutscenes
-
-    Fire Tile?
-    Heal Tile?
-
-    Healing Animation
-
-    Real-time color editing in the editor
-
-    "Guard" action?
-    Canto? Mounted?
-
-////////////////////////////////////////////////////////////
+    * Sometimes Conversation backgrounds
 
 POLISH
-    Switch Options menu to internal system.
-    * Music Volume
-    * Resolution
-    * Quit
-
     Shrink Tilesets to absolute necessity, also enforce consistency across them.
-    Create polished tilemaps with Tiled and overlay them onto the in-game maps.
     Smooth Screen Scroll (Render tiles one tile off of the screen.)
-    Huge visual flourishes (start of the level causes the tiles to flash in
-                            waves, etc.)
 
 QA
-    BUG | Controller added mid-game doesn't register joystick, only buttons.
-    BUG | Enemy attacks on targets outside the viewport don't get the target
-    in view.
     BUG | Enemies that can actually reach you don't believe that they can due to
     the difference in pathfinding/flood filling. We NEED To get a more unified
     solution working.
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
-    BUG | TRY SOME EASING FUNCS ON EXPERIENCE METER. ITS WEIRD!
-
 
 # Plot
 ## World

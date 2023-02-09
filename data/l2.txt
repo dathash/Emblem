@@ -20,21 +20,21 @@ MUS spiny.wav
 WDT 18
 HGT 14
 MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 1 1 
-MAP 0 5 5 5 0 1 0 0 0 1 1 1 1 0 0 1 1 1 
-MAP 0 5 0 5 4 1 0 0 0 0 0 0 0 0 0 0 0 0 
-MAP 0 5 5 5 0 1 0 0 0 0 0 0 0 0 0 0 4 0 
+MAP 0 0 0 0 0 1 0 0 0 1 1 1 1 0 0 1 1 1 
+MAP 0 0 0 0 4 1 0 0 0 0 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 4 0 
 MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 
 MAP 0 0 0 1 1 1 0 0 0 1 0 0 1 1 1 0 0 1 
 MAP 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 1 0 
 MAP 1 0 1 1 0 1 0 0 0 1 0 0 0 0 1 0 0 0 
-MAP 1 0 0 0 0 1 6 0 6 1 0 0 0 0 0 0 1 0 
+MAP 1 0 0 0 0 1 5 0 5 1 0 0 0 0 0 0 1 0 
 MAP 1 1 1 1 0 1 0 0 0 1 1 1 1 0 1 0 0 0 
 MAP 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 
 
-COM <UNT <name> <col> <row> <ai> <boss>>
+COM <UNT <name> <col> <row> <ai> <boss> <start>>
 UNT Lucina 2 2 0 0 0 
 UNT Lon'qu 3 0 0 0 0 
 UNT Donnel 0 3 0 0 0 
@@ -57,4 +57,6 @@ UNT Archer 10 6 1 0 0
 UNT Brigand 4 12 7 0 0 
 UNT Assassin 7 5 1 0 0 
 UNT Assassin 8 4 1 0 0 
+UNT Noire 2 4 0 0 0 
+UNT Sully 1 1 0 0 0 
 

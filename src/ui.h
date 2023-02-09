@@ -27,7 +27,6 @@ GetTileNameString(TileType type)
     case FOREST: return "Forest";
     case SWAMP: return "Swamp";
     case GOAL: return "Goal";
-    case SPAWN: return "Spawn";
     case FORT: return "Fort";
     case VILLAGE: return "House";
     case CHEST: return "Chest";
@@ -71,6 +70,7 @@ GetInterfaceString(InterfaceState state)
     case PRELUDE:                       return "Prelude";
     case PLAYER_FIGHT:                  return "Player fight";
     case RESOLVING_EXPERIENCE:          return "Resolving experience";
+    case RESOLVING_ADVANCEMENT:         return "Resolving advancement";
     case NO_OP:                         return "No-Op";
     case TITLE_SCREEN:                  return "Title screen";
     case GAME_OVER:                     return "Game over";
@@ -138,6 +138,7 @@ struct UI_State
     bool unit_menu = false;
     bool combat_screen = false;
     bool experience = false;
+    bool advancement = false;
 
     void
     Clear()
@@ -152,6 +153,7 @@ struct UI_State
         unit_menu = false;
         combat_screen = false;
         experience = false;
+        advancement = false;
     }
 
     void 
@@ -175,6 +177,16 @@ struct UI_State
         else
         {
             experience = false;
+        }
+
+        if(GlobalInterfaceState == RESOLVING_ADVANCEMENT ||
+           GlobalAIState == AI_RESOLVING_ADVANCEMENT)
+        {
+            advancement = true;
+        }
+        else
+        {
+            advancement = false;
         }
 
 		// Tile Info
@@ -743,7 +755,7 @@ DisplayExperienceBar(int experience)
 	ImGui::PopStyleColor();
 }
 
-// Displays combat preview when initiating combat
+// Displays Experience bar over its parcelling
 void
 DisplayExperience(ImGuiWindowFlags wf, const Parcel &parcel)
 {
@@ -757,6 +769,82 @@ DisplayExperience(ImGuiWindowFlags wf, const Parcel &parcel)
     {
         DisplayExperienceBar(parcel.Amount());
         TextCentered("Experience");
+    }
+    ImGui::End();
+	ImGui::PopFont();
+}
+
+// Displays combat preview when initiating combat
+void
+DisplayAdvancement(ImGuiWindowFlags wf, const Advancement &advancement)
+{
+	// Window sizing
+    ImGui::SetNextWindowSize(ImVec2(300, 400));
+    ImGui::SetNextWindowPos(ImVec2(500, 100));
+
+    // Render
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin(advancement.recipient->name.c_str(), NULL, wf);
+    {
+        Unit *subject = advancement.recipient;
+
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(cerulean));
+        TextCentered("Level Up!");
+        ImGui::PopStyleColor();
+
+        ImGui::Text("HLTH %d", subject->health);
+        if(advancement.value >= 0.16f)
+        {
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.16) * 3)));
+            ImGui::Text("+%d", advancement.boosts.health);
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Text("ATTK %d", subject->attack);
+        if(advancement.value >= 0.33f)
+        {
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.33) * 3)));
+            ImGui::Text("+%d", advancement.boosts.attack);
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Text("APTI %d", subject->aptitude);
+        if(advancement.value >= 0.50f)
+        {
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.50) * 3)));
+            ImGui::Text("+%d", advancement.boosts.aptitude);
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Text("DEFN %d", subject->defense);
+        if(advancement.value >= 0.66f)
+        {
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.66) * 3)));
+            ImGui::Text("+%d", advancement.boosts.defense);
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Text("SPD  %d", subject->speed);
+        if(advancement.value >= 0.83f)
+        {
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.83) * 3)));
+            ImGui::Text("+%d", advancement.boosts.speed);
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Text("SKIL %d", subject->skill);
+        if(advancement.value >= 1.00f)
+        {
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 1.0) * 3)));
+            ImGui::Text("+%d", advancement.boosts.skill);
+            ImGui::PopStyleColor();
+        }
     }
     ImGui::End();
 	ImGui::PopFont();
@@ -789,7 +877,9 @@ RenderUI(UI_State *ui,
          const Cursor &cursor, 
          const Level &level,
          const Fight &fight,
-         const Parcel &parcel)
+         const Parcel &parcel,
+         const Advancement &advancement
+         )
 {
     ui->Update();
 
@@ -823,6 +913,8 @@ RenderUI(UI_State *ui,
 		DisplayCombatScreen(window_flags, fight);
     if(ui->experience)
         DisplayExperience(window_flags, parcel);
+    if(ui->advancement)
+        DisplayAdvancement(window_flags, advancement);
 
     if(!GlobalPlayerTurn)
     {

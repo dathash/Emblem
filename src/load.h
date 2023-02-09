@@ -25,8 +25,6 @@ TileTypeToTile(TileType type)
             return FORT_TILE;
         case(GOAL):
             return GOAL_TILE;
-        case(SPAWN):
-            return SPAWN_TILE;
         case(VILLAGE):
             return VILLAGE_TILE;
         case(CHEST):
@@ -491,6 +489,18 @@ SaveLevel(string filename_in, const Level &level)
 
     fp << "COM <UNT <name> <col> <row> <ai> <boss> <start>>\n";
     for(const shared_ptr<Unit> &unit : level.combatants)
+    {
+        fp << "UNT " << unit->name << " "
+                     << unit->pos.col << " "
+                     << unit->pos.row << " "
+                     << unit->ai_behavior << " "
+                     << unit->is_boss << " "
+                     << unit->arrival << " "
+                     << "\n";
+    }
+    fp << "\n";
+
+    for(const shared_ptr<Unit> &unit : level.bench)
     {
         fp << "UNT " << unit->name << " "
                      << unit->pos.col << " "

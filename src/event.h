@@ -8,7 +8,9 @@
 void
 GlobalHandleEvents(Fade *level_fade,
                    Fade *turn_fade,
-                   Parcel *parcel)
+                   Parcel *parcel,
+                   Advancement *advancement
+                   )
 {
     while(!GlobalEvents.empty())
     {
@@ -33,17 +35,24 @@ GlobalHandleEvents(Fade *level_fade,
             {
                 PlaySfx("start.wav");
                 turn_fade->amount = 0.0f;
-                turn_fade->animation = GetAnimation(FADE_IN_OUT_ANIMATION, 0.25f);
-            }
+                turn_fade->animation = GetAnimation(TURN_FADE_IN_OUT_ANIMATION);
+                turn_fade->show_first_texture = false;
+            } break;
             case END_AI_TURN_EVENT:
             {
                 PlaySfx("start.wav");
                 turn_fade->amount = 0.0f;
-                turn_fade->animation = GetAnimation(FADE_IN_OUT_ANIMATION, 0.25f);
-            }
+                turn_fade->animation = GetAnimation(TURN_FADE_IN_OUT_ANIMATION);
+                turn_fade->show_first_texture = true;
+            } break;
+            case FADE_DONE_EVENT:
+            {
+                if(GlobalInterfaceState == NO_OP && GlobalPlayerTurn)
+                    GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            } break;
             case MOVE_CURSOR_EVENT:
             {
-                PlaySfx("mov.wav");
+                PlaySfx("click.wav");
             } break;
             case MOVE_MENU_EVENT:
             {
@@ -99,14 +108,29 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case EXPERIENCE_EVENT:
             {
-                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION);
+                parcel->animation = GetAnimation(EXPERIENCE_PARCEL_ANIMATION, event.number);
                 parcel->recipient = event.unit;
                 parcel->total = event.integer;
-                //PlaySfx("dance.wav"); // TODO: Get the actual exp bar sound
+                PlaySfx("experience.wav");
+            } break;
+            case EXPERIENCE_DONE_EVENT:
+            {
+                StopSfx("experience.wav");
+            } break;
+            case ADVANCEMENT_EVENT:
+            {
+                advancement->animation = GetAnimation(ADVANCEMENT_ANIMATION);
+                advancement->recipient = event.unit;
+                advancement->boosts = advancement->recipient->CalculateLevelUp();
+                PlaySfx("levelup.wav");
             } break;
             default:
             {
                 cout << "WARN: Unimplemented Event\n";
+            } break;
+            case LEVEL_BOOST_EVENT:
+            {
+                PlaySfx("boost.wav");
             } break;
         }
     }

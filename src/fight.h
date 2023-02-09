@@ -284,7 +284,7 @@ struct Fight
                     else
                     {
                         one->Deactivate();
-                        EmitEvent(Event(EXPERIENCE_EVENT, one, experience_amount));
+                        EmitEvent(Event(EXPERIENCE_EVENT, one, experience_amount, (float)experience_amount / 10.0f + 0.3f));
                         GlobalInterfaceState = RESOLVING_EXPERIENCE;
                     }
                 }
@@ -304,11 +304,11 @@ struct Fight
                     one->Deactivate();
                     if(two->should_die)
                     {
-                        GlobalAIState = FINDING_NEXT;
+                        GlobalAIState = AI_FINDING_NEXT;
                     }
                     else
                     {
-                        EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount));
+                        EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount, (float)experience_amount / 10.0f + 0.3f));
                         GlobalAIState = AI_RESOLVING_EXPERIENCE;
                     }
                 }

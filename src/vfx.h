@@ -10,13 +10,22 @@ struct Fade
 {
     SDL_Color color = black;
     string text = "";
+    Texture texture_one = {};
+    Texture texture_two = {};
     float amount = 0.0f;
     Animation *animation = nullptr;
+    bool show_first_texture = true;
 
     ~Fade()
     {
         delete animation;
         animation = nullptr;
+    }
+
+    Fade(string text_one, string text_two)
+    {
+        texture_one = LoadTextureText(text_one, blue, 0);
+        texture_two = LoadTextureText(text_two, red, 0);
     }
 
     void
@@ -29,6 +38,8 @@ struct Fade
             {
                 delete animation;
                 animation = nullptr;
+                amount = 0.0f;
+                EmitEvent(FADE_DONE_EVENT);
             }
         }
     }
@@ -66,18 +77,68 @@ struct Parcel
                 delete animation;
                 animation = nullptr;
 
-                recipient->GrantExperience(total);
+                if(recipient->GrantExperience(total))
+                {
+                    EmitEvent({ADVANCEMENT_EVENT, recipient, 0});
+                    if(GlobalPlayerTurn)
+                        GlobalInterfaceState = RESOLVING_ADVANCEMENT;
+                    else
+                        GlobalAIState = AI_RESOLVING_ADVANCEMENT;
+                }
+                else if(GlobalInterfaceState != LEVEL_MENU)
+                {
+                    if(GlobalPlayerTurn)
+                        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                    else
+                        GlobalAIState = AI_FINDING_NEXT;
+                }
+
+                recipient = nullptr;
+                value = 0.0f;
+                total = 0;
+
+                return;
+            }
+        }
+    }
+};
+
+
+struct Advancement
+{
+    Unit *recipient = nullptr;
+    float value = 0.0f;
+    Animation *animation = nullptr;
+    Boosts boosts = {};
+
+    ~Advancement()
+    {
+        delete animation;
+    }
+
+    void
+    Update()
+    {
+        if(animation)
+        {
+            value = animation->Value(CHANNEL_ONE);
+
+            if(animation->Update())
+            {
+                delete animation;
+                animation = nullptr;
+
+                recipient->LevelUp(boosts);
 
                 if(GlobalInterfaceState != LEVEL_MENU)
                 {
                     if(GlobalPlayerTurn)
                         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
                     else
-                        GlobalAIState = FINDING_NEXT;
+                        GlobalAIState = AI_FINDING_NEXT;
                 }
                 recipient = nullptr;
                 value = 0.0f;
-                total = 0;
                 return;
             }
         }

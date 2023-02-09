@@ -39,6 +39,17 @@ public:
 
         if(IsValidBoundsPosition(map.width, map.height, new_pos))
         {
+            /*
+            // Check Soft Viewport
+            if(WithinSoftViewport(cursor->pos) && !WithinSoftViewport(new_pos) &&
+               ((dir.col && new_pos.col >= 3 && new_pos.col < map.width - 3) ||
+                (dir.row && new_pos.row >= 2 && new_pos.row < map.height - 2)))
+            {
+                cout << "HERE\n";
+                MoveViewportDirection(dir);
+            }
+            */
+
             // move cursor
             cursor->MoveTo(new_pos, dir * -1);
 
@@ -1218,7 +1229,9 @@ public:
                 conversation->song->Stop();
                 level_song->Start();
 
-                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+                EmitEvent(END_AI_TURN_EVENT);
+
+                GlobalInterfaceState = NO_OP;
                 return;
             }
             if(GlobalInterfaceState == BATTLE_CONVERSATION)
@@ -1287,7 +1300,9 @@ public:
             conversation->song->Stop();
             level_song->Start();
 
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            EmitEvent(END_AI_TURN_EVENT);
+
+            GlobalInterfaceState = NO_OP;
             return;
         }
         if(GlobalInterfaceState == BATTLE_CONVERSATION)
@@ -1895,6 +1910,18 @@ public:
             } break;
 
             case(RESOLVING_EXPERIENCE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(RESOLVING_ADVANCEMENT):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());

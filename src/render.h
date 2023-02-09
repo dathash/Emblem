@@ -176,7 +176,8 @@ Render(const Tilemap &map, const Cursor &cursor,
        const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu,
        const Menu &conversationMenu,
        const ConversationList &conversations, 
-       const Fight &fight, const Fade &level_fade, const Fade &turn_fade)
+       const Fight &fight, const Fade &level_fade, const Fade &turn_fade,
+       const Advancement &advancement)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -193,8 +194,6 @@ Render(const Tilemap &map, const Cursor &cursor,
             position screen_pos = {col - viewportCol, row - viewportRow};
             const Tile &tile = map.tiles[col][row];
             RenderTileTexture(map, tile, screen_pos);
-            if(tile.type == SPAWN && GlobalEditorMode)
-                RenderTileColor(screen_pos, yellow);
         }
     }
 
@@ -316,7 +315,7 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
 // ================================ ai visualization  =============================
-    if(GlobalAIState == SELECTED)
+    if(GlobalAIState == AI_SELECTED)
     {
         for(const position &cell : map.vis_range)
         {
@@ -499,6 +498,14 @@ Render(const Tilemap &map, const Cursor &cursor,
                        false);
     }
 
+    if(GlobalInterfaceState == RESOLVING_ADVANCEMENT ||
+	   GlobalAIState == AI_RESOLVING_ADVANCEMENT)
+    {
+        RenderPortrait(-100, 0, *advancement.recipient,
+                       EXPR_HAPPY,
+                       true);
+    }
+
     if(GlobalInterfaceState == CONVERSATION ||
        GlobalInterfaceState == BATTLE_CONVERSATION ||
        GlobalInterfaceState == PRELUDE ||
@@ -556,6 +563,14 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     SDL_SetRenderDrawColor(GlobalRenderer, turn_fade.color.r, turn_fade.color.g, turn_fade.color.b, (int)(255 * turn_fade.amount));
     SDL_RenderFillRect(GlobalRenderer, &fade_rect);
+
+    if(turn_fade.amount > 0.4f)
+    {
+        if(turn_fade.show_first_texture)
+            RenderText(turn_fade.texture_one, 400, 200);
+        else
+            RenderText(turn_fade.texture_two, 400, 200);
+    }
 }
 
 #endif
