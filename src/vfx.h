@@ -12,7 +12,7 @@ struct Fade
     string text = "";
     Texture texture_one = {};
     Texture texture_two = {};
-    float amount = 0.0f;
+    float amount = 1.0f;
     Animation *animation = nullptr;
     bool show_first_texture = true;
 
@@ -38,7 +38,7 @@ struct Fade
             {
                 delete animation;
                 animation = nullptr;
-                amount = 0.0f;
+                amount = 1.0f;
                 EmitEvent(FADE_DONE_EVENT);
             }
         }

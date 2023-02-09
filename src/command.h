@@ -996,6 +996,7 @@ public:
 
             level_song->FadeOut();
             GlobalInterfaceState = LEVEL_MENU;
+            EmitEvent(MISSION_COMPLETE_EVENT);
             return;
         }
 
@@ -1109,6 +1110,8 @@ public:
 
             GlobalPlayerTurn = true;
             level->turn_start = true;
+            EmitEvent(END_AI_TURN_EVENT);
+            GlobalInterfaceState = NO_OP;
             return;
         }
         if(option == "Conv")
@@ -1358,7 +1361,6 @@ public:
 
     virtual void Execute()
     {
-        cout << "ToTitleScreenCommand | Unimplemented command!\n";
         GlobalInterfaceState = TITLE_SCREEN;
     }
 };
@@ -1394,6 +1396,8 @@ public:
         level->turn_start = true;
 
         level->song->Restart();
+        EmitEvent(END_AI_TURN_EVENT);
+        GlobalInterfaceState = NO_OP;
     }
 
 private:

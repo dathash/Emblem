@@ -21,29 +21,33 @@ GlobalHandleEvents(Fade *level_fade,
         {
             case START_GAME_EVENT:
             {
-                PlaySfx("start.wav");
+                PlaySfx("mission_start.wav");
                 level_fade->amount = 1.0f;
                 level_fade->animation = GetAnimation(FADE_OUT_ANIMATION);
             } break;
             case NEXT_LEVEL_EVENT:
             {
-                PlaySfx("start.wav");
+                PlaySfx("mission_start.wav");
                 level_fade->amount = 1.0f;
                 level_fade->animation = GetAnimation(FADE_OUT_ANIMATION);
             } break;
             case END_PLAYER_TURN_EVENT:
             {
-                PlaySfx("start.wav");
+                PlaySfx("mission_start.wav");
                 turn_fade->amount = 0.0f;
                 turn_fade->animation = GetAnimation(TURN_FADE_IN_OUT_ANIMATION);
                 turn_fade->show_first_texture = false;
             } break;
             case END_AI_TURN_EVENT:
             {
-                PlaySfx("start.wav");
+                PlaySfx("mission_start.wav");
                 turn_fade->amount = 0.0f;
                 turn_fade->animation = GetAnimation(TURN_FADE_IN_OUT_ANIMATION);
                 turn_fade->show_first_texture = true;
+            } break;
+            case MISSION_COMPLETE_EVENT:
+            {
+                PlaySfx("mission_complete.wav");
             } break;
             case FADE_DONE_EVENT:
             {
@@ -60,7 +64,7 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case SELECT_MENU_OPTION_EVENT:
             {
-                PlaySfx("sel1.wav");
+                PlaySfx("pitch.wav");
             } break;
             case NEXT_SENTENCE_EVENT:
             {
@@ -88,11 +92,25 @@ GlobalHandleEvents(Fade *level_fade,
             } break;
             case ATTACK_MISS_EVENT:
             {
-                PlaySfx("miss04.wav");
+                PlaySfx("whoosh.wav");
+                PlaySfx("miss.wav");
             } break;
-            case ATTACK_RANGED_EVENT:
+            case ATTACK_RANGED_NOCK_EVENT:
+            {
+                PlaySfx("nock.wav");
+            } break;
+            case ATTACK_RANGED_HIT_EVENT:
             {
                 PlaySfx("ranged.wav");
+            } break;
+            case ATTACK_RANGED_MISS_EVENT:
+            {
+                PlaySfx("whoosh.wav");
+                PlaySfx("miss.wav");
+            } break;
+            case ATTACK_RANGED_CRIT_EVENT:
+            {
+                PlaySfx("crit.wav");
             } break;
             case BUFF_EVENT:
             {

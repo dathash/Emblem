@@ -49,6 +49,8 @@ LoadConversation(string path, string filename,
 
     Expression one_expression = EXPR_NEUTRAL;
     Expression two_expression = EXPR_NEUTRAL;
+    Expression three_expression = EXPR_NEUTRAL;
+    Expression four_expression = EXPR_NEUTRAL;
     ConversationEvent conversation_event = CONV_NONE;
 
     ifstream fp;
@@ -76,6 +78,14 @@ LoadConversation(string path, string filename,
         {
             conversation.two = GetUnitByName(units, rest);
         }
+        else if(type == "SP3")
+        {
+            conversation.three = GetUnitByName(units, rest);
+        }
+        else if(type == "SP4")
+        {
+            conversation.four = GetUnitByName(units, rest);
+        }
         else if(type == "EX1")
         {
             one_expression = GetExpressionFromString(rest);
@@ -83,6 +93,14 @@ LoadConversation(string path, string filename,
         else if(type == "EX2")
         {
             two_expression = GetExpressionFromString(rest);
+        }
+        else if(type == "EX3")
+        {
+            three_expression = GetExpressionFromString(rest);
+        }
+        else if(type == "EX4")
+        {
+            four_expression = GetExpressionFromString(rest);
         }
         else if(type == "EVE")
         {
@@ -96,6 +114,14 @@ LoadConversation(string path, string filename,
         {
             conversation.prose.push_back({SPEAKER_TWO, rest, two_expression, conversation_event});
         }
+        else if(type == "THREE")
+        {
+            conversation.prose.push_back({SPEAKER_THREE, rest, three_expression, conversation_event});
+        }
+        else if(type == "FOUR")
+        {
+            conversation.prose.push_back({SPEAKER_FOUR, rest, four_expression, conversation_event});
+        }
         else if(type == "COM")
         {
         }
@@ -106,7 +132,7 @@ LoadConversation(string path, string filename,
     }
     fp.close();
 
-    SDL_assert(conversation.one && conversation.two);
+    //SDL_assert(conversation.one && conversation.two);
 
     conversation.ReloadTextures();
     return conversation;

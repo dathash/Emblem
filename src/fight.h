@@ -128,7 +128,10 @@ struct Attack
         {
             case RANGED:
             {
-                animation = GetAnimation(ATTACK_RANGED_ANIMATION, 1.0f);
+                if(hit)
+                    animation = GetAnimation(ATTACK_RANGED_HIT_ANIMATION, 1.0f);
+                else
+                    animation = GetAnimation(ATTACK_RANGED_MISS_ANIMATION, 1.0f);
             } break;
 
             case MELEE:

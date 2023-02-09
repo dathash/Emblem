@@ -69,6 +69,7 @@ enum EventType
     NEXT_LEVEL_EVENT,
     END_PLAYER_TURN_EVENT,
     END_AI_TURN_EVENT,
+    MISSION_COMPLETE_EVENT,
     FADE_DONE_EVENT,
     MOVE_CURSOR_EVENT,
     MOVE_MENU_EVENT,
@@ -80,7 +81,10 @@ enum EventType
     ATTACK_HIT_EVENT,
     ATTACK_CRIT_EVENT,
     ATTACK_MISS_EVENT,
-    ATTACK_RANGED_EVENT,
+    ATTACK_RANGED_NOCK_EVENT,
+    ATTACK_RANGED_HIT_EVENT,
+    ATTACK_RANGED_MISS_EVENT,
+    ATTACK_RANGED_CRIT_EVENT,
     BUFF_EVENT,
     HEAL_EVENT,
     DANCE_EVENT,
@@ -186,30 +190,43 @@ int main(int argc, char *argv[])
 
     GlobalSfx.sounds =
     {
-        new Sound("mov.wav", SFX),
+        new Sound("boost.wav", SFX),
+        new Sound("chaching.wav", SFX),
+        new Sound("clang.wav", SFX),
+        new Sound("click.wav", SFX),
         new Sound("crit.wav", SFX),
+        new Sound("dance.wav", SFX),
+        new Sound("denied.wav", SFX),
+        new Sound("experience.wav", SFX),
         new Sound("heal.wav", SFX),
+        new Sound("hinges.wav", SFX),
         new Sound("hit1.wav", SFX),
         new Sound("hit2.wav", SFX),
         new Sound("hit3.wav", SFX),
+        new Sound("hooves.wav", SFX),
+        new Sound("horsey1.wav", SFX),
+        new Sound("horsey2.wav", SFX),
+        new Sound("levelup.wav", SFX),
         new Sound("magic.wav", SFX),
-        new Sound("miss01.wav", SFX),
-        new Sound("miss04.wav", SFX),
+        new Sound("miss.wav", SFX),
+        new Sound("mission_complete.wav", SFX),
+        new Sound("mission_start.wav", SFX),
+        new Sound("nock.wav", SFX),
         new Sound("pickup.wav", SFX),
+        new Sound("pitch.wav", SFX),
         new Sound("place.wav", SFX),
         new Sound("powerup.wav", SFX),
         new Sound("ranged.wav", SFX),
+        new Sound("rubble.wav", SFX),
         new Sound("sel1.wav", SFX),
         new Sound("sel2.wav", SFX),
         new Sound("sel3.wav", SFX),
         new Sound("start.wav", SFX),
-        new Sound("click.wav", SFX),
-        new Sound("minor_click.wav", SFX),
         new Sound("turn.wav", SFX),
-        new Sound("experience.wav", SFX),
-        new Sound("levelup.wav", SFX),
-        new Sound("boost.wav", SFX),
-        new Sound("dance.wav", SFX)
+        new Sound("whoosh1.wav", SFX),
+        new Sound("whoosh2.wav", SFX),
+        new Sound("whoosh3.wav", SFX),
+        new Sound("whoosh4.wav", SFX)
     };
 
 // ================================== load =================================
@@ -287,9 +304,9 @@ int main(int argc, char *argv[])
                 (level.objective == OBJECTIVE_BOSS && 
                  level.IsBossDead())))
             {
-                cout << "IN CONDITION\n";
                 level.song->FadeOut();
                 GlobalInterfaceState = LEVEL_MENU;
+                EmitEvent(MISSION_COMPLETE_EVENT);
             }
         }
 

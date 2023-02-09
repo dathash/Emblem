@@ -458,10 +458,13 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             cout << "Units loaded: " << fileName << "\n";
             *level = LoadLevel(DATA_PATH + string(levelFileName), *units, party);
             GlobalAIState = AI_PLAYER_TURN;
-            GlobalInterfaceState = NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            EmitEvent(END_AI_TURN_EVENT);
+            if(GlobalInterfaceState != PRELUDE)
+            {
+                GlobalInterfaceState = NO_OP;
+                EmitEvent(END_AI_TURN_EVENT);
+            }
             cout << "Level loaded: " << levelFileName << "\n";
         }
         ImGui::SameLine();
@@ -482,10 +485,13 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             *level = LoadLevel(DATA_PATH + string("test.txt"), *units, party);
             sprintf(levelFileName, "test.txt");
             GlobalAIState = AI_PLAYER_TURN;
-            GlobalInterfaceState = NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            EmitEvent(END_AI_TURN_EVENT);
+            if(GlobalInterfaceState != PRELUDE)
+            {
+                GlobalInterfaceState = NO_OP;
+                EmitEvent(END_AI_TURN_EVENT);
+            }
         }
 
         int wrap = 0;
@@ -496,10 +502,13 @@ EditorPass(vector<shared_ptr<Unit>> *units,
                 *level = LoadLevel(DATA_PATH + s, *units, party);
                 sprintf(levelFileName, "%s", s.c_str());
                 GlobalAIState = AI_PLAYER_TURN;
-                GlobalInterfaceState = NO_OP;
                 GlobalPlayerTurn = true;
                 level->turn_start = true;
-                EmitEvent(END_AI_TURN_EVENT);
+                if(GlobalInterfaceState != PRELUDE)
+                {
+                    GlobalInterfaceState = NO_OP;
+                    EmitEvent(END_AI_TURN_EVENT);
+                }
             }
             if(++wrap % 4)
                 ImGui::SameLine();

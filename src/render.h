@@ -526,12 +526,19 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
         SDL_RenderFillRect(GlobalRenderer, &bg_rect);
 
-        if(conversation.active.first)
+        if(conversation.active[3])
+            RenderPortrait(150, 0, *conversation.four,
+                           conversation.expressions[3], true);
+        if(conversation.active[2])
+            RenderPortrait(350, 0, *conversation.three,
+                           conversation.expressions[2], false);
+
+        if(conversation.active[0])
             RenderPortrait(-50, 0, *conversation.one,
-                           conversation.expressions.first, true);
-        if(conversation.active.second)
-            RenderPortrait(400, 0, *conversation.two,
-                           conversation.expressions.second, false);
+                           conversation.expressions[0], true);
+        if(conversation.active[1])
+            RenderPortrait(500, 0, *conversation.two,
+                           conversation.expressions[1], false);
 
         SDL_Rect conv_rect = {20, 400, 860, 180};
         SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
@@ -558,18 +565,24 @@ Render(const Tilemap &map, const Cursor &cursor,
     }
 
     SDL_Rect fade_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_SetRenderDrawColor(GlobalRenderer, level_fade.color.r, level_fade.color.g, level_fade.color.b, (int)(255 * level_fade.amount));
-    SDL_RenderFillRect(GlobalRenderer, &fade_rect);
-
-    SDL_SetRenderDrawColor(GlobalRenderer, turn_fade.color.r, turn_fade.color.g, turn_fade.color.b, (int)(255 * turn_fade.amount));
-    SDL_RenderFillRect(GlobalRenderer, &fade_rect);
-
-    if(turn_fade.amount > 0.4f)
+    if(level_fade.animation)
     {
-        if(turn_fade.show_first_texture)
-            RenderText(turn_fade.texture_one, 400, 200);
-        else
-            RenderText(turn_fade.texture_two, 400, 200);
+        SDL_SetRenderDrawColor(GlobalRenderer, level_fade.color.r, level_fade.color.g, level_fade.color.b, (int)(255 * level_fade.amount));
+        SDL_RenderFillRect(GlobalRenderer, &fade_rect);
+    }
+
+    if(turn_fade.animation)
+    {
+        SDL_SetRenderDrawColor(GlobalRenderer, turn_fade.color.r, turn_fade.color.g, turn_fade.color.b, (int)(255 * turn_fade.amount));
+        SDL_RenderFillRect(GlobalRenderer, &fade_rect);
+
+        if(turn_fade.amount > 0.3f)
+        {
+            if(turn_fade.show_first_texture)
+                RenderText(turn_fade.texture_one, 400, 200);
+            else
+                RenderText(turn_fade.texture_two, 400, 200);
+        }
     }
 }
 

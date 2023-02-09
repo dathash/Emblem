@@ -82,28 +82,6 @@ private:
 };
 
 
-class AIDeactivateUnitCommand : public Command
-{
-public:
-    AIDeactivateUnitCommand(Cursor *cursor_in)
-    : cursor(cursor_in)
-    {}
-
-    virtual void Execute()
-    {
-        cursor->selected->is_exhausted = true;
-
-        cursor->selected->sheet.ChangeTrack(TRACK_IDLE);
-        cursor->selected = nullptr;
-
-        cursor->redo = {-1, -1};
-
-        GlobalAIState = AI_FINDING_NEXT;
-    }
-private:
-    Cursor *cursor; 
-};
-
 // =============================== Specification of Behaviors ==================
 pair<position, Unit *>
 PursueBehavior(const Unit &unit, const Tilemap &map)

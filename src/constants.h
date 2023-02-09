@@ -39,7 +39,7 @@
 
 // animation
 #define ANIMATION_SPEED 10
-#define AI_ACTION_SPEED 10
+#define AI_ACTION_SPEED 5
 
 // startup
 #define INITIAL_LEVEL "l0.txt"

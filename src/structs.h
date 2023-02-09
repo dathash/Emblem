@@ -444,6 +444,8 @@ enum Speaker
 {
     SPEAKER_ONE,
     SPEAKER_TWO,
+    SPEAKER_THREE,
+    SPEAKER_FOUR,
 };
 
 enum ConversationEvent
@@ -451,8 +453,12 @@ enum ConversationEvent
     CONV_NONE,
     CONV_ONE_EXITS,
     CONV_TWO_EXITS,
+    CONV_THREE_EXITS,
+    CONV_FOUR_EXITS,
     CONV_ONE_ENTERS,
     CONV_TWO_ENTERS,
+    CONV_THREE_ENTERS,
+    CONV_FOUR_ENTERS,
 };
 
 Expression
@@ -471,8 +477,12 @@ GetConversationEventFromString(const string &in)
 {
     if(in == "ONE Exits") return CONV_ONE_EXITS;
     else if(in == "TWO Exits") return CONV_TWO_EXITS;
+    else if(in == "THREE Exits") return CONV_THREE_EXITS;
+    else if(in == "FOUR Exits") return CONV_FOUR_EXITS;
     else if(in == "ONE Enters") return CONV_ONE_ENTERS;
     else if(in == "TWO Enters") return CONV_TWO_ENTERS;
+    else if(in == "THREE Enters") return CONV_THREE_ENTERS;
+    else if(in == "FOUR Enters") return CONV_FOUR_ENTERS;
     SDL_assert(!"Warning: Unsupported Expression in GetConversationEventFromString.");
     return CONV_ONE_EXITS;
 }
@@ -493,9 +503,11 @@ struct Conversation
     string filename = "";
     Unit *one = nullptr;
     Unit *two = nullptr;
+    Unit *three = nullptr;
+    Unit *four = nullptr;
     position pos = {-1, -1};
-    pair<bool, bool> active = {true, false};
-    pair<Expression, Expression> expressions = {EXPR_NEUTRAL, EXPR_NEUTRAL};
+    vector<bool> active = {true, false, false, false};
+    vector<Expression> expressions = {EXPR_NEUTRAL, EXPR_NEUTRAL, EXPR_NEUTRAL, EXPR_NEUTRAL};
     int current = 0;
     bool done = false;
     Sound *song = nullptr;
@@ -529,8 +541,12 @@ struct Conversation
         words_texture = LoadTextureText(Words(), black, CONVERSATION_WRAP);
         if(Speaker() == SPEAKER_ONE)
             speaker_texture = LoadTextureText(one->name, black, 0);
-        if(Speaker() == SPEAKER_TWO)
+        else if(Speaker() == SPEAKER_TWO)
             speaker_texture = LoadTextureText(two->name, black, 0);
+        else if(Speaker() == SPEAKER_TWO)
+            speaker_texture = LoadTextureText(three->name, black, 0);
+        else if(Speaker() == SPEAKER_TWO)
+            speaker_texture = LoadTextureText(four->name, black, 0);
     }
 
     void
@@ -546,11 +562,19 @@ struct Conversation
 
         if(Speaker() == SPEAKER_ONE)
         {
-            expressions.first = Expression();
+            expressions[0] = Expression();
         }
         else if(Speaker() == SPEAKER_TWO)
         {
-            expressions.second = Expression();
+            expressions[1] = Expression();
+        }
+        else if(Speaker() == SPEAKER_THREE)
+        {
+            expressions[2] = Expression();
+        }
+        else if(Speaker() == SPEAKER_FOUR)
+        {
+            expressions[3] = Expression();
         }
 
         switch(prose[current].event)
@@ -560,19 +584,35 @@ struct Conversation
             } break;
             case CONV_ONE_EXITS: 
             {
-                active.first = false;
+                active[0] = false;
             } break;
             case CONV_TWO_EXITS: 
             {
-                active.second = false;
+                active[1] = false;
+            } break;;
+            case CONV_THREE_EXITS: 
+            {
+                active[2] = false;
+            } break;;
+            case CONV_FOUR_EXITS: 
+            {
+                active[3] = false;
             } break;;
             case CONV_ONE_ENTERS: 
             {
-                active.first = true;
+                active[0] = true;
             } break;;
             case CONV_TWO_ENTERS:
             {
-                active.second = true;
+                active[1] = true;
+            } break;;
+            case CONV_THREE_ENTERS:
+            {
+                active[2] = true;
+            } break;;
+            case CONV_FOUR_ENTERS:
+            {
+                active[3] = true;
             } break;;
             default: SDL_assert(!"ERROR Unhandled enum in Conversation.Next()");
         }
