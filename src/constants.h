@@ -127,10 +127,10 @@ enum InterfaceState
     RESOLVING_EXPERIENCE, // 28
     RESOLVING_ADVANCEMENT, // 29
 
-    NO_OP, // 31
+    NO_OP, // 30
 
-    TITLE_SCREEN, // 32
-    GAME_OVER, // 33
+    TITLE_SCREEN, // 31
+    GAME_OVER, // 32
 };
 
 
@@ -140,9 +140,8 @@ enum AIState
     AI_FINDING_NEXT, // 0
     AI_SELECTED, // 1
 
-    AI_RESOLVING_EXPERIENCE, // 2
+    AI_RESOLVING_EXPERIENCE, // 1
     AI_RESOLVING_ADVANCEMENT, // 2
-
     AI_FIGHT, // 3
 
     AI_PLAYER_TURN, // 4

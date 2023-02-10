@@ -110,38 +110,33 @@ Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
 # Story
 The story of the game is delivered through the characters.
-We randomly generate which characters you have, and therefore create an
-experience where you end up with different dynamics every time?
 
 # TODO
     Enemies pursue and destroy villages and chests.
 
-    BUG | Enemy gets stuck parceling EXP when it uses the last unit it has.
-          No plan, we switch back the AI State, but it doesn't have any clue
-          what to do.
+    BUG | Single frame of sight before level starts out of a prelude
+
+    Conversations
+    * Cutscene events on turn change.
+    * Unit Death Screens
+
+    BUG | Enemy turn combat can still keep my units out of the viewport for some
+          reason.
+
+    Polished Product! (For Joom Bog)
+
+# Later
+    10 levels
+
+    Put a turn counter on the turn transition fade, it would be cool.
 
     AI doesn't wait on every unit that won't act.
     * Run a first pass that just gathers the units that will act, then run with
       those.
     * This will be faster anyways.
 
-    BUG | Single frame of sight before level starts out of a prelude
-    BUG | Sometimes the game state is not set to NO_OP while the fade-in is
-    happening right after the prelude. sigh.
-
-    Put a turn counter on the turn transition fade, it would be cool.
-
-    SWAP END_AI_TURN_EVENT for START_PLAYER_TURN_EVENT and put them in the main
-    code rather than calling them every time after we set the turn_start var.
-
-    Conversations
-    * Cutscene events on turn change.
-    * Unit Death Screens
-
-    Let combat resolution have more downtime after the fact.
-
-# Later
-    10 levels
+    put START_PLAYER_TURN_EVENT .. in the main code rather than calling them
+    every time after we set the turn_start var.
 
     Smooth reinforcements
 

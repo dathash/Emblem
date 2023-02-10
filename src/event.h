@@ -31,14 +31,14 @@ GlobalHandleEvents(Fade *level_fade,
                 level_fade->amount = 1.0f;
                 level_fade->animation = GetAnimation(FADE_OUT_ANIMATION);
             } break;
-            case END_PLAYER_TURN_EVENT:
+            case START_AI_TURN_EVENT:
             {
                 PlaySfx("mission_start.wav");
                 turn_fade->amount = 0.0f;
                 turn_fade->animation = GetAnimation(TURN_FADE_IN_OUT_ANIMATION);
                 turn_fade->show_first_texture = false;
             } break;
-            case END_AI_TURN_EVENT:
+            case START_PLAYER_TURN_EVENT:
             {
                 PlaySfx("mission_start.wav");
                 turn_fade->amount = 0.0f;
@@ -53,6 +53,8 @@ GlobalHandleEvents(Fade *level_fade,
             {
                 if(GlobalInterfaceState == NO_OP && GlobalPlayerTurn)
                     GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+                if(GlobalAIState == AI_NO_OP && !GlobalPlayerTurn)
+                    GlobalAIState = AI_FINDING_NEXT;
             } break;
             case MOVE_CURSOR_EVENT:
             {

@@ -34,7 +34,7 @@ public:
             GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            EmitEvent(END_AI_TURN_EVENT);
+            EmitEvent(START_PLAYER_TURN_EVENT);
         }
     }
 private: 
@@ -342,9 +342,10 @@ struct AI
         if(GlobalPlayerTurn)
             return;
 
-        if(GlobalAIState == AI_FIGHT ||
+        if(GlobalAIState == AI_NO_OP ||
            GlobalAIState == AI_RESOLVING_EXPERIENCE ||
-           GlobalAIState == AI_RESOLVING_ADVANCEMENT)
+           GlobalAIState == AI_RESOLVING_ADVANCEMENT ||
+           GlobalAIState == AI_FIGHT)
             return;
 
         if(commandQueue.empty())

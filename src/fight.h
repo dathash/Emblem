@@ -194,6 +194,7 @@ struct Fight
     bool ready = false;
 
     Animation *animation = nullptr;
+    Animation *finish_animation = nullptr;
     bool lower_half_screen = false;
 
     Fight() = default;
@@ -246,13 +247,31 @@ struct Fight
             {
                 Current().Resolve();
                 attack_queue.pop();
-                ready = true;
                 delete animation;
                 animation = nullptr;
+                if(attack_queue.empty())
+                {
+                    finish_animation = GetAnimation(WASTE_TIME_ANIMATION);
+                }
+                else
+                {
+                    ready = true;
+                }
+            }
+        }
+        if(finish_animation)
+        {
+            if(finish_animation->Update())
+            {
+                delete finish_animation;
+                finish_animation = nullptr;
+                ready = true;
             }
         }
         if(ready)
         {
+            ready = false;
+
             if(!attack_queue.empty())
             {
                 animation = Current().Execute();
@@ -260,63 +279,71 @@ struct Fight
             }
             else
             {
-                if(one->health <= 0)
-                    one->should_die = true;
-                if(two->health <= 0)
-                    two->should_die = true;
-
-                Unit *experience_recipient = nullptr;
-                int experience_amount = 0;
-
-                if(GlobalPlayerTurn)
-                {
-                    experience_recipient = one;
-
-                    experience_amount = EXP_FOR_COMBAT;
-                    if(two->should_die)
-                        experience_amount += two->xp_value;
-
-                    if(one->level > two->level)
-                        experience_amount /= 2;
-
-                    if(one->should_die)
-                    {
-                        // TODO: Put DEATH CONVERSATION HERE!!!
-                        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-                    }
-                    else
-                    {
-                        one->Deactivate();
-                        EmitEvent(Event(EXPERIENCE_EVENT, one, experience_amount, (float)experience_amount / 10.0f + 0.3f));
-                        GlobalInterfaceState = RESOLVING_EXPERIENCE;
-                    }
-                }
-                else
-                {
-                    experience_recipient = two;
-
-                    experience_amount = 1;
-                    if(one->should_die)
-                        experience_amount += one->xp_value;
-
-                    if(two->level > one->level + 3) // Arbitrary threshold
-                        experience_amount /= 4;
-                    else if(two->level > one->level)
-                        experience_amount /= 2;
-
-                    one->Deactivate();
-                    if(two->should_die)
-                    {
-                        GlobalAIState = AI_FINDING_NEXT;
-                    }
-                    else
-                    {
-                        EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount, (float)experience_amount / 10.0f + 0.3f));
-                        GlobalAIState = AI_RESOLVING_EXPERIENCE;
-                    }
-                }
+                CompleteCombat();
             }
-            ready = false;
+        }
+    }
+
+
+    // Finishes the given combat, changing the game state and reverting the fight.
+    // IMPURE
+    void
+    CompleteCombat()
+    {
+        if(one->health <= 0)
+            one->should_die = true;
+        if(two->health <= 0)
+            two->should_die = true;
+
+        Unit *experience_recipient = nullptr;
+        int experience_amount = 0;
+
+        if(GlobalPlayerTurn)
+        {
+            experience_recipient = one;
+
+            experience_amount = EXP_FOR_COMBAT;
+            if(two->should_die)
+                experience_amount += two->xp_value;
+
+            if(one->level > two->level)
+                experience_amount /= 2;
+
+            if(one->should_die)
+            {
+                // TODO: Put DEATH CONVERSATION HERE!!!
+                GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+            }
+            else
+            {
+                one->Deactivate();
+                EmitEvent(Event(EXPERIENCE_EVENT, one, experience_amount, (float)experience_amount / 10.0f + 0.3f));
+                GlobalInterfaceState = RESOLVING_EXPERIENCE;
+            }
+        }
+        else
+        {
+            experience_recipient = two;
+
+            experience_amount = 1;
+            if(one->should_die)
+                experience_amount += one->xp_value;
+
+            if(two->level > one->level + 3) // Arbitrary threshold
+                experience_amount /= 4;
+            else if(two->level > one->level)
+                experience_amount /= 2;
+
+            one->Deactivate();
+            if(two->should_die)
+            {
+                GlobalAIState = AI_FINDING_NEXT;
+            }
+            else
+            {
+                EmitEvent(Event(EXPERIENCE_EVENT, two, experience_amount, (float)experience_amount / 10.0f + 0.3f));
+                GlobalAIState = AI_RESOLVING_EXPERIENCE;
+            }
         }
     }
 
@@ -412,6 +439,7 @@ struct Fight
                 attack_queue.push(attack);
             } 
         }
+        // TODO: WASTE TIME ANIMATION HERE!
     }
 };
 

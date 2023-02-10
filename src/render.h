@@ -226,9 +226,12 @@ Render(const Tilemap &map, const Cursor &cursor,
 
         for(const position &p : cursor.path_draw)
         {
-            RenderTileColor({p.col - viewportCol, 
-                       p.row - viewportRow}, 
-                       pathColor);
+            if(WithinViewport(p))
+            {
+                RenderTileColor({p.col - viewportCol, 
+                           p.row - viewportRow}, 
+                           pathColor);
+            }
         }
     }
 

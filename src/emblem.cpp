@@ -51,6 +51,7 @@ static ImFont *uiFontLarge;
 
 static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
+static bool GlobalDebug = false;
 static bool GlobalPlayerTurn = true;
 
 ////////////////////////////////
@@ -67,8 +68,8 @@ enum EventType
 {
     START_GAME_EVENT,
     NEXT_LEVEL_EVENT,
-    END_PLAYER_TURN_EVENT,
-    END_AI_TURN_EVENT,
+    START_AI_TURN_EVENT,
+    START_PLAYER_TURN_EVENT,
     MISSION_COMPLETE_EVENT,
     FADE_DONE_EVENT,
     MOVE_CURSOR_EVENT,
@@ -148,7 +149,7 @@ static AIState GlobalAIState;
 #include "ai.h"
 #include "render.h"
 #include "editor.h"
-
+#include "debug.h"
 
 int main(int argc, char *argv[])
 {
@@ -342,6 +343,8 @@ int main(int argc, char *argv[])
 #if DEV_MODE
         if(GlobalEditorMode)
             EditorPass(&units, party, &level, levels);
+        if(GlobalDebug)
+            DebugUI();
 #endif
 
 		ImGui::EndFrame();

@@ -21,6 +21,11 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
             GlobalEditorMode = !GlobalEditorMode;
             return;
         }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_BACKQUOTE)
+        {
+            GlobalDebug = !GlobalDebug;
+            return;
+        }
         if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {
             GlobalRunning = false;

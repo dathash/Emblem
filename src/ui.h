@@ -37,49 +37,6 @@ GetTileNameString(TileType type)
 }
 
 string 
-GetInterfaceString(InterfaceState state)
-{
-    switch (state)
-    {
-    case NEUTRAL_OVER_GROUND:           return "Neutral over ground";
-    case NEUTRAL_OVER_ENEMY:            return "Neutral over enemy";
-    case NEUTRAL_OVER_UNIT:             return "Neutral over unit";
-    case NEUTRAL_OVER_DEACTIVATED_UNIT: return "Neutral over deactivated unit";
-    case SELECTED_OVER_GROUND:          return "Selected over ground";
-    case SELECTED_OVER_INACCESSIBLE:    return "Selected over inaccessible";
-    case SELECTED_OVER_ALLY:            return "Selected over ally";
-    case SELECTED_OVER_ENEMY:           return "Selected over enemy";
-    case ATTACK_TARGETING:              return "Attack targeting";
-    case ABILITY_TARGETING:             return "Ability targeting";
-    case TALK_TARGETING:                return "Talk targeting";
-    case PREVIEW_ATTACK:                return "Preview attack";
-    case PREVIEW_ABILITY:               return "Preview ability";
-    case GAME_MENU:                     return "Game menu";
-    case GAME_MENU_OUTLOOK:             return "Game menu outlook";
-    case GAME_MENU_OPTIONS:             return "Game menu options";
-    case ANIMATING_UNIT_MOVEMENT:       return "Animating unit movement";
-    case UNIT_MENU_ROOT:                return "Unit menu root";
-    case UNIT_INFO:                     return "Unit info";
-    case ENEMY_INFO:                    return "Enemy info";
-    case ENEMY_RANGE:                   return "Enemy range";
-    case LEVEL_MENU:                    return "Level menu";
-    case CONVERSATION_MENU:             return "Conversation menu";
-    case CONVERSATION:                  return "Conversation";
-    case BATTLE_CONVERSATION:           return "Battle conversation";
-    case VILLAGE_CONVERSATION:          return "Village conversation";
-    case PRELUDE:                       return "Prelude";
-    case PLAYER_FIGHT:                  return "Player fight";
-    case RESOLVING_EXPERIENCE:          return "Resolving experience";
-    case RESOLVING_ADVANCEMENT:         return "Resolving advancement";
-    case NO_OP:                         return "No-Op";
-    case TITLE_SCREEN:                  return "Title screen";
-    case GAME_OVER:                     return "Game over";
-	default:
-		assert(!"ERROR: Unhandled InterfaceState name string in UI.\n"); return "";
-	}
-}
-
-string 
 GetAbilityString(Ability ability)
 {
     switch (ability)
@@ -883,7 +840,7 @@ RenderUI(UI_State *ui,
 {
     ui->Update();
 
-    if(GlobalEditorMode)
+    if(GlobalEditorMode || GlobalDebug) // For now
         return;
 
     ImGuiWindowFlags window_flags = 0;

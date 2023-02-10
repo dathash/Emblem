@@ -895,9 +895,10 @@ public:
             case(2): // END TURN
             {
                 GlobalInterfaceState = NO_OP;
+                GlobalAIState = AI_NO_OP;
                 GlobalPlayerTurn = false;
                 level->turn_start = true;
-                EmitEvent(END_PLAYER_TURN_EVENT);
+                EmitEvent(START_AI_TURN_EVENT);
             } break;
         }
     }
@@ -1110,7 +1111,7 @@ public:
 
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            EmitEvent(END_AI_TURN_EVENT);
+            EmitEvent(START_PLAYER_TURN_EVENT);
             GlobalInterfaceState = NO_OP;
             return;
         }
@@ -1232,7 +1233,7 @@ public:
                 conversation->song->Stop();
                 level_song->Start();
 
-                EmitEvent(END_AI_TURN_EVENT);
+                EmitEvent(START_PLAYER_TURN_EVENT);
 
                 GlobalInterfaceState = NO_OP;
                 return;
@@ -1303,7 +1304,7 @@ public:
             conversation->song->Stop();
             level_song->Start();
 
-            EmitEvent(END_AI_TURN_EVENT);
+            EmitEvent(START_PLAYER_TURN_EVENT);
 
             GlobalInterfaceState = NO_OP;
             return;
@@ -1392,12 +1393,12 @@ public:
     virtual void Execute()
     {
         *level = LoadLevel(level->name, units, party);
+        level->song->Restart();
+
         GlobalPlayerTurn = true;
         level->turn_start = true;
-
-        level->song->Restart();
-        EmitEvent(END_AI_TURN_EVENT);
         GlobalInterfaceState = NO_OP;
+        EmitEvent(START_PLAYER_TURN_EVENT);
     }
 
 private:

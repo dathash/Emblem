@@ -83,7 +83,7 @@ struct Parcel
                     if(GlobalPlayerTurn)
                         GlobalInterfaceState = RESOLVING_ADVANCEMENT;
                     else
-                        GlobalAIState = AI_RESOLVING_ADVANCEMENT;
+                        GlobalAIState = AI_NO_OP;
                 }
                 else if(GlobalInterfaceState != LEVEL_MENU)
                 {

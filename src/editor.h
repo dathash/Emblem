@@ -1,5 +1,3 @@
-
-
 // Author: Alex Hartford                                                                                 
 // Program: Emblem
 // File: Editor
@@ -10,9 +8,9 @@
 #if DEV_MODE
 
 void
-Meta(Level *level)
+Audio(Level *level)
 {
-    ImGui::Begin("Meta");
+    ImGui::Begin("Audio");
     {
         static float music_volume = DEFAULT_MUSIC_VOLUME;
         static float sfx_volume = DEFAULT_SFX_VOLUME;
@@ -419,21 +417,6 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
     ImGui::End();
 }
 
-void
-GlobalsViewer()
-{
-    ImGui::Begin("Globals");
-    {
-        ImGui::Text("State");
-        ImGui::Checkbox("GlobalRunning", &GlobalRunning);
-        ImGui::Checkbox("GlobalPlayerTurn", &GlobalPlayerTurn);
-        ImGui::Checkbox("GlobalEditorMode", &GlobalEditorMode);
-        ImGui::Text("%02d | STATE", GlobalInterfaceState);
-        ImGui::Text("%02d | AI", GlobalAIState);
-    }
-    ImGui::End();
-}
-
 // Renders all imgui stuff.
 // Contains static variables that might trip some stuff up, just a heads up.
 void
@@ -444,8 +427,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
     // Internal variables
     static bool showUnitEditor = true;
     static bool showLevelEditor = true;
-    static bool showGlobals = false;
-    static bool showMeta = true;
+    static bool showAudio = true;
 
     static char fileName[128] = INITIAL_UNITS;
     static char levelFileName[128] = INITIAL_LEVEL;
@@ -463,7 +445,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             if(GlobalInterfaceState != PRELUDE)
             {
                 GlobalInterfaceState = NO_OP;
-                EmitEvent(END_AI_TURN_EVENT);
+                EmitEvent(START_PLAYER_TURN_EVENT);
             }
             cout << "Level loaded: " << levelFileName << "\n";
         }
@@ -490,7 +472,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             if(GlobalInterfaceState != PRELUDE)
             {
                 GlobalInterfaceState = NO_OP;
-                EmitEvent(END_AI_TURN_EVENT);
+                EmitEvent(START_PLAYER_TURN_EVENT);
             }
         }
 
@@ -507,7 +489,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
                 if(GlobalInterfaceState != PRELUDE)
                 {
                     GlobalInterfaceState = NO_OP;
-                    EmitEvent(END_AI_TURN_EVENT);
+                    EmitEvent(START_PLAYER_TURN_EVENT);
                 }
             }
             if(++wrap % 4)
@@ -519,8 +501,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
 
         ImGui::Checkbox("Unit Editor", &showUnitEditor);
         ImGui::Checkbox("Level Editor", &showLevelEditor);
-        ImGui::Checkbox("Globals", &showGlobals);
-        ImGui::Checkbox("Meta", &showMeta);
+        ImGui::Checkbox("Audio", &showAudio);
 
         ImGui::Text("avg %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
@@ -530,10 +511,8 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         UnitEditor(units);
     if(showLevelEditor)
         LevelEditor(level, *units);
-    if(showGlobals)
-        GlobalsViewer();
-    if(showMeta)
-        Meta(level);
+    if(showAudio)
+        Audio(level);
 
     /*
     // debug
@@ -541,6 +520,6 @@ EditorPass(vector<shared_ptr<Unit>> *units,
     ImGui::ShowDemoWindow();
     */
 }
-#endif // EDITOR
+#endif
 
 #endif

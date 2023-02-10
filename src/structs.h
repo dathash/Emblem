@@ -691,6 +691,8 @@ struct Level
     bool next_level = false;
     bool turn_start = false;
 
+
+
     Level
     LoadNextLevel(const string &name, 
                   const vector<shared_ptr<Unit>> &units,
@@ -855,8 +857,10 @@ struct Level
 
             // End player turn
             GlobalInterfaceState = NO_OP;
+            GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = false;
             turn_start = true;
+            EmitEvent(START_AI_TURN_EVENT);
         }
     }
 
