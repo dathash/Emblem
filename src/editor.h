@@ -425,10 +425,6 @@ EditorPass(vector<shared_ptr<Unit>> *units,
            Level *level, const vector<string> &levels)
 {
     // Internal variables
-    static bool showUnitEditor = true;
-    static bool showLevelEditor = true;
-    static bool showAudio = true;
-
     static char fileName[128] = INITIAL_UNITS;
     static char levelFileName[128] = INITIAL_LEVEL;
 
@@ -498,21 +494,13 @@ EditorPass(vector<shared_ptr<Unit>> *units,
 
         ImGui::InputText("units", fileName, IM_ARRAYSIZE(fileName));
         ImGui::InputText("level", levelFileName, IM_ARRAYSIZE(levelFileName));
-
-        ImGui::Checkbox("Unit Editor", &showUnitEditor);
-        ImGui::Checkbox("Level Editor", &showLevelEditor);
-        ImGui::Checkbox("Audio", &showAudio);
-
-        ImGui::Text("avg %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
     ImGui::End();
 
-    if(showUnitEditor)
-        UnitEditor(units);
-    if(showLevelEditor)
-        LevelEditor(level, *units);
-    if(showAudio)
-        Audio(level);
+    // Sub-Editors
+    UnitEditor(units);
+    LevelEditor(level, *units);
+    Audio(level);
 
     /*
     // debug

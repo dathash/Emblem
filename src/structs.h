@@ -53,6 +53,7 @@ struct Texture
     }
 };
 
+
 enum SheetTrack
 {
     TRACK_IDLE,

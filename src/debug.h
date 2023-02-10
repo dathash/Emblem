@@ -87,6 +87,7 @@ DebugUI()
     ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(white));
     ImGui::Begin("Debug", NULL, flags);
     {
+        ImGui::Text("[%.2f FPS]", ImGui::GetIO().Framerate);
         ImGui::Text("%s", GetInterfaceString(GlobalInterfaceState).c_str());
         ImGui::Text("%s", GetAIString(GlobalAIState).c_str());
         ImGui::Text("Viewport [%d, %d]", viewportCol, viewportRow);

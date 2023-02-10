@@ -33,111 +33,30 @@ static ImFont *uiFontSmall;
 static ImFont *uiFontMedium;
 static ImFont *uiFontLarge;
 
-//// STATE //////////////////////
-// Necessary State:
-// * Running
-// * Editor / Paused
-// * PlayerTurn ? (We could maybe just store this in the InterfaceState at any
-//                 given time)
-// Transitories:
-// * StartPlayerTurn
-// * StartEnemyTurn
-// * Next Level
-
-// Note: I don't have anything against global state in this program, since I
-// don't intend to multi-thread it. However, I keep it to a minimum and
-// consolidate it as much as I can, so that it doesn't carry a lot of mental
-// overhead.
-
+// My Globals
 static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
 static bool GlobalDebug = false;
 static bool GlobalPlayerTurn = true;
 
-////////////////////////////////
-
 // TODO: Refactor these to only be where they need to be.
 static int viewportCol = 0;
 static int viewportRow = 0;
 
-////////////////////////////////
-
-// EVENTS
-// TODO: Fix these circular dependencies.
-enum EventType
-{
-    START_GAME_EVENT,
-    NEXT_LEVEL_EVENT,
-    START_AI_TURN_EVENT,
-    START_PLAYER_TURN_EVENT,
-    MISSION_COMPLETE_EVENT,
-    FADE_DONE_EVENT,
-    MOVE_CURSOR_EVENT,
-    MOVE_MENU_EVENT,
-    SELECT_MENU_OPTION_EVENT,
-    NEXT_SENTENCE_EVENT,
-    PICK_UP_UNIT_EVENT,
-    PLACE_UNIT_EVENT,
-    UNIT_INFO_EVENT,
-    ATTACK_HIT_EVENT,
-    ATTACK_CRIT_EVENT,
-    ATTACK_MISS_EVENT,
-    ATTACK_RANGED_NOCK_EVENT,
-    ATTACK_RANGED_HIT_EVENT,
-    ATTACK_RANGED_MISS_EVENT,
-    ATTACK_RANGED_CRIT_EVENT,
-    BUFF_EVENT,
-    HEAL_EVENT,
-    DANCE_EVENT,
-    EXPERIENCE_EVENT,
-    EXPERIENCE_DONE_EVENT,
-    ADVANCEMENT_EVENT,
-    LEVEL_BOOST_EVENT,
-};
-
-struct Unit;
-struct Event
-{
-    EventType type;
-    Unit *unit = nullptr;
-    int integer = 0;
-    float number = 0.0f;
-
-    Event(EventType type_in)
-    : type(type_in)
-    {}
-
-    Event(EventType type_in,
-          Unit *unit_in,
-          int integer_in = 0,
-          float number_in = 0.0f)
-    : type(type_in),
-      unit(unit_in),
-      integer(integer_in),
-      number(number_in)
-    {}
-};
-
-static queue<Event> GlobalEvents;
-
-void
-EmitEvent(Event event)
-{
-    GlobalEvents.push(event);
-}
-
 // ================================= my includes ===============================
-// NOTE: This is a unity build. This is all that the game includes.
+// NOTE: This is a unity build. This file is the only compilation unit, and it
+// pulls all the following includes in at compile time.
+
 #include "constants.h"
 static InterfaceState GlobalInterfaceState;
 static AIState GlobalAIState;
 
 #include "utils.h"
+#include "event.h" // NOTE: Includes Global Event handler
 #include "animation.h"
-#include "audio.h" // NOTE: Includes GlobalMusic and GlobalSfx, GlobalSong
+#include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
 #include "structs.h"
 #include "vfx.h"
-#include "event.h" // NOTE: Includes a GlobalEvents queue.
 #include "cursor.h"
 #include "load.h"
 #include "init.h"
@@ -150,6 +69,7 @@ static AIState GlobalAIState;
 #include "render.h"
 #include "editor.h"
 #include "debug.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -234,17 +154,16 @@ int main(int argc, char *argv[])
     vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
     vector<shared_ptr<Unit>> party = {};
 
-
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
                              string("l2.txt"), string("l3.txt"),
                              string("l4.txt"), string("l5.txt"),
-                             string("l6.txt"), string("l7.txt")
+                             string("l6.txt"), string("l7.txt"),
 							 };
     int level_index = 0;
     Level level = LoadLevel(DATA_PATH + levels[level_index], units, party);
 
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
-		32, ANIMATION_SPEED));
+		                      32, ANIMATION_SPEED));
 
 	UI_State ui = {};
 
@@ -253,8 +172,8 @@ int main(int argc, char *argv[])
     Menu level_menu({"Next", "Redo", "Conv"});
     Menu conversation_menu({"Return"});
 
-    Fade level_fade = {"t", "t"};
-    Fade turn_fade = {"Player Turn", "Enemy Turn"};
+    Fade level_fade = {"placeholder", "placeholder"};
+    Fade turn_fade = {"Player Turn", "Enemy Turn", FADE_TURN};
     Parcel parcel;
     Advancement advancement;
 
@@ -328,7 +247,7 @@ int main(int argc, char *argv[])
             handler.clearQueue();
         }
 
-        GlobalHandleEvents(&level_fade, &turn_fade, &parcel, &advancement);
+        EventSystemUpdate(&level_fade, &turn_fade, &parcel, &advancement);
 
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
@@ -355,8 +274,6 @@ int main(int argc, char *argv[])
 
     } // End Game Loop
 
-    // This needs to be in this function due to scope restrictions.
-    // TODO: Learn more about heap allocation, scope weirdness, double frees, etc.
     for(Sound *sound : GlobalMusic.sounds)
         delete sound;
     for(Sound *sound : GlobalSfx.sounds)

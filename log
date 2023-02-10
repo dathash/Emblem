@@ -114,14 +114,14 @@ The story of the game is delivered through the characters.
 # TODO
     Enemies pursue and destroy villages and chests.
 
+    BUG | Enemy turn combat can still keep my units out of the viewport for some
+          reason.
+
     BUG | Single frame of sight before level starts out of a prelude
 
     Conversations
     * Cutscene events on turn change.
     * Unit Death Screens
-
-    BUG | Enemy turn combat can still keep my units out of the viewport for some
-          reason.
 
     Polished Product! (For Joom Bog)
 

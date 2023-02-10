@@ -5,15 +5,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-/* From Game Engine Architecture:
-   Event Channel
-   * Footstep sound
-   * Cloud of dust Particle effect
-   YOU CAN HOOK THESE THINGS UP TO EVENTS.
-   For instance:
-   * Unit_Died event results in the dialogue system playing and changing the interface state.
-*/
-
 enum AnimationValue
 {
     WASTE_TIME_ANIMATION,
@@ -74,9 +65,9 @@ struct Channel
     float
     Value(float time)
     {
-        float ratio = (ease(time) - samples[index].t) / (samples[index+1].t - samples[index].t);
-        return Lerp(samples[index].value, samples[index+1].value,
-                    ratio);
+        float ratio = ((ease(time) - samples[index].t) / 
+                       (samples[index+1].t - samples[index].t));
+        return Lerp(samples[index].value, samples[index+1].value, ratio);
     }
 };
 
@@ -90,7 +81,6 @@ struct EventChannel
 {
     vector<EventSample> samples = {};
     int index = 0;
-    //float (*ease) (float) = Identity;
 
     EventChannel() = default;
 
@@ -125,8 +115,6 @@ struct Animation
     Channel channel_four  = {};
     EventChannel event_channel = {};
     int num_channels = 0;
-
-    Animation() = default;
 
     Animation(int speed_in, int finish_in, bool repeat_in, int num_channels_in,
               const vector<Sample> &samples_one, float (*ease_one) (float),
@@ -171,30 +159,22 @@ struct Animation
     Update()
     {
         counter++;
-        if(!(counter % finish))
-        {
-            if(repeat)
-            {
-                counter = 0;
-                return false;
-            }
+        if(event_channel.samples.size() > 0) event_channel.Update(Time());
+        if(num_channels > 0) channel_one.Update(Time());
+        if(num_channels > 1) channel_two.Update(Time());
+        if(num_channels > 2) channel_three.Update(Time());
+        if(num_channels > 3) channel_four.Update(Time());
 
-            //EmitEvent(on_finish);
-            return true;
+        if(counter % finish)
+            return false;
+
+        if(repeat)
+        {
+            counter = 0;
+            return false;
         }
 
-        if(event_channel.samples.size() > 0)
-            event_channel.Update(Time());
-
-        if(num_channels > 0)
-            channel_one.Update(Time());
-        if(num_channels > 1)
-            channel_two.Update(Time());
-        if(num_channels > 2)
-            channel_three.Update(Time());
-        if(num_channels > 3)
-            channel_four.Update(Time());
-        return false;
+        return true;
     }
 };
 
@@ -376,6 +356,7 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
     }
 }
 
+/* This might be the right thing to do someday?
 struct AnimationSystem
 {
     Animation *current = nullptr;
@@ -401,5 +382,6 @@ struct AnimationSystem
 };
 
 static AnimationSystem GlobalAnimations;
+*/
 
 #endif

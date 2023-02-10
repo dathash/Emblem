@@ -116,6 +116,7 @@ struct AudioBank
 {
     vector<Sound *> sounds;
 };
+
 static AudioBank GlobalMusic;
 static AudioBank GlobalSfx;
 
@@ -132,11 +133,11 @@ GetMusic(const string &name)
 
 
 void
-PauseMusic(const string &name)
+StartMusic(const string &name)
 {
     for(Sound *sound : GlobalMusic.sounds)
         if(sound->name == name)
-            sound->Pause();
+            sound->Start();
 }
 
 void
@@ -148,12 +149,13 @@ StopMusic(const string &name)
 }
 
 void
-StartMusic(const string &name)
+PauseMusic(const string &name)
 {
     for(Sound *sound : GlobalMusic.sounds)
         if(sound->name == name)
-            sound->Start();
+            sound->Pause();
 }
+
 
 void
 PlaySfx(const string &name)
@@ -176,33 +178,6 @@ StopSfx(const string &name)
         }
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////
-/*
-    NOTE: THIS IS THE OLD INTERFACE.
-
-// Plays a song with miniaudio.
-void
-PlayMusic(const string &filename)
-{
-    //ma_sound_set_looping();
-    ma_engine_play_sound(&GlobalAudioEngine, 
-                         (MUSIC_PATH + filename).c_str(),
-                         &(GlobalMusicGroup));
-}
-
-// Plays a sound effect with miniaudio.
-void
-PlaySfx(const string &filename)
-{
-    ma_engine_play_sound(&GlobalAudioEngine, 
-                         (SFX_PATH + filename).c_str(),
-                         &(GlobalSfxGroup));
-}
-*/
-
-///////////////////////////////////////////////////////////////////////////
 
 void
 SetMusicVolume(float volume)
