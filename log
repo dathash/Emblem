@@ -114,8 +114,8 @@ The story of the game is delivered through the characters.
 
 # TODO
     Conversations
-    * Cutscene events on turn change.
     * Unit Death Screens
+    * Cutscenes anytime, not just on end of player turn.
 
     BUG | Single frame visual glitch before level starts out of a prelude.
 

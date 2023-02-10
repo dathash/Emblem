@@ -181,6 +181,7 @@ EventSystemUpdate(Fade *level_fade,
                 PlaySfx("mission_start.wav");
                 level_fade->amount = 1.0f;
                 level_fade->animation = GetAnimation(FADE_OUT_ANIMATION);
+                turn_fade->turn_count_texture = LoadTextureText("1", white, 0);
             } break;
             case START_AI_TURN_EVENT:
             {

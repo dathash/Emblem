@@ -18,7 +18,7 @@
 #define EPSILON 0.00001
 
 // defaults
-#define DEFAULT_MUSIC_VOLUME 0.0f
+#define DEFAULT_MUSIC_VOLUME 0.5f
 #define DEFAULT_SFX_VOLUME 0.05f
 
 // rendering
