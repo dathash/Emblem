@@ -39,6 +39,7 @@ GetInterfaceString(InterfaceState state)
     case BATTLE_CONVERSATION:           return "Battle conversation";
     case VILLAGE_CONVERSATION:          return "Village conversation";
     case PRELUDE:                       return "Prelude";
+    case CUTSCENE:                      return "Cutscene";
     case PLAYER_FIGHT:                  return "Player fight";
     case RESOLVING_EXPERIENCE:          return "Resolving experience";
     case RESOLVING_ADVANCEMENT:         return "Resolving advancement";

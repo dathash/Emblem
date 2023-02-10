@@ -1,0 +1,16 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Conversation
+
+COM NOTE: Don't use tabs in here!
+
+SP1 Lucina
+SP2 Flavia
+
+EVE ONE Enters
+ONE Heyo!
+
+EVE TWO Enters
+EX2 Happy
+TWO We are in a village!
+

@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     };
 
 // ================================== load =================================
-    vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
+    vector<shared_ptr<Unit>> units = LoadUnits(UNITS_PATH + string(INITIAL_UNITS));
     vector<shared_ptr<Unit>> party = {};
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
                              string("l6.txt"), string("l7.txt"),
 							 };
     int level_index = 0;
-    Level level = LoadLevel(DATA_PATH + levels[level_index], units, party);
+    Level level = LoadLevel(levels[level_index], units, party);
 
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		                      32, ANIMATION_SPEED));
@@ -216,18 +216,6 @@ int main(int argc, char *argv[])
 
             for(Sound *sound : GlobalMusic.sounds)
                 sound->Update();
-
-            if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT &&
-               ((level.objective == OBJECTIVE_ROUT &&
-                 level.GetNumberOf(false) == 0)
-                 ||
-                (level.objective == OBJECTIVE_BOSS && 
-                 level.IsBossDead())))
-            {
-                level.song->FadeOut();
-                GlobalInterfaceState = LEVEL_MENU;
-                EmitEvent(MISSION_COMPLETE_EVENT);
-            }
         }
 
         // Resolve State
@@ -245,6 +233,17 @@ int main(int argc, char *argv[])
 
             ai.clearQueue();
             handler.clearQueue();
+        }
+        if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT &&
+           ((level.objective == OBJECTIVE_ROUT &&
+             level.GetNumberOf(false) == 0)
+             ||
+            (level.objective == OBJECTIVE_BOSS && 
+             level.IsBossDead())))
+        {
+            level.song->FadeOut();
+            GlobalInterfaceState = LEVEL_MENU;
+            EmitEvent(MISSION_COMPLETE_EVENT);
         }
 
         EventSystemUpdate(&level_fade, &turn_fade, &parcel, &advancement);

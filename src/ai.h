@@ -31,10 +31,10 @@ public:
         }
         else
         {
-            GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            EmitEvent(START_PLAYER_TURN_EVENT);
+            EmitEvent({START_PLAYER_TURN_EVENT, nullptr, level->turn_count + 2});
+            GlobalInterfaceState = NO_OP;
         }
     }
 private: 

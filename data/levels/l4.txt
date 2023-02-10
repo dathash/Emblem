@@ -1,0 +1,51 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Level
+
+OBJ 1
+
+ATL frozen.png
+
+PRE prelude04.txt
+
+
+
+
+MUS r4.wav
+
+WDT 30
+HGT 10
+MAP 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+MAP 1 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 1 3 3 3 1 1 1 1 
+MAP 1 0 0 0 0 0 0 0 0 1 0 0 1 1 1 1 1 0 0 0 1 0 1 3 1 3 3 1 1 1 
+MAP 1 0 0 0 0 2 2 0 0 1 0 0 2 1 1 2 0 0 0 0 1 0 0 3 1 0 3 3 1 1 
+MAP 1 0 0 0 0 0 0 0 0 0 0 0 0 3 3 3 0 0 0 0 3 0 1 0 1 0 0 3 1 1 
+MAP 1 0 0 0 0 2 2 0 0 0 3 0 0 3 1 1 2 0 0 0 3 0 1 0 1 0 0 0 1 1 
+MAP 1 1 0 0 0 0 0 0 0 3 3 0 0 1 1 1 1 2 0 0 1 0 1 0 0 0 0 0 1 1 
+MAP 1 1 1 0 0 0 0 0 0 1 3 0 0 1 1 1 1 1 0 0 1 0 1 0 1 0 0 0 1 1 
+MAP 1 1 1 1 1 1 0 0 1 1 0 0 1 1 1 1 1 1 1 1 1 0 0 0 1 0 0 0 4 1 
+MAP 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+
+COM <UNT <name> <col> <row> <ai> <boss> <start>>
+UNT Lucina 3 2 0 0 0 
+UNT Archer 8 3 2 0 0 
+UNT Archer 8 1 2 0 0 
+UNT Archer 10 2 2 0 0 
+UNT Archer 10 5 2 0 0 
+UNT Thief 11 3 1 0 0 
+UNT Thief 11 6 1 0 0 
+UNT Archer 8 6 2 0 0 
+UNT Flavia 3 4 0 0 0 
+UNT Donnel 2 6 0 0 0 
+UNT Sniper 10 7 3 0 0 
+UNT Stahl 2 1 0 0 0 
+UNT Lon'qu 3 5 0 0 0 
+UNT Diane 28 8 2 1 0 
+UNT Brigand 24 6 4 0 0 
+UNT Sniper 25 5 4 0 0 
+UNT Brute 21 4 4 0 0 
+UNT Brute 21 5 4 0 0 
+UNT Sniper 23 4 4 0 0 
+UNT Sniper 23 5 4 0 0 
+UNT Brute 19 1 2 0 0 
+

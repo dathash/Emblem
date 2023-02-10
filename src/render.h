@@ -512,7 +512,8 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(GlobalInterfaceState == CONVERSATION ||
        GlobalInterfaceState == BATTLE_CONVERSATION ||
        GlobalInterfaceState == PRELUDE ||
-       GlobalInterfaceState == VILLAGE_CONVERSATION)
+       GlobalInterfaceState == VILLAGE_CONVERSATION ||
+       GlobalInterfaceState == CUTSCENE)
     {
         Conversation conversation;
         if(GlobalInterfaceState == CONVERSATION)
@@ -520,10 +521,13 @@ Render(const Tilemap &map, const Cursor &cursor,
 
         if(GlobalInterfaceState == BATTLE_CONVERSATION ||
            GlobalInterfaceState == VILLAGE_CONVERSATION)
-            conversation = *conversations.current;
+            conversation = *conversations.current_conversation;
 
         if(GlobalInterfaceState == PRELUDE)
             conversation = conversations.prelude;
+
+        if(GlobalInterfaceState == CUTSCENE)
+            conversation = conversations.current_cutscene->second;
 
         SDL_Rect bg_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
         SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
@@ -585,6 +589,7 @@ Render(const Tilemap &map, const Cursor &cursor,
                 RenderText(turn_fade.texture_one, 400, 200);
             else
                 RenderText(turn_fade.texture_two, 400, 200);
+            RenderText(turn_fade.turn_count_texture, 450, 230);
         }
     }
 }

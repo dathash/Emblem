@@ -436,7 +436,7 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
             return unit.get();
         }
     }
-    cout << "WARN GetUnitByName: No unit of that name.\n";
+    cout << "WARN GetUnitByName: No unit of that name: " << name << "\n";
     return nullptr;
 }
 
@@ -562,21 +562,13 @@ struct Conversation
         }
 
         if(Speaker() == SPEAKER_ONE)
-        {
             expressions[0] = Expression();
-        }
         else if(Speaker() == SPEAKER_TWO)
-        {
             expressions[1] = Expression();
-        }
         else if(Speaker() == SPEAKER_THREE)
-        {
             expressions[2] = Expression();
-        }
         else if(Speaker() == SPEAKER_FOUR)
-        {
             expressions[3] = Expression();
-        }
 
         switch(prose[current].event)
         {
@@ -620,16 +612,19 @@ struct Conversation
     }
 };
 
+typedef pair<int, Conversation> cutscene;
+
 struct ConversationList
 {
     vector<Conversation> list = {};
     int index = 0;
     vector<Conversation> mid_battle = {};
     vector<Conversation> villages = {};
-    Conversation *current = nullptr;
+    vector<cutscene> cutscenes = {};
+    cutscene *current_cutscene = nullptr;
+    Conversation *current_conversation = nullptr;
     Conversation prelude;
 };
-
 
 
 // ========================== map stuff =======================================
@@ -718,7 +713,7 @@ struct Level
         }
 
         song->Stop();
-        next = LoadLevel(DATA_PATH + name, units, *party);
+        next = LoadLevel(name, units, *party);
         next.conversations.prelude.song->Start();
 
         GlobalPlayerTurn = true;
@@ -730,50 +725,43 @@ struct Level
     bool
     CheckNextTurn()
     {
-        if(turn_start)
+        if(!turn_start)
+            return false;
+
+        turn_start = false;
+
+        if(GlobalPlayerTurn)
         {
-            turn_start = false;
-
-            if(GlobalPlayerTurn)
-            {
-                ++turn_count;
-                for(auto const &unit : combatants)
-                {
-                    if(!unit->is_ally) // Increment enemy units
-                    {
-                        ++unit->turns_active;
-                    }
-                    if(unit->buff)
-                        unit->TickBuff();
-                }
-
-                for(auto unit : bench)
-                {
-                    if(unit->is_ally && (unit->arrival == turn_count))
-                    {
-                        map.tiles[unit->pos.col][unit->pos.row].occupant = unit.get();
-                        combatants.push_back(move(unit));
-                    }
-                }
-            }
-            else
-            {
-                for(auto const &unit : combatants)
-                {
-                    if(unit->is_ally)
-                    {
-                        ++unit->turns_active;
-                    }
-                }
-            }
+            ++turn_count;
 
             for(auto const &unit : combatants)
-                unit->Activate();
+            {
+                if(!unit->is_ally) // Increment enemy units
+                    ++unit->turns_active;
+                if(unit->buff)
+                    unit->TickBuff();
+            }
 
-            return true;
+            for(auto unit : bench)
+            {
+                if(unit->is_ally && (unit->arrival == turn_count))
+                {
+                    map.tiles[unit->pos.col][unit->pos.row].occupant = unit.get();
+                    combatants.push_back(move(unit));
+                }
+            }
+        }
+        else
+        {
+            for(auto const &unit : combatants)
+                if(unit->is_ally)
+                    ++unit->turns_active;
         }
 
-        return false;
+        for(auto const &unit : combatants)
+            unit->Activate();
+
+        return true;
     }
 
     // Puts a piece on the board

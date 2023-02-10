@@ -19,6 +19,7 @@ struct Fade
     string text = "";
     Texture texture_one = {};
     Texture texture_two = {};
+    Texture turn_count_texture = {};
     float amount = 1.0f;
     Animation *animation = nullptr;
     bool show_first_texture = true;
@@ -34,6 +35,7 @@ struct Fade
     {
         texture_one = LoadTextureText(text_one, blue, 0);
         texture_two = LoadTextureText(text_two, red, 0);
+        turn_count_texture = LoadTextureText("1", white, 0);
     }
 
     void
@@ -193,6 +195,9 @@ EventSystemUpdate(Fade *level_fade,
                 turn_fade->amount = 0.0f;
                 turn_fade->animation = GetAnimation(TURN_FADE_IN_OUT_ANIMATION);
                 turn_fade->show_first_texture = true;
+
+                if(event.integer) // Increment turn display
+                    turn_fade->turn_count_texture = LoadTextureText(to_string(event.integer), white, 0);
             } break;
             case MISSION_COMPLETE_EVENT:
             {

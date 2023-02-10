@@ -605,7 +605,7 @@ public:
                (cursor->selected->ID() == conv.two->ID() &&
                 cursor->targeted->ID() == conv.one->ID()))
             {
-                conversations->current = &conv;
+                conversations->current_conversation = &conv;
                 if(conv.song)
                 {
                     level_song->Pause();
@@ -887,18 +887,30 @@ public:
             case(0): // OUTLOOK
             {
                 GlobalInterfaceState = GAME_MENU_OUTLOOK;
+                return;
             } break;
             case(1): // OPTIONS
             {
                 GlobalInterfaceState = GAME_MENU_OPTIONS;
+                return;
             } break;
             case(2): // END TURN
             {
-                GlobalInterfaceState = NO_OP;
-                GlobalAIState = AI_NO_OP;
+                for(cutscene &cs : level->conversations.cutscenes)
+                {
+                    if(cs.first == level->turn_count)
+                    {
+                        level->conversations.current_cutscene = &cs;
+                        GlobalInterfaceState = CUTSCENE;
+                        return;
+                    }
+                }
+
                 GlobalPlayerTurn = false;
-                level->turn_start = true;
+                GlobalInterfaceState = NO_OP;
                 EmitEvent(START_AI_TURN_EVENT);
+                GlobalAIState = AI_NO_OP;
+                return;
             } break;
         }
     }
@@ -969,17 +981,17 @@ public:
             {
                 if(conv.pos == cursor->pos)
                 {
-                    conversations->current = &conv;
+                    conversations->current_conversation = &conv;
                 }
             }
-            assert(conversations->current);
-            conversations->current->one = cursor->selected;
-            conversations->current->ReloadTextures(); // NOTE: For name to update
+            assert(conversations->current_conversation);
+            conversations->current_conversation->one = cursor->selected;
+            conversations->current_conversation->ReloadTextures(); // NOTE: For name to update
 
-            if(conversations->current->song)
+            if(conversations->current_conversation->song)
             {
                 level_song->Pause();
-                conversations->current->song->Start();
+                conversations->current_conversation->song->Start();
             }
 
             // Move onto next level!
@@ -1217,96 +1229,42 @@ class NextSentenceCommand : public Command
 {
 public:
     NextSentenceCommand(Cursor *cursor_in, Conversation *conversation_in,
-                        Sound *level_song_in)
+                        Sound *level_song_in, bool end_in)
     : cursor(cursor_in),
       conversation(conversation_in),
-      level_song(level_song_in)
+      level_song(level_song_in),
+      end(end_in)
     {}
 
     virtual void Execute()
     {
         conversation->Next();
-        if(conversation->done)
+        if(!end && !conversation->done)
         {
-            if(GlobalInterfaceState == PRELUDE)
-            {
-                conversation->song->Stop();
-                level_song->Start();
-
-                EmitEvent(START_PLAYER_TURN_EVENT);
-
-                GlobalInterfaceState = NO_OP;
-                return;
-            }
-            if(GlobalInterfaceState == BATTLE_CONVERSATION)
-            {
-                conversation->song->Stop();
-                level_song->Start();
-
-                cursor->pos = cursor->selected->pos;
-                cursor->selected->Deactivate();
-                cursor->selected = nullptr;
-                cursor->targeted = nullptr;
-                cursor->path_draw = {};
-                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-                return;
-            }
-            if(GlobalInterfaceState == VILLAGE_CONVERSATION)
-            {
-                conversation->song->Stop();
-                level_song->Start();
-
-                cursor->selected->Deactivate();
-                int experience = EXP_FOR_VILLAGE_SAVED;
-                cursor->selected->GrantExperience(experience);
-                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
-                cursor->selected = nullptr;
-                cursor->targeted = nullptr;
-                cursor->path_draw = {};
-                GlobalInterfaceState = RESOLVING_EXPERIENCE;
-                return;
-            }
-            if(GlobalInterfaceState == CONVERSATION)
-            {
-                conversation->song->FadeOut();
-
-                GlobalInterfaceState = CONVERSATION_MENU;
-                return;
-            }
+            conversation->ReloadTextures();
+            EmitEvent(NEXT_SENTENCE_EVENT);
+            return;
         }
 
-        conversation->ReloadTextures();
-        EmitEvent(NEXT_SENTENCE_EVENT);
-    }
-
-private:
-    Cursor *cursor;
-    Conversation *conversation;
-    Sound *level_song;
-};
-
-class EndConversationEarlyCommand : public Command
-{
-public:
-    EndConversationEarlyCommand(Cursor *cursor_in, Conversation *conversation_in,
-                                Sound *level_song_in)
-    : cursor(cursor_in),
-      conversation(conversation_in),
-      level_song(level_song_in)
-    {}
-
-    virtual void Execute()
-    {
         conversation->done = true;
-
         if(GlobalInterfaceState == PRELUDE)
         {
             conversation->song->Stop();
             level_song->Start();
 
             EmitEvent(START_PLAYER_TURN_EVENT);
-
             GlobalInterfaceState = NO_OP;
+            return;
+        }
+        if(GlobalInterfaceState == CUTSCENE)
+        {
+            conversation->song->Stop();
+            level_song->Start();
+
+            GlobalPlayerTurn = false;
+            EmitEvent(START_AI_TURN_EVENT);
+            GlobalInterfaceState = NO_OP;
+            GlobalAIState = AI_NO_OP;
             return;
         }
         if(GlobalInterfaceState == BATTLE_CONVERSATION)
@@ -1328,7 +1286,6 @@ public:
             level_song->Start();
 
             cursor->selected->Deactivate();
-
             int experience = EXP_FOR_VILLAGE_SAVED;
             cursor->selected->GrantExperience(experience);
             EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
@@ -1351,6 +1308,7 @@ private:
     Cursor *cursor;
     Conversation *conversation;
     Sound *level_song;
+    bool end;
 };
 
 // ================================= Game Over =================================
@@ -1397,8 +1355,8 @@ public:
 
         GlobalPlayerTurn = true;
         level->turn_start = true;
-        GlobalInterfaceState = NO_OP;
         EmitEvent(START_PLAYER_TURN_EVENT);
+        GlobalInterfaceState = NO_OP;
     }
 
 private:
@@ -1836,8 +1794,8 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.list[level->conversations.index]), level->song));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(level->conversations.list[level->conversations.index]), level->song));
+                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.list[level->conversations.index]), level->song, false));
+                BindB(make_shared<NextSentenceCommand>(cursor, &(level->conversations.list[level->conversations.index]), level->song, true));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1848,8 +1806,8 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current, level->song));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, level->conversations.current, level->song));
+                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current_conversation, level->song, false));
+                BindB(make_shared<NextSentenceCommand>(cursor, level->conversations.current_conversation, level->song, true));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1860,8 +1818,8 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current, level->song));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, level->conversations.current, level->song));
+                BindA(make_shared<NextSentenceCommand>(cursor, level->conversations.current_conversation, level->song, false));
+                BindB(make_shared<NextSentenceCommand>(cursor, level->conversations.current_conversation, level->song, true));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
@@ -1872,8 +1830,20 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.prelude), level->song));
-                BindB(make_shared<EndConversationEarlyCommand>(cursor, &(level->conversations.prelude), level->song));
+                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.prelude), level->song, false));
+                BindB(make_shared<NextSentenceCommand>(cursor, &(level->conversations.prelude), level->song, true));
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(CUTSCENE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NextSentenceCommand>(cursor, &(level->conversations.current_cutscene->second), level->song, false));
+                BindB(make_shared<NextSentenceCommand>(cursor, &(level->conversations.current_cutscene->second), level->song, true));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

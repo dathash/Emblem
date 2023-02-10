@@ -46,10 +46,13 @@
 #define INITIAL_UNITS "units.tsv"
 
 // data
-#define DATA_PATH "../data/"
+//#define DATA_PATH "../data/"
+#define UNITS_PATH "../data/"
+#define LEVELS_PATH "../data/levels/"
 #define CONVERSATIONS_PATH "../data/conversations/"
-#define VILLAGES_PATH "../data/conversations/villages/"
-#define PRELUDES_PATH "../data/conversations/preludes/"
+#define CUTSCENES_PATH "../data/cutscenes/"
+#define VILLAGES_PATH "../data/villages/"
+#define PRELUDES_PATH "../data/preludes/"
 
 // assets
 #define MUSIC_PATH "../assets/music/"
@@ -122,15 +125,16 @@ enum InterfaceState
     BATTLE_CONVERSATION, // 24
     VILLAGE_CONVERSATION, // 25
     PRELUDE, // 26
+    CUTSCENE, // 27
 
-    PLAYER_FIGHT, // 27
-    RESOLVING_EXPERIENCE, // 28
-    RESOLVING_ADVANCEMENT, // 29
+    PLAYER_FIGHT, // 28
+    RESOLVING_EXPERIENCE, // 29
+    RESOLVING_ADVANCEMENT, // 30
 
-    NO_OP, // 30
+    NO_OP, // 31
 
-    TITLE_SCREEN, // 31
-    GAME_OVER, // 32
+    TITLE_SCREEN, // 32
+    GAME_OVER, // 33
 };
 
 

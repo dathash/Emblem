@@ -230,7 +230,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             *hover_tile = FOREST_TILE;
             hover_tile->occupant = tmp;
         }
-
+        ImGui::SameLine();
         if(ImGui::Button("slow"))
         {
             Unit *tmp = hover_tile->occupant;
@@ -244,14 +244,14 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             *hover_tile = GOAL_TILE;
             hover_tile->occupant = tmp;
         }
-        ImGui::SameLine();
+
         if(ImGui::Button("fort"))
         {
             Unit *tmp = hover_tile->occupant;
             *hover_tile = FORT_TILE;
             hover_tile->occupant = tmp;
         }
-
+        ImGui::SameLine();
         if(ImGui::Button("village"))
         {
             Unit *tmp = hover_tile->occupant;
@@ -432,9 +432,9 @@ EditorPass(vector<shared_ptr<Unit>> *units,
     {
         if(ImGui::Button("Load"))
         {
-            *units = LoadUnits(DATA_PATH + string(fileName));
+            *units = LoadUnits(UNITS_PATH + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
-            *level = LoadLevel(DATA_PATH + string(levelFileName), *units, party);
+            *level = LoadLevel(levelFileName, *units, party);
             GlobalAIState = AI_PLAYER_TURN;
             GlobalPlayerTurn = true;
             level->turn_start = true;
@@ -448,19 +448,19 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         ImGui::SameLine();
         if(ImGui::Button("Save Units"))
         {
-            SaveUnits(string(DATA_PATH) + string(fileName), *units);
+            SaveUnits(string(UNITS_PATH) + string(fileName), *units);
             cout << "Units saved: " << fileName << "\n";
         }
         ImGui::SameLine();
         if(ImGui::Button("Save Level"))
         {
-            SaveLevel(string(DATA_PATH) + string(levelFileName), *level);
+            SaveLevel(string(LEVELS_PATH) + string(levelFileName), *level);
             cout << "Level saved: " << levelFileName << "\n";
         }
 
         if(ImGui::Button("Test Zone"))
         {
-            *level = LoadLevel(DATA_PATH + string("test.txt"), *units, party);
+            *level = LoadLevel("test.txt", *units, party);
             sprintf(levelFileName, "test.txt");
             GlobalAIState = AI_PLAYER_TURN;
             GlobalPlayerTurn = true;
@@ -477,7 +477,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         {
             if(ImGui::Button(s.c_str()))
             {
-                *level = LoadLevel(DATA_PATH + s, *units, party);
+                *level = LoadLevel(s, *units, party);
                 sprintf(levelFileName, "%s", s.c_str());
                 GlobalAIState = AI_PLAYER_TURN;
                 GlobalPlayerTurn = true;

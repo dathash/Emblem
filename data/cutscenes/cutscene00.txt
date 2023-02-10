@@ -1,0 +1,14 @@
+SP1 Lucina
+SP2 Priam
+
+EVE ONE Enters
+EX1 Wince
+ONE Father! Where are you?
+ONE Oh god... It's a nightmare.
+
+EVE TWO Enters
+EX2 Angry
+TWO Lucina, watch yourself! You're more of an obstacle than a help in your state.
+
+EVE TWO Exits
+ONE I've got to get it together...

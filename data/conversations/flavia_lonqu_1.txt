@@ -1,9 +1,3 @@
-COM Author: Alex Hartford
-COM Program: Emblem
-COM File: Conversation
-
-COM NOTE: Don't use tabs in here!
-
 MUS chrono.wav
 
 SP1 Lon'qu

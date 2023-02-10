@@ -1,0 +1,63 @@
+COM Author: Alex Hartford
+COM Program: Emblem
+COM File: Level
+
+OBJ 1
+
+ATL sunset.png
+
+PRE prelude03.txt
+
+
+
+
+MUS gerudo.wav
+
+WDT 15
+HGT 20
+MAP 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 
+MAP 0 0 1 0 1 0 0 0 1 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 0 0 1 1 1 0 0 1 1 1 
+MAP 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 1 1 1 0 0 1 1 1 0 0 
+MAP 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 
+MAP 1 0 1 0 0 0 0 1 0 0 0 0 0 1 0 
+MAP 6 0 1 0 1 0 0 0 1 0 0 1 0 0 0 
+MAP 0 0 0 0 1 0 1 0 0 0 1 0 0 1 0 
+MAP 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 
+MAP 1 0 1 0 1 0 0 1 1 1 0 1 1 1 1 
+MAP 1 0 0 0 1 0 0 0 0 0 0 1 1 1 1 
+MAP 1 0 1 0 1 0 1 1 0 1 0 6 0 1 1 
+MAP 1 0 1 0 1 0 0 0 0 0 0 1 0 1 1 
+MAP 1 0 0 0 1 1 1 1 0 1 0 6 0 0 1 
+MAP 1 0 1 0 0 0 0 0 0 1 1 1 0 4 0 
+MAP 1 1 0 0 1 0 1 1 1 1 1 1 0 0 0 
+
+COM <UNT <name> <col> <row> <ai> <boss> <start>>
+UNT Donnel 10 0 0 0 0 
+UNT Lon'qu 11 1 0 0 0 
+UNT Flavia 10 2 0 0 0 
+UNT Lucina 13 1 0 0 0 
+UNT Charles 13 18 2 1 0 
+UNT Brigand 11 17 2 0 0 
+UNT Brigand 11 15 2 0 0 
+UNT Archer 12 15 2 0 0 
+UNT Archer 12 17 2 0 0 
+UNT Brute 10 13 4 0 0 
+UNT Brute 8 15 8 0 0 
+UNT Thief 10 13 8 0 0 
+UNT Thief 5 11 8 0 0 
+UNT Thief 7 10 8 0 0 
+UNT Brute 11 8 8 0 0 
+UNT Soldier 2 5 7 0 0 
+UNT Soldier 4 8 7 0 0 
+UNT Soldier 4 9 7 0 0 
+UNT Gypsy 1 11 4 0 0 
+UNT Gypsy 3 12 4 0 0 
+UNT Sully 12 2 0 0 0 
+
+UNT Olivia 14 5 0 0 1 
+

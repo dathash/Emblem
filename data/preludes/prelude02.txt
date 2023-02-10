@@ -1,0 +1,26 @@
+MUS wind.wav
+
+SP1 Lucina
+SP2 Flavia
+
+EVE ONE Enters
+EX1 Wince
+ONE Well, folks, I never said it would be easy.
+ONE Should have packed another dozen flasks.
+ONE Should be just over this ridge, though...
+
+EVE ONE Exits
+ONE ...
+
+EVE TWO Enters
+EX2 Angry
+TWO You damned desperados! I won't hesitate to kill you all!
+TWO Move, Damnit!
+
+EVE TWO Exits
+ONE ...
+
+EVE ONE Enters
+ONE Hey, did you guys hear that?
+ONE Sounds like a skirmish up ahead. Let's hurry up and see what the fuss is about!
+ONE There might be an innocent under attack!

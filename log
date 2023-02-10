@@ -5,6 +5,7 @@ log
 Plan
 > Build a fun little game!
 
+# Release
 What I need for release:
 * Plan out the hours.
   * Forty Days and Forty nights = 320 Hours remaining.
@@ -112,35 +113,32 @@ Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 The story of the game is delivered through the characters.
 
 # TODO
-    Enemies pursue and destroy villages and chests.
-
-    BUG | Single frame of sight before level starts out of a prelude
-
     Conversations
     * Cutscene events on turn change.
     * Unit Death Screens
 
+    BUG | Single frame visual glitch before level starts out of a prelude.
+
     Polished Product! (For Joom Bog)
+    * 5 Levels
+    * 30 Conversations
+
+    Enemies pursue and destroy villages and chests.
 
 # Later
     10 levels
-
-    Put a turn counter on the turn transition fade, it would be cool.
 
     AI doesn't wait on every unit that won't act.
     * Run a first pass that just gathers the units that will act, then run with
       those.
     * This will be faster anyways.
 
-    put START_PLAYER_TURN_EVENT .. in the main code rather than calling them
-    every time after we set the turn_start var.
-
     Smooth reinforcements
 
     More complex conversations
     * Multiple preludes in a row.
     * Animated stuff inbetween.
-    * Sometimes Conversation backgrounds
+    * Image backgrounds
 
 POLISH
     Shrink Tilesets to absolute necessity, also enforce consistency across them.

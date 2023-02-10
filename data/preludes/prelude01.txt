@@ -1,0 +1,20 @@
+MUS forest.wav
+
+SP1 Lucina
+SP2 Brute
+
+EVE ONE Enters
+ONE Here I am, in the plains of Imrryr.
+ONE I'm nearly out of supplies... I will have to rest at the nearest town.
+
+EX1 Wince
+ONE What? There are bandits here too. I'll try to sneak through.
+
+EVE TWO Enters
+TWO Who goes there? Ah. Your money or your life.
+
+EX1 Neutral
+ONE So much for that plan.
+
+EX1 Angry
+ONE I don't have time for this!

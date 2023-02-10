@@ -114,11 +114,11 @@ LoadConversation(string path, string filename,
         {
             conversation.prose.push_back({SPEAKER_TWO, rest, two_expression, conversation_event});
         }
-        else if(type == "THREE")
+        else if(type == "THR")
         {
             conversation.prose.push_back({SPEAKER_THREE, rest, three_expression, conversation_event});
         }
-        else if(type == "FOUR")
+        else if(type == "FOU")
         {
             conversation.prose.push_back({SPEAKER_FOUR, rest, four_expression, conversation_event});
         }
@@ -214,7 +214,8 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
     level.name = filename_in;
 
     ifstream fp;
-    fp.open(DATA_PATH + filename_in);
+    fp.open(LEVELS_PATH + filename_in);
+
     if(!fp.is_open())
         SDL_assert(!"ERROR LoadLevel: File could not be opened!\n");
 
@@ -249,6 +250,11 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         {
             level.conversations.list.push_back(
                     LoadConversation(CONVERSATIONS_PATH, rest, units));
+        }
+        else if(type == "CUT")
+        {
+            level.conversations.cutscenes.push_back(cutscene(stoi(tokens[0]),
+                        LoadConversation(CUTSCENES_PATH, tokens[1], units)));
         }
         else if(type == "VIL")
         {
@@ -494,6 +500,12 @@ SaveLevel(string filename_in, const Level &level)
     for(const Conversation &conv : level.conversations.list)
     {
         fp << "CNV " << conv.filename << "\n";
+    }
+    fp << "\n";
+
+    for(const cutscene &cs : level.conversations.cutscenes)
+    {
+        fp << "CNV " << cs.first << " " << cs.second.filename << "\n";
     }
     fp << "\n";
 
