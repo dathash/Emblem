@@ -37,11 +37,8 @@ MAP 1 1 6 0 0 0 1 1 1 1 1 0 0 0 0 0 0 0 4 0
 MAP 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 0 
 
 COM <UNT <name> <col> <row> <ai> <boss> <start>>
-UNT Priam 1 4 0 0 0 
 UNT Lucina 2 2 0 0 0 
 UNT Noire 4 1 0 0 0 
-UNT Sully 4 3 0 0 0 
-UNT Donnel 3 4 0 0 0 
 UNT Brigand 1 10 7 0 0 
 UNT Brute 10 6 2 0 0 
 UNT Brigand 13 9 6 0 0 
@@ -64,5 +61,8 @@ UNT Brute 17 6 8 0 0
 UNT Thief 5 5 1 0 0 
 UNT Thief 6 4 1 0 0 
 UNT Brute 2 7 1 0 0 
+UNT Donnel 2 3 0 0 0 
+UNT Priam 1 3 0 0 0 
+UNT Sully 3 3 0 0 0 
 
 

@@ -301,6 +301,7 @@ public:
                           map->tiles[cursor->pos.col][cursor->pos.row].defense,
                           distance, dir);
             fight->ready = true;
+            cursor->pos = action.second->pos;
 
             GlobalAIState = AI_FIGHT;
             return;
