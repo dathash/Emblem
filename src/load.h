@@ -56,7 +56,10 @@ LoadConversation(string path, string filename,
     ifstream fp;
     fp.open(path + filename);
     if(!fp.is_open())
+    {
+        cout << path << " " << filename << "\n";
         SDL_assert(!"ERROR LoadConversation: File could not be opened.\n");
+    }
 
     while(getline(fp, line))
     {
@@ -404,7 +407,8 @@ LoadUnits(string filename_in)
                     LoadTextureImage(FULLS_PATH, tokens[22]),   // neutral
                     LoadTextureImage(FULLS_PATH, tokens[23]),   // happy
                     LoadTextureImage(FULLS_PATH, tokens[24]),   // angry
-                    LoadTextureImage(FULLS_PATH, tokens[25])    // wince
+                    LoadTextureImage(FULLS_PATH, tokens[25]),   // wince
+                    tokens[26]                                  // valediction
                 ));
             }
         }
@@ -459,6 +463,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
                      << unit->happy.filename << "\t"
                      << unit->angry.filename << "\t"
                      << unit->wince.filename << "\t"
+                     << unit->valediction
                      << "\n";
     }
     fp.close();
@@ -505,7 +510,7 @@ SaveLevel(string filename_in, const Level &level)
 
     for(const cutscene &cs : level.conversations.cutscenes)
     {
-        fp << "CNV " << cs.first << " " << cs.second.filename << "\n";
+        fp << "CUT " << cs.first << " " << cs.second.filename << "\n";
     }
     fp << "\n";
 

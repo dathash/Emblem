@@ -25,7 +25,6 @@ using namespace std;
 // SDL
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
-
 static TTF_Font *GlobalFont = nullptr;
 
 // IMGUI
@@ -45,12 +44,11 @@ static int viewportRow = 0;
 
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This file is the only compilation unit, and it
-// pulls all the following includes in at compile time.
+// pulls all of the following includes in at compile time.
 
 #include "constants.h"
 static InterfaceState GlobalInterfaceState;
 static AIState GlobalAIState;
-
 #include "utils.h"
 #include "event.h" // NOTE: Includes Global Event handler
 #include "animation.h"
@@ -71,6 +69,7 @@ static AIState GlobalAIState;
 #include "debug.h"
 
 
+// ================================= the main ==================================
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
@@ -153,6 +152,7 @@ int main(int argc, char *argv[])
 // ================================== load =================================
     vector<shared_ptr<Unit>> units = LoadUnits(UNITS_PATH + string(INITIAL_UNITS));
     vector<shared_ptr<Unit>> party = {};
+    string dying = "";
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
                              string("l2.txt"), string("l3.txt"),
@@ -208,6 +208,9 @@ int main(int argc, char *argv[])
             parcel.Update();
             advancement.Update();
             level.Update();
+
+            EventSystemUpdate(&level_fade, &turn_fade, &parcel, &advancement, &dying);
+
             level_fade.Update();
             turn_fade.Update();
 
@@ -246,11 +249,9 @@ int main(int argc, char *argv[])
             EmitEvent(MISSION_COMPLETE_EVENT);
         }
 
-        EventSystemUpdate(&level_fade, &turn_fade, &parcel, &advancement);
-
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
-               level.conversations, fight, level_fade, turn_fade, advancement);
+               level.conversations, fight, level_fade, turn_fade, advancement, (!dying.empty() ? GetUnitByName(units, dying) : nullptr));
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

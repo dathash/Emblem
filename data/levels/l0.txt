@@ -48,12 +48,6 @@ UNT Archer 5 11 8 0 0
 UNT Archer 6 10 8 0 0 
 UNT Brute 5 10 8 0 0 
 UNT Brigand 18 13 5 0 0 
-UNT Archer 17 9 2 0 0 
-UNT Archer 18 8 2 0 0 
-UNT Archer 16 10 2 0 0 
-UNT Archer 12 14 2 0 0 
-UNT Archer 13 13 2 0 0 
-UNT Brute 12 13 2 0 0 
 UNT Brute 4 13 8 0 0 
 UNT Brute 2 12 8 0 0 
 UNT Brute 7 12 8 0 0 

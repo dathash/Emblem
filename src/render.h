@@ -63,7 +63,7 @@ SetSpriteModifiers(Unit *unit)
             } break;
             default:
             {
-                cout << "WARN Render(): Unit has unhandled buff color mod\n";
+                cout << "WARN Render: Unit has unhandled buff color mod " << unit->buff->stat << "\n";
             } break;
         }
     }
@@ -177,7 +177,7 @@ Render(const Tilemap &map, const Cursor &cursor,
        const Menu &conversationMenu,
        const ConversationList &conversations, 
        const Fight &fight, const Fade &level_fade, const Fade &turn_fade,
-       const Advancement &advancement)
+       const Advancement &advancement, Unit *dying)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -589,8 +589,16 @@ Render(const Tilemap &map, const Cursor &cursor,
                 RenderText(turn_fade.texture_one, 400, 200);
             else
                 RenderText(turn_fade.texture_two, 400, 200);
-            RenderText(turn_fade.turn_count_texture, 450, 230);
+            RenderText(turn_fade.turn_count_texture, 525, 250);
         }
+    }
+
+    if(dying)
+    {
+        cout << "HERE\n";
+        RenderPortrait(-50, 0, *dying,
+                       EXPR_WINCE,
+                       true);
     }
 }
 

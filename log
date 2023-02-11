@@ -115,9 +115,12 @@ The story of the game is delivered through the characters.
 # TODO
     Conversations
     * Unit Death Screens
-    * Cutscenes anytime, not just on end of player turn.
+        * THIS IS PARTWAY DONE.
+            all that I need to do is come up with some solution for the
+            shared_ptr issue. If I can do this, then I'll be able to do
+            everything we need.
 
-    BUG | Single frame visual glitch before level starts out of a prelude.
+    Soft Viewport
 
     Polished Product! (For Joom Bog)
     * 5 Levels
@@ -127,6 +130,8 @@ The story of the game is delivered through the characters.
 
 # Later
     10 levels
+
+    Cutscenes anytime, not just on end of player turn.
 
     AI doesn't wait on every unit that won't act.
     * Run a first pass that just gathers the units that will act, then run with

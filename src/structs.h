@@ -226,6 +226,8 @@ struct Unit
     Texture angry;
     Texture wince;
 
+    string valediction;
+
     ~Unit()
     {
         delete buff;
@@ -266,7 +268,8 @@ struct Unit
          Texture neutral_in,
          Texture happy_in,
          Texture angry_in,
-         Texture wince_in
+         Texture wince_in,
+         const string &valediction_in
          )
     : name(name_in),
       is_ally(is_ally_in),
@@ -288,7 +291,8 @@ struct Unit
       neutral(neutral_in),
       happy(happy_in),
       angry(angry_in),
-      wince(wince_in)
+      wince(wince_in),
+      valediction(valediction_in)
     {
       growths.health = health_growth_in;
       growths.attack = attack_growth_in;
@@ -815,11 +819,17 @@ struct Level
 
         // REFACTOR: This could be so much simpler.
         vector<position> tiles;
-        for(const shared_ptr<Unit> &unit : combatants)
+        for(shared_ptr<Unit> unit : combatants)
         {
             if(unit->should_die)
             {
                 tiles.push_back(unit->pos);
+                if(unit->is_ally)
+                {
+                    EmitEvent({UNIT_DEATH_EVENT, unit.get()});
+                    GlobalInterfaceState = DEATH;
+                    GlobalAIState = AI_DEATH;
+                }
             }
         }
 
@@ -831,8 +841,11 @@ struct Level
             map.tiles[tile.col][tile.row].occupant = nullptr;
     }
 
+
     // A mutation function that just checks if there are any units left to
     // move, and ends the player's turn if there aren't.
+    // TODO: This would be so much simpler as a function called when you deactivate a unit.
+    // Look into this refactoring.
     void
     CheckForRemaining()
     {

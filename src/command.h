@@ -683,7 +683,7 @@ public:
                 EmitEvent(HEAL_EVENT);
 
                 int experience = EXP_FOR_HEALING;
-                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience, (float)experience / 10.0f + 0.3f));
             } break;
             case ABILITY_BUFF:
             {
@@ -691,7 +691,7 @@ public:
                 EmitEvent(BUFF_EVENT);
 
                 int experience = EXP_FOR_BUFF;
-                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience, (float)experience / 10.0f + 0.3f));
             } break;
             case ABILITY_SHIELD:
             {
@@ -703,7 +703,8 @@ public:
                 EmitEvent(DANCE_EVENT);
 
                 int experience = EXP_FOR_DANCE;
-                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience));
+                EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience, (float)experience / 10.0f + 0.3f));
+                GlobalAIState = AI_RESOLVING_EXPERIENCE;
             } break;
             default:
             {
@@ -1395,6 +1396,16 @@ private:
     const vector<shared_ptr<Unit>> &party;
 };
 
+class SayGoodbyeEvent : public Command
+{
+public:
+    virtual void Execute()
+    {
+        EmitEvent(UNIT_DEATH_OVER_EVENT);
+        return;
+    }
+};
+
 // ============================== Input Handler ================================
 class InputHandler
 {
@@ -1456,8 +1467,9 @@ public:
 
     void Update(InputState *input)
     {
-        if(!GlobalPlayerTurn)
-            return;
+        // NOTE: uncomment if the player doesn't have any inputs on AI turn.
+        //if(!GlobalPlayerTurn)
+        //    return;
 
         shared_ptr<Command> newCommand = HandleInput(input);
         if(newCommand)
@@ -1516,8 +1528,9 @@ public:
                         Menu *levelMenu, Menu *conversationMenu, 
                         Fight *fight)
     {
-        if(!GlobalPlayerTurn)
-            return;
+        // NOTE: uncomment if the player doesn't have any inputs on AI turn.
+        //if(!GlobalPlayerTurn)
+        //    return;
 
         switch(GlobalInterfaceState)
         {
@@ -1903,6 +1916,18 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
+                BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+
+            case(DEATH):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<SayGoodbyeEvent>());
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

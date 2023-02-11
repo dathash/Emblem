@@ -160,7 +160,8 @@ void
 EventSystemUpdate(Fade *level_fade,
                   Fade *turn_fade,
                   Parcel *parcel,
-                  Advancement *advancement
+                  Advancement *advancement,
+                  string *dying
                   )
 {
     while(!GlobalEvents.empty())
@@ -299,9 +300,31 @@ EventSystemUpdate(Fade *level_fade,
                 advancement->boosts = advancement->recipient->CalculateLevelUp();
                 PlaySfx("levelup.wav");
             } break;
+            case UNIT_DEATH_EVENT:
+            {
+                PlaySfx("levelup.wav");
+                cout << *dying << "\n";
+                *dying = event.unit->name;
+                cout << *dying << "\n";
+            } break;
+            case UNIT_DEATH_OVER_EVENT:
+            {
+                StopSfx("levelup.wav");
+                if(GlobalPlayerTurn)
+                {
+                    GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+                    GlobalAIState = AI_PLAYER_TURN;
+                }
+                else
+                {
+                    GlobalInterfaceState = NO_OP;
+                    GlobalAIState = AI_FINDING_NEXT;
+                }
+                *dying = "";
+            } break;
             default:
             {
-                cout << "WARN: Unimplemented Event\n";
+                cout << "WARN: Unimplemented Event " << event.type << "\n";
             } break;
             case LEVEL_BOOST_EVENT:
             {

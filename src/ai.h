@@ -346,7 +346,8 @@ struct AI
         if(GlobalAIState == AI_NO_OP ||
            GlobalAIState == AI_RESOLVING_EXPERIENCE ||
            GlobalAIState == AI_RESOLVING_ADVANCEMENT ||
-           GlobalAIState == AI_FIGHT)
+           GlobalAIState == AI_FIGHT ||
+           GlobalAIState == AI_DEATH)
             return;
 
         if(commandQueue.empty())

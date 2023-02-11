@@ -43,6 +43,7 @@ GetInterfaceString(InterfaceState state)
     case PLAYER_FIGHT:                  return "Player fight";
     case RESOLVING_EXPERIENCE:          return "Resolving experience";
     case RESOLVING_ADVANCEMENT:         return "Resolving advancement";
+    case DEATH:                         return "Death";
     case NO_OP:                         return "No-Op";
     case TITLE_SCREEN:                  return "Title screen";
     case GAME_OVER:                     return "Game over";
@@ -62,6 +63,7 @@ GetAIString(AIState state)
     case AI_RESOLVING_ADVANCEMENT:  return "AI Resolving Advancement";
     case AI_FIGHT:                  return "AI Fight";
     case AI_PLAYER_TURN:            return "AI Player Turn";
+    case AI_DEATH:                  return "AI Death";
     case AI_NO_OP:                  return "AI No-op";
 	default:
 		cout << "WARNING GetAIString " << state << "\n"; return "";

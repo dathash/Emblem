@@ -69,7 +69,8 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT))
+                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
+                "Oof..."
             ));
         }
         ImGui::SameLine();

@@ -18,7 +18,7 @@
 #define EPSILON 0.00001
 
 // defaults
-#define DEFAULT_MUSIC_VOLUME 0.5f
+#define DEFAULT_MUSIC_VOLUME 0.0f
 #define DEFAULT_SFX_VOLUME 0.05f
 
 // rendering
@@ -50,9 +50,10 @@
 #define UNITS_PATH "../data/"
 #define LEVELS_PATH "../data/levels/"
 #define CONVERSATIONS_PATH "../data/conversations/"
+#define PRELUDES_PATH "../data/preludes/"
 #define CUTSCENES_PATH "../data/cutscenes/"
 #define VILLAGES_PATH "../data/villages/"
-#define PRELUDES_PATH "../data/preludes/"
+#define VALEDICTIONS_PATH "../data/valedictions/"
 
 // assets
 #define MUSIC_PATH "../assets/music/"
@@ -131,10 +132,12 @@ enum InterfaceState
     RESOLVING_EXPERIENCE, // 29
     RESOLVING_ADVANCEMENT, // 30
 
-    NO_OP, // 31
+    DEATH, // 31
 
-    TITLE_SCREEN, // 32
-    GAME_OVER, // 33
+    NO_OP, // 32
+
+    TITLE_SCREEN, // 33
+    GAME_OVER, // 34
 };
 
 
@@ -149,7 +152,8 @@ enum AIState
     AI_FIGHT, // 3
 
     AI_PLAYER_TURN, // 4
-    AI_NO_OP, // 5
+    AI_DEATH, // 5
+    AI_NO_OP, // 6
 };
 
 enum AIBehavior
