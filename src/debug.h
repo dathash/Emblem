@@ -94,6 +94,7 @@ DebugUI()
         ImGui::Text("%s", GetInterfaceString(GlobalInterfaceState).c_str());
         ImGui::Text("%s", GetAIString(GlobalAIState).c_str());
         ImGui::Text("Viewport [%d, %d]", viewportCol, viewportRow);
+        ImGui::Text("Speed 1/%d", GlobalSpeedMod);
     }
     ImGui::End();
     ImGui::PopStyleColor();

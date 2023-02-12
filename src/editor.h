@@ -185,13 +185,15 @@ EditorPollForKeyboardInput(position *editor_cursor, int width, int height)
 
 void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 {
+    static position editor_cursor = {0, 0};
+    static path path_debug = {};
+    EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
+    Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
+
     ImGui::Begin("level editor");
     {
-        static position editor_cursor = {0, 0};
-        static path path_debug = {};
-
-        EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
-        Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
+        if(ImGui::Button("Prelude"))
+            GlobalInterfaceState = PRELUDE;
 
         ImGui::Text("Objective: %s", GetObjectiveString(level->objective).c_str());
         if(ImGui::Button("rout"))

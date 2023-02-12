@@ -119,9 +119,7 @@ The story of the game is delivered through the characters.
 
     Enemies pursue and destroy villages and chests.
 
-    Debug Tools
-    * Frame by frame
-    * Fast-Forward
+    Set the viewport code to work right in SetViewport (go to a soft viewport)
 
 # Later
     10 levels
@@ -142,7 +140,6 @@ The story of the game is delivered through the characters.
     * Image backgrounds
 
 POLISH
-    Shrink Tilesets to absolute necessity, also enforce consistency across them.
     Smooth Screen Scroll (Render tiles one tile off of the screen.)
 
 QA

@@ -4,7 +4,7 @@ COM File: Level
 
 OBJ 1
 
-ATL sunset.png
+ATL yellow.png
 
 PRE prelude03.txt
 

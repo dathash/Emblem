@@ -4,7 +4,7 @@ COM File: Level
 
 OBJ 0
 
-ATL ruins.png
+ATL green.png
 
 PRE preludeTT.txt
 

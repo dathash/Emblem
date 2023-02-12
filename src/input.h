@@ -26,10 +26,47 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
             GlobalDebug = !GlobalDebug;
             return;
         }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_1)
+        {
+            GlobalSpeedMod = 1;
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_2)
+        {
+            GlobalSpeedMod = 2;
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_3)
+        {
+            GlobalSpeedMod = 3;
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_4)
+        {
+            GlobalSpeedMod = 4;
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_5)
+        {
+            GlobalSpeedMod = 5;
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_0)
+        {
+            GlobalPaused = !GlobalPaused;
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_EQUALS)
+        {
+            if(GlobalPaused)
+                GlobalStep = true;
+            return;
+        }
         if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {
             GlobalRunning = false;
         }
+
         if(GlobalEditorMode)
         {
 // ================================= editor inputs =============================

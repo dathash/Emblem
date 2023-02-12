@@ -692,7 +692,21 @@ struct Level
     bool next_level = false;
     bool turn_start = false;
 
-
+    void
+    CheckVictory()
+    {
+        if((objective == OBJECTIVE_ROUT &&
+             GetNumberOf(false) == 0)
+             ||
+            (objective == OBJECTIVE_BOSS && 
+             IsBossDead()))
+        {
+            song->FadeOut();
+            GlobalInterfaceState = LEVEL_MENU;
+            GlobalAIState = AI_NO_OP;
+            EmitEvent(MISSION_COMPLETE_EVENT);
+        }
+    }
 
     Level
     LoadNextLevel(const string &name, 
@@ -896,6 +910,7 @@ struct Level
         DetectDeadAllies();
         RemoveDeadUnits();
         CheckForRemaining();
+        CheckVictory();
     }
 };
 

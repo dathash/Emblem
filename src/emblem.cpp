@@ -38,6 +38,10 @@ static bool GlobalEditorMode = false;
 static bool GlobalDebug = false;
 static bool GlobalPlayerTurn = true;
 
+static bool GlobalPaused = false;
+static bool GlobalStep = false;
+static int GlobalSpeedMod = 1;
+
 // TODO: Refactor these to only be where they need to be.
 static int viewportCol = 0;
 static int viewportRow = 0;
@@ -186,15 +190,24 @@ int main(int argc, char *argv[])
     GlobalInterfaceState = TITLE_SCREEN;
     GlobalAIState = AI_PLAYER_TURN;
 
+    unsigned long long frame = 0;
+
     GlobalRunning = true;
 // ========================= game loop =========================================
     while(GlobalRunning)
     {
+        ++frame;
+        if(frame > 900000000000000) // Just in case we overflow!
+            frame = 0;
+
         HandleEvents(&input, gamepad);
 
         // Update
-        if(!GlobalEditorMode)
+        if(!GlobalEditorMode && 
+           (!GlobalPaused || GlobalStep) &&
+           !(frame % GlobalSpeedMod))
         {
+            GlobalStep = false;
             handler.Update(&input);
             handler.UpdateCommands(&cursor, &level, units, party,
                                    &game_menu, &unit_menu, 
@@ -236,17 +249,6 @@ int main(int argc, char *argv[])
 
             ai.clearQueue();
             handler.clearQueue();
-        }
-        if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT &&
-           ((level.objective == OBJECTIVE_ROUT &&
-             level.GetNumberOf(false) == 0)
-             ||
-            (level.objective == OBJECTIVE_BOSS && 
-             level.IsBossDead())))
-        {
-            level.song->FadeOut();
-            GlobalInterfaceState = LEVEL_MENU;
-            EmitEvent(MISSION_COMPLETE_EVENT);
         }
 
         // Render

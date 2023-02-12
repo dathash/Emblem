@@ -4,7 +4,7 @@ COM File: Level
 
 OBJ 1
 
-ATL frozen.png
+ATL white.png
 
 PRE prelude04.txt
 
