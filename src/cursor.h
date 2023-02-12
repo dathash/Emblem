@@ -93,14 +93,27 @@ struct Cursor
     }
 
     void
-    MoveTo(const position &pos_in, const direction &dir_in)
+    MoveTo(const position &pos_in, const direction &dir_in, 
+           int map_width, int map_height)
     {
-        pos = pos_in;
-        if(WithinSoftViewport(pos_in))
+        // Check Soft Viewport
+        if(
+           (ColWithinSoftViewport(pos) && !ColWithinSoftViewport(pos_in) &&
+           (dir_in.col && pos_in.col >= 3 && pos_in.col < map_width - 3))
+           ||
+           (RowWithinSoftViewport(pos) && !RowWithinSoftViewport(pos_in) &&
+            (dir_in.row && pos_in.row >= 2 && pos_in.row < map_height - 2)))
+        {
+            MoveViewportDirection(dir_in * -1);
+        }
+        else
         {
             animation_dir = dir_in;
             animation = GetAnimation(MOVE_ANIMATION, 1.0f);
         }
+
+        pos = pos_in;
+
         EmitEvent(MOVE_CURSOR_EVENT);
     }
 

@@ -39,19 +39,8 @@ public:
 
         if(IsValidBoundsPosition(map.width, map.height, new_pos))
         {
-            // Check Soft Viewport
-            if(
-               (ColWithinSoftViewport(cursor->pos) && !ColWithinSoftViewport(new_pos) &&
-               (dir.col && new_pos.col >= 3 && new_pos.col < map.width - 3))
-               ||
-               (RowWithinSoftViewport(cursor->pos) && !RowWithinSoftViewport(new_pos) &&
-                (dir.row && new_pos.row >= 2 && new_pos.row < map.height - 2)))
-            {
-                MoveViewportDirection(dir);
-            }
-
             // move cursor
-            cursor->MoveTo(new_pos, dir * -1);
+            cursor->MoveTo(new_pos, dir * -1, map.width, map.height);
 
             // change state
             const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
@@ -190,7 +179,7 @@ public:
             return;
 
         // move cursor
-        cursor->MoveTo(new_pos, dir * -1);
+        cursor->MoveTo(new_pos, dir * -1, map.width, map.height);
 
         const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
         if(!VectorHasElement(new_pos, map.accessible))
