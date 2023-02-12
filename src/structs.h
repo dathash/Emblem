@@ -215,6 +215,7 @@ struct Unit
     position pos = {0, 0};
     bool is_exhausted = false;
     bool should_die = false;
+    bool has_spoken_valediction = false;
     position animation_offset = {0, 0};
     bool is_boss = false;
 
@@ -803,12 +804,31 @@ struct Level
     }
 
     void
+    DetectDeadAllies()
+    {
+        for(shared_ptr<Unit> unit : combatants)
+        {
+            if(unit->should_die)
+            {
+                if(unit->is_ally && !unit->has_spoken_valediction)
+                {
+                    unit->should_die = false;
+                    EmitEvent({UNIT_DEATH_EVENT, unit.get()});
+                    GlobalInterfaceState = DEATH;
+                    GlobalAIState = AI_DEATH;
+                    return;
+                }
+            }
+        }
+    }
+
+    void
     RemoveDeadUnits()
     {
+        // Quit if Leader is dead
         if(GlobalInterfaceState != GAME_OVER)
         {
             position leader_pos = Leader();
-            // Quit if Leader is dead
             if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
             {
                 GlobalInterfaceState = GAME_OVER;
@@ -819,19 +839,10 @@ struct Level
 
         // REFACTOR: This could be so much simpler.
         vector<position> tiles;
+
         for(shared_ptr<Unit> unit : combatants)
-        {
             if(unit->should_die)
-            {
                 tiles.push_back(unit->pos);
-                if(unit->is_ally)
-                {
-                    EmitEvent({UNIT_DEATH_EVENT, unit.get()});
-                    GlobalInterfaceState = DEATH;
-                    GlobalAIState = AI_DEATH;
-                }
-            }
-        }
 
         combatants.erase(remove_if(combatants.begin(), combatants.end(),
                     [](auto const &u) { return u->should_die; }),
@@ -882,6 +893,7 @@ struct Level
     Update()
     {
         // cleanup functions
+        DetectDeadAllies();
         RemoveDeadUnits();
         CheckForRemaining();
     }

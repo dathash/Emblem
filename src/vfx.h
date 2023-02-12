@@ -161,7 +161,7 @@ EventSystemUpdate(Fade *level_fade,
                   Fade *turn_fade,
                   Parcel *parcel,
                   Advancement *advancement,
-                  string *dying
+                  Unit **dying
                   )
 {
     while(!GlobalEvents.empty())
@@ -303,9 +303,7 @@ EventSystemUpdate(Fade *level_fade,
             case UNIT_DEATH_EVENT:
             {
                 PlaySfx("levelup.wav");
-                cout << *dying << "\n";
-                *dying = event.unit->name;
-                cout << *dying << "\n";
+                *dying = event.unit;
             } break;
             case UNIT_DEATH_OVER_EVENT:
             {
@@ -320,7 +318,9 @@ EventSystemUpdate(Fade *level_fade,
                     GlobalInterfaceState = NO_OP;
                     GlobalAIState = AI_FINDING_NEXT;
                 }
-                *dying = "";
+                (*dying)->should_die = true;
+                (*dying)->has_spoken_valediction = true;
+                *dying = nullptr;
             } break;
             default:
             {

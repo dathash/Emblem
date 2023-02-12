@@ -96,7 +96,7 @@ struct Cursor
     MoveTo(const position &pos_in, const direction &dir_in)
     {
         pos = pos_in;
-        if(WithinViewport(pos_in))
+        if(WithinSoftViewport(pos_in))
         {
             animation_dir = dir_in;
             animation = GetAnimation(MOVE_ANIMATION, 1.0f);

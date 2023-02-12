@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 // ================================== load =================================
     vector<shared_ptr<Unit>> units = LoadUnits(UNITS_PATH + string(INITIAL_UNITS));
     vector<shared_ptr<Unit>> party = {};
-    string dying = "";
+    Unit *dying = nullptr;
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
                              string("l2.txt"), string("l3.txt"),
@@ -251,13 +251,13 @@ int main(int argc, char *argv[])
 
         // Render
         Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
-               level.conversations, fight, level_fade, turn_fade, advancement, (!dying.empty() ? GetUnitByName(units, dying) : nullptr));
+               level.conversations, fight, level_fade, turn_fade, advancement, dying);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level, fight, parcel, advancement);
+        RenderUI(&ui, cursor, level, fight, parcel, advancement, dying);
 
 #if DEV_MODE
         if(GlobalEditorMode)

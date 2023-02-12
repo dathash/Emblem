@@ -94,6 +94,7 @@ struct UI_State
     bool game_over = false;
     bool unit_menu = false;
     bool combat_screen = false;
+    bool death_screen = false;
     bool experience = false;
     bool advancement = false;
 
@@ -109,6 +110,7 @@ struct UI_State
         game_over = false;
         unit_menu = false;
         combat_screen = false;
+        death_screen = false;
         experience = false;
         advancement = false;
     }
@@ -124,6 +126,16 @@ struct UI_State
         else
         {
             combat_screen = false;
+        }
+
+        if(GlobalInterfaceState == DEATH ||
+           GlobalAIState == AI_DEATH)
+        {
+            death_screen = true;
+        }
+        else
+        {
+            death_screen = false;
         }
 
         if(GlobalInterfaceState == RESOLVING_EXPERIENCE ||
@@ -665,6 +677,24 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 	ImGui::PopFont(); // Large
 }
 
+// Displays Death quote
+void
+DisplayDeathScreen(ImGuiWindowFlags wf, Unit *dying)
+{
+	// Window sizing
+    ImGui::SetNextWindowSize(ImVec2(800, 100));
+    ImGui::SetNextWindowPos(ImVec2(20, 500));
+
+    // Render
+    ImGui::PushFont(uiFontMedium);
+    ImGui::Begin(dying->name.c_str(), NULL, wf);
+    {
+        ImGui::Text("%s", dying->valediction.c_str());
+    }
+    ImGui::End();
+    ImGui::PopFont();
+}
+
 // Displays combat preview when initiating combat
 void
 DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
@@ -835,7 +865,8 @@ RenderUI(UI_State *ui,
          const Level &level,
          const Fight &fight,
          const Parcel &parcel,
-         const Advancement &advancement
+         const Advancement &advancement,
+         Unit *dying
          )
 {
     ui->Update();
@@ -868,6 +899,8 @@ RenderUI(UI_State *ui,
     // USER/AI UI
     if(ui->combat_screen)
 		DisplayCombatScreen(window_flags, fight);
+    if(ui->death_screen)
+        DisplayDeathScreen(window_flags, dying);
     if(ui->experience)
         DisplayExperience(window_flags, parcel);
     if(ui->advancement)

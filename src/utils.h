@@ -219,6 +219,20 @@ WithinSoftViewport(const position &p)
 }
 
 bool
+ColWithinSoftViewport(const position &p)
+{
+    return (p.col < VIEWPORT_WIDTH + viewportCol - 3 &&
+            p.col >= viewportCol + 3);
+}
+
+bool
+RowWithinSoftViewport(const position &p)
+{
+    return (p.row < VIEWPORT_HEIGHT + viewportRow - 2 &&
+            p.row >= viewportRow + 2);
+}
+
+bool
 WithinRect(const position &p, 
            const position &upper_left, 
            const position &lower_right)

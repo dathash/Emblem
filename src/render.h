@@ -595,7 +595,6 @@ Render(const Tilemap &map, const Cursor &cursor,
 
     if(dying)
     {
-        cout << "HERE\n";
         RenderPortrait(-50, 0, *dying,
                        EXPR_WINCE,
                        true);

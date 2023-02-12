@@ -113,13 +113,6 @@ Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 The story of the game is delivered through the characters.
 
 # TODO
-    Conversations
-    * Unit Death Screens
-        * THIS IS PARTWAY DONE.
-            all that I need to do is come up with some solution for the
-            shared_ptr issue. If I can do this, then I'll be able to do
-            everything we need.
-
     Soft Viewport
 
     Polished Product! (For Joom Bog)
@@ -132,6 +125,7 @@ The story of the game is delivered through the characters.
     10 levels
 
     Cutscenes anytime, not just on end of player turn.
+    * Make sure that cutscenes featuring dead units don't trigger.
 
     AI doesn't wait on every unit that won't act.
     * Run a first pass that just gathers the units that will act, then run with

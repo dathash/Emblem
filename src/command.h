@@ -39,16 +39,16 @@ public:
 
         if(IsValidBoundsPosition(map.width, map.height, new_pos))
         {
-            /*
             // Check Soft Viewport
-            if(WithinSoftViewport(cursor->pos) && !WithinSoftViewport(new_pos) &&
-               ((dir.col && new_pos.col >= 3 && new_pos.col < map.width - 3) ||
+            if(
+               (ColWithinSoftViewport(cursor->pos) && !ColWithinSoftViewport(new_pos) &&
+               (dir.col && new_pos.col >= 3 && new_pos.col < map.width - 3))
+               ||
+               (RowWithinSoftViewport(cursor->pos) && !RowWithinSoftViewport(new_pos) &&
                 (dir.row && new_pos.row >= 2 && new_pos.row < map.height - 2)))
             {
-                cout << "HERE\n";
                 MoveViewportDirection(dir);
             }
-            */
 
             // move cursor
             cursor->MoveTo(new_pos, dir * -1);
