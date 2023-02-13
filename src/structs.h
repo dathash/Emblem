@@ -414,20 +414,19 @@ struct Unit
     int
     Accuracy() const
     {
-        return 50 + (skill * 10);
+        return 5;
     }
 
     int
     Avoid() const
     {
-        return skill * 5;
+        return 12;
     }
 
     int
     Crit() const
     {
-        return skill * 2;
-        // TODO: Make this less for enemies.
+        return 20;
     }
 };
 

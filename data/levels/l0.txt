@@ -58,7 +58,7 @@ UNT Thief 5 5 1 0 0
 UNT Thief 6 4 1 0 0 
 UNT Brute 2 7 1 0 0 
 UNT Donnel 2 3 0 0 0 
-UNT Priam 1 3 0 0 0 
-UNT Sully 3 3 0 0 0 
+UNT Vaike 3 3 0 0 0 
+UNT Brady 1 3 0 0 0 
 
 

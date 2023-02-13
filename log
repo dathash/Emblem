@@ -52,15 +52,16 @@ What I need for release:
 
 # Design
 What is appealing to me about tactics games?
-    Individual Characters
-        Strong Characterization
-        Developing Relationships
     Permadeath sacrifices
+    Taking Risks
     Gaining new team members
     The beginning of Fire Emblem games are always the best.
     Middle of a level is best.
         Beginning: Setting up, being overly cautious. Not good.
         End: Ganging up on a boss. Pretty much a waste of time.
+    Individual Characters
+        Strong Characterization
+        Developing Relationships
  
 Ideas
 * Social Psychology game
@@ -79,12 +80,6 @@ Ideas
         Made mechanics that lended themselves towards extremely specific playstyles?
         Made objectives that required modes of thinking?
         Dropped RPG elements to make way for the new puzzle-style mechanic?
-
-* Shapes game
-
-* Turn Timer game
-
-* Rogue-like combinatoric explosion game
 
 Why are we fighting?
 Fire Emblem maps are almost always about killing all the enemies
@@ -109,6 +104,14 @@ Misty Step
 Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
+Ability system, like that of D&D.
+
+Really explicit die-rolls.
+Simple statistics
+I like the Two-handed fighter ability to reroll 1's.
+I like the FTD mechanic where halberds can use intelligence for damage.
+
+
 # Story
 The story of the game is delivered through the characters.
 
@@ -119,10 +122,17 @@ The story of the game is delivered through the characters.
 
     Enemies pursue and destroy villages and chests.
 
-    Set the viewport code to work right in SetViewport (go to a soft viewport)
+    Set the viewport code to work right in SetViewport (go to a soft viewport).
 
 # Later
     10 levels
+
+    Vaike's sprite is broken.
+
+    Mini headshots displayed in unit blurb 
+
+    Unit Info blurs out the background, displays an animated form of the unit's
+    spritesheet, maybe a unit description?
 
     Cutscenes anytime, not just on end of player turn.
     * Make sure that cutscenes featuring dead units don't trigger.
@@ -141,6 +151,8 @@ The story of the game is delivered through the characters.
 
 POLISH
     Smooth Screen Scroll (Render tiles one tile off of the screen.)
+    Pixel Squishing Fix
+    Z-Sorting
 
 QA
     BUG | Enemies that can actually reach you don't believe that they can due to

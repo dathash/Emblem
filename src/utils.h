@@ -5,6 +5,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+// ============================= Dice ==========================================
 // Rolls a d100. range: 00 to 99.
 int
 d100()
@@ -12,6 +13,53 @@ d100()
     return rand() % 100;
 }
 
+// range: 01 to 20.
+int
+d20()
+{
+    return (rand() % 20) + 1;
+}
+// range: 01 to 04. (etc.)
+int
+d4()
+{
+    return (rand() % 4) + 1;
+}
+int
+d6()
+{
+    return (rand() % 6) + 1;
+}
+int
+d8()
+{
+    return (rand() % 8) + 1;
+}
+int
+d10()
+{
+    return (rand() % 10) + 1;
+}
+int
+d12()
+{
+    return (rand() % 12) + 1;
+}
+
+// Rolls a number of dice.
+int
+Roll(int (*die)(), int num = 1)
+{
+    int result = 0;
+    for(int i = 0; i < num; ++i)
+    {
+        result += die();
+    }
+    return result;
+}
+
+
+// ================================= Structs ===================================
 struct Timer
 {
     Uint32 current = 0;

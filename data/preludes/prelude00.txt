@@ -1,90 +1,52 @@
-MUS boat.wav
+MUS forest.wav
 
-SP1 Priam
-SP2 Lucina
-SP3 Sully
-SP4 Donnel
+SP1 Lucina
+SP2 Brady
+SP3 Donnel
+SP4 Vaike
 
 EVE ONE Enters
-ONE Lucina, your training has come a long way, but you still can't match me.
-ONE Do not falter now, after all this time.
+ONE Here he comes...
+ONE Brady, any word?
 
 EVE TWO Enters
 EX2 Wince
 TWO -huff- -huff-
-TWO You're right, it's pitiful.
+TWO It's... bad... There's at least a dozen of them.
 
-ONE Not pitiful. All beings begin this life in the same way.
-
-EX2 Neutral
-ONE It is only through the innumerable days that strength is gained.
-
-EX1 Happy
-ONE I am proud of you, my daughter. You are worthy of our village.
-
-EX2 Happy
-ONE Lucina, your days are just beginning.
-ONE Be calm in this knowledge.
-
-EX2 Happy
-TWO Thanks, dad. So what next?
-
-EX1 Happy
-ONE Today we put your training to the test.
-
-EX2 Neutral
-TWO Huh?
+EX1 Wince
+ONE I see.
 
 EX1 Neutral
-ONE There's a group of thieves on the mountain. Sparrow has been tracking them.
-ONE We must defend our home.
-
-EX2 Neutral
-TWO Fight them? How many? How armed?
-
-EX2 Wince
-TWO ... Am I ready?
-
-ONE Of course you are. I have taught you everything...
-
-EX1 Neutral
-ONE ... I see. You mean to ask if you are ready to kill a man?
-
-EX2 Neutral
-TWO Yes.
-
-EX1 Neutral
-ONE Only you may decide.
-ONE Remember that all men are sovereign, masters of their own wills.
-ONE Some are free. We must respect our adversaries.
-ONE But peace can only be upheld through strength.
-ONE I would kill before I would let these lands be razed.
-
-TWO ...
-
-ONE One day, you will understand. Come, the outsiders approach.
-
-EVE ONE Exits
-
-TWO I wish you were wrong, father.
-TWO Perhaps somewhere, there is a place where strength is outmatched by love.
-
-EVE ONE Enters
-ONE Here they are. Our objective is to cut through to their leader.
-
-EX2 Happy
-TWO "Cut off the head of the dragon, and the body loses purpose?"
-
-EX1 Happy
-ONE Precisely.
+ONE Everyone! 
 
 EVE THREE Enters
-EX3 Happy
-THR Hey, don't count me out!
+THR Captain!
 
 EVE FOUR Enters
-EX4 Happy
-FOU Me neither!
+FOU Aye, cap.
 
-ONE So the gang's all here!
+EX2 Neutral
+TWO So what's the plan?
+
+ONE We'll be meeting the enemy shortly.
+ONE I'll be honest, it will be dangerous.
+ONE They outnumber us four-to-one.
+
+EX1 Angry
+ONE But it's the only chance we have.
+ONE If we can't stop them here, we'll be discovered, the village will be ravaged within the moon.
+
+EX1 Neutral
+ONE So fight, and live, for our people.
+
+EX3 Happy
+THR Yeah, don't worry, cap, we've got this!
+
+EX4 Happy
+FOU Piece of cake.
+
+EX1 Happy
+ONE Lot of confidence. If that's how it's going to be, then so be it.
+
 ONE Let's give 'em hell!

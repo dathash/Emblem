@@ -6,7 +6,7 @@ OBJ 2
 
 ATL green.png
 
-PRE prelude00.txt
+PRE preludeTT.txt
 
 MID lucina_priam_1.txt
 
@@ -16,32 +16,34 @@ VIL 8 6 village03.txt
 
 CNV lucina_priam_2.txt
 
+
 MUS 21.wav
 
 WDT 15
 HGT 10
 MAP 0 0 0 0 0 2 2 2 2 2 1 1 1 1 1 
-MAP 0 5 5 5 7 0 0 2 2 2 1 1 1 1 1 
-MAP 0 5 6 5 4 0 0 0 2 2 1 1 0 4 1 
-MAP 0 5 5 5 0 0 0 0 2 1 1 2 2 2 2 
-MAP 0 0 0 0 0 3 0 0 1 1 7 0 2 0 2 
+MAP 0 0 0 0 6 0 0 2 2 2 1 1 1 1 1 
+MAP 0 0 0 0 0 0 0 0 2 2 1 1 0 4 1 
+MAP 0 0 0 0 0 0 0 0 2 1 1 2 2 2 2 
+MAP 0 0 0 0 0 3 0 0 1 1 6 0 2 0 2 
 MAP 0 0 0 0 0 3 3 1 1 1 0 2 2 2 2 
-MAP 0 0 0 0 3 3 3 0 7 1 1 2 0 2 0 
+MAP 0 0 0 0 3 3 3 0 6 1 1 2 0 2 0 
 MAP 1 1 0 0 3 3 0 0 0 0 1 0 2 0 2 
-MAP 1 1 1 0 0 0 0 0 6 0 0 0 0 0 0 
+MAP 1 1 1 0 0 0 0 0 5 0 0 0 0 0 0 
 MAP 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 
 
-COM <UNT <name> <col> <row> <ai> <boss>>
-UNT Priam 1 4 0 0 
-UNT Thief 4 5 1 1 
-UNT Archer 8 8 2 0 
-UNT Brute 11 8 8 0 
-UNT Brute 11 9 8 0 
-UNT Brute 13 2 2 0 
-UNT Thief 13 4 2 0 
-UNT Archer 10 5 8 0 
-UNT Lucina 2 2 0 0 
-UNT Brute 13 7 2 0 
-UNT Brute 14 8 2 0 
-UNT Thief 13 9 2 0 
+COM <UNT <name> <col> <row> <ai> <boss> <start>>
+UNT Priam 1 4 0 0 0 
+UNT Thief 4 5 1 0 0 
+UNT Archer 8 8 2 0 0 
+UNT Brute 11 8 8 0 0 
+UNT Brute 11 9 8 0 0 
+UNT Brute 13 2 2 1 0 
+UNT Thief 13 4 2 0 0 
+UNT Archer 10 5 8 0 0 
+UNT Lucina 2 2 0 0 0 
+UNT Brute 13 7 2 0 0 
+UNT Brute 14 8 2 0 0 
+UNT Thief 13 9 2 0 0 
+
 

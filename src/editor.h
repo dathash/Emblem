@@ -474,6 +474,20 @@ EditorPass(vector<shared_ptr<Unit>> *units,
                 EmitEvent(START_PLAYER_TURN_EVENT);
             }
         }
+        ImGui::SameLine();
+        if(ImGui::Button("Tutorial"))
+        {
+            *level = LoadLevel("tutorial.txt", *units, party);
+            sprintf(levelFileName, "tutorial.txt");
+            GlobalAIState = AI_PLAYER_TURN;
+            GlobalPlayerTurn = true;
+            level->turn_start = true;
+            if(GlobalInterfaceState != PRELUDE)
+            {
+                GlobalInterfaceState = NO_OP;
+                EmitEvent(START_PLAYER_TURN_EVENT);
+            }
+        }
 
         int wrap = 0;
         for(const string &s : levels)

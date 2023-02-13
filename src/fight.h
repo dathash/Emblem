@@ -12,12 +12,18 @@ HitChance(const Unit &predator, const Unit &prey, int bonus)
     return (predator.Accuracy() - prey.Avoid() - bonus);
 }
 
+int
+TargetNumber(const Unit &predator, const Unit &prey, int bonus)
+{
+    return prey.Avoid() - predator.Accuracy() - bonus;
+}
+
 // Returns the chance to crit a unit
 // CONSIDER: critical resist mechanic, like hobbit luck?
 int
-CritChance(const Unit &predator, const Unit &prey)
+CritNumber(const Unit &predator, const Unit &prey)
 {
-    return (predator.Crit());
+    return predator.Crit(); // Most always just a 20.
 }
 
 // Determines what damage a hit will do.
@@ -85,7 +91,7 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     Outcome outcome = {};
     outcome.one_attacks = true;
     outcome.one_damage = CalculateDamage(one, two, two_defense_bonus);
-    outcome.one_hit = HitChance(one, two, two_avoid_bonus);
+    outcome.one_hit = TargetNumber(one, two, two_avoid_bonus);
     outcome.one_crit = one.Crit();
     outcome.one_doubles = Doubles(one, two);
 
@@ -93,7 +99,7 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
     {
         outcome.two_attacks = true;
         outcome.two_damage = CalculateDamage(two, one, one_defense_bonus);
-        outcome.two_hit = HitChance(two, one, one_avoid_bonus);
+        outcome.two_hit = TargetNumber(two, one, one_avoid_bonus);
         outcome.two_crit = two.Crit();
         outcome.two_doubles = Doubles(two, one);
     }
@@ -364,10 +370,12 @@ struct Fight
         {
             attack.type = RANGED;
         }
-        if(d100() < HitChance(*one, *two, two_avoid_bonus))
+
+        int result = Roll(d20);
+        if(result >= TargetNumber(*one, *two, two_avoid_bonus))
         {
             attack.hit = true;
-            if(d100() < CritChance(*one, *two))
+            if(result >= CritNumber(*one, *two))
                 attack.crit = true;
         }
         attack_queue.push(attack);
@@ -385,10 +393,11 @@ struct Fight
             {
                 attack.type = RANGED;
             }
-            if(d100() < HitChance(*two, *one, one_avoid_bonus))
+            result = Roll(d20);
+            if(result >= TargetNumber(*two, *one, one_avoid_bonus))
             {
                 attack.hit = true;
-                if(d100() < CritChance(*two, *one))
+                if(result >= CritNumber(*two, *one))
                     attack.crit = true;
             }
             attack_queue.push(attack);
@@ -407,10 +416,11 @@ struct Fight
         }
         if(outcome.one_doubles)
         {
-            if(d100() < HitChance(*one, *two, two_avoid_bonus))
+            result = Roll(d20);
+            if(result >= TargetNumber(*one, *two, two_avoid_bonus))
             {
                 attack.hit = true;
-                if(d100() < CritChance(*one, *two))
+                if(result >= CritNumber(*one, *two))
                     attack.crit = true;
             }
             attack_queue.push(attack);
@@ -430,16 +440,16 @@ struct Fight
             }
             if(outcome.two_doubles)
             {
-                if(d100() < HitChance(*two, *one, one_avoid_bonus))
+                result = Roll(d20);
+                if(result >= TargetNumber(*two, *one, one_avoid_bonus))
                 {
                     attack.hit = true;
-                    if(d100() < CritChance(*two, *one))
+                    if(result >= CritNumber(*two, *one))
                         attack.crit = true;
                 }
                 attack_queue.push(attack);
             } 
         }
-        // TODO: WASTE TIME ANIMATION HERE!
     }
 };
 
