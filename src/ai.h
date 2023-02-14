@@ -60,18 +60,18 @@ public:
         map->vis_range.clear();
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->movement,
-                                        cursor->selected->min_range,
-                                        cursor->selected->max_range,
+                                        cursor->selected->Movement(),
+                                        cursor->selected->MinRange(),
+                                        cursor->selected->MaxRange(),
                                         cursor->selected->is_ally);
         map->accessible = result.first;
         map->vis_range = result.second;
 
         map->double_range = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->movement * 2,
-                                        cursor->selected->min_range,
-                                        cursor->selected->max_range,
+                                        cursor->selected->Movement() * 2,
+                                        cursor->selected->MinRange(),
+                                        cursor->selected->MaxRange(),
                                         cursor->selected->is_ally).first;
 
         GlobalAIState = AI_SELECTED;
@@ -98,7 +98,7 @@ PursueBehavior(const Unit &unit, const Tilemap &map)
         path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
         if(path_to_nearest.size())
         {
-            position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.movement);
+            position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.Movement());
             if(furthest == position(0, 0))
             {
                 furthest = unit.pos;
@@ -125,7 +125,7 @@ PursueBehavior(const Unit &unit, const Tilemap &map)
                                     map.tiles[target->pos.col][target->pos.row].avoid,
                                     map.tiles[p.col][p.row].defense,
                                     map.tiles[target->pos.col][target->pos.row].defense);
-            int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
+            int health_remaining = clamp(target->health - outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage, 0, target->MaxHealth());
             if(health_remaining < min_health_after_attack)
             {
                 action = poss;
@@ -165,7 +165,7 @@ BossBehavior(const Unit &unit, const Tilemap &map)
                                         map.tiles[target->pos.col][target->pos.row].avoid,
                                         map.tiles[p.col][p.row].defense,
                                         map.tiles[target->pos.col][target->pos.row].defense);
-                int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
+                int health_remaining = clamp(target->health - outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage, 0, target->MaxHealth());
                 if(health_remaining < min_health_after_attack)
                 {
                     action = poss;
@@ -201,7 +201,7 @@ AttackInRangeBehavior(const Unit &unit, const Tilemap &map, bool extended)
             path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
             if(path_to_nearest.size())
             {
-                position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.movement);
+                position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.Movement());
                 if(furthest == position(0, 0))
                 {
                     furthest = unit.pos;
@@ -226,7 +226,7 @@ AttackInRangeBehavior(const Unit &unit, const Tilemap &map, bool extended)
                                     map.tiles[target->pos.col][target->pos.row].avoid,
                                     map.tiles[p.col][p.row].defense,
                                     map.tiles[target->pos.col][target->pos.row].defense);
-            int health_remaining = clamp(target->health - outcome.two_damage * (1 + outcome.two_doubles), 0, target->health);
+            int health_remaining = clamp(target->health - outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage, 0, target->MaxHealth());
             if(health_remaining < min_health_after_attack)
             {
                 action = poss;
@@ -250,7 +250,7 @@ GetAction(const Unit &unit, const Tilemap &map)
         case PURSUE_AFTER_2:     return ((unit.turns_active >= 2) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
         case PURSUE_AFTER_3:     return ((unit.turns_active >= 3) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
         case BOSS:               return BossBehavior(unit, map);
-        case BOSS_THEN_MOVE:     return ((unit.health == unit.max_health) ? BossBehavior(unit, map) : PursueBehavior(unit, map));
+        case BOSS_THEN_MOVE:     return ((unit.health == unit.MaxHealth()) ? BossBehavior(unit, map) : PursueBehavior(unit, map));
         case ATTACK_IN_RANGE:    return AttackInRangeBehavior(unit, map, false);
         case ATTACK_IN_TWO:      return AttackInRangeBehavior(unit, map, true);
         case FLEE:               return {unit.pos, NULL};

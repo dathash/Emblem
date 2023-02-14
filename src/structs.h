@@ -125,16 +125,6 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
-struct Growths
-{
-    int health;
-    int attack;
-    int aptitude;
-    int defense;
-    int speed;
-    int skill;
-};
-
 enum Ability
 {
     ABILITY_NONE,
@@ -177,36 +167,25 @@ enum Expression
 };
 
 
-struct Boosts
-{
-    int health = 0;
-    int attack = 0;
-    int aptitude = 0;
-    int defense = 0;
-    int speed = 0;
-    int skill = 0;
-};
-
-
 struct Unit
 {
     string name;
     bool is_ally;
-    int movement;
     int health;
-    int max_health;
-    int attack;
-    int aptitude;
-    int defense;
-    int speed;
-    int skill;
-    int min_range;
-    int max_range;
+
+    int strength;
+    int dexterity;
+    int vitality;
+    int intuition;
+    int faith;
+
     int level;
     Ability ability;
 
-    Growths growths = {};
     int experience = 0;
+
+    Item *weapon;
+    Item *pocket;
 
     int arrival = 0;
     int turns_active = -1;
@@ -232,6 +211,8 @@ struct Unit
     ~Unit()
     {
         delete buff;
+        delete weapon;
+        delete pocket;
     }
 
     size_t
@@ -247,23 +228,17 @@ struct Unit
     }
 
     Unit(
-         string name_in,
-         bool is_ally_in, int movement_in,
-         int health_in, int max_health_in,
-         int attack_in, int aptitude_in, int defense_in,
-         int speed_in, int skill_in,
-         int min_range_in, int max_range_in,
+         string name_in, bool is_ally_in,
+         int strength_in, int dexterity_in,
+         int vitality_in,
+         int intuition_in, int faith_in,
          int level_in,
          Ability ability_in,
          AIBehavior ai_behavior_in,
          int xp_value_in,
 
-         int health_growth_in,
-         int attack_growth_in,
-         int aptitude_growth_in,
-         int defense_growth_in,
-         int speed_growth_in,
-         int skill_growth_in,
+         ItemType weapon_type_in,
+         ItemType pocket_type_in,
 
          Spritesheet sheet_in,
          Texture neutral_in,
@@ -274,16 +249,11 @@ struct Unit
          )
     : name(name_in),
       is_ally(is_ally_in),
-      movement(movement_in),
-      health(health_in),
-      max_health(max_health_in),
-      attack(attack_in),
-      aptitude(aptitude_in),
-      defense(defense_in),
-      speed(speed_in),
-      skill(skill_in),
-      min_range(min_range_in),
-      max_range(max_range_in),
+      strength(strength_in),
+      dexterity(dexterity_in),
+      vitality(vitality_in),
+      intuition(intuition_in),
+      faith(faith_in),
       level(level_in),
       ability(ability_in),
       ai_behavior(ai_behavior_in),
@@ -295,26 +265,158 @@ struct Unit
       wince(wince_in),
       valediction(valediction_in)
     {
-      growths.health = health_growth_in;
-      growths.attack = attack_growth_in;
-      growths.aptitude = aptitude_growth_in;
-      growths.defense = defense_growth_in;
-      growths.speed = speed_growth_in;
-      growths.skill = skill_growth_in;
+        health = MaxHealth();
+        weapon = GetItem(weapon_type_in);
+        pocket = GetItem(pocket_type_in);
+    }
+
+    Unit(const Unit &other)
+    : name(other.name),
+      is_ally(other.is_ally),
+      health(other.health),
+      strength(other.strength),
+      dexterity(other.dexterity),
+      vitality(other.vitality),
+      intuition(other.intuition),
+      faith(other.faith),
+      level(other.level),
+      ability(other.ability),
+      ai_behavior(other.ai_behavior),
+      xp_value(other.xp_value),
+      sheet(other.sheet),
+      neutral(other.neutral),
+      happy(other.happy),
+      angry(other.angry),
+      wince(other.wince)
+    {
+        if(other.weapon)
+            weapon = new Item(*other.weapon);
+        if(other.pocket)
+            pocket = new Item(*other.pocket);
+    }
+
+    // Switches the primary weapon with the secondary item
+    void
+    SwitchItems()
+    {
+        assert(weapon->weapon);
+        Item *tmp = weapon;
+        weapon = pocket;
+        pocket = tmp;
+    }
+
+    // Uses the pocket item
+    void
+    Use()
+    {
+        assert(pocket);
+        if(!pocket->consumable)
+        {
+            cout << "WARNING: Item.Use() not right. Item type: " << GetItemString(pocket->type) << "\n";
+            return;
+        }
+
+        switch(pocket->consumable->type)
+        {
+            case CONS_NOTHING: cout << "WARNING: Item.Use() not right. Item type: " << GetItemString(pocket->type) << "\n";
+            case CONS_POTION: Heal(pocket->consumable->amount); break;
+            case CONS_STATBOOST: cout << "Unimplemented STATBOOST item in Use()\n"; break;
+            case CONS_BUFF: cout << "Unimplemented BUFF item in Use()\n"; break;
+            default: cout << "UNIMPLEMENTED DEFAULT Item in USE()\n"; break;
+        }
+        cout << "Used item: " << GetItemString(pocket->type) << "\n";
+        Discard();
+    }
+
+    // Deletes the unit's pocket item.
+    void
+    Discard()
+    {
+        delete pocket;
+        pocket = nullptr;
+    }
+
+    bool
+    PrimaryRange(int distance) const
+    {
+        if(weapon && weapon->weapon && 
+           weapon->weapon->min_range <= distance &&
+           weapon->weapon->max_range >= distance)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool
+    SecondaryRange(int distance) const
+    {
+        if(pocket && pocket->weapon && 
+           pocket->weapon->min_range <= distance &&
+           pocket->weapon->max_range >= distance)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    int
+    MinRange() const
+    {
+        if(weapon && weapon->weapon)
+            return weapon->weapon->min_range;
+        return 0;
+    }
+    int
+    MaxRange() const
+    {
+        if(weapon && weapon->weapon)
+            return weapon->weapon->max_range;
+        return 0;
+    }
+
+    int
+    OverallMinRange() const
+    {
+        int result = 0;
+        if(weapon && weapon->weapon)
+        {
+            result = weapon->weapon->min_range;
+        }
+        if(pocket && pocket->weapon)
+        {
+            result = min(result, pocket->weapon->min_range);
+        }
+        return result;
+    }
+
+    int
+    OverallMaxRange() const
+    {
+        int result = 0;
+        if(weapon && weapon->weapon)
+        {
+            result = weapon->weapon->max_range;
+        }
+        if(pocket && pocket->weapon)
+        {
+            result = max(result, pocket->weapon->max_range);
+        }
+        return result;
     }
 
     // Damages a unit and resolves things involved with that process.
     void
     Damage(int amount)
     {
-        health = clamp(health - amount, 0, max_health);
+        health = clamp(health - amount, 0, MaxHealth());
     }
 
     // Damages a unit and resolves things involved with that process.
     void
     Heal(int amount)
     {
-        health = clamp(health + amount, 0, max_health);
+        health = clamp(health + amount, 0, MaxHealth());
     }
 
     void
@@ -346,56 +448,6 @@ struct Unit
         }
     }
 
-    int
-    StatBoost(int growth)
-    {
-        int result = 0;
-        while(growth > 100)
-        {
-            result += 1;
-            growth -= 100;
-        }
-
-        if(d100() < growth)
-        {
-            result += 1;
-        }
-
-        return result;
-    }
-
-    Boosts
-    CalculateLevelUp()
-    {
-        Boosts boosts;
-
-        boosts.health = StatBoost(growths.health);
-        boosts.attack = StatBoost(growths.attack);
-        boosts.defense = StatBoost(growths.defense);
-        boosts.aptitude = StatBoost(growths.aptitude);
-        boosts.speed = StatBoost(growths.speed);
-        boosts.skill = StatBoost(growths.skill);
-
-        return boosts;
-    }
-
-    void
-    LevelUp(Boosts boosts)
-    {
-        level += 1;
-        
-        health += boosts.health;
-        attack += boosts.attack;
-        defense += boosts.defense;
-        aptitude += boosts.aptitude;
-        speed += boosts.speed;
-        skill += boosts.skill;
-
-        experience -= 100;
-        if(level == 10)
-            experience = 0;
-    }
-
     bool
     GrantExperience(int amount)
     {
@@ -411,14 +463,64 @@ struct Unit
         return false;
     }
 
-    int
-    Accuracy() const
+    int MaxHealth() const
     {
-        return 5;
+        return max(1, 10 + (3 + (vitality / 2)) * level);
+    }
+
+    int Movement() const
+    {
+        return max(1, 4 + dexterity / 3);
+    }
+
+    int GetWeaponHitStat() const
+    {
+        if(!weapon)
+            return 0;
+
+        assert(weapon->weapon);
+        switch(weapon->weapon->hit_stat)
+        {
+            case STAT_STRENGTH:  return strength;
+            case STAT_DEXTERITY: return dexterity;
+            case STAT_VITALITY:  return vitality;
+            case STAT_INTUITION: return intuition;
+            case STAT_FAITH:     return faith;
+        }
+    }
+
+    int GetWeaponDmgStat() const
+    {
+        if(!weapon)
+            return 0;
+
+        assert(weapon->weapon);
+        switch(weapon->weapon->hit_stat)
+        {
+            case STAT_STRENGTH:  return strength;
+            case STAT_DEXTERITY: return dexterity;
+            case STAT_VITALITY:  return vitality;
+            case STAT_INTUITION: return intuition;
+            case STAT_FAITH:     return faith;
+        }
     }
 
     int
-    Avoid() const
+    ToHit() const
+    {
+        return (weapon ? GetWeaponHitStat() 
+                       : max(strength, dexterity));
+    }
+
+    int
+    DamageAmount() const
+    {
+        return (weapon ? weapon->weapon->RollDamage() + GetWeaponDmgStat()
+                        : max(1, 1 + strength));
+    }
+
+    int
+    AC() const
     {
         return 12;
     }
@@ -720,7 +822,7 @@ struct Level
         // Reset the party's statistics
             if(unit->is_ally)
             {
-                unit->health = unit->max_health;
+                unit->health = unit->MaxHealth();
                 if(unit->buff)
                     delete unit->buff;
                     unit->buff = nullptr;

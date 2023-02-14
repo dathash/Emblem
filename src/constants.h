@@ -69,7 +69,6 @@
 // gameplay
 #define LEADER_ID hash<string>{}("Lucina")
 
-#define DOUBLE_RATIO 2    // How much a unit must beat another by to double them.
 #define CRIT_MULTIPLIER 2 // The multiplier on damage.
 
 #define EXP_FOR_COMBAT 5
@@ -231,8 +230,10 @@ const SDL_Color green =             {101, 204, 55,  255};
 const SDL_Color darkGreen =         {21, 85, 51, 255};
 const SDL_Color blue =              {42, 101, 205, 255};
 const SDL_Color darkBlue =          {22, 50, 125, 255};
+const SDL_Color purple =            {100, 20, 125, 255};
 
-const SDL_Color yellow =            {200, 200, 50, 255};
+
+const SDL_Color yellow =            {200, 200, 0, 255};
 const SDL_Color darkGray =          {100, 100, 100, 255};
 const SDL_Color accentBlue =        {106, 150, 250, 255};
 const SDL_Color cerulean =          {0, 128, 255, 255};

@@ -120,7 +120,6 @@ struct Advancement
     Unit *recipient = nullptr;
     float value = 0.0f;
     Animation *animation = nullptr;
-    Boosts boosts = {};
 
     ~Advancement()
     {
@@ -138,8 +137,6 @@ struct Advancement
             {
                 delete animation;
                 animation = nullptr;
-
-                recipient->LevelUp(boosts);
 
                 if(GlobalInterfaceState != LEVEL_MENU)
                 {
@@ -297,7 +294,6 @@ EventSystemUpdate(Fade *level_fade,
             {
                 advancement->animation = GetAnimation(ADVANCEMENT_ANIMATION);
                 advancement->recipient = event.unit;
-                advancement->boosts = advancement->recipient->CalculateLevelUp();
                 PlaySfx("levelup.wav");
             } break;
             case UNIT_DEATH_EVENT:

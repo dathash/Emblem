@@ -5,17 +5,11 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-// Returns the chance to hit a unit
-int
-HitChance(const Unit &predator, const Unit &prey, int bonus)
-{
-    return (predator.Accuracy() - prey.Avoid() - bonus);
-}
-
+// Returns a number representing the number required to roll to hit.
 int
 TargetNumber(const Unit &predator, const Unit &prey, int bonus)
 {
-    return prey.Avoid() - predator.Accuracy() - bonus;
+    return prey.AC() - predator.ToHit() - bonus;
 }
 
 // Returns the chance to crit a unit
@@ -30,8 +24,8 @@ CritNumber(const Unit &predator, const Unit &prey)
 int
 CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
 {
-    int attack = max(predator.attack, predator.aptitude);
-    int defense = prey.defense + defense_bonus;
+    int attack = predator.DamageAmount();
+    int defense = 0 + defense_bonus;
     if(predator.buff && predator.buff->stat == STAT_ATTACK)
         attack += predator.buff->amount;
     if(prey.buff && prey.buff->stat == STAT_DEFENSE)
@@ -39,24 +33,11 @@ CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
     return clamp(attack - defense, 0, 999);
 }
 
-// Determines the speed difference between two units.
-bool
-Doubles(const Unit &predator, const Unit &prey)
-{
-    int pred_spd = predator.speed;
-    int prey_spd = prey.speed;
-    if(predator.buff && predator.buff->stat == STAT_SPEED)
-        pred_spd += predator.buff->amount;
-    if(prey.buff && prey.buff->stat == STAT_SPEED)
-        prey_spd += prey.buff->amount;
-    return pred_spd - prey_spd > DOUBLE_RATIO;
-}
-
 int
 CalculateHealing(const Unit &healer, const Unit &healee)
 {
-    int healing = healer.aptitude;
-    if(healer.buff && healer.buff->stat == STAT_SPEED)
+    int healing = healer.intuition;
+    if(healer.buff && healer.buff->stat == STAT_APTITUDE)
         healing += healer.buff->amount;
     return healing;
 }
@@ -65,16 +46,11 @@ CalculateHealing(const Unit &healer, const Unit &healee)
 // For information passing in combat functions.
 struct Outcome
 {
-    bool one_attacks;
-    bool one_doubles;
-    int one_damage;
-    int one_hit;
-    int one_crit;
-    bool two_attacks;
-    bool two_doubles;
-    int two_damage;
-    int two_hit;
-    int two_crit;
+    int (*die)() = d0;
+    int num_dice = 0;
+    int bonus_damage = 0;
+    int target = 0;
+    int crit = 0;
 };
 
 // =============================== Attacking =====================================
@@ -89,20 +65,17 @@ PredictCombat(const Unit &one, const Unit &two, int distance,
               )
 {
     Outcome outcome = {};
-    outcome.one_attacks = true;
-    outcome.one_damage = CalculateDamage(one, two, two_defense_bonus);
-    outcome.one_hit = TargetNumber(one, two, two_avoid_bonus);
-    outcome.one_crit = one.Crit();
-    outcome.one_doubles = Doubles(one, two);
-
-    if(distance >= two.min_range && distance <= two.max_range)
+    outcome.die = d1;
+    outcome.num_dice = 1;
+    outcome.bonus_damage = one.strength;
+    if(one.weapon)
     {
-        outcome.two_attacks = true;
-        outcome.two_damage = CalculateDamage(two, one, one_defense_bonus);
-        outcome.two_hit = TargetNumber(two, one, one_avoid_bonus);
-        outcome.two_crit = two.Crit();
-        outcome.two_doubles = Doubles(two, one);
+        outcome.die = one.weapon->weapon->die;
+        outcome.num_dice = one.weapon->weapon->num_dice;
+        outcome.bonus_damage = one.GetWeaponDmgStat();
     }
+    outcome.target = TargetNumber(one, two, two_avoid_bonus);
+    outcome.crit = one.Crit();
 
     return outcome;
 }
@@ -385,71 +358,6 @@ struct Fight
 
         if(attack.hit && two->health - two_accum <= 0)
             return;
-
-        if(distance >= two->min_range && distance <= two->max_range)
-        {
-            attack = {two, one, two_dmg};
-            if(distance > 1)
-            {
-                attack.type = RANGED;
-            }
-            result = Roll(d20);
-            if(result >= TargetNumber(*two, *one, one_avoid_bonus))
-            {
-                attack.hit = true;
-                if(result >= CritNumber(*two, *one))
-                    attack.crit = true;
-            }
-            attack_queue.push(attack);
-
-            if(attack.hit)
-                one_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
-
-            if(attack.hit && one->health - one_accum <= 0)
-                return;
-        }
-
-        attack = {one, two, one_dmg};
-        if(distance > 1)
-        {
-            attack.type = RANGED;
-        }
-        if(outcome.one_doubles)
-        {
-            result = Roll(d20);
-            if(result >= TargetNumber(*one, *two, two_avoid_bonus))
-            {
-                attack.hit = true;
-                if(result >= CritNumber(*one, *two))
-                    attack.crit = true;
-            }
-            attack_queue.push(attack);
-            if(attack.hit)
-                two_accum += (attack.crit ? attack.damage * CRIT_MULTIPLIER : attack.damage);
-
-            if(attack.hit && two->health - two_accum <= 0)
-                return;
-        }
-
-        if(distance >= two->min_range && distance <= two->max_range)
-        {
-            attack = {two, one, two_dmg};
-            if(distance > 1)
-            {
-                attack.type = RANGED;
-            }
-            if(outcome.two_doubles)
-            {
-                result = Roll(d20);
-                if(result >= TargetNumber(*two, *one, one_avoid_bonus))
-                {
-                    attack.hit = true;
-                    if(result >= CritNumber(*two, *one))
-                        attack.crit = true;
-                }
-                attack_queue.push(attack);
-            } 
-        }
     }
 };
 
@@ -458,11 +366,17 @@ struct Fight
 Outcome PredictHealing(const Unit &one, const Unit &two)
 {
     Outcome outcome = {};
-    outcome.one_attacks = true;
-    outcome.one_doubles = false;
-    outcome.one_damage = -CalculateHealing(one, two);
-    outcome.one_hit = 100;
-    outcome.one_crit = 0;
+    outcome.die = d0;
+    outcome.num_dice = 0;
+    outcome.bonus_damage = 0;
+    if(one.weapon)
+    {
+        outcome.die = one.weapon->weapon->die;
+        outcome.num_dice = one.weapon->weapon->num_dice;
+        outcome.bonus_damage = one.GetWeaponDmgStat();
+    }
+    outcome.target = 0;
+    outcome.crit = 20;
 
     return outcome;
 }
@@ -474,7 +388,7 @@ void SimulateBuff(Unit *one, Unit *two)
 
 void SimulateHealing(Unit *one, Unit *two)
 {
-    int healing = one->aptitude;
+    int healing = one->intuition;
     two->Heal(healing);
 }
 

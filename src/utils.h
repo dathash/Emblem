@@ -19,6 +19,17 @@ d20()
 {
     return (rand() % 20) + 1;
 }
+
+int
+d1()
+{
+    return 1;
+}
+int
+d0()
+{
+    return 0;
+}
 // range: 01 to 04. (etc.)
 int
 d4()

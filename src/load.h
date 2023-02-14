@@ -375,40 +375,27 @@ LoadUnits(string filename_in)
                     tokens[1] == "Ally" ? true : false,			// team
 
                     // Bases
-                    stoi(tokens[2]),							// movement
-                    stoi(tokens[3]),							// health
-                    stoi(tokens[3]),							// max health
-                    stoi(tokens[4]),							// attack
-                    stoi(tokens[5]),							// aptitude
-                    stoi(tokens[6]),							// defense
-                    stoi(tokens[7]),							// speed
-                    stoi(tokens[8]),						    // skill
-                    stoi(tokens[9]),						    // short range
-                    stoi(tokens[10]),						    // long range
+                    stoi(tokens[2]),							// strength
+                    stoi(tokens[3]),							// dexterity
+                    stoi(tokens[4]),							// vitality
+                    stoi(tokens[5]),							// intuition
+                    stoi(tokens[6]),							// faith
 
-                    stoi(tokens[11]),						    // level
+                    stoi(tokens[7]),						    // level
+                    (Ability)stoi(tokens[8]),				    // ability
+                    (AIBehavior)stoi(tokens[9]),                // ai behavior
+                    stoi(tokens[10]),                           // xp value
 
-                    (Ability)stoi(tokens[12]),				    // ability
-
-                    (AIBehavior)stoi(tokens[13]),               // ai behavior
-
-                    stoi(tokens[14]),                           // xp value
-
-                    // Growths
-                    stoi(tokens[15]),                           // health
-                    stoi(tokens[16]),                           // attack
-                    stoi(tokens[17]),                           // aptitude
-                    stoi(tokens[18]),                           // defense
-                    stoi(tokens[19]),                           // speed
-                    stoi(tokens[20]),                           // skill
+                    (ItemType)stoi(tokens[11]),                 // weapon
+                    (ItemType)stoi(tokens[12]),                 // pocket
 
                     // Textures
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[21]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(FULLS_PATH, tokens[22]),   // neutral
-                    LoadTextureImage(FULLS_PATH, tokens[23]),   // happy
-                    LoadTextureImage(FULLS_PATH, tokens[24]),   // angry
-                    LoadTextureImage(FULLS_PATH, tokens[25]),   // wince
-                    tokens[26]                                  // valediction
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[13]), 32, ANIMATION_SPEED), // path to texture
+                    LoadTextureImage(FULLS_PATH, tokens[14]),   // neutral
+                    LoadTextureImage(FULLS_PATH, tokens[15]),   // happy
+                    LoadTextureImage(FULLS_PATH, tokens[16]),   // angry
+                    LoadTextureImage(FULLS_PATH, tokens[17]),   // wince
+                    tokens[18]                                  // valediction
                 ));
             }
         }
@@ -432,39 +419,31 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Units\n\n";
 
-    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<atk>\t<apt>\t<def>\t<spd>\t<skl>\t<short>\t<long>\t<level>\t<abi>\t<ai>\t<xpv>\t<ghp>\t<gat>\t<gap>\t<gdf>\t<gsp>\t<gsk>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
+    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<str>\t<dex>\t<vit>\t<int>\t<fth>\t<short>\t<long>\t<level>\t<abi>\t<ai>\t<xpv>\t<weapn>\t<pockt>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT " << unit->name << "\t"
-                     << (unit->is_ally ? "Ally" : "Enemy") << "\t"
-                     << unit->movement << "\t"
-                     << unit->max_health << "\t"
-                     << unit->attack << "\t"
-                     << unit->aptitude << "\t"
-                     << unit->defense << "\t"
-                     << unit->speed << "\t"
-                     << unit->skill << "\t"
-                     << unit->min_range << "\t"
-                     << unit->max_range << "\t"
-                     << unit->level << "\t"
-                     << unit->ability << "\t"
-                     << unit->ai_behavior << "\t"
-                     << unit->xp_value << "\t"
+           << (unit->is_ally ? "Ally" : "Enemy") << "\t"
+           << unit->strength << "\t"
+           << unit->dexterity << "\t"
+           << unit->vitality << "\t"
+           << unit->intuition << "\t"
+           << unit->faith << "\t"
+           << unit->level << "\t"
+           << unit->ability << "\t"
+           << unit->ai_behavior << "\t"
+           << unit->xp_value << "\t"
 
-                     << unit->growths.health << "\t"
-                     << unit->growths.attack << "\t"
-                     << unit->growths.aptitude << "\t"
-                     << unit->growths.defense << "\t"
-                     << unit->growths.speed << "\t"
-                     << unit->growths.skill << "\t"
+           << (unit->weapon ? unit->weapon->type : 0) << "\t"
+           << (unit->pocket ? unit->pocket->type : 0) << "\t"
 
-                     << unit->sheet.texture.filename << "\t"
-                     << unit->neutral.filename << "\t"
-                     << unit->happy.filename << "\t"
-                     << unit->angry.filename << "\t"
-                     << unit->wince.filename << "\t"
-                     << unit->valediction
-                     << "\n";
+           << unit->sheet.texture.filename << "\t"
+           << unit->neutral.filename << "\t"
+           << unit->happy.filename << "\t"
+           << unit->angry.filename << "\t"
+           << unit->wince.filename << "\t"
+           << unit->valediction
+           << "\n";
     }
     fp.close();
 }

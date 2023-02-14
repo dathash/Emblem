@@ -413,7 +413,7 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit,
 
     for(const position &pos : range)
     {
-        interactible = InteractibleFrom(map, pos, unit.min_range, unit.max_range);
+        interactible = InteractibleFrom(map, pos, unit.MinRange(), unit.MaxRange());
         for(const position &i : interactible)
         {
             if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->is_ally)

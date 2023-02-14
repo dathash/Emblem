@@ -49,21 +49,11 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 3,
                 3,
                 3,
-                3,
-                3,
-                3,
-                3,
-                3,
                 ABILITY_NONE,
                 NO_BEHAVIOR,
                 3,
-
-                3,
-                3,
-                3,
-                3,
-                3,
-                3,
+                ITEM_NONE,
+                ITEM_NONE,
 
                 Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
                 LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
@@ -102,26 +92,14 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 
         ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("name", &(selected->name));
-        ImGui::SliderInt("mov", &selected->movement, 0, 10);
-        ImGui::SliderInt("hp", &selected->max_health, 1, 50);
-        ImGui::SliderInt("atk", &selected->attack, 0, 20);
-        ImGui::SliderInt("def", &selected->defense, 0, 20);
-        ImGui::SliderInt("apt", &selected->aptitude, 0, 20);
-        ImGui::SliderInt("spd", &selected->speed, 0, 20);
-        ImGui::SliderInt("skl", &selected->skill, 0, 20);
-        ImGui::SliderInt("min", &selected->min_range, 1, 4);
-        ImGui::SliderInt("max", &selected->max_range, 1, 4);
+        ImGui::Text("health: %d, mov: %d", selected->MaxHealth(), selected->Movement());
+        ImGui::SliderInt("str", &selected->strength, -10, 20);
+        ImGui::SliderInt("dex", &selected->dexterity, -10, 20);
+        ImGui::SliderInt("vit", &selected->vitality, -10, 20);
+        ImGui::SliderInt("int", &selected->intuition, -10, 20);
+        ImGui::SliderInt("fth", &selected->faith, -10, 20);
         ImGui::SliderInt("level", &selected->level, 1, 20);
         ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
-
-        ImGui::Text("growths");
-        ImGui::SliderInt("health", (int *)&selected->growths.health, 0, 200);
-        ImGui::SliderInt("attack", (int *)&selected->growths.attack, 0, 200);
-        ImGui::SliderInt("aptitude", (int *)&selected->growths.aptitude, 0, 200);
-        ImGui::SliderInt("defense", (int *)&selected->growths.defense, 0, 200);
-        ImGui::SliderInt("speed", (int *)&selected->growths.speed, 0, 200);
-        ImGui::SliderInt("skill", (int *)&selected->growths.skill, 0, 200);
-
 
         ImGui::Text("ability: %d", selected->ability);
         ImGui::SameLine();
@@ -140,6 +118,35 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         if(ImGui::Button("D"))
             selected->ability = ABILITY_DANCE;
         ImGui::SliderInt("xpv", &selected->xp_value, 0, 200);
+
+        ImGui::Text("Items");
+        if(selected->weapon)
+        {
+            ImGui::Text("Weapon | %s", GetItemString(selected->weapon->type).c_str());
+        }
+        if(selected->pocket)
+        {
+            ImGui::Text("Pocket | %s", GetItemString(selected->pocket->type).c_str());
+        }
+
+        static int item_type = 0;
+        ImGui::Text("%s", GetItemString((ItemType)item_type).c_str());
+        ImGui::SliderInt("type", &item_type, 0, 30);
+        if(ImGui::Button("Weapon"))
+        {
+            delete selected->weapon;
+            selected->weapon = nullptr;
+            if(item_type != 0)
+                selected->weapon = GetItem((ItemType)item_type);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Pocket"))
+        {
+            delete selected->pocket;
+            selected->pocket = nullptr;
+            if(item_type != 0)
+                selected->pocket = GetItem((ItemType)item_type);
+        }
     }
     ImGui::End();
 }

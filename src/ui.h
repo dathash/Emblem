@@ -82,6 +82,44 @@ GetObjectiveString(Objective obj)
 	}
 }
 
+string
+GetDieString(int (*die)())
+{
+    if(die == d1)
+        return "d1";
+    else if(die == d4)
+        return "d4";
+    else if(die == d6)
+        return "d6";
+    else if(die == d8)
+        return "d8";
+    else if(die == d10)
+        return "d10";
+    else if(die == d12)
+        return "d12";
+    cout << "WARNING: Bad die format: " << die << "\n";
+    return "";
+}
+
+int
+GetMaxValue(int (*die)())
+{
+    if(die == d1)
+        return 1;
+    else if(die == d4)
+        return 4;
+    else if(die == d6)
+        return 6;
+    else if(die == d8)
+        return 8;
+    else if(die == d10)
+        return 10;
+    else if(die == d12)
+        return 12;
+    cout << "WARNING: Bad die format: " << die << "\n";
+    return 0;
+}
+
 // ============================ New UI =========================================
 struct UI_State
 {
@@ -375,14 +413,41 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
 
-			DisplayHealthBar(unit.health, unit.max_health, 0);
+			DisplayHealthBar(unit.health, unit.MaxHealth(), 0);
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
-			ImGui::Text("%d / %d", unit.health, unit.max_health);
+			ImGui::Text("%d / %d", unit.health, unit.MaxHealth());
 		ImGui::PopFont();
     }
     ImGui::End();
+}
+
+void
+DisplayItemInfo(Item *item, int bonus_damage = 0)
+{
+    if(item->weapon)
+    {
+        ImGui::Text("[%s, %d%s+%d wt [%d-%d]]", 
+                    GetItemString(item->type).c_str(),
+                    item->weapon->num_dice,
+                    GetDieString(item->weapon->die).c_str(),
+                    bonus_damage,
+                    item->weapon->min_range, item->weapon->max_range);
+    }
+    if(item->consumable)
+    {
+        ImGui::Text("[%s, %d, %d]", 
+                    GetItemString(item->type).c_str(),
+                    item->consumable->amount,
+                    item->consumable->uses);
+    }
+    if(item->equipment)
+    {
+        ImGui::Text("[%s, %d]", 
+                    GetItemString(item->type).c_str(),
+                    item->consumable->amount);
+    }
 }
 
 // Full display of unit's stats
@@ -424,90 +489,99 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
             ImGui::Text("lv %d+%d xp", unit.level, unit.experience);
 
             ImGui::SameLine(ImGui::GetWindowWidth() - 120);
-			ImGui::Text("[%d/%d]", unit.health, unit.max_health);
+			ImGui::Text("[%d/%d]", unit.health, unit.MaxHealth());
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
 
-			DisplayHealthBar(unit.health, unit.max_health, 0);
+			DisplayHealthBar(unit.health, unit.MaxHealth(), 0);
 
 			// Second line
-            int attack = unit.attack;
+            int strength = unit.strength;
             if(unit.buff && unit.buff->stat == STAT_ATTACK)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                attack += unit.buff->amount;
+                strength += unit.buff->amount;
             }
             else
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
             }
-			ImGui::Text("[ATK %d]", attack);
+			ImGui::Text("[STR %d]", strength);
             ImGui::PopStyleColor();
 
-            int defense = unit.defense;
+            int dexterity = unit.dexterity;
 			ImGui::SameLine();
             if(unit.buff && unit.buff->stat == STAT_DEFENSE)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                defense += unit.buff->amount;
+                dexterity += unit.buff->amount;
             }
             else
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
             }
-			ImGui::Text("[DEF %d]", defense);
+			ImGui::Text("[DEX %d]", dexterity);
             ImGui::PopStyleColor();
 
-            int aptitude = unit.aptitude;
+            int vitality = unit.vitality;
 			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_APTITUDE)
+            if(unit.buff && unit.buff->stat == STAT_DEFENSE)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                aptitude += unit.buff->amount;
+                vitality += unit.buff->amount;
             }
             else
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
             }
-			ImGui::Text("[APT %d]", aptitude);
+			ImGui::Text("[VIT %d]", vitality);
             ImGui::PopStyleColor();
 
-            int speed = unit.speed;
+            int intuition = unit.intuition;
+			ImGui::SameLine();
+            if(unit.buff && unit.buff->stat == STAT_APTITUDE)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
+                intuition += unit.buff->amount;
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(purple));
+            }
+			ImGui::Text("[INT %d]", intuition);
+            ImGui::PopStyleColor();
+
+            int faith = unit.faith;
 			ImGui::SameLine();
             if(unit.buff && unit.buff->stat == STAT_SPEED)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                speed += unit.buff->amount;
+                faith += unit.buff->amount;
             }
             else
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(yellow));
             }
-			ImGui::Text("[SPD %d]", speed);
+			ImGui::Text("[FTH %d]", faith);
             ImGui::PopStyleColor();
 
-            int skill = unit.skill;
-            ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_SKILL)
+            if(unit.weapon)
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                skill += unit.buff->amount;
+                DisplayItemInfo(unit.weapon, unit.GetWeaponDmgStat());
             }
-            else
+            if(unit.pocket)
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGray));
+                DisplayItemInfo(unit.pocket);
             }
-            ImGui::Text("[SKL %d]", unit.skill);
-            ImGui::PopStyleColor();
 
-			ImGui::Text("[HIT %d%%]", unit.Accuracy());
+			ImGui::Text("[MOV %d]", unit.Movement());
 			ImGui::SameLine();
-			ImGui::Text("[AVO %d%%]", unit.Avoid());
+			ImGui::Text("[%d AC]", unit.AC());
 			ImGui::SameLine();
-			ImGui::Text("[CRT %d%%]", unit.Crit());
+			ImGui::Text("[+%d to hit]", unit.ToHit());
 			ImGui::SameLine();
-			ImGui::Text("[RG %d-%d]", unit.min_range, unit.max_range);
+			ImGui::Text("[CRIT-%d]", unit.Crit());
 
             if(unit.ability != ABILITY_NONE)
             {
@@ -570,16 +644,9 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     ImGui::Begin(ally.name.c_str(), NULL, wf);
     {
 		ImGui::PushFont(uiFontMedium);
-            ImGui::Text("%d dmg", outcome.one_damage);
-            if(outcome.one_doubles)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                ImGui::SameLine();
-                ImGui::Text("X2");
-                ImGui::PopStyleColor();
-            }
-            ImGui::Text("%d%% hit", outcome.one_hit);
-            ImGui::Text("%d%% crit", outcome.one_crit);
+            ImGui::Text("%d%s+%d", outcome.num_dice, GetDieString(outcome.die).c_str(), outcome.bonus_damage);
+            ImGui::Text("target-%d", outcome.target);
+            ImGui::Text("crit-%d", outcome.crit);
         ImGui::PopFont();
     }
     ImGui::End();
@@ -590,35 +657,14 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
     ImGui::Begin(target.name.c_str(), NULL, wf);
     {
 		ImGui::PushFont(uiFontMedium);
-            if(outcome.two_attacks)
-            {
-                ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::Text("%d dmg", outcome.two_damage);
-                if(outcome.two_doubles)
-                {
-                    ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                    ImGui::Text("X2");
-                    ImGui::PopStyleColor();
-                }
-                ImGui::NewLine();
-                ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::Text("%d%% hit", outcome.two_hit);
-                ImGui::NewLine();
-                ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::Text("%d%% crit", outcome.two_crit);
-            }
-            else
-            {
-                ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::Text("-- dmg");
-                ImGui::NewLine();
-                ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::Text("--%% hit");
-                ImGui::NewLine();
-                ImGui::SameLine(ImGui::GetWindowWidth()-150);
-                ImGui::Text("--%% crit");
-            }
+            ImGui::SameLine(ImGui::GetWindowWidth()-150);
+            ImGui::Text("--");
+            ImGui::NewLine();
+            ImGui::SameLine(ImGui::GetWindowWidth()-150);
+            ImGui::Text("--");
+            ImGui::NewLine();
+            ImGui::SameLine(ImGui::GetWindowWidth()-150);
+            ImGui::Text("--");
         ImGui::PopFont();
     }
     ImGui::End();
@@ -631,15 +677,14 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(uiDarkColor));
     ImGui::Begin("health1", NULL, wf);
     {
-        int health_after = clamp(ally.health - (outcome.two_doubles ? 2 * outcome.two_damage : outcome.two_damage), 
-                                 0, ally.max_health);
-        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)ally.health / ally.max_health)));
+        int health_after = clamp(ally.health, 0, ally.MaxHealth());
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)ally.health / ally.MaxHealth())));
         ImGui::Text("%d", ally.health);
         ImGui::PopStyleColor();
         ImGui::SameLine();
         ImGui::Text("->");
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)health_after / ally.max_health)));
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)health_after / ally.MaxHealth())));
         ImGui::Text("%d", health_after);
         ImGui::PopStyleColor();
         ImGui::PushFont(uiFontMedium);
@@ -654,15 +699,14 @@ DisplayCombatPreview(ImGuiWindowFlags wf, const Unit &ally, const Unit &target,
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(uiDarkColor));
     ImGui::Begin("health2", NULL, wf);
     {
-        int health_after = clamp(target.health - (outcome.one_doubles ? 2 * outcome.one_damage : outcome.one_damage), 
-                                 0, target.max_health);
-        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)target.health / target.max_health)));
+        int health_after = clamp(target.health - (outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage), 0, target.MaxHealth());
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)target.health / target.MaxHealth())));
         ImGui::Text("%d", target.health);
         ImGui::PopStyleColor();
         ImGui::SameLine();
         ImGui::Text("->");
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)health_after / target.max_health)));
+        ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(PiecewiseColors(red, yellow, green, (float)health_after / target.MaxHealth())));
         ImGui::Text("%d", health_after);
         ImGui::PopStyleColor();
         ImGui::PushFont(uiFontMedium);
@@ -712,7 +756,7 @@ DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin(fight.one->name.c_str(), NULL, wf);
     {
-        DisplayHealthBar(fight.one->health, fight.one->max_health, 0);
+        DisplayHealthBar(fight.one->health, fight.one->MaxHealth(), 0);
 		ImGui::PushFont(uiFontMedium);
         ImGui::PopFont();
     }
@@ -723,7 +767,7 @@ DisplayCombatScreen(ImGuiWindowFlags wf, const Fight &fight)
 
     ImGui::Begin(fight.two->name.c_str(), NULL, wf);
     {
-        DisplayHealthBar(fight.two->health, fight.two->max_health, 0);
+        DisplayHealthBar(fight.two->health, fight.two->MaxHealth(), 0);
 		ImGui::PushFont(uiFontMedium);
         ImGui::PopFont();
     }
@@ -778,60 +822,6 @@ DisplayAdvancement(ImGuiWindowFlags wf, const Advancement &advancement)
         ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(cerulean));
         TextCentered("Level Up!");
         ImGui::PopStyleColor();
-
-        ImGui::Text("HLTH %d", subject->health);
-        if(advancement.value >= 0.16f)
-        {
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.16) * 3)));
-            ImGui::Text("+%d", advancement.boosts.health);
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::Text("ATTK %d", subject->attack);
-        if(advancement.value >= 0.33f)
-        {
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.33) * 3)));
-            ImGui::Text("+%d", advancement.boosts.attack);
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::Text("APTI %d", subject->aptitude);
-        if(advancement.value >= 0.50f)
-        {
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.50) * 3)));
-            ImGui::Text("+%d", advancement.boosts.aptitude);
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::Text("DEFN %d", subject->defense);
-        if(advancement.value >= 0.66f)
-        {
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.66) * 3)));
-            ImGui::Text("+%d", advancement.boosts.defense);
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::Text("SPD  %d", subject->speed);
-        if(advancement.value >= 0.83f)
-        {
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 0.83) * 3)));
-            ImGui::Text("+%d", advancement.boosts.speed);
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::Text("SKIL %d", subject->skill);
-        if(advancement.value >= 1.00f)
-        {
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(LerpColors(cerulean, black, (advancement.value - 1.0) * 3)));
-            ImGui::Text("+%d", advancement.boosts.skill);
-            ImGui::PopStyleColor();
-        }
     }
     ImGui::End();
 	ImGui::PopFont();

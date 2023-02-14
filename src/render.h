@@ -354,7 +354,7 @@ Render(const Tilemap &map, const Cursor &cursor,
                 SetSpriteModifiers(tileToRender.occupant);
 
                 RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally, tileToRender.occupant->animation_offset);
-                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health, tileToRender.occupant->animation_offset);
+                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->MaxHealth(), tileToRender.occupant->animation_offset);
             }
         }
     }
@@ -477,6 +477,10 @@ Render(const Tilemap &map, const Cursor &cursor,
     if(GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO)
     {
+        SDL_Rect bg_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
+        SDL_RenderFillRect(GlobalRenderer, &bg_rect);
+
         const Unit *subject = map.tiles[cursor.pos.col][cursor.pos.row].occupant;
         SDL_assert(subject);
         int x_pos = 480;
@@ -484,7 +488,7 @@ Render(const Tilemap &map, const Cursor &cursor,
             x_pos = -50;
 
         RenderPortrait(x_pos, 0, *subject,
-                       subject->health < subject->max_health * 0.5 ? EXPR_WINCE : EXPR_NEUTRAL,
+                       subject->health < subject->MaxHealth() * 0.5 ? EXPR_WINCE : EXPR_NEUTRAL,
                        subject->is_ally);
     }
 

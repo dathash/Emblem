@@ -118,9 +118,9 @@ public:
         map->vis_range.clear();
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->movement,
-                                        cursor->selected->min_range,
-                                        cursor->selected->max_range,
+                                        cursor->selected->Movement(),
+                                        cursor->selected->MinRange(),
+                                        cursor->selected->MaxRange(),
                                         cursor->selected->is_ally);
         map->accessible = result.first;
         map->vis_range = result.second;
@@ -247,7 +247,8 @@ public:
         }
 
         vector<position> interactible = InteractibleFrom(level->map, cursor->pos,
-                                             cursor->selected->min_range, cursor->selected->max_range);
+                                             cursor->selected->MinRange(), 
+                                             cursor->selected->MaxRange());
         // for attacking
         for(const position &p : interactible)
         {
@@ -275,7 +276,7 @@ public:
                 {
                     if(level->map.tiles[p.col][p.row].occupant &&
                        level->map.tiles[p.col][p.row].occupant->is_ally &&
-                       level->map.tiles[p.col][p.row].occupant->health < level->map.tiles[p.col][p.row].occupant->max_health &&
+                       level->map.tiles[p.col][p.row].occupant->health < level->map.tiles[p.col][p.row].occupant->MaxHealth() &&
                        level->map.tiles[p.col][p.row].occupant->ID() != cursor->selected->ID())
                     {
                         level->map.ability.push_back(p);
@@ -813,9 +814,9 @@ public:
         map->vis_range.clear();
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->movement,
-                                        cursor->selected->min_range,
-                                        cursor->selected->max_range,
+                                        cursor->selected->Movement(),
+                                        cursor->selected->MinRange(),
+                                        cursor->selected->MaxRange(),
                                         cursor->selected->is_ally);
         map->accessible = result.first;
         map->vis_range = result.second;
