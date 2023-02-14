@@ -22,6 +22,7 @@ GetInterfaceString(InterfaceState state)
     case SELECTED_OVER_ENEMY:           return "Selected over enemy";
     case ATTACK_TARGETING:              return "Attack targeting";
     case ABILITY_TARGETING:             return "Ability targeting";
+    case GRAPPLE_TARGETING:             return "Grapple targeting";
     case TALK_TARGETING:                return "Talk targeting";
     case PREVIEW_ATTACK:                return "Preview attack";
     case PREVIEW_ABILITY:               return "Preview ability";

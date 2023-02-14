@@ -275,6 +275,10 @@ EventSystemUpdate(Fade *level_fade,
             {
                 PlaySfx("heal.wav");
             } break;
+            case GRAPPLE_EVENT:
+            {
+                PlaySfx("crit.wav");
+            } break;
             case DANCE_EVENT:
             {
                 PlaySfx("dance.wav");

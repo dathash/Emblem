@@ -26,10 +26,6 @@ CalculateDamage(const Unit &predator, const Unit &prey, int defense_bonus)
 {
     int attack = predator.DamageAmount();
     int defense = 0 + defense_bonus;
-    if(predator.buff && predator.buff->stat == STAT_ATTACK)
-        attack += predator.buff->amount;
-    if(prey.buff && prey.buff->stat == STAT_DEFENSE)
-        defense += prey.buff->amount;
     return clamp(attack - defense, 0, 999);
 }
 
@@ -37,8 +33,6 @@ int
 CalculateHealing(const Unit &healer, const Unit &healee)
 {
     int healing = healer.intuition;
-    if(healer.buff && healer.buff->stat == STAT_APTITUDE)
-        healing += healer.buff->amount;
     return healing;
 }
 
@@ -381,20 +375,31 @@ Outcome PredictHealing(const Unit &one, const Unit &two)
     return outcome;
 }
 
-void SimulateBuff(Unit *one, Unit *two)
-{
-    two->ApplyBuff(new Buff(STAT_ATTACK, 10, 1));
-}
-
-void SimulateHealing(Unit *one, Unit *two)
+bool
+SimulateHealing(Unit *one, Unit *two)
 {
     int healing = one->intuition;
     two->Heal(healing);
+    return true;
 }
 
-void SimulateDancing(Unit *one, Unit *two)
+bool
+SimulateGrappling(Unit *one, Unit *two)
+{
+    int target = max(two->strength, two->dexterity);
+    if(Roll(d20) > target)
+    {
+        two->condition = GetCondition(CONDITION_GRAPPLED);
+        return true;
+    }
+    return false;
+}
+
+bool
+SimulateDancing(Unit *one, Unit *two)
 {
     two->Activate();
+    return true;
 }
 
 #endif

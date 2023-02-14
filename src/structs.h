@@ -134,16 +134,6 @@ enum Ability
     ABILITY_DANCE,
 };
 
-enum Stat
-{
-    STAT_NONE,
-    STAT_ATTACK,
-    STAT_DEFENSE,
-    STAT_APTITUDE,
-    STAT_SPEED,
-    STAT_SKILL,
-};
-
 struct Buff
 {
     Stat stat = STAT_NONE;
@@ -156,6 +146,39 @@ struct Buff
       turns_remaining(turns_remaining_in)
     {}
 };
+
+enum ConditionType
+{
+    CONDITION_NONE,
+    CONDITION_GRAPPLED,
+};
+struct Condition
+{
+    ConditionType type = CONDITION_NONE;
+    int turns_remaining = 1;
+    Stat stat = STAT_NONE;
+    int save = 10;
+
+    Condition(ConditionType type_in, int turns_in,
+              Stat stat_in, int save_in)
+    : type(type_in),
+      turns_remaining(turns_in),
+      stat(stat_in),
+      save(save_in)
+    {
+    }
+};
+
+Condition *
+GetCondition(ConditionType type)
+{
+    switch(type)
+    {
+        case CONDITION_NONE:        return nullptr;
+        case CONDITION_GRAPPLED:    return new Condition(type, -1, STAT_STRENGTH, 12);
+        default: cout << "WARNING: GetCondition() bad type: " << type << "\n"; return nullptr;
+    }
+}
 
 
 enum Expression
@@ -199,6 +222,7 @@ struct Unit
     bool is_boss = false;
 
     Buff *buff = nullptr;
+    Condition *condition = nullptr;
 
     Spritesheet sheet;
     Texture neutral;
@@ -211,6 +235,7 @@ struct Unit
     ~Unit()
     {
         delete buff;
+        delete condition;
         delete weapon;
         delete pocket;
     }
@@ -435,6 +460,18 @@ struct Unit
     {
         buff = buff_in;
     }
+    void
+    ApplyCondition(Condition *cond_in)
+    {
+        condition = cond_in;
+    }
+    bool
+    CanMove()
+    {
+        if(condition && condition->type == CONDITION_GRAPPLED)
+            return false;
+        return true;
+    }
 
     // Called every turn. If buff is over, deletes the buff.
     void
@@ -445,6 +482,31 @@ struct Unit
         {
             delete buff;
             buff = nullptr;
+        }
+    }
+    // Called every turn. If buff is over, deletes the buff.
+    void
+    TickCondition()
+    {
+        if(!condition)
+            return;
+
+        if(condition->turns_remaining > 0)
+        {
+            --(condition->turns_remaining);
+        }
+        else if(condition->turns_remaining == 0)
+        {
+            delete condition;
+            condition = nullptr;
+        }
+        else
+        {
+            if(Roll(d20) >= condition->save)
+            {
+                delete condition;
+                condition = nullptr;
+            }
         }
     }
 
@@ -481,6 +543,7 @@ struct Unit
         assert(weapon->weapon);
         switch(weapon->weapon->hit_stat)
         {
+            case STAT_NONE:      return 0;
             case STAT_STRENGTH:  return strength;
             case STAT_DEXTERITY: return dexterity;
             case STAT_VITALITY:  return vitality;
@@ -497,6 +560,7 @@ struct Unit
         assert(weapon->weapon);
         switch(weapon->weapon->hit_stat)
         {
+            case STAT_NONE:      return 0;
             case STAT_STRENGTH:  return strength;
             case STAT_DEXTERITY: return dexterity;
             case STAT_VITALITY:  return vitality;
@@ -754,6 +818,7 @@ struct Tilemap
     vector<position> ability = {};
     vector<position> range = {};
     vector<position> adjacent = {};
+    vector<position> grapplable = {};
     vector<position> vis_range = {};
 
     // NOTE: For AI decision-making purposes
@@ -857,7 +922,14 @@ struct Level
             for(auto const &unit : combatants)
             {
                 if(!unit->is_ally) // Increment enemy units
+                {
                     ++unit->turns_active;
+                }
+                else
+                {
+                    if(unit->condition)
+                        unit->TickCondition();
+                }
                 if(unit->buff)
                     unit->TickBuff();
             }
@@ -874,8 +946,15 @@ struct Level
         else
         {
             for(auto const &unit : combatants)
+            {
                 if(unit->is_ally)
                     ++unit->turns_active;
+                else
+                {
+                    if(unit->condition)
+                        unit->TickCondition();
+                }
+            }
         }
 
         for(auto const &unit : combatants)

@@ -73,6 +73,7 @@
 
 #define EXP_FOR_COMBAT 5
 #define EXP_FOR_HEALING 10
+#define EXP_FOR_GRAPPLING 7
 #define EXP_FOR_DANCE 10
 #define EXP_FOR_BUFF 10
 
@@ -101,6 +102,7 @@ enum InterfaceState
 
     ATTACK_TARGETING, // 8
     ABILITY_TARGETING, // 9
+    GRAPPLE_TARGETING, // 11
     TALK_TARGETING, // 10
 
     PREVIEW_ATTACK, // 11

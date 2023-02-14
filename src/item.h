@@ -17,8 +17,9 @@ enum WeaponType
     WEAPON_STAFF,
 };
 
-enum StatUsed
+enum Stat
 {
+    STAT_NONE,
     STAT_STRENGTH,
     STAT_DEXTERITY,
     STAT_VITALITY,
@@ -30,26 +31,26 @@ struct WeaponComponent
 {
     int (*die)() = d6;
     int num_dice = 1;
-    StatUsed hit_stat = STAT_STRENGTH;
-    StatUsed dmg_stat = STAT_STRENGTH;
-    int bonus_to_hit = 0;
-    int bonus_damage = 0;
+    Stat hit_stat = STAT_STRENGTH;
+    Stat dmg_stat = STAT_STRENGTH;
     int min_range = 1;
     int max_range = 1;
+    int bonus_to_hit = 0;
+    int bonus_damage = 0;
 
     WeaponComponent(int (*die_in)(), int num_dice_in = 1,
-                    StatUsed hit_stat_in = STAT_STRENGTH, StatUsed dmg_stat_in = STAT_STRENGTH,
-                    int bonus_to_hit_in = 0, int bonus_damage_in = 0,
-                    int min_range_in = 1, int max_range_in = 1
+                    Stat hit_stat_in = STAT_STRENGTH, Stat dmg_stat_in = STAT_STRENGTH,
+                    int min_range_in = 1, int max_range_in = 1,
+                    int bonus_to_hit_in = 0, int bonus_damage_in = 0
                     )
     : die(die_in),
       num_dice(num_dice_in),
       hit_stat(hit_stat_in),
       dmg_stat(dmg_stat_in),
-      bonus_to_hit(bonus_to_hit_in),
-      bonus_damage(bonus_damage_in),
       min_range(min_range_in),
-      max_range(max_range_in)
+      max_range(max_range_in),
+      bonus_to_hit(bonus_to_hit_in),
+      bonus_damage(bonus_damage_in)
     {
     }
 
@@ -109,6 +110,9 @@ struct EquipmentComponent
 enum ItemType
 {
     ITEM_NONE,
+    ITEM_CLUB,
+    ITEM_DAGGER,
+    ITEM_SLING,
     ITEM_BROADSWORD,
     ITEM_SHORTSWORD,
     ITEM_GREATSWORD,
@@ -137,6 +141,9 @@ GetItemString(ItemType type)
     switch(type)
     {
     case ITEM_NONE:       return "NONE";
+    case ITEM_CLUB:       return "Club";
+    case ITEM_DAGGER:     return "Dagger";
+    case ITEM_SLING:      return "Sling";
     case ITEM_BROADSWORD: return "Broadsword";
     case ITEM_SHORTSWORD: return "Shortsword";
     case ITEM_GREATSWORD: return "Greatsword";
@@ -205,25 +212,29 @@ GetItem(ItemType type)
     {
         case ITEM_NONE:           return nullptr;
         // Weapons
+        case ITEM_CLUB:           return new Item(type, new WeaponComponent(d4));
+        case ITEM_DAGGER:         return new Item(type, new WeaponComponent(d4, 1, STAT_DEXTERITY, STAT_DEXTERITY, 1, 4));
+        case ITEM_SLING:          return new Item(type, new WeaponComponent(d4, 1, STAT_DEXTERITY, STAT_DEXTERITY, 2, 3));
+
         case ITEM_BROADSWORD:     return new Item(type, new WeaponComponent(d6));
         case ITEM_SHORTSWORD:     return new Item(type, new WeaponComponent(d6, 1, STAT_DEXTERITY, STAT_DEXTERITY));
         case ITEM_GREATSWORD:     return new Item(type, new WeaponComponent(d6, 2));
 
-        case ITEM_SPEAR:          return new Item(type, new WeaponComponent(d6, 1, STAT_STRENGTH, STAT_STRENGTH, 0, 0, 1, 2));
+        case ITEM_SPEAR:          return new Item(type, new WeaponComponent(d6, 1, STAT_STRENGTH, STAT_STRENGTH, 1, 2));
 
         case ITEM_AXE:            return new Item(type, new WeaponComponent(d8));
-        case ITEM_HANDAXE:        return new Item(type, new WeaponComponent(d6, 1, STAT_STRENGTH, STAT_STRENGTH, 0, 0, 2, 4));
+        case ITEM_HANDAXE:        return new Item(type, new WeaponComponent(d6, 1, STAT_STRENGTH, STAT_STRENGTH, 2, 4));
 
-        case ITEM_BOW:            return new Item(type, new WeaponComponent(d6, 1, STAT_DEXTERITY, STAT_DEXTERITY, 0, 0, 2, 6));
-        case ITEM_LONGBOW:        return new Item(type, new WeaponComponent(d12, 1, STAT_DEXTERITY, STAT_DEXTERITY, 0, 0, 3, 10));
+        case ITEM_BOW:            return new Item(type, new WeaponComponent(d6, 1, STAT_DEXTERITY, STAT_DEXTERITY, 2, 6));
+        case ITEM_LONGBOW:        return new Item(type, new WeaponComponent(d12, 1, STAT_DEXTERITY, STAT_DEXTERITY, 3, 10));
 
-        case ITEM_SPARK:          return new Item(type, new WeaponComponent(d6, 1, STAT_INTUITION, STAT_INTUITION, 0, 0, 2, 4));
-        case ITEM_EMBER:          return new Item(type, new WeaponComponent(d6, 1, STAT_INTUITION, STAT_INTUITION, 0, 0, 2, 4));
-        case ITEM_GUST:           return new Item(type, new WeaponComponent(d6, 1, STAT_INTUITION, STAT_INTUITION, 0, 0, 2, 4));
+        case ITEM_SPARK:          return new Item(type, new WeaponComponent(d6, 1, STAT_INTUITION, STAT_INTUITION, 2, 4));
+        case ITEM_EMBER:          return new Item(type, new WeaponComponent(d6, 1, STAT_INTUITION, STAT_INTUITION, 2, 4));
+        case ITEM_GUST:           return new Item(type, new WeaponComponent(d6, 1, STAT_INTUITION, STAT_INTUITION, 2, 4));
 
-        case ITEM_STAFF_HEAL:     return new Item(type, new WeaponComponent(d6, 1, STAT_FAITH, STAT_FAITH, 0, 0, 1, 1));
-        case ITEM_STAFF_MEND:     return new Item(type, new WeaponComponent(d6, 1, STAT_FAITH, STAT_FAITH, 0, 0, 1, 1));
-        case ITEM_STAFF_REVIVE:   return new Item(type, new WeaponComponent(d6, 1, STAT_FAITH, STAT_FAITH, 0, 0, 1, 1));
+        case ITEM_STAFF_HEAL:     return new Item(type, new WeaponComponent(d6, 1, STAT_FAITH, STAT_FAITH, 1, 1));
+        case ITEM_STAFF_MEND:     return new Item(type, new WeaponComponent(d6, 1, STAT_FAITH, STAT_FAITH, 1, 1));
+        case ITEM_STAFF_REVIVE:   return new Item(type, new WeaponComponent(d6, 1, STAT_FAITH, STAT_FAITH, 1, 1));
 
         // Consumables
         case ITEM_POTION_LOW:     return new Item(type, nullptr, new ConsumableComponent(CONS_POTION, 10, 3));

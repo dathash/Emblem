@@ -5,6 +5,13 @@ log
 Plan
 > Build a fun little game!
 
+Implementation
+Phase 1: Mechanical 
+Phase 2: Writing
+Phase 3: Design 
+Phase 4: Art
+Phase 5: Release
+
 # Release
 What I need for release:
 * Plan out the hours.
@@ -121,43 +128,50 @@ Genealogy's items are pretty close too.
 The story of the game is delivered through the characters.
 
 # TODO
-    Polished Product! (For Joom Bog)
-    * 5 Levels
-    * 30 Conversations
+Mechanics
+    Item acquisition 
+    Classes 
+    * Abilities 
 
-    Enemies pursue and destroy villages and chests.
+Design
+    Classes
+    Levels
+
+# Later
+Art
+15 Portraits (with 4 faces each) 
+30 Spritesheets
+Tilemaps (With five colorschemes) 
+
+Conversations
+    Story nailed down
+    200 Conversations
+    20 Cutscenes
+
+POLISH
 
     Set the viewport code to work right in SetViewport (go to a soft viewport).
 
-# Later
-    10 levels
+    Different colored menus.
+    Smooth Screen Scroll (Render tiles one tile off of the screen.)
+    Pixel Squishing Fix
+    Z-Sorting
 
-    Vaike's sprite is broken.
+    More complex conversations
+    * Multiple preludes in a row.
+    * Animated stuff inbetween.
 
-    Mini headshots displayed in unit blurb 
-
-    Unit Info blurs out the background, displays an animated form of the unit's
-    spritesheet, maybe a unit description?
-
-    Cutscenes anytime, not just on end of player turn.
-    * Make sure that cutscenes featuring dead units don't trigger.
+    Smooth reinforcements
 
     AI doesn't wait on every unit that won't act.
     * Run a first pass that just gathers the units that will act, then run with
       those.
     * This will be faster anyways.
 
-    Smooth reinforcements
+    Cutscenes anytime, not just on end of player turn.
+    * Make sure that cutscenes featuring dead units don't trigger.
 
-    More complex conversations
-    * Multiple preludes in a row.
-    * Animated stuff inbetween.
-    * Image backgrounds
-
-POLISH
-    Smooth Screen Scroll (Render tiles one tile off of the screen.)
-    Pixel Squishing Fix
-    Z-Sorting
+    Mini headshots displayed in unit blurb 
 
 QA
     BUG | Enemies that can actually reach you don't believe that they can due to
@@ -165,6 +179,11 @@ QA
     solution working.
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
+
+Release
+Emscripten build 
+Mac build (with bundles)
+
 
 # Plot
 ## World

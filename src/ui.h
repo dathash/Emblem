@@ -58,12 +58,13 @@ GetStatString(Stat stat)
     switch (stat)
     {
     case STAT_NONE: return "N/A";
-    case STAT_ATTACK: return "Atk";
-    case STAT_DEFENSE: return "Def";
-    case STAT_APTITUDE: return "Apt";
-    case STAT_SPEED: return "Spd";
+    case STAT_STRENGTH: return "STR";
+    case STAT_DEXTERITY: return "DEX";
+    case STAT_VITALITY: return "VIT";
+    case STAT_INTUITION: return "INT";
+    case STAT_FAITH: return "FTH";
 	default:
-		assert(!"ERROR: Unhandled Ability name string in UI.\n");
+		assert(!"ERROR: Unhandled Stat name string in UI.\n");
 		return "";
 	}
 }
@@ -208,6 +209,7 @@ struct UI_State
             GlobalInterfaceState == SELECTED_OVER_ENEMY ||
             GlobalInterfaceState == ATTACK_TARGETING ||
             GlobalInterfaceState == ABILITY_TARGETING ||
+            GlobalInterfaceState == GRAPPLE_TARGETING ||
             GlobalInterfaceState == ENEMY_INFO ||
             GlobalInterfaceState == UNIT_MENU_ROOT
 			)
@@ -237,6 +239,8 @@ struct UI_State
 				GlobalInterfaceState == SELECTED_OVER_ENEMY ||
 				GlobalInterfaceState == ATTACK_TARGETING ||
 				GlobalInterfaceState == ABILITY_TARGETING ||
+				GlobalInterfaceState == GRAPPLE_TARGETING ||
+				GlobalInterfaceState == TALK_TARGETING ||
 				GlobalInterfaceState == UNIT_MENU_ROOT
             )
 		{
@@ -497,73 +501,28 @@ DisplayUnitInfo(ImGuiWindowFlags wf, const Unit &unit, enum quadrant quad)
 			DisplayHealthBar(unit.health, unit.MaxHealth(), 0);
 
 			// Second line
-            int strength = unit.strength;
-            if(unit.buff && unit.buff->stat == STAT_ATTACK)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                strength += unit.buff->amount;
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
-            }
-			ImGui::Text("[STR %d]", strength);
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkRed));
+			ImGui::Text("[STR %d]", unit.strength);
             ImGui::PopStyleColor();
 
-            int dexterity = unit.dexterity;
 			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_DEFENSE)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                dexterity += unit.buff->amount;
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
-            }
-			ImGui::Text("[DEX %d]", dexterity);
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkBlue));
+			ImGui::Text("[DEX %d]", unit.dexterity);
             ImGui::PopStyleColor();
 
-            int vitality = unit.vitality;
 			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_DEFENSE)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                vitality += unit.buff->amount;
-            }
-            else
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
-            }
-			ImGui::Text("[VIT %d]", vitality);
+            ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(darkGreen));
+			ImGui::Text("[VIT %d]", unit.vitality);
             ImGui::PopStyleColor();
 
-            int intuition = unit.intuition;
 			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_APTITUDE)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                intuition += unit.buff->amount;
-            }
-            else
-            {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(purple));
-            }
-			ImGui::Text("[INT %d]", intuition);
+			ImGui::Text("[INT %d]", unit.intuition);
             ImGui::PopStyleColor();
 
-            int faith = unit.faith;
 			ImGui::SameLine();
-            if(unit.buff && unit.buff->stat == STAT_SPEED)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(accentBlue));
-                faith += unit.buff->amount;
-            }
-            else
-            {
                 ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(yellow));
-            }
-			ImGui::Text("[FTH %d]", faith);
+			ImGui::Text("[FTH %d]", unit.faith);
             ImGui::PopStyleColor();
 
             if(unit.weapon)

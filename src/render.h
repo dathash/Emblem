@@ -45,21 +45,30 @@ SetSpriteModifiers(Unit *unit)
     {
         switch(unit->buff->stat)
         {
-            case STAT_ATTACK:
+            case STAT_STRENGTH:
             {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
+                        buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
             } break;
-            case STAT_DEFENSE:
+            case STAT_DEXTERITY:
             {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffDefMod.r, buffDefMod.g, buffDefMod.b);
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
+                        buffDefMod.r, buffDefMod.g, buffDefMod.b);
             } break;
-            case STAT_APTITUDE:
+            case STAT_VITALITY:
             {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAptMod.r, buffAptMod.g, buffAptMod.b);
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
+                        buffAptMod.r, buffAptMod.g, buffAptMod.b);
             } break;
-            case STAT_SPEED:
+            case STAT_INTUITION:
             {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
+                        buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
+            } break;
+            case STAT_FAITH:
+            {
+                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
+                        buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
             } break;
             default:
             {
@@ -281,6 +290,19 @@ Render(const Tilemap &map, const Cursor &cursor,
         }
     }
 
+    if(GlobalInterfaceState == GRAPPLE_TARGETING)
+    {
+        for(const position &cell : map.grapplable)
+        {
+            if(WithinViewport(cell))
+            {
+                RenderTileColor({cell.col - viewportCol, 
+                           cell.row - viewportRow}, 
+                           yellow);
+            }
+        }
+    }
+
     if(GlobalInterfaceState == ABILITY_TARGETING)
     {
         for(const position &cell : map.range)
@@ -371,6 +393,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         GlobalInterfaceState == SELECTED_OVER_ENEMY ||
         GlobalInterfaceState == ATTACK_TARGETING ||
         GlobalInterfaceState == ABILITY_TARGETING ||
+        GlobalInterfaceState == GRAPPLE_TARGETING ||
         GlobalInterfaceState == TALK_TARGETING ||
         GlobalInterfaceState == ENEMY_INFO ||
         GlobalInterfaceState == ENEMY_RANGE

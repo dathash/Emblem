@@ -116,9 +116,14 @@ public:
 
         map->accessible.clear();
         map->vis_range.clear();
+        int movement = 0; 
+        if(cursor->selected->CanMove())
+        {
+            movement = cursor->selected->Movement();
+        }
         pair<vector<position>, vector<position>> result = 
             AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->Movement(),
+                                        movement,
                                         cursor->selected->MinRange(),
                                         cursor->selected->MaxRange(),
                                         cursor->selected->is_ally);
@@ -225,6 +230,8 @@ public:
         level->map.ability.clear();
         level->map.range.clear();
         level->map.adjacent.clear();
+        level->map.grapplable.clear();
+        level->map.vis_range.clear();
 
         // Update unit menu with available actions
         *menu = Menu({});
@@ -349,6 +356,19 @@ public:
         if(level->map.adjacent.size() > 0)
             menu->AddOption("Talk");
 
+        interactible = InteractibleFrom(level->map, cursor->pos, 1, 1);
+        // for grappling
+        for(const position &p : interactible)
+        {
+            if(level->map.tiles[p.col][p.row].occupant &&
+               !level->map.tiles[p.col][p.row].occupant->is_ally)
+            {
+                level->map.grapplable.push_back(p);
+            }
+        }
+        if(level->map.grapplable.size() > 0)
+            menu->AddOption("Grapple");
+
         menu->AddOption("Wait");
 
         if(cursor->path_draw.empty())
@@ -467,6 +487,41 @@ public:
                    map->ability.begin() + map->ability.size() - 1,
                    map->ability.end());
         position next = map->ability[0];
+
+        // move cursor
+        cursor->PlaceAt(next);
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+    bool forward;
+};
+
+class NextGrappleTargetCommand : public Command
+{
+public:
+    NextGrappleTargetCommand(Cursor *cursor_in, Tilemap *map_in, bool forward_in)
+    : cursor(cursor_in),
+      map(map_in),
+      forward(forward_in)
+    {}
+
+    virtual void Execute()
+    {
+        SDL_assert(map->grapplable.size() > 0);
+        if(map->grapplable.size() == 1)
+            return;
+
+        if(forward)
+            rotate(map->grapplable.begin(), 
+                   map->grapplable.begin() + 1,
+                   map->grapplable.end());
+        else
+            rotate(map->grapplable.begin(), 
+                   map->grapplable.begin() + map->grapplable.size() - 1,
+                   map->grapplable.end());
+        position next = map->grapplable[0];
 
         // move cursor
         cursor->PlaceAt(next);
@@ -651,7 +706,6 @@ private:
     Fight *fight;
 };
 
-
 class AbilityCommand : public Command
 {
 public:
@@ -677,7 +731,7 @@ public:
             } break;
             case ABILITY_BUFF:
             {
-                SimulateBuff(cursor->selected, cursor->targeted);
+                //SimulateBuff(cursor->selected, cursor->targeted);
                 EmitEvent(BUFF_EVENT);
 
                 int experience = EXP_FOR_BUFF;
@@ -713,6 +767,40 @@ public:
 
 private:
     Cursor *cursor;
+};
+
+class GrappleCommand : public Command
+{
+public:
+    GrappleCommand(Cursor *cursor_in, const Tilemap &map_in)
+    : cursor(cursor_in),
+      map(map_in)
+    {}
+
+    virtual void Execute()
+    {
+        cursor->targeted = map.tiles[cursor->pos.col][cursor->pos.row].occupant;
+
+        int experience = 0;
+        if(SimulateGrappling(cursor->selected, cursor->targeted))
+        {
+            EmitEvent(GRAPPLE_EVENT);
+            experience = EXP_FOR_GRAPPLING;
+        }
+        EmitEvent(Event(EXPERIENCE_EVENT, cursor->selected, experience, (float)experience / 10.0f + 0.3f));
+
+        cursor->selected->Deactivate();
+        cursor->selected = nullptr;
+        cursor->targeted = nullptr;
+        cursor->PlaceAt(cursor->source);
+        cursor->path_draw = {};
+
+        GlobalInterfaceState = RESOLVING_EXPERIENCE;
+    }
+
+private:
+    Cursor *cursor;
+    const Tilemap &map;
 };
 
 class BackDownFromAttackingCommand : public Command
@@ -1013,6 +1101,17 @@ public:
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
         }
+
+        if(option == "Grapple")
+        {
+            SDL_assert(map.grapplable.size());
+            cursor->source = cursor->pos;
+
+            cursor->PlaceAt(map.grapplable[0]);
+            GlobalInterfaceState = GRAPPLE_TARGETING;
+            return;
+        }
+
         if(option == "Heal" || option == "Dance" ||
            option == "Buff")
         {
@@ -1639,6 +1738,16 @@ public:
                 BindA(make_shared<InitiateAbilityCommand>(cursor, level->map));
                 BindB(make_shared<DetargetCommand>(cursor));
                 BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
+            case(GRAPPLE_TARGETING):
+            {
+                BindUp(make_shared<NextGrappleTargetCommand>(cursor, &(level->map), true));
+                BindDown(make_shared<NextGrappleTargetCommand>(cursor, &(level->map), false));
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<GrappleCommand>(cursor, level->map));
+                BindB(make_shared<DetargetCommand>(cursor));
                 BindR(make_shared<NullCommand>());
             } break;
             case(TALK_TARGETING):
