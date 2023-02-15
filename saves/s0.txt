@@ -1,7 +1,0 @@
-COM Author: Alex Hartford
-COM Program: Emblem
-COM File: Saves
-
-COM <UNT <name> <mov> <hp> <atk> <apt> <def> <spd> <ski> <level> <exp> <abi>>
-UNT Lucina 4 14 8 0 2 9 7 1 0 2
-UNT Priam 3 25 12 5 6 6 5 1 0 1

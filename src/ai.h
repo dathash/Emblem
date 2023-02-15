@@ -33,7 +33,7 @@ public:
         {
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            EmitEvent({START_PLAYER_TURN_EVENT, nullptr, level->turn_count + 2});
+            EmitEvent(END_TURN_EVENT);
             GlobalInterfaceState = NO_OP;
         }
     }
@@ -54,25 +54,16 @@ public:
     virtual void Execute()
     {
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
-        cursor->redo = cursor->pos;
+        cursor->selected->initial_pos = cursor->pos;
 
         map->accessible.clear();
-        map->vis_range.clear();
         pair<vector<position>, vector<position>> result = 
-            AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->Movement(),
-                                        cursor->selected->MinRange(),
-                                        cursor->selected->MaxRange(),
+            AccessibleAndAttackableFrom(*map, cursor->pos,
+                                        cursor->selected->movement,
+                                        1,
+                                        1,
                                         cursor->selected->is_ally);
         map->accessible = result.first;
-        map->vis_range = result.second;
-
-        map->double_range = 
-            AccessibleAndAttackableFrom(*map, cursor->redo,
-                                        cursor->selected->Movement() * 2,
-                                        cursor->selected->MinRange(),
-                                        cursor->selected->MaxRange(),
-                                        cursor->selected->is_ally).first;
 
         GlobalAIState = AI_SELECTED;
     }
@@ -82,159 +73,12 @@ private:
 };
 
 
-// =============================== Specification of Behaviors ==================
 pair<position, Unit *>
-PursueBehavior(const Unit &unit, const Tilemap &map)
+AttackInRangeBehavior(const Unit &unit, const Tilemap &map)
 {
     pair<position, Unit *> action = {};
     vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
-    if(possibilities.size() == 0) // No enemies to attack in range.
-    {
-        Unit *nearest = FindNearest(map, unit.pos,
-            [](const Unit &unit) -> bool
-            {
-                return unit.is_ally;
-            }, false);
-        path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
-        if(path_to_nearest.size())
-        {
-            position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.Movement());
-            if(furthest == position(0, 0))
-            {
-                furthest = unit.pos;
-            }
-            action = pair<position, Unit *>(furthest, NULL);
-        }
-        else
-            action = {unit.pos, NULL};
-    }
-    else
-    {
-        int min_health_after_attack = 999;
-        Outcome outcome;
-        //int max_odds = 0;
-        //int min_counter_dmg = 100;
-        //int min_counter_odds = 100;
-        for(const pair<position, Unit *> &poss : possibilities)
-        {
-            const position &p = poss.first;
-            Unit *target = poss.second;
-            outcome = PredictCombat(unit, *target,
-                                    ManhattanDistance(p, target->pos),
-                                    map.tiles[p.col][p.row].avoid,
-                                    map.tiles[target->pos.col][target->pos.row].avoid,
-                                    map.tiles[p.col][p.row].defense,
-                                    map.tiles[target->pos.col][target->pos.row].defense);
-            int health_remaining = clamp(target->health - outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage, 0, target->MaxHealth());
-            if(health_remaining < min_health_after_attack)
-            {
-                action = poss;
-                min_health_after_attack = health_remaining;
-            }
-        }
-    }
-    return action;
-}
-
-
-pair<position, Unit *>
-BossBehavior(const Unit &unit, const Tilemap &map)
-{
-    pair<position, Unit *> action = {};
-    vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
-
-    if(possibilities.size() == 0) // No enemies to attack in range.
-    {
-        action = {unit.pos, NULL};
-    }
-    else
-    {
-        int min_health_after_attack = 999;
-        Outcome outcome;
-
-        action = {unit.pos, NULL};
-        for(const pair<position, Unit *> &poss : possibilities)
-        {
-            if(poss.first == unit.pos)
-            {
-                const position &p = poss.first;
-                Unit *target = poss.second;
-                outcome = PredictCombat(unit, *target,
-                                        ManhattanDistance(p, target->pos),
-                                        map.tiles[p.col][p.row].avoid,
-                                        map.tiles[target->pos.col][target->pos.row].avoid,
-                                        map.tiles[p.col][p.row].defense,
-                                        map.tiles[target->pos.col][target->pos.row].defense);
-                int health_remaining = clamp(target->health - outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage, 0, target->MaxHealth());
-                if(health_remaining < min_health_after_attack)
-                {
-                    action = poss;
-                    min_health_after_attack = health_remaining;
-                }
-            }
-        }
-    }
-    return action;
-}
-
-
-pair<position, Unit *>
-AttackInRangeBehavior(const Unit &unit, const Tilemap &map, bool extended)
-{
-    pair<position, Unit *> action = {};
-    vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
-    vector<pair<position, Unit *>> extended_poss;
-    if(extended)
-         extended_poss = FindAttackingSquares(map, unit, map.double_range);
-
-    if(possibilities.empty()) // No enemies to attack in range.
-    {
-        if(extended_poss.empty())
-            action = {unit.pos, NULL};
-        else
-        {
-            Unit *nearest = FindNearest(map, unit.pos,
-                [](const Unit &unit) -> bool
-                {
-                    return unit.is_ally;
-                }, false);
-            path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
-            if(path_to_nearest.size())
-            {
-                position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.Movement());
-                if(furthest == position(0, 0))
-                {
-                    furthest = unit.pos;
-                }
-                action = pair<position, Unit *>(furthest, NULL);
-            }
-        }
-    }
-    else
-    {
-        int min_health_after_attack = 999;
-        Outcome outcome;
-
-        action = {unit.pos, NULL};
-        for(const pair<position, Unit *> &poss : possibilities)
-        {
-            const position &p = poss.first;
-            Unit *target = poss.second;
-            outcome = PredictCombat(unit, *target,
-                                    ManhattanDistance(p, target->pos),
-                                    map.tiles[p.col][p.row].avoid,
-                                    map.tiles[target->pos.col][target->pos.row].avoid,
-                                    map.tiles[p.col][p.row].defense,
-                                    map.tiles[target->pos.col][target->pos.row].defense);
-            int health_remaining = clamp(target->health - outcome.num_dice * GetMaxValue(outcome.die) + outcome.bonus_damage, 0, target->MaxHealth());
-            if(health_remaining < min_health_after_attack)
-            {
-                action = poss;
-                min_health_after_attack = health_remaining;
-            }
-        }
-    }
-    return action;
+    return possibilities[0];
 }
 
 
@@ -243,31 +87,15 @@ AttackInRangeBehavior(const Unit &unit, const Tilemap &map, bool extended)
 pair<position, Unit *>
 GetAction(const Unit &unit, const Tilemap &map)
 {
-    switch(unit.ai_behavior)
-    {
-        case PURSUE:             return PursueBehavior(unit, map);
-        case PURSUE_AFTER_1:     return ((unit.turns_active >= 1) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
-        case PURSUE_AFTER_2:     return ((unit.turns_active >= 2) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
-        case PURSUE_AFTER_3:     return ((unit.turns_active >= 3) ? PursueBehavior(unit, map) : AttackInRangeBehavior(unit, map, false));
-        case BOSS:               return BossBehavior(unit, map);
-        case BOSS_THEN_MOVE:     return ((unit.health == unit.MaxHealth()) ? BossBehavior(unit, map) : PursueBehavior(unit, map));
-        case ATTACK_IN_RANGE:    return AttackInRangeBehavior(unit, map, false);
-        case ATTACK_IN_TWO:      return AttackInRangeBehavior(unit, map, true);
-        case FLEE:               return {unit.pos, NULL};
-        case TREASURE_THEN_FLEE: return {unit.pos, NULL};
-        case NO_BEHAVIOR: cout << "WARN GetAction: This AI Unit has no behavior specified: " << unit.name << "\n"; return {};
-        default: SDL_assert(!"Shouldn't get here!\n"); return {};
-    }
+    return AttackInRangeBehavior(unit, map);    
 }
 
 class AIPerformUnitActionCommand : public Command
 {
 public:
-    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in,
-                               Fight *fight_in)
+    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
-      map(map_in),
-      fight(fight_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -280,38 +108,25 @@ public:
         cursor->pos = action.first;
 
         // place unit
-        map->tiles[cursor->redo.col][cursor->redo.row].occupant = nullptr;
+        map->tiles[cursor->selected->initial_pos.col][cursor->selected->initial_pos.row].occupant = nullptr;
         map->tiles[cursor->pos.col][cursor->pos.row].occupant = cursor->selected;
 
         cursor->selected->pos = cursor->pos;
-        cursor->source = cursor->pos;
         cursor->selected->sheet.ChangeTrack(TRACK_ACTIVE);
 
         // perform attack
         if(action.second)
         {
-            int distance = ManhattanDistance(cursor->selected->pos,
-                                             action.second->pos);
-            direction dir = GetDirection(cursor->selected->pos,
-                                         action.second->pos);
-            *fight = Fight(cursor->selected, action.second,
-                          map->tiles[cursor->redo.col][cursor->redo.row].avoid,
-                          map->tiles[cursor->pos.col][cursor->pos.row].avoid,
-                          map->tiles[cursor->redo.col][cursor->redo.row].defense,
-                          map->tiles[cursor->pos.col][cursor->pos.row].defense,
-                          distance, dir);
-            fight->ready = true;
             cursor->pos = action.second->pos;
 
-            GlobalAIState = AI_FIGHT;
+            GlobalAIState = AI_FINDING_NEXT;
             return;
         }
 
         // resolution
+        cursor->pos = cursor->selected->pos;
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
-        cursor->targeted = nullptr;
-        cursor->pos = cursor->source;
 
         // change state
         GlobalAIState = AI_FINDING_NEXT;
@@ -321,7 +136,6 @@ public:
 private:
     Cursor *cursor;
     Tilemap *map;
-    Fight *fight;
 };
 
 // ============================== struct ====================================
@@ -330,30 +144,27 @@ struct AI
     int frame = 0;
 
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Level *level, Fight *fight)
+    void Plan(Cursor *cursor, Level *level)
     {
         commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, level));
         commandQueue.push(make_shared<AISelectUnitCommand>(cursor, &(level->map)));
-        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map), fight));
+        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map)));
     }
 
     // Passes the args through to plan.
-    void Update(Cursor *cursor, Level *level, Fight *fight)
+    void Update(Cursor *cursor, Level *level)
     {
         if(GlobalPlayerTurn)
             return;
 
         if(GlobalAIState == AI_NO_OP ||
-           GlobalAIState == AI_RESOLVING_EXPERIENCE ||
-           GlobalAIState == AI_RESOLVING_ADVANCEMENT ||
-           GlobalAIState == AI_FIGHT ||
-           GlobalAIState == AI_DEATH)
+           GlobalAIState == AI_ATTACK_RESOLUTION
+          )
             return;
 
         if(commandQueue.empty())
         {
-            Plan(cursor, level, fight);
-            // TODO: Bug with Experience Parceling
+            Plan(cursor, level);
         }
 
         ++frame;

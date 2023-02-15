@@ -45,22 +45,10 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 false,
                 3,
                 3,
-                3,
-                3,
-                3,
-                3,
-                ABILITY_NONE,
-                NO_BEHAVIOR,
-                3,
                 ITEM_NONE,
                 ITEM_NONE,
 
-                Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED),
-                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-                LoadTextureImage(FULLS_PATH, string(DEFAULT_PORTRAIT)),
-                "Oof..."
+                Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED)
             ));
         }
         ImGui::SameLine();
@@ -92,60 +80,24 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 
         ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("name", &(selected->name));
-        ImGui::Text("health: %d, mov: %d", selected->MaxHealth(), selected->Movement());
-        ImGui::SliderInt("str", &selected->strength, -10, 20);
-        ImGui::SliderInt("dex", &selected->dexterity, -10, 20);
-        ImGui::SliderInt("vit", &selected->vitality, -10, 20);
-        ImGui::SliderInt("int", &selected->intuition, -10, 20);
-        ImGui::SliderInt("fth", &selected->faith, -10, 20);
-        ImGui::SliderInt("level", &selected->level, 1, 20);
-        ImGui::SliderInt("default ai", (int *)&selected->ai_behavior, 0, 5);
-
-        ImGui::Text("ability: %d", selected->ability);
-        ImGui::SameLine();
-        if(ImGui::Button("N"))
-            selected->ability = ABILITY_NONE;
-        ImGui::SameLine();
-        if(ImGui::Button("H"))
-            selected->ability = ABILITY_HEAL;
-        ImGui::SameLine();
-        if(ImGui::Button("B"))
-            selected->ability = ABILITY_BUFF;
-        ImGui::SameLine();
-        if(ImGui::Button("S"))
-            selected->ability = ABILITY_SHIELD;
-        ImGui::SameLine();
-        if(ImGui::Button("D"))
-            selected->ability = ABILITY_DANCE;
-        ImGui::SliderInt("xpv", &selected->xp_value, 0, 200);
+        ImGui::SliderInt("health", &selected->max_health, 1, 8);
+        ImGui::SliderInt("movement", &selected->movement, 1, 8);
 
         ImGui::Text("Items");
-        if(selected->weapon)
-        {
-            ImGui::Text("Weapon | %s", GetItemString(selected->weapon->type).c_str());
-        }
-        if(selected->pocket)
-        {
-            ImGui::Text("Pocket | %s", GetItemString(selected->pocket->type).c_str());
-        }
+        ImGui::Text("Primary | %s", GetItemString(selected->primary.type).c_str());
+        ImGui::Text("Secondary | %s", GetItemString(selected->secondary.type).c_str());
 
         static int item_type = 0;
         ImGui::Text("%s", GetItemString((ItemType)item_type).c_str());
         ImGui::SliderInt("type", &item_type, 0, 30);
-        if(ImGui::Button("Weapon"))
+        if(ImGui::Button("Primary"))
         {
-            delete selected->weapon;
-            selected->weapon = nullptr;
-            if(item_type != 0)
-                selected->weapon = GetItem((ItemType)item_type);
+            selected->primary = GetItem((ItemType)item_type);
         }
         ImGui::SameLine();
-        if(ImGui::Button("Pocket"))
+        if(ImGui::Button("Secondary"))
         {
-            delete selected->pocket;
-            selected->pocket = nullptr;
-            if(item_type != 0)
-                selected->pocket = GetItem((ItemType)item_type);
+            selected->secondary = GetItem((ItemType)item_type);
         }
     }
     ImGui::End();
@@ -183,10 +135,6 @@ EditorPollForKeyboardInput(position *editor_cursor, int width, int height)
         desired_move = desired_move + position(0, 1);
 
     desired_move = clamp(desired_move, position(0, 0), position(width-1, height-1));
-    if(!WithinViewport(desired_move))
-    {
-        MoveViewport(desired_move);
-    }
     *editor_cursor = desired_move;
 }
 
@@ -194,30 +142,11 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 {
     static position editor_cursor = {0, 0};
     static path path_debug = {};
-    EditorPollForKeyboardInput(&editor_cursor, level->map.width, level->map.height);
+    EditorPollForKeyboardInput(&editor_cursor, MAP_WIDTH, MAP_HEIGHT);
     Tile *hover_tile = &level->map.tiles[editor_cursor.col][editor_cursor.row];
 
     ImGui::Begin("level editor");
     {
-        if(ImGui::Button("Prelude"))
-            GlobalInterfaceState = PRELUDE;
-
-        ImGui::Text("Objective: %s", GetObjectiveString(level->objective).c_str());
-        if(ImGui::Button("rout"))
-        {
-            level->objective = OBJECTIVE_ROUT;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("capture"))
-        {
-            level->objective = OBJECTIVE_CAPTURE;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("boss"))
-        {
-            level->objective = OBJECTIVE_BOSS;
-        }
-
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
         if(ImGui::Button("none"))
@@ -326,10 +255,6 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         if(hover_tile->occupant)
         {
             ImGui::Text("Over unit.");
-            ImGui::SameLine();
-            ImGui::Text("Behavior: %d", hover_tile->occupant->ai_behavior);
-            ImGui::SameLine();
-            ImGui::Checkbox("boss?", &hover_tile->occupant->is_boss);
 
             if(ImGui::Button("Dmg"))
             {
@@ -338,65 +263,8 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             ImGui::SameLine();
             if(ImGui::Button("Heal"))
             {
-                hover_tile->occupant->Damage(-1);
+                hover_tile->occupant->Heal(1);
             }
-            ImGui::SameLine();
-            if(ImGui::Button("lvl+"))
-            {
-                hover_tile->occupant->GrantExperience(100);
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("25xp"))
-            {
-                hover_tile->occupant->GrantExperience(25);
-            }
-
-            ImGui::Text("AI Behavior");
-            if(ImGui::Button("-"))
-                hover_tile->occupant->ai_behavior = NO_BEHAVIOR;
-            ImGui::SameLine();
-            if(ImGui::Button("P"))
-                hover_tile->occupant->ai_behavior = PURSUE;
-            ImGui::SameLine();
-            if(ImGui::Button("Pa1"))
-                hover_tile->occupant->ai_behavior = PURSUE_AFTER_1;
-            ImGui::SameLine();
-            if(ImGui::Button("Pa2"))
-                hover_tile->occupant->ai_behavior = PURSUE_AFTER_2;
-            ImGui::SameLine();
-            if(ImGui::Button("Pa3"))
-                hover_tile->occupant->ai_behavior = PURSUE_AFTER_3;
-
-            if(ImGui::Button("BOSS"))
-                hover_tile->occupant->ai_behavior = BOSS;
-            ImGui::SameLine();
-            if(ImGui::Button("BtM"))
-                hover_tile->occupant->ai_behavior = BOSS_THEN_MOVE;
-            ImGui::SameLine();
-            if(ImGui::Button("Range"))
-                hover_tile->occupant->ai_behavior = ATTACK_IN_RANGE;
-            ImGui::SameLine();
-            if(ImGui::Button("AI2"))
-                hover_tile->occupant->ai_behavior = ATTACK_IN_TWO;
-
-            if(ImGui::Button("Flee"))
-                hover_tile->occupant->ai_behavior = FLEE;
-            ImGui::SameLine();
-            if(ImGui::Button("Plunder"))
-                hover_tile->occupant->ai_behavior = TREASURE_THEN_FLEE;
-
-            if(ImGui::Button("Bench"))
-            {
-                hover_tile->occupant->arrival = 1;
-            }
-        }
-
-        for(auto unit : level->bench)
-        {
-            ImGui::Text("%s", unit->name.c_str());
-            ImGui::SliderInt("Arrival", &unit->arrival, 0, 10);
-            ImGui::SliderInt("col", &unit->pos.col, 0, level->map.height);
-            ImGui::SliderInt("row", &unit->pos.row, 0, level->map.width);
         }
 
         //static bool showDebugPaths = false;
@@ -410,19 +278,12 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         {
             for(const position &p : path_debug)
             {
-                RenderTileColor({p.col - viewportCol,
-                                 p.row - viewportRow},
-                           healColor);
+                RenderTileColor({p.col, p.row}, healColor);
             }
         }
         */
 
-        if(WithinViewport(editor_cursor))
-        {
-            RenderTileColor({editor_cursor.col - viewportCol,
-                       editor_cursor.row - viewportRow},
-                       editorColor);
-        }
+        RenderTileColor({editor_cursor.col, editor_cursor.row}, editorColor);
     }
     ImGui::End();
 }
@@ -445,14 +306,11 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             *units = LoadUnits(UNITS_PATH + string(fileName));
             cout << "Units loaded: " << fileName << "\n";
             *level = LoadLevel(levelFileName, *units, party);
-            GlobalAIState = AI_PLAYER_TURN;
+            GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            if(GlobalInterfaceState != PRELUDE)
-            {
-                GlobalInterfaceState = NO_OP;
-                EmitEvent(START_PLAYER_TURN_EVENT);
-            }
+            GlobalInterfaceState = NO_OP;
+            EmitEvent(END_TURN_EVENT);
             cout << "Level loaded: " << levelFileName << "\n";
         }
         ImGui::SameLine();
@@ -472,28 +330,22 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         {
             *level = LoadLevel("test.txt", *units, party);
             sprintf(levelFileName, "test.txt");
-            GlobalAIState = AI_PLAYER_TURN;
+            GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            if(GlobalInterfaceState != PRELUDE)
-            {
-                GlobalInterfaceState = NO_OP;
-                EmitEvent(START_PLAYER_TURN_EVENT);
-            }
+            GlobalInterfaceState = NO_OP;
+            EmitEvent(END_TURN_EVENT);
         }
         ImGui::SameLine();
         if(ImGui::Button("Tutorial"))
         {
             *level = LoadLevel("tutorial.txt", *units, party);
             sprintf(levelFileName, "tutorial.txt");
-            GlobalAIState = AI_PLAYER_TURN;
+            GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
-            if(GlobalInterfaceState != PRELUDE)
-            {
-                GlobalInterfaceState = NO_OP;
-                EmitEvent(START_PLAYER_TURN_EVENT);
-            }
+            GlobalInterfaceState = NO_OP;
+            EmitEvent(END_TURN_EVENT);
         }
 
         int wrap = 0;
@@ -503,14 +355,11 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             {
                 *level = LoadLevel(s, *units, party);
                 sprintf(levelFileName, "%s", s.c_str());
-                GlobalAIState = AI_PLAYER_TURN;
+                GlobalAIState = AI_NO_OP;
                 GlobalPlayerTurn = true;
                 level->turn_start = true;
-                if(GlobalInterfaceState != PRELUDE)
-                {
-                    GlobalInterfaceState = NO_OP;
-                    EmitEvent(START_PLAYER_TURN_EVENT);
-                }
+                GlobalInterfaceState = NO_OP;
+                EmitEvent(END_TURN_EVENT);
             }
             if(++wrap % 4)
                 ImGui::SameLine();

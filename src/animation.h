@@ -8,18 +8,13 @@
 enum AnimationValue
 {
     WASTE_TIME_ANIMATION,
-    EXPERIENCE_PARCEL_ANIMATION,
-    ADVANCEMENT_ANIMATION,
     FADE_IN_ANIMATION,
     FADE_OUT_ANIMATION,
     FADE_IN_OUT_ANIMATION,
-    TURN_FADE_IN_OUT_ANIMATION,
     ATTACK_RANGED_HIT_ANIMATION,
-    ATTACK_RANGED_MISS_ANIMATION,
     ATTACK_RANGED_CRIT_ANIMATION,
     ATTACK_MELEE_ANIMATION,
     ATTACK_LEAP_ANIMATION,
-    ATTACK_MISS_ANIMATION,
     MOVE_ANIMATION,
     MOVE_UNIT_ANIMATION,
 };
@@ -191,31 +186,6 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                      Identity
                    ));
         }
-        case EXPERIENCE_PARCEL_ANIMATION:
-        {
-            return (new Animation(1, (int)(50 * frame_modulation), false, 1,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.5 ,  1.0 },
-                     {1.0 ,  1.0 }},
-                     Identity,
-                    {{0.45 , EXPERIENCE_DONE_EVENT}}
-                   ));
-        }
-        case ADVANCEMENT_ANIMATION:
-        {
-            return (new Animation(1, (int)(300 * frame_modulation), false, 1,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.5 ,  1.0 },
-                     {1.0 ,  2.0 }},
-                     Identity,
-                    {{0.08, LEVEL_BOOST_EVENT}, // Events
-                     {0.17, LEVEL_BOOST_EVENT},
-                     {0.25, LEVEL_BOOST_EVENT},
-                     {0.33, LEVEL_BOOST_EVENT},
-                     {0.42, LEVEL_BOOST_EVENT},
-                     {0.50, LEVEL_BOOST_EVENT}}
-                   ));
-        }
         case FADE_IN_ANIMATION:
         {
             return (new Animation(1, (int)(100 * frame_modulation), false, 1,
@@ -238,14 +208,6 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                      {1.0 ,  0.0 }},
                      Identity));
         }
-        case TURN_FADE_IN_OUT_ANIMATION:
-        {
-            return (new Animation(1, (int)(100 * frame_modulation), false, 1,
-                    {{0.0 ,  1.0 },  // channel 1
-                     {0.5 ,  1.0 },
-                     {1.0 ,  0.0 }},
-                     Identity));
-        }
         case ATTACK_RANGED_HIT_ANIMATION:
         {
             return (new Animation(1, (int)(40 * frame_modulation), false, 2,
@@ -256,34 +218,6 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                      Identity,
                     {{0.0, ATTACK_RANGED_NOCK_EVENT}, // Events
                      {0.6, ATTACK_RANGED_HIT_EVENT}},
-                    {{0.0 ,  0.0 },  // channel 2
-                     {1.0 ,  0.0 }},
-                     Identity));
-        }
-        case ATTACK_RANGED_MISS_ANIMATION:
-        {
-            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.45, -0.1 },
-                     {0.5 ,  0.0 },
-                     {1.0 ,  0.0 }},
-                     Identity,
-                    {{0.0, ATTACK_RANGED_NOCK_EVENT}, // Events
-                     {0.6, ATTACK_RANGED_MISS_EVENT}},
-                    {{0.0 ,  0.0 },  // channel 2
-                     {1.0 ,  0.0 }},
-                     Identity));
-        }
-        case ATTACK_RANGED_CRIT_ANIMATION:
-        {
-            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.45, -0.1 },
-                     {0.5 ,  0.0 },
-                     {1.0 ,  0.0 }},
-                     Identity,
-                    {{0.0, ATTACK_RANGED_NOCK_EVENT}, // Events
-                     {0.6, ATTACK_RANGED_CRIT_EVENT}},
                     {{0.0 ,  0.0 },  // channel 2
                      {1.0 ,  0.0 }},
                      Identity));
@@ -299,38 +233,6 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                      Identity,
                     {{0.2, ATTACK_HIT_EVENT}}, // Events
                     {{0.0 ,  0.0 },  // channel 2
-                     {1.0 ,  0.0 }},
-                     Identity));
-        }
-        case ATTACK_LEAP_ANIMATION:
-        {
-            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.1 ,  0.0 },
-                     {0.2 ,  1.0 },
-                     {0.4 ,  0.0 },
-                     {1.0 ,  0.0 }},
-                     Identity,
-                    {{0.2, ATTACK_CRIT_EVENT}}, // Events
-                    {{0.0 ,  0.0 },  // channel 2
-                     {0.1 ,  0.0 },
-                     {0.15,  0.5 },
-                     {0.2 ,  0.0 },
-                     {0.4 ,  0.0 },
-                     {1.0 ,  0.0 }},
-                     Identity));
-        }
-        case ATTACK_MISS_ANIMATION:
-        {
-            return (new Animation(1, (int)(40 * frame_modulation), false, 2,
-                    {{0.0 ,  0.0 },  // channel 1
-                     {0.4 ,  0.0 },
-                     {0.5 ,  1.0 },
-                     {1.0 ,  0.0 }},
-                     Identity,
-                    {{0.45, ATTACK_MISS_EVENT}}, // Events
-                    {{0.0 ,  0.0 },  // channel 2
-                     {0.5 ,  0.0 },
                      {1.0 ,  0.0 }},
                      Identity));
         }
@@ -355,33 +257,5 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
         }
     }
 }
-
-/* This might be the right thing to do someday?
-struct AnimationSystem
-{
-    Animation *current = nullptr;
-
-    void
-    PlayAnimation(AnimationValue in)
-    {
-        current = GetAnimation(in, 1.0f);
-    }
-
-    void
-    Update()
-    {
-        if(current)
-        {
-            if(current->Update())
-            {
-                delete(current);
-                current = nullptr;
-            }
-        }
-    }
-};
-
-static AnimationSystem GlobalAnimations;
-*/
 
 #endif

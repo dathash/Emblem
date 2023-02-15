@@ -15,18 +15,18 @@
 //       OR Decide on one input system or the other.
 #define JOYSTICK_COOLDOWN_TIME 5 // Frames
 
-#define EPSILON 0.00001
-
 // defaults
 #define DEFAULT_MUSIC_VOLUME 0.0f
 #define DEFAULT_SFX_VOLUME 0.05f
 
 // rendering
-#define VIEWPORT_WIDTH 15
-#define VIEWPORT_HEIGHT 10
+#define MAP_WIDTH 8
+#define MAP_HEIGHT 8
 #define TILE_SIZE 60
 #define SCREEN_WIDTH 1120
 #define SCREEN_HEIGHT 800
+#define X_OFFSET 400
+#define Y_OFFSET 10
 
 #define PORTRAIT_SIZE 600
 #define SPRITE_SIZE 32
@@ -35,31 +35,23 @@
 #define MENU_WIDTH 240
 #define MENU_ROW_HEIGHT 50
 #define CONV_MENU_WIDTH 400
-#define CONVERSATION_WRAP 840
 
 // animation
 #define ANIMATION_SPEED 10
-#define AI_ACTION_SPEED 5
+#define AI_ACTION_SPEED 10
 
 // startup
 #define INITIAL_LEVEL "l0.txt"
 #define INITIAL_UNITS "units.tsv"
 
 // data
-//#define DATA_PATH "../data/"
 #define UNITS_PATH "../data/"
 #define LEVELS_PATH "../data/levels/"
-#define CONVERSATIONS_PATH "../data/conversations/"
-#define PRELUDES_PATH "../data/preludes/"
-#define CUTSCENES_PATH "../data/cutscenes/"
-#define VILLAGES_PATH "../data/villages/"
-#define VALEDICTIONS_PATH "../data/valedictions/"
 
 // assets
 #define MUSIC_PATH "../assets/music/"
 #define SFX_PATH "../assets/sfx/"
 #define SPRITES_PATH "../assets/sprites/"
-#define THUMBS_PATH "../assets/portraits/thumbs/"
 #define FULLS_PATH "../assets/portraits/fulls/"
 #define TILESETS_PATH "../assets/tilesets/"
 
@@ -69,116 +61,57 @@
 // gameplay
 #define LEADER_ID hash<string>{}("Lucina")
 
-#define CRIT_MULTIPLIER 2 // The multiplier on damage.
+#define EXP_FOR_COMBAT 1
+#define EXP_FOR_KILL 2
 
-#define EXP_FOR_COMBAT 5
-#define EXP_FOR_HEALING 10
-#define EXP_FOR_GRAPPLING 7
-#define EXP_FOR_DANCE 10
-#define EXP_FOR_BUFF 10
-
-#define EXP_FOR_VILLAGE_SAVED 40
-
-#define FLOOR_TILE {FLOOR, 1, 0, 0, nullptr, {0, 0}}
-#define WALL_TILE {WALL, 99, 0, 0, nullptr, {1, 0}}
-#define FOREST_TILE {FOREST, 2, 20, 0, nullptr, {2, 0}}
-#define SWAMP_TILE {SWAMP, 3, 0, 0, nullptr, {5, 1}}
-#define FORT_TILE {FORT, 1, 10, 4, nullptr, {4, 0}}
-#define GOAL_TILE {GOAL, 1, 0, 2, nullptr, {5, 0}}
-#define VILLAGE_TILE {VILLAGE, 1, 0, 0, nullptr, {1, 1}}
-#define CHEST_TILE {CHEST, 1, 0, 0, nullptr, {0, 1}}
+#define FLOOR_TILE {FLOOR, nullptr, {0, 0}}
+#define WALL_TILE {WALL, nullptr, {1, 0}}
+#define FOREST_TILE {FOREST, nullptr, {2, 0}}
+#define SWAMP_TILE {SWAMP, nullptr, {5, 1}}
+#define FORT_TILE {FORT, nullptr, {4, 0}}
+#define GOAL_TILE {GOAL, nullptr, {5, 0}}
+#define VILLAGE_TILE {VILLAGE, nullptr, {1, 1}}
+#define CHEST_TILE {CHEST, nullptr, {0, 1}}
 
 enum InterfaceState
 {
-    NEUTRAL_OVER_GROUND, // 0
-    NEUTRAL_OVER_ENEMY, // 1
-    NEUTRAL_OVER_UNIT, // 2
-    NEUTRAL_OVER_DEACTIVATED_UNIT, // 3
+    NO_OP,
+    TITLE_SCREEN,
+    GAME_OVER,
 
-    SELECTED_OVER_GROUND, // 4
-    SELECTED_OVER_INACCESSIBLE, // 5
-    SELECTED_OVER_ALLY, // 6
-    SELECTED_OVER_ENEMY, // 7
+    GAME_MENU,
+    GAME_MENU_OPTIONS,
 
-    ATTACK_TARGETING, // 8
-    ABILITY_TARGETING, // 9
-    GRAPPLE_TARGETING, // 11
-    TALK_TARGETING, // 10
+    ENEMY_RANGE,
 
-    PREVIEW_ATTACK, // 11
-    PREVIEW_ABILITY, // 12
+    NEUTRAL_OVER_GROUND,
+    NEUTRAL_OVER_ENEMY,
+    NEUTRAL_OVER_UNIT,
+    NEUTRAL_OVER_DEACTIVATED_UNIT,
 
-    GAME_MENU, // 13
-    GAME_MENU_OUTLOOK, // 14
-    GAME_MENU_OPTIONS, // 15
+    SELECTED,
 
-    ANIMATING_UNIT_MOVEMENT, // 16
-
-    UNIT_MENU_ROOT, // 17
-    UNIT_INFO, // 18
-
-    ENEMY_INFO, // 19
-    ENEMY_RANGE, // 20
-
-    LEVEL_MENU, // 21
-
-    CONVERSATION_MENU, // 22
-    CONVERSATION, // 23
-    BATTLE_CONVERSATION, // 24
-    VILLAGE_CONVERSATION, // 25
-    PRELUDE, // 26
-    CUTSCENE, // 27
-
-    PLAYER_FIGHT, // 28
-    RESOLVING_EXPERIENCE, // 29
-    RESOLVING_ADVANCEMENT, // 30
-
-    DEATH, // 31
-
-    NO_OP, // 32
-
-    TITLE_SCREEN, // 33
-    GAME_OVER, // 34
+    ATTACK_TARGETING,
+    ATTACK_RESOLUTION,
 };
-
 
 // AI
 enum AIState
 {
-    AI_FINDING_NEXT, // 0
-    AI_SELECTED, // 1
+    AI_NO_OP,
+    AI_FINDING_NEXT,
+    AI_SELECTED,
 
-    AI_RESOLVING_EXPERIENCE, // 1
-    AI_RESOLVING_ADVANCEMENT, // 2
-    AI_FIGHT, // 3
-
-    AI_PLAYER_TURN, // 4
-    AI_DEATH, // 5
-    AI_NO_OP, // 6
+    AI_ATTACK_RESOLUTION,
 };
 
-enum AIBehavior
+enum Direction
 {
-    NO_BEHAVIOR,
-    PURSUE,
-    PURSUE_AFTER_1,
-    PURSUE_AFTER_2,
-    PURSUE_AFTER_3,
-    BOSS,
-    BOSS_THEN_MOVE,
-    ATTACK_IN_RANGE,
-    ATTACK_IN_TWO,
-    FLEE,
-    TREASURE_THEN_FLEE,
-};
-
-// UI
-enum quadrant
-{
-    TOP_LEFT,
-    TOP_RIGHT,
-    BOTTOM_LEFT,
-    BOTTOM_RIGHT,
+    DIR_NONE,
+    DIR_LEFT,
+    DIR_RIGHT,
+    DIR_UP,
+    DIR_DOWN,
 };
 
 // MAP

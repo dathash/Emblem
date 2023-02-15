@@ -34,113 +34,6 @@ TileTypeToTile(TileType type)
 }
 
 // ============================== loading data =================================
-Conversation
-LoadConversation(string path, string filename,
-                 const vector<shared_ptr<Unit>> units,
-                 const position &pos_in = position(-1, -1))
-{
-    Conversation conversation = {};
-    conversation.filename = filename;
-    conversation.pos = pos_in;
-
-    string line;
-    string type;
-    string rest;
-
-    Expression one_expression = EXPR_NEUTRAL;
-    Expression two_expression = EXPR_NEUTRAL;
-    Expression three_expression = EXPR_NEUTRAL;
-    Expression four_expression = EXPR_NEUTRAL;
-    ConversationEvent conversation_event = CONV_NONE;
-
-    ifstream fp;
-    fp.open(path + filename);
-    if(!fp.is_open())
-    {
-        cout << path << " " << filename << "\n";
-        SDL_assert(!"ERROR LoadConversation: File could not be opened.\n");
-    }
-
-    while(getline(fp, line))
-    {
-        if(line.empty())
-            continue;
-
-        type = line.substr(0, 3);
-        rest = line.substr(4);
-
-        if(type == "MUS")
-        {
-            conversation.song = GetMusic(rest);
-        }
-        else if(type == "SP1")
-        {
-            conversation.one = GetUnitByName(units, rest);
-        }
-        else if(type == "SP2")
-        {
-            conversation.two = GetUnitByName(units, rest);
-        }
-        else if(type == "SP3")
-        {
-            conversation.three = GetUnitByName(units, rest);
-        }
-        else if(type == "SP4")
-        {
-            conversation.four = GetUnitByName(units, rest);
-        }
-        else if(type == "EX1")
-        {
-            one_expression = GetExpressionFromString(rest);
-        }
-        else if(type == "EX2")
-        {
-            two_expression = GetExpressionFromString(rest);
-        }
-        else if(type == "EX3")
-        {
-            three_expression = GetExpressionFromString(rest);
-        }
-        else if(type == "EX4")
-        {
-            four_expression = GetExpressionFromString(rest);
-        }
-        else if(type == "EVE")
-        {
-            conversation_event = GetConversationEventFromString(rest);
-        }
-        else if(type == "ONE")
-        {
-            conversation.prose.push_back({SPEAKER_ONE, rest, one_expression, conversation_event});
-        }
-        else if(type == "TWO")
-        {
-            conversation.prose.push_back({SPEAKER_TWO, rest, two_expression, conversation_event});
-        }
-        else if(type == "THR")
-        {
-            conversation.prose.push_back({SPEAKER_THREE, rest, three_expression, conversation_event});
-        }
-        else if(type == "FOU")
-        {
-            conversation.prose.push_back({SPEAKER_FOUR, rest, four_expression, conversation_event});
-        }
-        else if(type == "COM")
-        {
-        }
-        else
-        {
-            cout << "WARN LoadConversation: Unrecognized line type in " << filename << ".\n";
-        }
-    }
-    fp.close();
-
-    //SDL_assert(conversation.one && conversation.two);
-
-    conversation.ReloadTextures();
-    return conversation;
-}
-
 // Loads a Texture displaying the given text in the given color.
 // Now with wrapping, set by the line_length parameter
 Texture
@@ -231,65 +124,17 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         rest = line.substr(4);
         tokens = split(rest, ' ');
 
-        if(type == "OBJ")
-        {
-            level.objective = (Objective)stoi(rest);
-        }
-        else if(type == "ATL")
+        if(type == "ATL")
         {
             level.map.atlas = LoadTextureImage(TILESETS_PATH, rest);
-        }
-        else if(type == "PRE")
-        {
-            level.conversations.prelude = 
-                    LoadConversation(PRELUDES_PATH, rest, units);
-        }
-        else if(type == "MID")
-        {
-            level.conversations.mid_battle.push_back(
-                    LoadConversation(CONVERSATIONS_PATH, rest, units));
-        }
-        else if(type == "CNV")
-        {
-            level.conversations.list.push_back(
-                    LoadConversation(CONVERSATIONS_PATH, rest, units));
-        }
-        else if(type == "CUT")
-        {
-            level.conversations.cutscenes.push_back(cutscene(stoi(tokens[0]),
-                        LoadConversation(CUTSCENES_PATH, tokens[1], units)));
-        }
-        else if(type == "VIL")
-        {
-            int col = stoi(tokens[0]);
-            int row = stoi(tokens[1]);
-
-            level.conversations.villages.push_back(
-                    LoadConversation(VILLAGES_PATH, tokens[2], units, position(col, row)));
         }
         else if(type == "MUS")
         {
             level.song = GetMusic(rest);
         }
-        else if(type == "WDT")
-        {
-            level.map.width = stoi(rest);
-        }
-        else if(type == "HGT")
-        {
-            level.map.height = stoi(rest);
-            level.map.tiles.resize(level.map.width, vector<Tile>(level.map.height));
-            for(int col = 0; col < level.map.width; ++col)
-            {
-                for(int row = 0; row < level.map.height; ++row)
-                {
-                    level.map.tiles[col][row] = {};
-                }
-            }
-        }
         else if(type == "MAP")
         {
-            for(int col = 0; col < level.map.width; ++col)
+            for(int col = 0; col < MAP_WIDTH; ++col)
                 level.map.tiles[col][mapRow] = TileTypeToTile((TileType)stoi(tokens[col]));
 
             ++mapRow;
@@ -320,18 +165,8 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
 
             unitCopy->pos.col = col;
             unitCopy->pos.row = row;
-            unitCopy->ai_behavior = (AIBehavior)stoi(tokens[3]);
-            unitCopy->is_boss = (bool)stoi(tokens[4]);
-            unitCopy->arrival = stoi(tokens[5]);
-            if(unitCopy->arrival > 0)
-            {
-                level.bench.push_back(move(unitCopy));
-            }
-            else
-            {
-                level.combatants.push_back(move(unitCopy));
-                level.map.tiles[col][row].occupant = level.combatants.back().get();
-            }
+            level.combatants.push_back(move(unitCopy));
+            level.map.tiles[col][row].occupant = level.combatants.back().get();
         }
         else if(type == "COM")
         {
@@ -371,31 +206,16 @@ LoadUnits(string filename_in)
             {
                 tokens = split(rest, '\t');
                 units.push_back(make_shared<Unit>(
-                    tokens[0],									// name
-                    tokens[1] == "Ally" ? true : false,			// team
+                    tokens[0],						    // name
+                    tokens[1] == "Ally" ? true : false, // team
+                    stoi(tokens[2]), // health
+                    stoi(tokens[3]), // movement
 
-                    // Bases
-                    stoi(tokens[2]),							// strength
-                    stoi(tokens[3]),							// dexterity
-                    stoi(tokens[4]),							// vitality
-                    stoi(tokens[5]),							// intuition
-                    stoi(tokens[6]),							// faith
+                    (ItemType)stoi(tokens[4]),  // weapon
+                    (ItemType)stoi(tokens[5]),  // pocket
 
-                    stoi(tokens[7]),						    // level
-                    (Ability)stoi(tokens[8]),				    // ability
-                    (AIBehavior)stoi(tokens[9]),                // ai behavior
-                    stoi(tokens[10]),                           // xp value
-
-                    (ItemType)stoi(tokens[11]),                 // weapon
-                    (ItemType)stoi(tokens[12]),                 // pocket
-
-                    // Textures
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[13]), 32, ANIMATION_SPEED), // path to texture
-                    LoadTextureImage(FULLS_PATH, tokens[14]),   // neutral
-                    LoadTextureImage(FULLS_PATH, tokens[15]),   // happy
-                    LoadTextureImage(FULLS_PATH, tokens[16]),   // angry
-                    LoadTextureImage(FULLS_PATH, tokens[17]),   // wince
-                    tokens[18]                                  // valediction
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[6]),
+                                32, ANIMATION_SPEED)
                 ));
             }
         }
@@ -415,34 +235,18 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
     
-    fp << "COM Author: Alex Hartford\n";
-    fp << "COM Program: Emblem\n";
-    fp << "COM File: Units\n\n";
-
-    fp << "COM\t<name>\t<team>\t<mov>\t<hp>\t<str>\t<dex>\t<vit>\t<int>\t<fth>\t<short>\t<long>\t<level>\t<abi>\t<ai>\t<xpv>\t<weapn>\t<pockt>\t<texture>\t<neutral>\t<happy>\t<angry>\t<wince>\n";
+    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<prim>\t<secnd>\t<sprite>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
-        fp << "UNT " << unit->name << "\t"
+        fp << "UNT\t" << unit->name << "\t"
            << (unit->is_ally ? "Ally" : "Enemy") << "\t"
-           << unit->strength << "\t"
-           << unit->dexterity << "\t"
-           << unit->vitality << "\t"
-           << unit->intuition << "\t"
-           << unit->faith << "\t"
-           << unit->level << "\t"
-           << unit->ability << "\t"
-           << unit->ai_behavior << "\t"
-           << unit->xp_value << "\t"
+           << unit->max_health << "\t"
+           << unit->movement << "\t"
 
-           << (unit->weapon ? unit->weapon->type : 0) << "\t"
-           << (unit->pocket ? unit->pocket->type : 0) << "\t"
+           << unit->primary.type << "\t"
+           << unit->secondary.type << "\t"
 
-           << unit->sheet.texture.filename << "\t"
-           << unit->neutral.filename << "\t"
-           << unit->happy.filename << "\t"
-           << unit->angry.filename << "\t"
-           << unit->wince.filename << "\t"
-           << unit->valediction
+           << unit->sheet.texture.filename
            << "\n";
     }
     fp.close();
@@ -460,48 +264,15 @@ SaveLevel(string filename_in, const Level &level)
     fp << "COM Program: Emblem\n";
     fp << "COM File: Level\n\n";
 
-    fp << "OBJ " << level.objective << "\n\n";
-
     fp << "ATL " << level.map.atlas.filename << "\n\n";
-
-    if(level.conversations.prelude.one)
-    {
-        fp << "PRE " << level.conversations.prelude.filename << "\n";
-        fp << "\n";
-    }
-    for(const Conversation &conv : level.conversations.mid_battle)
-    {
-        fp << "MID " << conv.filename << "\n";
-    }
-    fp << "\n";
-
-    for(const Conversation &conv : level.conversations.villages)
-    {
-        fp << "VIL " << conv.pos.col << " " << conv.pos.row << " " << conv.filename << "\n";
-    }
-    fp << "\n";
-
-    for(const Conversation &conv : level.conversations.list)
-    {
-        fp << "CNV " << conv.filename << "\n";
-    }
-    fp << "\n";
-
-    for(const cutscene &cs : level.conversations.cutscenes)
-    {
-        fp << "CUT " << cs.first << " " << cs.second.filename << "\n";
-    }
-    fp << "\n";
 
     fp << "MUS " << level.song->name << "\n\n";
 
     // Save Map Data
-    fp << "WDT " << level.map.width << "\n";
-    fp << "HGT " << level.map.height << "\n";
-    for(int row = 0; row < level.map.height; ++row)
+    for(int row = 0; row < MAP_HEIGHT; ++row)
     {
         fp << "MAP ";
-        for(int col = 0; col < level.map.width; ++col)
+        for(int col = 0; col < MAP_WIDTH; ++col)
         {
             fp << level.map.tiles[col][row].type << " ";
         }
@@ -509,27 +280,12 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "COM <UNT <name> <col> <row> <ai> <boss> <start>>\n";
+    fp << "COM <UNT <name> <col> <row> <ai>>\n";
     for(const shared_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "
                      << unit->pos.col << " "
                      << unit->pos.row << " "
-                     << unit->ai_behavior << " "
-                     << unit->is_boss << " "
-                     << unit->arrival << " "
-                     << "\n";
-    }
-    fp << "\n";
-
-    for(const shared_ptr<Unit> &unit : level.bench)
-    {
-        fp << "UNT " << unit->name << " "
-                     << unit->pos.col << " "
-                     << unit->pos.row << " "
-                     << unit->ai_behavior << " "
-                     << unit->is_boss << " "
-                     << unit->arrival << " "
                      << "\n";
     }
     fp << "\n";

@@ -11,7 +11,8 @@ void
 RenderTileColor(const position &pos, const SDL_Color &color)
 {
     SDL_assert(pos.col >= 0 && pos.row >= 0);
-    SDL_Rect tileRect = {TILE_SIZE / 16 + pos.col * TILE_SIZE, TILE_SIZE / 16 + pos.row * TILE_SIZE, 
+    SDL_Rect tileRect = {TILE_SIZE / 16 + pos.col * TILE_SIZE + X_OFFSET,
+                         TILE_SIZE / 16 + pos.row * TILE_SIZE + Y_OFFSET,
                          TILE_SIZE - (TILE_SIZE / 16) * 2, 
                          TILE_SIZE - (TILE_SIZE / 16) * 2};
 
@@ -26,7 +27,9 @@ void
 RenderTileTexture(const Tilemap &map, const Tile &tile,
                   const position &pos)
 {
-    SDL_Rect destination = {pos.col * TILE_SIZE, pos.row * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+    SDL_Rect destination = {pos.col * TILE_SIZE + X_OFFSET,
+                            pos.row * TILE_SIZE + Y_OFFSET,
+                            TILE_SIZE, TILE_SIZE};
     SDL_Rect source = {tile.atlas_index.col * map.atlas_tile_size, 
                        tile.atlas_index.row * map.atlas_tile_size, 
                        map.atlas_tile_size, map.atlas_tile_size};
@@ -38,72 +41,32 @@ void
 SetSpriteModifiers(Unit *unit)
 {
     if(unit->is_exhausted)
-    {
         SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, exhaustedMod.r, exhaustedMod.g, exhaustedMod.b);
-    }
-    else if(unit->buff)
-    {
-        switch(unit->buff->stat)
-        {
-            case STAT_STRENGTH:
-            {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
-                        buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
-            } break;
-            case STAT_DEXTERITY:
-            {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
-                        buffDefMod.r, buffDefMod.g, buffDefMod.b);
-            } break;
-            case STAT_VITALITY:
-            {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
-                        buffAptMod.r, buffAptMod.g, buffAptMod.b);
-            } break;
-            case STAT_INTUITION:
-            {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
-                        buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
-            } break;
-            case STAT_FAITH:
-            {
-                SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, 
-                        buffSpdMod.r, buffSpdMod.g, buffSpdMod.b);
-            } break;
-            default:
-            {
-                cout << "WARN Render: Unit has unhandled buff color mod " << unit->buff->stat << "\n";
-            } break;
-        }
-    }
-    else if(unit->is_boss)
-    {
-        SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, buffAtkMod.r, buffAtkMod.g, buffAtkMod.b);
-    }
     else
-    {
         SDL_SetTextureColorMod(unit->sheet.texture.sdl_texture, readyMod.r, readyMod.g, readyMod.b);
-    }
 }
 
 // Renders a sprite to the screen, given its game coords and spritesheet.
 void
-RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false,
-             const position &animation_offset = position(0, 0))
+RenderSprite(const position &pos, const Spritesheet &sheet, bool flipped = false)
 {
-    SDL_Rect destination = {pos.col * TILE_SIZE + animation_offset.col, 
-                            pos.row * TILE_SIZE + animation_offset.row, 
+    SDL_Rect destination = {pos.col * TILE_SIZE + X_OFFSET,
+                            pos.row * TILE_SIZE + Y_OFFSET,
                             TILE_SIZE, TILE_SIZE};
-    SDL_Rect source = {sheet.frame * sheet.size, sheet.track * sheet.size, sheet.size, sheet.size};
+    SDL_Rect source = {sheet.frame * sheet.size,
+                       sheet.track * sheet.size,
+                       sheet.size, sheet.size};
 
-    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdl_texture, &source, &destination,
-                     0, NULL, (const SDL_RendererFlip)flipped);
+    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdl_texture, 
+                     &source, &destination,
+                     0, NULL, 
+                     (const SDL_RendererFlip)flipped);
 }
 
+/*
 // Renders a unit's portrait.
 void
-RenderPortrait(int x, int y, const Unit &unit, 
-               Expression expression, bool flipped)
+RenderPortrait(int x, int y, const Unit &unit, bool flipped)
 {
     const Texture *portrait;
     switch(expression)
@@ -122,6 +85,7 @@ RenderPortrait(int x, int y, const Unit &unit,
     SDL_RenderCopyEx(GlobalRenderer, portrait->sdl_texture, &source, &destination, 
                      0, NULL, (const SDL_RendererFlip)flipped);
 }
+*/
 
 // Renders a given texture at a pixel point.
 // (Meant for debug text)
@@ -134,17 +98,16 @@ RenderText(const Texture &texture, int x, int y)
 
 // Renders a Health Bar (For use underneath units)
 void
-RenderHealthBarSmall(const position &p, int hp, int maxHp,
-                     const position &animation_offset = position(0, 0))
+RenderHealthBarSmall(const position &p, int hp, int maxHp)
 {
     float ratio = (float)hp / maxHp;
     SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
 
-    SDL_Rect bar_rect = {p.col * TILE_SIZE + 7     + animation_offset.col, 
-                            p.row * TILE_SIZE + 50 + animation_offset.row,
+    SDL_Rect bar_rect = {p.col * TILE_SIZE + 7 + X_OFFSET,
+                            p.row * TILE_SIZE + 50 + Y_OFFSET,
                             50, 8};
-    SDL_Rect health_rect = {p.col * TILE_SIZE + 7  + animation_offset.col,
-                            p.row * TILE_SIZE + 50 + animation_offset.row,
+    SDL_Rect health_rect = {p.col * TILE_SIZE + 7 + X_OFFSET,
+                            p.row * TILE_SIZE + 50 + Y_OFFSET,
                             (int)(50 * ratio), 8};
 
     SDL_SetRenderDrawColor(GlobalRenderer, darkGray.r, darkGray.g, darkGray.b, darkGray.a);
@@ -181,12 +144,7 @@ RenderHealthBarCombat(const position &p, int hp, int maxHp)
 
 // Renders the scene from the given game state.
 void
-Render(const Tilemap &map, const Cursor &cursor, 
-       const Menu &gameMenu, const Menu &unitMenu, const Menu &levelMenu,
-       const Menu &conversationMenu,
-       const ConversationList &conversations, 
-       const Fight &fight, const Fade &level_fade, const Fade &turn_fade,
-       const Advancement &advancement, Unit *dying)
+Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -196,51 +154,29 @@ Render(const Tilemap &map, const Cursor &cursor,
         return;
 
 // ================================= render map tiles ============================================
-    for(int col = viewportCol; col < VIEWPORT_WIDTH + viewportCol; ++col)
+    for(int col = 0; col < MAP_WIDTH; ++col)
     {
-        for(int row = viewportRow; row < VIEWPORT_HEIGHT + viewportRow; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
-            position screen_pos = {col - viewportCol, row - viewportRow};
+            position screen_pos = {col, row};
             const Tile &tile = map.tiles[col][row];
             RenderTileTexture(map, tile, screen_pos);
         }
     }
 
 // ================================= render selected or targeted =====================================
-    if(GlobalInterfaceState == SELECTED_OVER_GROUND ||
-       GlobalInterfaceState == SELECTED_OVER_INACCESSIBLE ||
-       GlobalInterfaceState == SELECTED_OVER_ALLY ||
-       GlobalInterfaceState == SELECTED_OVER_ENEMY)
+    if(GlobalInterfaceState == SELECTED)
     {
-        for(const position &cell : map.vis_range)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           clearColor);
-            }
-        }
-
         for(const position &cell : map.accessible)
         {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor(
-                        {cell.col - viewportCol, cell.row - viewportRow},
-                        moveColor
-                        );
-            }
+            RenderTileColor({cell.col, cell.row},
+                            moveColor);
         }
 
         for(const position &p : cursor.path_draw)
         {
-            if(WithinViewport(p))
-            {
-                RenderTileColor({p.col - viewportCol, 
-                           p.row - viewportRow}, 
-                           pathColor);
-            }
+            RenderTileColor({p.col, p.row}, 
+                            pathColor);
         }
     }
 
@@ -248,22 +184,8 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(const position &cell : map.accessible)
         {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           aiMoveColor);
-            }
-        }
-
-        for(const position &cell : map.vis_range)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           clearColor);
-            }
+            RenderTileColor({cell.col, cell.row}, 
+                            aiMoveColor);
         }
     }
 
@@ -271,137 +193,56 @@ Render(const Tilemap &map, const Cursor &cursor,
     {
         for(const position &cell : map.range)
         {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           attackColor);
-            }
-        }
-
-        for(const position &cell : map.attackable)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           yellow);
-            }
+            RenderTileColor({cell.col, cell.row}, 
+                            attackColor);
         }
     }
-
-    if(GlobalInterfaceState == GRAPPLE_TARGETING)
+    if(cursor.selected)
     {
-        for(const position &cell : map.grapplable)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           yellow);
-            }
-        }
-    }
-
-    if(GlobalInterfaceState == ABILITY_TARGETING)
-    {
-        for(const position &cell : map.range)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           healColor);
-            }
-        }
-
-        for(const position &cell : map.ability)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           yellow);
-            }
-        }
-    }
-
-    if(GlobalInterfaceState == TALK_TARGETING)
-    {
-        for(const position &cell : map.adjacent)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           healColor);
-            }
-        }
+        RenderTileColor({cursor.selected->pos.col , cursor.selected->pos.row}, 
+                        healColor);
     }
 
 // ================================ ai visualization  =============================
     if(GlobalAIState == AI_SELECTED)
     {
-        for(const position &cell : map.vis_range)
-        {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           clearColor);
-            }
-        }
-
         for(const position &cell : map.accessible)
         {
-            if(WithinViewport(cell))
-            {
-                RenderTileColor({cell.col - viewportCol, 
-                           cell.row - viewportRow}, 
-                           aiMoveColor);
-            }
+            RenderTileColor({cell.col, cell.row}, 
+                            aiMoveColor);
         }
     }
 
 // ================================= render sprites ================================================
-    for(int col = viewportCol; col < VIEWPORT_WIDTH + viewportCol; ++col)
+    for(int col = 0; col < MAP_WIDTH; ++col)
     {
-        for(int row = viewportRow; row < VIEWPORT_HEIGHT + viewportRow; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
             const Tile &tileToRender = map.tiles[col][row];
             if(tileToRender.occupant)
             {
-                position screen_pos = {col - viewportCol, row - viewportRow};
+                position screen_pos = {col , row};
 
                 SetSpriteModifiers(tileToRender.occupant);
 
-                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally, tileToRender.occupant->animation_offset);
-                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->MaxHealth(), tileToRender.occupant->animation_offset);
+                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally);
+                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
             }
         }
     }
 
 // ================================= render cursor ================================================
     if(
+        GlobalInterfaceState == ENEMY_RANGE ||
         GlobalInterfaceState == NEUTRAL_OVER_GROUND ||
         GlobalInterfaceState == NEUTRAL_OVER_ENEMY ||
         GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
         GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
-        GlobalInterfaceState == SELECTED_OVER_GROUND ||
-        GlobalInterfaceState == SELECTED_OVER_INACCESSIBLE ||
-        GlobalInterfaceState == SELECTED_OVER_ALLY ||
-        GlobalInterfaceState == SELECTED_OVER_ENEMY ||
-        GlobalInterfaceState == ATTACK_TARGETING ||
-        GlobalInterfaceState == ABILITY_TARGETING ||
-        GlobalInterfaceState == GRAPPLE_TARGETING ||
-        GlobalInterfaceState == TALK_TARGETING ||
-        GlobalInterfaceState == ENEMY_INFO ||
-        GlobalInterfaceState == ENEMY_RANGE
+        GlobalInterfaceState == SELECTED ||
+        GlobalInterfaceState == ATTACK_TARGETING
       )
     {
-        if(WithinViewport(cursor.pos))
-            RenderSprite(cursor.pos - position(viewportCol, viewportRow), 
-                         cursor.sheet, false, cursor.animation_offset);
+        RenderSprite(cursor.pos, cursor.sheet);
     }
 
 
@@ -428,74 +269,7 @@ Render(const Tilemap &map, const Cursor &cursor,
         SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
     }
 
-    // Unit Menu
-    if(GlobalInterfaceState == UNIT_MENU_ROOT)
-    {
-        for(int i = 0; i < unitMenu.rows; ++i)
-        {
-            SDL_Rect menuRect = {650, 140 + i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &menuRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
-
-            RenderText(unitMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
-        }
-
-        SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * unitMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
-        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
-        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
-    }
-
-    if(GlobalInterfaceState == LEVEL_MENU)
-    {
-        for(int i = 0; i < levelMenu.rows; ++i)
-        {
-            SDL_Rect menuRect = {650, 140 + i * MENU_ROW_HEIGHT, MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &menuRect);
-            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
-
-            RenderText(levelMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
-        }
-
-        SDL_Rect menuSelectorRect = {650, 140 + MENU_ROW_HEIGHT * levelMenu.current, MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
-        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
-        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
-    }
-
-    if(GlobalInterfaceState == CONVERSATION_MENU)
-    {
-        for(int i = 0; i < conversationMenu.rows; ++i)
-        {
-            SDL_Rect menuRect = {400, 140 + i * MENU_ROW_HEIGHT, CONV_MENU_WIDTH, MENU_ROW_HEIGHT};
-
-            if(i < conversations.list.size() && conversations.list[i].done)
-                SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
-            else
-                SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-            SDL_RenderFillRect(GlobalRenderer, &menuRect);
-
-            SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-            SDL_RenderDrawRect(GlobalRenderer, &menuRect);
-
-            RenderText(conversationMenu.optionTextTextures[i], menuRect.x + 10, menuRect.y);
-        }
-
-        SDL_Rect menuSelectorRect = {400, 140 + MENU_ROW_HEIGHT * conversationMenu.current, CONV_MENU_WIDTH, MENU_ROW_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, uiSelectorColor.a);
-        SDL_RenderFillRect(GlobalRenderer, &menuSelectorRect);
-        SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
-        SDL_RenderDrawRect(GlobalRenderer, &menuSelectorRect);
-    }
-
+    /*
     // Portraits
     if(GlobalInterfaceState == UNIT_INFO ||
 	   GlobalInterfaceState == ENEMY_INFO)
@@ -514,118 +288,7 @@ Render(const Tilemap &map, const Cursor &cursor,
                        subject->health < subject->MaxHealth() * 0.5 ? EXPR_WINCE : EXPR_NEUTRAL,
                        subject->is_ally);
     }
-
-    if(GlobalInterfaceState == PREVIEW_ATTACK ||
-	   GlobalInterfaceState == PREVIEW_ABILITY)
-    {
-        SDL_assert(cursor.selected);
-
-        RenderPortrait(-100, 0, *cursor.selected, 
-                       GlobalInterfaceState == PREVIEW_ABILITY ? EXPR_HAPPY : EXPR_ANGRY, 
-                       true);
-        RenderPortrait(430, 0, *cursor.targeted, 
-                       GlobalInterfaceState == PREVIEW_ABILITY ? EXPR_HAPPY : EXPR_ANGRY, 
-                       false);
-    }
-
-    if(GlobalInterfaceState == RESOLVING_ADVANCEMENT ||
-	   GlobalAIState == AI_RESOLVING_ADVANCEMENT)
-    {
-        RenderPortrait(-100, 0, *advancement.recipient,
-                       EXPR_HAPPY,
-                       true);
-    }
-
-    if(GlobalInterfaceState == CONVERSATION ||
-       GlobalInterfaceState == BATTLE_CONVERSATION ||
-       GlobalInterfaceState == PRELUDE ||
-       GlobalInterfaceState == VILLAGE_CONVERSATION ||
-       GlobalInterfaceState == CUTSCENE)
-    {
-        Conversation conversation;
-        if(GlobalInterfaceState == CONVERSATION)
-            conversation = conversations.list[conversations.index];
-
-        if(GlobalInterfaceState == BATTLE_CONVERSATION ||
-           GlobalInterfaceState == VILLAGE_CONVERSATION)
-            conversation = *conversations.current_conversation;
-
-        if(GlobalInterfaceState == PRELUDE)
-            conversation = conversations.prelude;
-
-        if(GlobalInterfaceState == CUTSCENE)
-            conversation = conversations.current_cutscene->second;
-
-        SDL_Rect bg_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, 150);
-        SDL_RenderFillRect(GlobalRenderer, &bg_rect);
-
-        if(conversation.active[3])
-            RenderPortrait(150, 0, *conversation.four,
-                           conversation.expressions[3], true);
-        if(conversation.active[2])
-            RenderPortrait(350, 0, *conversation.three,
-                           conversation.expressions[2], false);
-
-        if(conversation.active[0])
-            RenderPortrait(-50, 0, *conversation.one,
-                           conversation.expressions[0], true);
-        if(conversation.active[1])
-            RenderPortrait(500, 0, *conversation.two,
-                           conversation.expressions[1], false);
-
-        SDL_Rect conv_rect = {20, 400, 860, 180};
-        SDL_SetRenderDrawColor(GlobalRenderer, uiColor.r, uiColor.g, uiColor.b, uiColor.a);
-        SDL_RenderFillRect(GlobalRenderer, &conv_rect);
-        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-        SDL_RenderDrawRect(GlobalRenderer, &conv_rect);
-
-        SDL_Rect name_rect;
-        if(conversation.Speaker() == SPEAKER_ONE)
-        {
-            name_rect = {20, 400, 300, 40};
-        }
-        else
-        {
-            name_rect = {580, 400, 300, 40};
-        }
-        SDL_SetRenderDrawColor(GlobalRenderer, uiSelectorColor.r, uiSelectorColor.g, uiSelectorColor.b, 255);
-        SDL_RenderFillRect(GlobalRenderer, &name_rect);
-        SDL_SetRenderDrawColor(GlobalRenderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-        SDL_RenderDrawRect(GlobalRenderer, &name_rect);
-
-        RenderText(conversation.speaker_texture, name_rect.x + 10, 400);
-        RenderText(conversation.words_texture, 30, 440);
-    }
-
-    SDL_Rect fade_rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    if(level_fade.animation)
-    {
-        SDL_SetRenderDrawColor(GlobalRenderer, level_fade.color.r, level_fade.color.g, level_fade.color.b, (int)(255 * level_fade.amount));
-        SDL_RenderFillRect(GlobalRenderer, &fade_rect);
-    }
-
-    if(turn_fade.animation)
-    {
-        SDL_SetRenderDrawColor(GlobalRenderer, turn_fade.color.r, turn_fade.color.g, turn_fade.color.b, (int)(255 * turn_fade.amount));
-        SDL_RenderFillRect(GlobalRenderer, &fade_rect);
-
-        if(turn_fade.amount > 0.3f)
-        {
-            if(turn_fade.show_first_texture)
-                RenderText(turn_fade.texture_one, 400, 200);
-            else
-                RenderText(turn_fade.texture_two, 400, 200);
-            RenderText(turn_fade.turn_count_texture, 525, 250);
-        }
-    }
-
-    if(dying)
-    {
-        RenderPortrait(-50, 0, *dying,
-                       EXPR_WINCE,
-                       true);
-    }
+    */
 }
 
 #endif

@@ -35,16 +35,12 @@ static ImFont *uiFontLarge;
 // My Globals
 static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
-static bool GlobalDebug = false;
+static bool GlobalDebug = true;
 static bool GlobalPlayerTurn = true;
 
 static bool GlobalPaused = false;
 static bool GlobalStep = false;
 static int GlobalSpeedMod = 1;
-
-// TODO: Refactor these to only be where they need to be.
-static int viewportCol = 0;
-static int viewportRow = 0;
 
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This file is the only compilation unit, and it
@@ -57,7 +53,7 @@ static AIState GlobalAIState;
 #include "event.h" // NOTE: Includes Global Event handler
 #include "animation.h"
 #include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
-#include "item.h"
+#include "weapon.h"
 #include "structs.h"
 #include "vfx.h"
 #include "cursor.h"
@@ -157,7 +153,6 @@ int main(int argc, char *argv[])
 // ================================== load =================================
     vector<shared_ptr<Unit>> units = LoadUnits(UNITS_PATH + string(INITIAL_UNITS));
     vector<shared_ptr<Unit>> party = {};
-    Unit *dying = nullptr;
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
                              string("l2.txt"), string("l3.txt"),
@@ -172,24 +167,14 @@ int main(int argc, char *argv[])
 
 	UI_State ui = {};
 
-    Menu game_menu({"Outlook", "Options", "End Turn"});
-    Menu unit_menu({"Wait"});
-    Menu level_menu({"Next", "Redo", "Conv"});
-    Menu conversation_menu({"Return"});
-
-    Fade level_fade = {"placeholder", "placeholder"};
-    Fade turn_fade = {"Player Turn", "Enemy Turn", FADE_TURN};
-    Parcel parcel;
-    Advancement advancement;
+    Menu game_menu({"Options", "End Turn"});
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
     AI ai;
 
-    Fight fight;
-
     GlobalInterfaceState = TITLE_SCREEN;
-    GlobalAIState = AI_PLAYER_TURN;
+    GlobalAIState = AI_NO_OP;
 
     unsigned long long frame = 0;
 
@@ -210,23 +195,14 @@ int main(int argc, char *argv[])
         {
             GlobalStep = false;
             handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level, units, party,
-                                   &game_menu, &unit_menu, 
-                                   &level_menu, &conversation_menu,
-                                   &fight);
+            handler.UpdateCommands(&cursor, &level, units, party, &game_menu);
 
-            ai.Update(&cursor, &level, &fight);
+            ai.Update(&cursor, &level);
 
             cursor.Update(&level.map);
-            fight.Update();
-            parcel.Update();
-            advancement.Update();
             level.Update();
 
-            EventSystemUpdate(&level_fade, &turn_fade, &parcel, &advancement, &dying);
-
-            level_fade.Update();
-            turn_fade.Update();
+            EventSystemUpdate();
 
             for(const shared_ptr<Unit> &unit : level.combatants)
                 unit->Update();
@@ -241,26 +217,40 @@ int main(int argc, char *argv[])
             level.next_level = false;
             level_index = (level_index + 1 < levels.size()) ? level_index + 1 : 0;
 
-            level = level.LoadNextLevel(levels[level_index], units, &party);
+            party = {};
+            for(shared_ptr<Unit> unit : level.combatants)
+            {
+            // Reset the party's statistics
+                if(unit->is_ally)
+                {
+                    unit->health = unit->max_health;
+                    unit->is_exhausted = false;
+                    party.push_back(unit);
+                }
+            }
+            level.song->Stop();
+            level = LoadLevel(levels[level_index], units, party);
+
+            GlobalPlayerTurn = true;
+            level.turn_start = true;
         }
         if(level.CheckNextTurn())
         {
             cursor.PlaceAt(level.Leader());
-            SetViewport(cursor.pos, level.map.width, level.map.height);
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
             ai.clearQueue();
             handler.clearQueue();
         }
 
         // Render
-        Render(level.map, cursor, game_menu, unit_menu, level_menu, conversation_menu,
-               level.conversations, fight, level_fade, turn_fade, advancement, dying);
+        Render(level.map, cursor, game_menu);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level, fight, parcel, advancement, dying);
+        RenderUI(&ui, cursor, level);
 
 #if DEV_MODE
         if(GlobalEditorMode)

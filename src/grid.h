@@ -40,10 +40,10 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
 
 	// initialize costs matrix
 	vector<vector<int>> costs;
-	for(int col = 0; col < map.width; ++col)
+	for(int col = 0; col < MAP_WIDTH; ++col)
 	{
         vector<int> currentColumn = {};
-        for(int row = 0; row < map.height; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
             currentColumn.push_back(100);
         }
@@ -69,7 +69,7 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
         {
             position new_pos = {current.col + directionsCol[i],
                                 current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(map.width, map.height, new_pos))
+            if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
             {
                 int newCost = costs[current.col][current.row] + 1;
                 if(newCost < costs[new_pos.col][new_pos.row])
@@ -90,6 +90,25 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
     return interactible;
 }
 
+// TODO: Other weapon types
+// returns a vector of positions representing orthogonal squares for a given unit.
+vector<position>
+Orthogonal(const Tilemap &map, const position &origin)
+{
+    vector<position> orthogonal;
+
+    for(int col = 0; col < MAP_WIDTH; ++col)
+    {
+        orthogonal.push_back(position(col, origin.row));
+    }
+    for(int row = 0; row < MAP_HEIGHT; ++row)
+    {
+        orthogonal.push_back(position(origin.col, row));
+    }
+
+    return orthogonal;
+}
+
 // returns a vector of positions representing accessible squares for a given unit.
 // NOTE: This may be the most hideous function I have ever written.
 // TODO: Immolate this
@@ -104,10 +123,10 @@ AccessibleAndAttackableFrom(const Tilemap &map, position origin,
 
 	// initialize costs matrix
 	vector<vector<int>> costs;
-	for(int col = 0; col < map.width; ++col)
+	for(int col = 0; col < MAP_WIDTH; ++col)
 	{
         vector<int> currentColumn = {};
-        for(int row = 0; row < map.height; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
             currentColumn.push_back(100);
         }
@@ -133,7 +152,7 @@ AccessibleAndAttackableFrom(const Tilemap &map, position origin,
         {
             position new_pos = {current.col + directionsCol[i],
                                 current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(map.width, map.height, new_pos))
+            if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
             {
                 int newCost;
                 if(map.tiles[new_pos.col][new_pos.row].occupant && 
@@ -143,8 +162,7 @@ AccessibleAndAttackableFrom(const Tilemap &map, position origin,
                 }
                 else
                 {
-                    newCost = costs[current.col][current.row] + 
-                              map.tiles[new_pos.col][new_pos.row].penalty;
+                    newCost = costs[current.col][current.row] + 1;
                 }
                 if(newCost < costs[new_pos.col][new_pos.row])
                 {
@@ -258,10 +276,10 @@ vector<vector<direction>>
 GetField(const Tilemap &map, position origin, bool is_ally)
 {
     vector<vector<direction>> field;
-	for(int col = 0; col < map.width; ++col)
+	for(int col = 0; col < MAP_WIDTH; ++col)
 	{
         vector<direction> currentColumn = {};
-        for(int row = 0; row < map.height; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
             currentColumn.push_back(direction(-1, -1));
         }
@@ -269,10 +287,10 @@ GetField(const Tilemap &map, position origin, bool is_ally)
 	}
 
     vector<vector<int>> distances;
-	for(int col = 0; col < map.width; ++col)
+	for(int col = 0; col < MAP_WIDTH; ++col)
 	{
         vector<int> currentColumn = {};
-        for(int row = 0; row < map.height; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
             currentColumn.push_back(100);
         }
@@ -302,10 +320,9 @@ GetField(const Tilemap &map, position origin, bool is_ally)
             direction dir = {-directionsRow[i], -directionsCol[i]};
             position new_pos = {current.col + directionsCol[i],
                                 current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(map.width, map.height, new_pos))
+            if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
             {
-                int newCost = distances[current.col][current.row]
-                              + map.tiles[new_pos.col][new_pos.row].penalty;
+                int newCost = distances[current.col][current.row] + 1;
 
                 if(map.tiles[new_pos.col][new_pos.row].occupant &&
                    (map.tiles[new_pos.col][new_pos.row].occupant->is_ally != is_ally))
@@ -413,7 +430,7 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit,
 
     for(const position &pos : range)
     {
-        interactible = InteractibleFrom(map, pos, unit.MinRange(), unit.MaxRange());
+        interactible = InteractibleFrom(map, pos, 1, 1);
         for(const position &i : interactible)
         {
             if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->is_ally)
@@ -433,9 +450,9 @@ Unit *FindNearest(const Tilemap &map, const position &origin,
     int minDistance = 100;
     int distance = 0;
     Unit *result = nullptr;
-    for(int col = 0; col < map.width; ++col)
+    for(int col = 0; col < MAP_WIDTH; ++col)
     {
-        for(int row = 0; row < map.height; ++row)
+        for(int row = 0; row < MAP_HEIGHT; ++row)
         {
             if(map.tiles[col][row].occupant && predicate(*map.tiles[col][row].occupant))
             {

@@ -40,17 +40,7 @@ struct Texture
         this->filename = filename_in;
     }
 
-    Texture()
-    {
-        //printf("WARN: Default texture constructor called.\n");
-    }
-
-    ~Texture()
-    {
-        //TODO: This causes some funny stuff to happen!
-        //      But I think it has to be called. Look into this.
-        //SDL_DestroyTexture(sdl_texture);
-    }
+    Texture() = default;
 };
 
 
@@ -125,120 +115,26 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
-enum Ability
-{
-    ABILITY_NONE,
-    ABILITY_HEAL,
-    ABILITY_BUFF,
-    ABILITY_SHIELD,
-    ABILITY_DANCE,
-};
-
-struct Buff
-{
-    Stat stat = STAT_NONE;
-    int amount = 5;
-    int turns_remaining = 1;
-
-    Buff(Stat stat_in, int amount_in, int turns_remaining_in)
-    : stat(stat_in),
-      amount(amount_in),
-      turns_remaining(turns_remaining_in)
-    {}
-};
-
-enum ConditionType
-{
-    CONDITION_NONE,
-    CONDITION_GRAPPLED,
-};
-struct Condition
-{
-    ConditionType type = CONDITION_NONE;
-    int turns_remaining = 1;
-    Stat stat = STAT_NONE;
-    int save = 10;
-
-    Condition(ConditionType type_in, int turns_in,
-              Stat stat_in, int save_in)
-    : type(type_in),
-      turns_remaining(turns_in),
-      stat(stat_in),
-      save(save_in)
-    {
-    }
-};
-
-Condition *
-GetCondition(ConditionType type)
-{
-    switch(type)
-    {
-        case CONDITION_NONE:        return nullptr;
-        case CONDITION_GRAPPLED:    return new Condition(type, -1, STAT_STRENGTH, 12);
-        default: cout << "WARNING: GetCondition() bad type: " << type << "\n"; return nullptr;
-    }
-}
-
-
-enum Expression
-{
-    EXPR_NEUTRAL,
-    EXPR_HAPPY,
-    EXPR_ANGRY,
-    EXPR_WINCE,
-};
-
-
 struct Unit
 {
     string name;
     bool is_ally;
     int health;
+    int max_health;
+    int movement;
 
-    int strength;
-    int dexterity;
-    int vitality;
-    int intuition;
-    int faith;
+    Item primary;
+    Item secondary;
 
-    int level;
-    Ability ability;
-
-    int experience = 0;
-
-    Item *weapon;
-    Item *pocket;
-
-    int arrival = 0;
-    int turns_active = -1;
-    int xp_value = 0;
-    AIBehavior ai_behavior = NO_BEHAVIOR;
     position pos = {0, 0};
-    bool is_exhausted = false;
-    bool should_die = false;
-    bool has_spoken_valediction = false;
-    position animation_offset = {0, 0};
-    bool is_boss = false;
+    position initial_pos = {0, 0};
 
-    Buff *buff = nullptr;
-    Condition *condition = nullptr;
+    bool has_moved = false;
+    bool is_exhausted = false;
+
+    bool should_die = false;
 
     Spritesheet sheet;
-    Texture neutral;
-    Texture happy;
-    Texture angry;
-    Texture wince;
-
-    string valediction;
-
-    ~Unit()
-    {
-        delete buff;
-        delete condition;
-        delete weapon;
-        delete pocket;
-    }
 
     size_t
     ID()
@@ -254,194 +150,46 @@ struct Unit
 
     Unit(
          string name_in, bool is_ally_in,
-         int strength_in, int dexterity_in,
-         int vitality_in,
-         int intuition_in, int faith_in,
-         int level_in,
-         Ability ability_in,
-         AIBehavior ai_behavior_in,
-         int xp_value_in,
-
-         ItemType weapon_type_in,
-         ItemType pocket_type_in,
-
-         Spritesheet sheet_in,
-         Texture neutral_in,
-         Texture happy_in,
-         Texture angry_in,
-         Texture wince_in,
-         const string &valediction_in
+         int health_in, int movement_in,
+         ItemType primary_type,
+         ItemType secondary_type,
+         Spritesheet sheet_in
          )
     : name(name_in),
       is_ally(is_ally_in),
-      strength(strength_in),
-      dexterity(dexterity_in),
-      vitality(vitality_in),
-      intuition(intuition_in),
-      faith(faith_in),
-      level(level_in),
-      ability(ability_in),
-      ai_behavior(ai_behavior_in),
-      xp_value(xp_value_in),
-      sheet(sheet_in),
-      neutral(neutral_in),
-      happy(happy_in),
-      angry(angry_in),
-      wince(wince_in),
-      valediction(valediction_in)
+      max_health(health_in),
+      health(health_in),
+      movement(movement_in),
+      sheet(sheet_in)
     {
-        health = MaxHealth();
-        weapon = GetItem(weapon_type_in);
-        pocket = GetItem(pocket_type_in);
+        primary = GetItem(primary_type);
+        secondary = GetItem(secondary_type);
     }
 
     Unit(const Unit &other)
     : name(other.name),
       is_ally(other.is_ally),
+      max_health(other.max_health),
       health(other.health),
-      strength(other.strength),
-      dexterity(other.dexterity),
-      vitality(other.vitality),
-      intuition(other.intuition),
-      faith(other.faith),
-      level(other.level),
-      ability(other.ability),
-      ai_behavior(other.ai_behavior),
-      xp_value(other.xp_value),
-      sheet(other.sheet),
-      neutral(other.neutral),
-      happy(other.happy),
-      angry(other.angry),
-      wince(other.wince)
+      movement(other.movement),
+      primary(other.primary),
+      secondary(other.secondary),
+      sheet(other.sheet)
     {
-        if(other.weapon)
-            weapon = new Item(*other.weapon);
-        if(other.pocket)
-            pocket = new Item(*other.pocket);
-    }
-
-    // Switches the primary weapon with the secondary item
-    void
-    SwitchItems()
-    {
-        assert(weapon->weapon);
-        Item *tmp = weapon;
-        weapon = pocket;
-        pocket = tmp;
-    }
-
-    // Uses the pocket item
-    void
-    Use()
-    {
-        assert(pocket);
-        if(!pocket->consumable)
-        {
-            cout << "WARNING: Item.Use() not right. Item type: " << GetItemString(pocket->type) << "\n";
-            return;
-        }
-
-        switch(pocket->consumable->type)
-        {
-            case CONS_NOTHING: cout << "WARNING: Item.Use() not right. Item type: " << GetItemString(pocket->type) << "\n";
-            case CONS_POTION: Heal(pocket->consumable->amount); break;
-            case CONS_STATBOOST: cout << "Unimplemented STATBOOST item in Use()\n"; break;
-            case CONS_BUFF: cout << "Unimplemented BUFF item in Use()\n"; break;
-            default: cout << "UNIMPLEMENTED DEFAULT Item in USE()\n"; break;
-        }
-        cout << "Used item: " << GetItemString(pocket->type) << "\n";
-        Discard();
-    }
-
-    // Deletes the unit's pocket item.
-    void
-    Discard()
-    {
-        delete pocket;
-        pocket = nullptr;
-    }
-
-    bool
-    PrimaryRange(int distance) const
-    {
-        if(weapon && weapon->weapon && 
-           weapon->weapon->min_range <= distance &&
-           weapon->weapon->max_range >= distance)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    bool
-    SecondaryRange(int distance) const
-    {
-        if(pocket && pocket->weapon && 
-           pocket->weapon->min_range <= distance &&
-           pocket->weapon->max_range >= distance)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    int
-    MinRange() const
-    {
-        if(weapon && weapon->weapon)
-            return weapon->weapon->min_range;
-        return 0;
-    }
-    int
-    MaxRange() const
-    {
-        if(weapon && weapon->weapon)
-            return weapon->weapon->max_range;
-        return 0;
-    }
-
-    int
-    OverallMinRange() const
-    {
-        int result = 0;
-        if(weapon && weapon->weapon)
-        {
-            result = weapon->weapon->min_range;
-        }
-        if(pocket && pocket->weapon)
-        {
-            result = min(result, pocket->weapon->min_range);
-        }
-        return result;
-    }
-
-    int
-    OverallMaxRange() const
-    {
-        int result = 0;
-        if(weapon && weapon->weapon)
-        {
-            result = weapon->weapon->max_range;
-        }
-        if(pocket && pocket->weapon)
-        {
-            result = max(result, pocket->weapon->max_range);
-        }
-        return result;
     }
 
     // Damages a unit and resolves things involved with that process.
     void
     Damage(int amount)
     {
-        health = clamp(health - amount, 0, MaxHealth());
+        health = clamp(health - amount, 0, max_health);
     }
 
     // Damages a unit and resolves things involved with that process.
     void
     Heal(int amount)
     {
-        health = clamp(health + amount, 0, MaxHealth());
+        health = clamp(health + amount, 0, max_health);
     }
 
     void
@@ -455,61 +203,8 @@ struct Unit
     {
         is_exhausted = false;
     }
-    void
-    ApplyBuff(Buff *buff_in)
-    {
-        buff = buff_in;
-    }
-    void
-    ApplyCondition(Condition *cond_in)
-    {
-        condition = cond_in;
-    }
-    bool
-    CanMove()
-    {
-        if(condition && condition->type == CONDITION_GRAPPLED)
-            return false;
-        return true;
-    }
 
-    // Called every turn. If buff is over, deletes the buff.
-    void
-    TickBuff()
-    {
-        --(buff->turns_remaining);
-        if(buff->turns_remaining <= 0)
-        {
-            delete buff;
-            buff = nullptr;
-        }
-    }
-    // Called every turn. If buff is over, deletes the buff.
-    void
-    TickCondition()
-    {
-        if(!condition)
-            return;
-
-        if(condition->turns_remaining > 0)
-        {
-            --(condition->turns_remaining);
-        }
-        else if(condition->turns_remaining == 0)
-        {
-            delete condition;
-            condition = nullptr;
-        }
-        else
-        {
-            if(Roll(d20) >= condition->save)
-            {
-                delete condition;
-                condition = nullptr;
-            }
-        }
-    }
-
+    /*
     bool
     GrantExperience(int amount)
     {
@@ -524,76 +219,7 @@ struct Unit
 
         return false;
     }
-
-    int MaxHealth() const
-    {
-        return max(1, 10 + (3 + (vitality / 2)) * level);
-    }
-
-    int Movement() const
-    {
-        return max(1, 4 + dexterity / 3);
-    }
-
-    int GetWeaponHitStat() const
-    {
-        if(!weapon)
-            return 0;
-
-        assert(weapon->weapon);
-        switch(weapon->weapon->hit_stat)
-        {
-            case STAT_NONE:      return 0;
-            case STAT_STRENGTH:  return strength;
-            case STAT_DEXTERITY: return dexterity;
-            case STAT_VITALITY:  return vitality;
-            case STAT_INTUITION: return intuition;
-            case STAT_FAITH:     return faith;
-        }
-    }
-
-    int GetWeaponDmgStat() const
-    {
-        if(!weapon)
-            return 0;
-
-        assert(weapon->weapon);
-        switch(weapon->weapon->hit_stat)
-        {
-            case STAT_NONE:      return 0;
-            case STAT_STRENGTH:  return strength;
-            case STAT_DEXTERITY: return dexterity;
-            case STAT_VITALITY:  return vitality;
-            case STAT_INTUITION: return intuition;
-            case STAT_FAITH:     return faith;
-        }
-    }
-
-    int
-    ToHit() const
-    {
-        return (weapon ? GetWeaponHitStat() 
-                       : max(strength, dexterity));
-    }
-
-    int
-    DamageAmount() const
-    {
-        return (weapon ? weapon->weapon->RollDamage() + GetWeaponDmgStat()
-                        : max(1, 1 + strength));
-    }
-
-    int
-    AC() const
-    {
-        return 12;
-    }
-
-    int
-    Crit() const
-    {
-        return 20;
-    }
+    */
 };
 
 Unit *
@@ -610,247 +236,31 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
     return nullptr;
 }
 
-// ===================================== Converation ===========================
-enum Speaker
-{
-    SPEAKER_ONE,
-    SPEAKER_TWO,
-    SPEAKER_THREE,
-    SPEAKER_FOUR,
-};
-
-enum ConversationEvent
-{
-    CONV_NONE,
-    CONV_ONE_EXITS,
-    CONV_TWO_EXITS,
-    CONV_THREE_EXITS,
-    CONV_FOUR_EXITS,
-    CONV_ONE_ENTERS,
-    CONV_TWO_ENTERS,
-    CONV_THREE_ENTERS,
-    CONV_FOUR_ENTERS,
-};
-
-Expression
-GetExpressionFromString(const string &in)
-{
-    if(in == "Neutral") return EXPR_NEUTRAL;
-    else if(in == "Happy") return EXPR_HAPPY;
-    else if(in == "Angry") return EXPR_ANGRY;
-    else if(in == "Wince") return EXPR_WINCE;
-    cout << "Warning: Unsupported Expression in GetExpressionFromString: " << in << "\n";
-    return EXPR_NEUTRAL;
-}
-
-ConversationEvent
-GetConversationEventFromString(const string &in)
-{
-    if(in == "ONE Exits") return CONV_ONE_EXITS;
-    else if(in == "TWO Exits") return CONV_TWO_EXITS;
-    else if(in == "THREE Exits") return CONV_THREE_EXITS;
-    else if(in == "FOUR Exits") return CONV_FOUR_EXITS;
-    else if(in == "ONE Enters") return CONV_ONE_ENTERS;
-    else if(in == "TWO Enters") return CONV_TWO_ENTERS;
-    else if(in == "THREE Enters") return CONV_THREE_ENTERS;
-    else if(in == "FOUR Enters") return CONV_FOUR_ENTERS;
-    SDL_assert(!"Warning: Unsupported Expression in GetConversationEventFromString.");
-    return CONV_ONE_EXITS;
-}
-
-struct Sentence
-{
-    Speaker speaker;
-    string text;
-    Expression expression;
-    ConversationEvent event;
-};
-
-// CIRCULAR
-Texture LoadTextureText(string, SDL_Color, int);
-
-struct Conversation
-{
-    string filename = "";
-    Unit *one = nullptr;
-    Unit *two = nullptr;
-    Unit *three = nullptr;
-    Unit *four = nullptr;
-    position pos = {-1, -1};
-    vector<bool> active = {true, false, false, false};
-    vector<Expression> expressions = {EXPR_NEUTRAL, EXPR_NEUTRAL, EXPR_NEUTRAL, EXPR_NEUTRAL};
-    int current = 0;
-    bool done = false;
-    Sound *song = nullptr;
-    vector<Sentence> prose;
-    Texture words_texture;
-    Texture speaker_texture;
-
-    Conversation() = default;
-
-    string
-    Words() const
-    {
-        return prose[current].text;
-    }
-
-    Speaker
-    Speaker() const
-    {
-        return prose[current].speaker;
-    }
-
-    Expression
-    Expression() const
-    {
-        return prose[current].expression;
-    }
-
-    void
-    ReloadTextures()
-    {
-        words_texture = LoadTextureText(Words(), black, CONVERSATION_WRAP);
-        if(Speaker() == SPEAKER_ONE)
-            speaker_texture = LoadTextureText(one->name, black, 0);
-        else if(Speaker() == SPEAKER_TWO)
-            speaker_texture = LoadTextureText(two->name, black, 0);
-        else if(Speaker() == SPEAKER_TWO)
-            speaker_texture = LoadTextureText(three->name, black, 0);
-        else if(Speaker() == SPEAKER_TWO)
-            speaker_texture = LoadTextureText(four->name, black, 0);
-    }
-
-    void
-    Next()
-    {
-        ++current;
-        if(current >= prose.size())
-        {
-            done = true;
-            current = 0;
-            return;
-        }
-
-        if(Speaker() == SPEAKER_ONE)
-            expressions[0] = Expression();
-        else if(Speaker() == SPEAKER_TWO)
-            expressions[1] = Expression();
-        else if(Speaker() == SPEAKER_THREE)
-            expressions[2] = Expression();
-        else if(Speaker() == SPEAKER_FOUR)
-            expressions[3] = Expression();
-
-        switch(prose[current].event)
-        {
-            case CONV_NONE:
-            {
-            } break;
-            case CONV_ONE_EXITS: 
-            {
-                active[0] = false;
-            } break;
-            case CONV_TWO_EXITS: 
-            {
-                active[1] = false;
-            } break;;
-            case CONV_THREE_EXITS: 
-            {
-                active[2] = false;
-            } break;;
-            case CONV_FOUR_EXITS: 
-            {
-                active[3] = false;
-            } break;;
-            case CONV_ONE_ENTERS: 
-            {
-                active[0] = true;
-            } break;;
-            case CONV_TWO_ENTERS:
-            {
-                active[1] = true;
-            } break;;
-            case CONV_THREE_ENTERS:
-            {
-                active[2] = true;
-            } break;;
-            case CONV_FOUR_ENTERS:
-            {
-                active[3] = true;
-            } break;;
-            default: SDL_assert(!"ERROR Unhandled enum in Conversation.Next()");
-        }
-    }
-};
-
-typedef pair<int, Conversation> cutscene;
-
-struct ConversationList
-{
-    vector<Conversation> list = {};
-    int index = 0;
-    vector<Conversation> mid_battle = {};
-    vector<Conversation> villages = {};
-    vector<cutscene> cutscenes = {};
-    cutscene *current_cutscene = nullptr;
-    Conversation *current_conversation = nullptr;
-    Conversation prelude;
-};
-
-
 // ========================== map stuff =======================================
 struct Tile
 {
     TileType type = FLOOR;
-    int penalty = 1;
-    int avoid = 0;
-    int defense = 0;
     Unit *occupant = nullptr;
     position atlas_index = {0, 16};
 };
 
 struct Tilemap
 {
-    int width;
-    int height;
-    vector<vector<Tile>> tiles = {};
+    Tile tiles[MAP_WIDTH][MAP_HEIGHT] = {};
     vector<position> accessible = {};
-    vector<position> attackable = {};
-    vector<position> ability = {};
     vector<position> range = {};
-    vector<position> adjacent = {};
-    vector<position> grapplable = {};
-    vector<position> vis_range = {};
-
-    // NOTE: For AI decision-making purposes
-    vector<position> double_range = {};
 
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;
 };
 
-enum Objective
-{
-    OBJECTIVE_ROUT,
-    OBJECTIVE_CAPTURE,
-    OBJECTIVE_BOSS,
-};
-
-// CIRCULAR: What a joke...
-struct Level;
-Level
-LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
-          const vector<shared_ptr<Unit>> &party);
-
 struct Level
 {
     string name = "";
-    Objective objective;
 
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
-    vector<shared_ptr<Unit>> bench;
 
-    ConversationList conversations;
     Sound *song = nullptr;
 
     int turn_count = -1;
@@ -861,50 +271,11 @@ struct Level
     void
     CheckVictory()
     {
-        if((objective == OBJECTIVE_ROUT &&
-             GetNumberOf(false) == 0)
-             ||
-            (objective == OBJECTIVE_BOSS && 
-             IsBossDead()))
+        if(turn_count > 4)
         {
             song->FadeOut();
-            GlobalInterfaceState = LEVEL_MENU;
-            GlobalAIState = AI_NO_OP;
             EmitEvent(MISSION_COMPLETE_EVENT);
         }
-    }
-
-    Level
-    LoadNextLevel(const string &name, 
-                  const vector<shared_ptr<Unit>> &units,
-                  vector<shared_ptr<Unit>> *party)
-    {
-        Level next;
-
-        *party = {};
-        for(shared_ptr<Unit> unit : combatants)
-        {
-        // Reset the party's statistics
-            if(unit->is_ally)
-            {
-                unit->health = unit->MaxHealth();
-                if(unit->buff)
-                    delete unit->buff;
-                    unit->buff = nullptr;
-                unit->turns_active = -1;
-                unit->is_exhausted = false;
-                party->push_back(unit);
-            }
-        }
-
-        song->Stop();
-        next = LoadLevel(name, units, *party);
-        next.conversations.prelude.song->Start();
-
-        GlobalPlayerTurn = true;
-        next.turn_start = true;
-
-        return next;
     }
 
     bool
@@ -918,43 +289,6 @@ struct Level
         if(GlobalPlayerTurn)
         {
             ++turn_count;
-
-            for(auto const &unit : combatants)
-            {
-                if(!unit->is_ally) // Increment enemy units
-                {
-                    ++unit->turns_active;
-                }
-                else
-                {
-                    if(unit->condition)
-                        unit->TickCondition();
-                }
-                if(unit->buff)
-                    unit->TickBuff();
-            }
-
-            for(auto unit : bench)
-            {
-                if(unit->is_ally && (unit->arrival == turn_count))
-                {
-                    map.tiles[unit->pos.col][unit->pos.row].occupant = unit.get();
-                    combatants.push_back(move(unit));
-                }
-            }
-        }
-        else
-        {
-            for(auto const &unit : combatants)
-            {
-                if(unit->is_ally)
-                    ++unit->turns_active;
-                else
-                {
-                    if(unit->condition)
-                        unit->TickCondition();
-                }
-            }
         }
 
         for(auto const &unit : combatants)
@@ -984,36 +318,6 @@ struct Level
         }
         SDL_assert(!"ERROR Level.Leader(): No leader!\n");
         return position(0, 0);
-    }
-
-    bool
-    IsBossDead()
-    {
-        for(const shared_ptr<Unit> &unit : combatants)
-        {
-            if(unit->is_boss)
-                return false;
-        }
-        return true;
-    }
-
-    void
-    DetectDeadAllies()
-    {
-        for(shared_ptr<Unit> unit : combatants)
-        {
-            if(unit->should_die)
-            {
-                if(unit->is_ally && !unit->has_spoken_valediction)
-                {
-                    unit->should_die = false;
-                    EmitEvent({UNIT_DEATH_EVENT, unit.get()});
-                    GlobalInterfaceState = DEATH;
-                    GlobalAIState = AI_DEATH;
-                    return;
-                }
-            }
-        }
     }
 
     void
@@ -1064,10 +368,10 @@ struct Level
 
             // End player turn
             GlobalInterfaceState = NO_OP;
-            GlobalAIState = AI_NO_OP;
+            GlobalAIState = AI_FINDING_NEXT;
             GlobalPlayerTurn = false;
             turn_start = true;
-            EmitEvent(START_AI_TURN_EVENT);
+            EmitEvent(END_TURN_EVENT);
         }
     }
 
@@ -1087,7 +391,6 @@ struct Level
     Update()
     {
         // cleanup functions
-        DetectDeadAllies();
         RemoveDeadUnits();
         CheckForRemaining();
         CheckVictory();
@@ -1095,6 +398,8 @@ struct Level
 };
 
 // ================================= Menu ======================================
+Texture
+LoadTextureText(string text, SDL_Color color, int line_length);
 struct Menu
 {
     int rows = 0;
