@@ -50,7 +50,7 @@ public:
                 return;
             }
 
-            if(hoverTile->occupant->is_ally)
+            if(hoverTile->occupant->IsAlly())
             {
                 GlobalInterfaceState = NEUTRAL_OVER_UNIT;
                 return;
@@ -95,7 +95,7 @@ public:
                                         cursor->selected->movement,
                                         1,
                                         1,
-                                        cursor->selected->is_ally);
+                                        cursor->selected->IsAlly());
         map->accessible = result.first;
     }
 
@@ -417,7 +417,7 @@ public:
                                         cursor->selected->movement,
                                         1,
                                         1, 
-                                        cursor->selected->is_ally);
+                                        cursor->selected->IsAlly());
         map->accessible = result.first;
 
         GlobalInterfaceState = ENEMY_RANGE;
@@ -431,13 +431,18 @@ private:
 class DeselectEnemyCommand : public Command
 {
 public:
-    DeselectEnemyCommand()
+    DeselectEnemyCommand(Cursor *cursor_in)
+    : cursor(cursor_in)
     {}
 
     virtual void Execute()
     {
+        cursor->selected = nullptr;
         GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
     }
+
+private:
+    Cursor *cursor;
 };
 
 // ======================= game menu commands =========================================
@@ -790,7 +795,7 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<DeselectEnemyCommand>());
+                BindB(make_shared<DeselectEnemyCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

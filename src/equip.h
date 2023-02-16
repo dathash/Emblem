@@ -149,33 +149,25 @@ struct Equip
       max_range(max_range_in)
     {}
 
-    /*
-    Equip(const Equip &other)
-    : name(other.name),
-      type(other.type),
-      cls(other.cls),
-      push(other.push),
-      move(other.move),
-      damage(other.damage),
-      push_damage(other.push_damage),
-      self_damage(other.self_damage),
-      min_range(other.min_range),
-      max_range(other.max_range)
-    {}
-    */
-
     size_t
     ID()
     {
         return hash<string>{}(name);
     }
 };
-std::ostream
-&operator<<(std::ostream &os, Equip const &e)
+
+Equip *
+GetEquipByName(const vector<shared_ptr<Equip>> &equipments, const string &name)
 {
-    return os << e.name << ": " << e.damage << " damage, " 
-                                << e.push_damage << " push, "
-                                << e.self_damage << " self.";
+    for(shared_ptr<Equip> equip : equipments)
+    {
+        if(equip->ID() == hash<string>{}(name))
+        {
+            return equip.get();
+        }
+    }
+    //cout << "WARN GetEquipByName: No equip of that name: " << name << "\n";
+    return nullptr;
 }
 
 #endif

@@ -1,7 +1,3 @@
-COM Author: Alex Hartford
-COM Program: Emblem
-COM File: Level
-
 ATL green.png
 
 MUS 21.wav
@@ -26,4 +22,19 @@ UNT Thief 2 1
 UNT Thief 4 1 
 UNT Thief 3 2 
 UNT Vaike 2 4 
+UNT Rock 6 2 
+UNT Rock 7 3 
+UNT Rock 7 4 
+UNT Rock 7 5 
+UNT Rock 6 6 
+UNT Rock 6 7 
+UNT Rock 5 7 
+UNT Rock 4 7 
+UNT Rock 3 7 
+UNT Rock 2 7 
+UNT Rock 5 6 
+UNT Rock 6 5 
+UNT Rock 6 4 
+UNT Rock 5 1 
+UNT Rock 4 0 
 

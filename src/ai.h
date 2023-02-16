@@ -21,7 +21,7 @@ public:
         selected = FindNearest(level->map, cursor->pos,
                 [](const Unit &unit) -> bool
                 {
-                    return !unit.is_ally && !unit.is_exhausted;
+                    return !unit.IsAlly() && !unit.is_exhausted;
                 }, false);
 
         if(selected)
@@ -62,7 +62,7 @@ public:
                                         cursor->selected->movement,
                                         1,
                                         1,
-                                        cursor->selected->is_ally);
+                                        cursor->selected->IsAlly());
         map->accessible = result.first;
 
         GlobalAIState = AI_SELECTED;

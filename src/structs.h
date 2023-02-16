@@ -115,10 +115,17 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
+enum Team
+{
+    TEAM_PLAYER,
+    TEAM_ENEMY,
+    TEAM_ENV,
+};
+
 struct Unit
 {
     string name;
-    bool is_ally;
+    Team team;
     int health;
     int max_health;
     int movement;
@@ -149,6 +156,12 @@ struct Unit
         return hash<string>{}(name);
     }
 
+    bool
+    IsAlly() const
+    {
+        return team == TEAM_PLAYER;
+    }
+
     void
     Update()
     {
@@ -156,14 +169,14 @@ struct Unit
     }
 
     Unit(
-         string name_in, bool is_ally_in,
+         string name_in, Team team_in,
          int health_in, int movement_in,
          Equip *primary_in,
          Equip *secondary_in,
          Spritesheet sheet_in
          )
     : name(name_in),
-      is_ally(is_ally_in),
+      team(team_in),
       max_health(health_in),
       health(health_in),
       movement(movement_in),
@@ -174,7 +187,7 @@ struct Unit
 
     Unit(const Unit &other)
     : name(other.name),
-      is_ally(other.is_ally),
+      team(other.team),
       max_health(other.max_health),
       health(other.health),
       movement(other.movement),
@@ -211,25 +224,7 @@ struct Unit
     {
         is_exhausted = false;
     }
-
-    /*
-    bool
-    GrantExperience(int amount)
-    {
-        if(level == 10)
-            return false;;
-
-        experience += amount;
-        if(experience >= 100)
-        {
-            return true;
-        }
-
-        return false;
-    }
-    */
 };
-
 
 Unit *
 GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
@@ -244,21 +239,6 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
     cout << "WARN GetUnitByName: No unit of that name: " << name << "\n";
     return nullptr;
 }
-
-Equip *
-GetEquipByName(const vector<shared_ptr<Equip>> &equipments, const string &name)
-{
-    for(shared_ptr<Equip> equip : equipments)
-    {
-        if(equip->ID() == hash<string>{}(name))
-        {
-            return equip.get();
-        }
-    }
-    cout << "WARN GetEquipByName: No equip of that name: " << name << "\n";
-    return nullptr;
-}
-
 // ========================== map stuff =======================================
 struct Tile
 {
@@ -386,7 +366,7 @@ struct Level
         {
             for(auto const &u : combatants)
             {
-                if(u->is_ally && !u->is_exhausted)
+                if(u->IsAlly() && !u->is_exhausted)
                     return;
             }
 
@@ -400,12 +380,12 @@ struct Level
     }
 
     int
-    GetNumberOf(bool is_ally = true) const
+    GetNumberOf(Team team = TEAM_PLAYER) const
     {
         int result = 0;
         for(shared_ptr<Unit> unit : combatants)
         {
-            if(unit->is_ally == is_ally)
+            if(unit->team == team)
                 ++result;
         }
         return result;

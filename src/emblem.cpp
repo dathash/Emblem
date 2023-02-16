@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
             party = {};
             for(shared_ptr<Unit> unit : level.combatants)
             {
-                if(unit->is_ally)
+                if(unit->IsAlly())
                 {
                     unit->health = unit->max_health;
                     unit->is_exhausted = false;

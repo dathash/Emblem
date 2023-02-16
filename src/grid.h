@@ -175,7 +175,7 @@ AccessibleAndAttackableFrom(const Tilemap &map, position origin,
             {
                 int newCost;
                 if(map.tiles[new_pos.col][new_pos.row].occupant && 
-                   map.tiles[new_pos.col][new_pos.row].occupant->is_ally != sourceIsAlly)
+                   map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != sourceIsAlly)
                 {
                     newCost = 100;
                 }
@@ -359,7 +359,7 @@ GetField(const Tilemap &map, position origin, bool is_ally)
                 int newCost = distances[current.col][current.row] + 1;
 
                 if(map.tiles[new_pos.col][new_pos.row].occupant &&
-                   (map.tiles[new_pos.col][new_pos.row].occupant->is_ally != is_ally))
+                   (map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != is_ally))
                 {
                     newCost = 100;
                 }
@@ -373,11 +373,6 @@ GetField(const Tilemap &map, position origin, bool is_ally)
             }
         }
     }
-#if 0
-    cout << "=============================\n";
-    PrintDistanceField(distances);
-    PrintField(field);
-#endif
 
     return field;
 }
@@ -467,7 +462,7 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit,
         interactible = InteractibleFrom(map, pos, 1, 1);
         for(const position &i : interactible)
         {
-            if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->is_ally)
+            if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->IsAlly())
             {
                 result.push_back(pair<position, Unit *>(pos, map.tiles[i.col][i.row].occupant));
             }

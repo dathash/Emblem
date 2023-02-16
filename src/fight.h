@@ -8,11 +8,10 @@
 // For use with line_shot mechs.
 position
 GetFirstTarget(const Tilemap &map, 
-               const position &pos, const direction &dir, 
-               int min_range, int max_range)
+               const position &pos, const direction &dir)
 {
     vector<position> line = Line(map, pos, dir);
-    for(int i = min_range-1; i <= min(max_range, line.size()); ++i)
+    for(int i = 0; i <= line.size(); ++i)
     {
         if(map.tiles[line[i].col][line[i].row].occupant)
             return line[i];
@@ -186,8 +185,7 @@ Simulate(Tilemap *map, const Equip &weapon,
     case EQUIP_LINE_SHOT:
     {
         position subject = GetFirstTarget(*map, source, 
-                                         GetDirection(source, destination),
-                                         weapon.min_range, weapon.max_range);
+                                         GetDirection(source, destination));
         if(!IsValid(subject))
             return;
 

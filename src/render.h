@@ -233,7 +233,7 @@ Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
 
                 SetSpriteModifiers(tileToRender.occupant);
 
-                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->is_ally);
+                RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->IsAlly());
                 RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
             }
         }

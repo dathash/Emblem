@@ -233,10 +233,10 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
                     secondary_copy = new Equip(*tmp); 
 
                 units.push_back(make_shared<Unit>(
-                    tokens[0],						    // name
-                    tokens[1] == "Ally" ? true : false, // team
-                    stoi(tokens[2]), // health
-                    stoi(tokens[3]), // movement
+                    tokens[0],             // name
+                    (Team)stoi(tokens[1]), // team
+                    stoi(tokens[2]),       // health
+                    stoi(tokens[3]),       // movement
 
                     primary_copy,
                     secondary_copy,
@@ -338,7 +338,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT\t" << unit->name << "\t"
-           << (unit->is_ally ? "Ally" : "Enemy") << "\t"
+           << unit->team << "\t"
            << unit->max_health << "\t"
            << unit->movement << "\t"
 

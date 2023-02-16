@@ -31,7 +31,6 @@ Audio(Level *level)
 }
 
 static uint8_t selectedIndex = 0;
-static bool editing_allies = false;
 void
 UnitEditor(
            vector<shared_ptr<Equip>> *equipments,
@@ -39,12 +38,11 @@ UnitEditor(
 {
     ImGui::Begin("unit editor");
     {
-        ImGui::Checkbox("allies", &editing_allies);
         if(ImGui::Button("create"))
         {
             units->push_back(make_shared<Unit>(
                 string("DEFAULT_CHANGE"),
-                false,
+                TEAM_ENV,
                 3,
                 3,
                 nullptr,
@@ -65,15 +63,12 @@ UnitEditor(
 
         for(int i = 0; i < units->size(); ++i)
         {
-            if((*units)[i]->is_ally == editing_allies)
-            {
-                char buffer[256];
-                sprintf(buffer, "%d", i);
-                if (ImGui::Button(buffer))
-                    selectedIndex = i;
-                if(i % 7 || i == 0)
-                    ImGui::SameLine();
-            }
+            char buffer[256];
+            sprintf(buffer, "%d", i);
+            if (ImGui::Button(buffer))
+                selectedIndex = i;
+            if(i % 7 || i == 0)
+                ImGui::SameLine();
         }
         ImGui::NewLine();
 
