@@ -45,6 +45,7 @@ UnitEditor(
                 TEAM_ENV,
                 3,
                 3,
+                false,
                 nullptr,
                 nullptr,
 
@@ -79,6 +80,7 @@ UnitEditor(
         ImGui::InputText("unit name", &(selected->name));
         ImGui::SliderInt("health", &selected->max_health, 1, 8);
         ImGui::SliderInt("movement", &selected->movement, 1, 8);
+        ImGui::Checkbox("fixed?", &selected->fixed);
 
         ImGui::Text("Items");
         if(selected->primary)

@@ -128,10 +128,10 @@ Genealogy's items are pretty close too.
 The story of the game is delivered through the characters.
 
 # TODO
-Rock Unit for pushing around
-Buildings
-Enemy Telegraphing and turn order
+Turn Order
+AI
 * Attacks
+* Telegraphing
 Visualization of attacks.
 AI pass (target buildings)
 Random Enemy Spawns

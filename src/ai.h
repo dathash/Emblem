@@ -21,7 +21,7 @@ public:
         selected = FindNearest(level->map, cursor->pos,
                 [](const Unit &unit) -> bool
                 {
-                    return !unit.IsAlly() && !unit.is_exhausted;
+                    return unit.IsAI() && !unit.is_exhausted;
                 }, false);
 
         if(selected)

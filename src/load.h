@@ -225,10 +225,10 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
 
                 Equip *primary_copy = nullptr;
                 Equip *secondary_copy = nullptr;
-                Equip *tmp = GetEquipByName(equipments, tokens[4]);
+                Equip *tmp = GetEquipByName(equipments, tokens[5]);
                 if(tmp)
                     primary_copy = new Equip(*tmp); 
-                tmp = GetEquipByName(equipments, tokens[5]);
+                tmp = GetEquipByName(equipments, tokens[6]);
                 if(tmp)
                     secondary_copy = new Equip(*tmp); 
 
@@ -237,11 +237,12 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
                     (Team)stoi(tokens[1]), // team
                     stoi(tokens[2]),       // health
                     stoi(tokens[3]),       // movement
+                    (bool)stoi(tokens[4]), // fixed?
 
                     primary_copy,
                     secondary_copy,
 
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[6]),
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[7]),
                                 32, ANIMATION_SPEED)
                 ));
             }
@@ -334,13 +335,14 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
     
-    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<prim>\t<secnd>\t<sprite>\n";
+    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<fixed>\t<prim>\t<secnd>\t<sprite>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT\t" << unit->name << "\t"
            << unit->team << "\t"
            << unit->max_health << "\t"
            << unit->movement << "\t"
+           << unit->fixed << "\t"
 
            << (unit->primary ? unit->primary->name : " ") << "\t"
            << (unit->secondary ? unit->secondary->name : " ") << "\t"

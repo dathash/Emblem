@@ -39,14 +39,18 @@ void
 SimulatePush(Tilemap *map, int push_damage,
              const position &initial, const direction &dir)
 {
+    // Damage occupants (innate to weapon)
+    if(!map->tiles[initial.col][initial.row].occupant)
+        return;
+    SimulateDamage(map->tiles[initial.col][initial.row].occupant, push_damage);
+
+    if(map->tiles[initial.col][initial.row].occupant->fixed)
+        return;
+
+    // Do the pushing
     position target = initial + dir;
     if(!IsValid(target) || !IsValid(initial))
         return;
-
-    if(!map->tiles[initial.col][initial.row].occupant)
-        return;
-        
-    SimulateDamage(map->tiles[initial.col][initial.row].occupant, push_damage);
 
     if(map->tiles[target.col][target.row].occupant)
     {

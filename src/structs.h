@@ -118,7 +118,7 @@ struct Spritesheet
 enum Team
 {
     TEAM_PLAYER,
-    TEAM_ENEMY,
+    TEAM_AI,
     TEAM_ENV,
 };
 
@@ -129,6 +129,7 @@ struct Unit
     int health;
     int max_health;
     int movement;
+    bool fixed;
 
     Equip *primary = nullptr;
     Equip *secondary = nullptr;
@@ -162,6 +163,12 @@ struct Unit
         return team == TEAM_PLAYER;
     }
 
+    bool
+    IsAI() const
+    {
+        return team == TEAM_AI;
+    }
+
     void
     Update()
     {
@@ -171,6 +178,7 @@ struct Unit
     Unit(
          string name_in, Team team_in,
          int health_in, int movement_in,
+         bool fixed_in,
          Equip *primary_in,
          Equip *secondary_in,
          Spritesheet sheet_in
@@ -180,6 +188,7 @@ struct Unit
       max_health(health_in),
       health(health_in),
       movement(movement_in),
+      fixed(fixed_in),
       primary(primary_in),
       secondary(secondary_in),
       sheet(sheet_in)
@@ -191,6 +200,7 @@ struct Unit
       max_health(other.max_health),
       health(other.health),
       movement(other.movement),
+      fixed(other.fixed),
       sheet(other.sheet)
     {
         if(other.primary)
