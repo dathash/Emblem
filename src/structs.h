@@ -232,6 +232,7 @@ struct Unit
     void
     Activate()
     {
+        has_moved = false;
         is_exhausted = false;
     }
 };

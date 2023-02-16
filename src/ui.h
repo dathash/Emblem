@@ -122,8 +122,7 @@ struct UI_State
 		if(
             GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
             GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
-            GlobalInterfaceState == ATTACK_THINKING
+            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT
             )
 		{
 			unit_blurb = true;
@@ -141,7 +140,8 @@ struct UI_State
         {
             unit_selected = false;
         }
-        if(GlobalInterfaceState == ATTACK_TARGETING)
+        if(GlobalInterfaceState == ATTACK_TARGETING ||
+           GlobalInterfaceState == ATTACK_THINKING)
         {
             attack_targeting = true;
         }

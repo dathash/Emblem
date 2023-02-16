@@ -274,18 +274,19 @@ public:
 
         cursor->MoveTo(new_pos, dir * -1);
 
-        if(new_pos == cursor->selected->pos)
-        {
-            map->attackable.clear();
-            GlobalInterfaceState = ATTACK_THINKING;
-            return;
-        }
-
         if(VectorHasElement(new_pos, map->range))
         {
             cursor->targeting = new_pos;
             map->attackable.clear();
             map->attackable = {new_pos};
+        }
+
+        if(cursor->targeting == position(-1, -1) || 
+           new_pos == cursor->selected->pos)
+        {
+            map->attackable.clear();
+            GlobalInterfaceState = ATTACK_THINKING;
+            return;
         }
 
         GlobalInterfaceState = ATTACK_TARGETING;
@@ -488,6 +489,7 @@ public:
             {
                 GlobalPlayerTurn = false;
                 GlobalInterfaceState = NO_OP;
+                GlobalAIState = AI_FINDING_NEXT;
                 EmitEvent(END_TURN_EVENT);
                 return;
             } break;

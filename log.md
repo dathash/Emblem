@@ -133,6 +133,13 @@ AI
 * Attacks
 * Telegraphing
 Visualization of attacks.
+* Punch
+* Line shots
+* Ram (Line shot variant)
+* Artillery
+* Leap (Artillery variant)
+* Show Where the unit will end up by the end.
+* Show Damage outcome
 AI pass (target buildings)
 Random Enemy Spawns
 Vek Surfacing
@@ -142,6 +149,7 @@ Animations
 * Destruction
 * Death
 * Attacks
+
 
 # Later
 Art
@@ -155,41 +163,14 @@ Conversations
     20 Cutscenes
 
 POLISH
-
-    Set the viewport code to work right in SetViewport (go to a soft viewport).
-
     Different colored menus.
-    Smooth Screen Scroll (Render tiles one tile off of the screen.)
     Pixel Squishing Fix
     Z-Sorting
 
-    More complex conversations
-    * Multiple preludes in a row.
-    * Animated stuff inbetween.
-
-    Smooth reinforcements
-
-    AI doesn't wait on every unit that won't act.
-    * Run a first pass that just gathers the units that will act, then run with
-      those.
-    * This will be faster anyways.
-
-    Cutscenes anytime, not just on end of player turn.
-    * Make sure that cutscenes featuring dead units don't trigger.
-
     Mini headshots displayed in unit blurb 
 
-QA
-    BUG | Enemies that can actually reach you don't believe that they can due to
-    the difference in pathfinding/flood filling. We NEED To get a more unified
-    solution working.
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
-
-Release
-Emscripten build 
-Mac build (with bundles)
-
 
 # Plot
 ## World

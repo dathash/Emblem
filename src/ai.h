@@ -31,10 +31,14 @@ public:
         }
         else
         {
+            cursor->selected = nullptr;
+
+            GlobalAIState = AI_NO_OP;
+
             GlobalPlayerTurn = true;
             level->turn_start = true;
+
             EmitEvent(END_TURN_EVENT);
-            GlobalInterfaceState = NO_OP;
         }
     }
 private: 
@@ -76,8 +80,9 @@ private:
 pair<position, Unit *>
 AttackInRangeBehavior(const Unit &unit, const Tilemap &map)
 {
-    pair<position, Unit *> action = {};
     vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
+    if(possibilities.empty())
+        return {unit.pos, nullptr};
     return possibilities[0];
 }
 
@@ -119,6 +124,7 @@ public:
         {
             cursor->pos = action.second->pos;
 
+            cursor->selected->Deactivate();
             GlobalAIState = AI_FINDING_NEXT;
             return;
         }
