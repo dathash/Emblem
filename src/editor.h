@@ -33,7 +33,9 @@ Audio(Level *level)
 static uint8_t selectedIndex = 0;
 static bool editing_allies = false;
 void
-UnitEditor(vector<shared_ptr<Unit>> *units)
+UnitEditor(
+           vector<shared_ptr<Equip>> *equipments,
+           vector<shared_ptr<Unit>> *units)
 {
     ImGui::Begin("unit editor");
     {
@@ -45,8 +47,8 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
                 false,
                 3,
                 3,
-                ITEM_NONE,
-                ITEM_NONE,
+                nullptr,
+                nullptr,
 
                 Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED)
             ));
@@ -79,25 +81,62 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         Unit *selected = (*units)[selectedIndex].get();
 
         ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
-        ImGui::InputText("name", &(selected->name));
+        ImGui::InputText("unit name", &(selected->name));
         ImGui::SliderInt("health", &selected->max_health, 1, 8);
         ImGui::SliderInt("movement", &selected->movement, 1, 8);
 
         ImGui::Text("Items");
-        ImGui::Text("Primary | %s", GetItemString(selected->primary.type).c_str());
-        ImGui::Text("Secondary | %s", GetItemString(selected->secondary.type).c_str());
+        if(selected->primary)
+            ImGui::Text("Primary | %s", selected->primary->name.c_str());
+        if(selected->secondary)
+            ImGui::Text("Secondary | %s", selected->secondary->name.c_str());
 
-        static int item_type = 0;
-        ImGui::Text("%s", GetItemString((ItemType)item_type).c_str());
-        ImGui::SliderInt("type", &item_type, 0, 30);
-        if(ImGui::Button("Primary"))
+        static int index = 0;
+        ImGui::SliderInt("index", &index, 0, 30);
+        if(index < equipments->size())
         {
-            selected->primary = GetItem((ItemType)item_type);
+            ImGui::Text("%s", equipments->at(index)->name.c_str());
+            if(ImGui::Button("Primary"))
+            {
+                if(selected->primary)
+                    delete selected->primary;
+                selected->primary = new Equip(*equipments->at(index));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Secondary"))
+            {
+                if(selected->secondary)
+                    delete selected->secondary;
+                selected->secondary = new Equip(*equipments->at(index));
+            }
+
+            ImGui::InputText("equip name", &(equipments->at(index)->name));
+
+            ImGui::SliderInt("type", (int *)&(equipments->at(index)->type), 0, 10);
+            ImGui::SameLine();
+            ImGui::Text("%s", GetEquipmentString(equipments->at(index)->type).c_str());
+
+            ImGui::SliderInt("class", (int *)&(equipments->at(index)->cls), 0, 10);
+            ImGui::SameLine();
+            ImGui::Text("%s", GetClassString(equipments->at(index)->cls).c_str());
+
+            ImGui::SliderInt("push", (int *)&(equipments->at(index)->push), 0, 10);
+            ImGui::SameLine();
+            ImGui::Text("%s", GetPushString(equipments->at(index)->push).c_str());
+
+            ImGui::SliderInt("move", (int *)&(equipments->at(index)->move), 0, 10);
+            ImGui::SameLine();
+            ImGui::Text("%s", GetMovementString(equipments->at(index)->move).c_str());
+
+            ImGui::SliderInt("damage", &(equipments->at(index)->damage), 0, 3);
+            ImGui::SliderInt("push damage", &(equipments->at(index)->push_damage), 0, 3);
+            ImGui::SliderInt("self damage", &(equipments->at(index)->self_damage), 0, 3);
+            ImGui::SliderInt("min range", &(equipments->at(index)->min_range), 0, 8);
+            ImGui::SliderInt("max range", &(equipments->at(index)->max_range), 0, 8);
         }
-        ImGui::SameLine();
-        if(ImGui::Button("Secondary"))
+        else
         {
-            selected->secondary = GetItem((ItemType)item_type);
+            ImGui::Text("Invalid Equipment index");
         }
     }
     ImGui::End();
@@ -291,45 +330,59 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 // Renders all imgui stuff.
 // Contains static variables that might trip some stuff up, just a heads up.
 void
-EditorPass(vector<shared_ptr<Unit>> *units,
+EditorPass(
+           vector<shared_ptr<Equip>> *equipments,
+           vector<shared_ptr<Unit>> *units,
            const vector<shared_ptr<Unit>> &party,
            Level *level, const vector<string> &levels)
 {
     // Internal variables
-    static char fileName[128] = INITIAL_UNITS;
-    static char levelFileName[128] = INITIAL_LEVEL;
+    static char equip_filename[128] = INITIAL_EQUIPS;
+    static char unit_filename[128] = INITIAL_UNITS;
+    static char level_filename[128] = INITIAL_LEVEL;
 
     ImGui::Begin("emblem editor");
     {
         if(ImGui::Button("Load"))
         {
-            *units = LoadUnits(UNITS_PATH + string(fileName));
-            cout << "Units loaded: " << fileName << "\n";
-            *level = LoadLevel(levelFileName, *units, party);
+            *equipments = LoadEquips(DATA_PATH + string(equip_filename));
+            cout << "Units loaded: " << equip_filename << "\n";
+
+            *units = LoadUnits(DATA_PATH + string(unit_filename), *equipments);
+            cout << "Units loaded: " << unit_filename << "\n";
+
+            *level = LoadLevel(level_filename, *units, party);
+            cout << "Level loaded: " << level_filename << "\n";
+
             GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
             GlobalInterfaceState = NO_OP;
             EmitEvent(END_TURN_EVENT);
-            cout << "Level loaded: " << levelFileName << "\n";
+        }
+
+        if(ImGui::Button("Save Equips"))
+        {
+            SaveEquips(string(DATA_PATH) + string(equip_filename), *equipments);
+            cout << "Equips saved: " << equip_filename << "\n";
         }
         ImGui::SameLine();
         if(ImGui::Button("Save Units"))
         {
-            SaveUnits(string(UNITS_PATH) + string(fileName), *units);
-            cout << "Units saved: " << fileName << "\n";
+            SaveUnits(string(DATA_PATH) + string(unit_filename), *units);
+            cout << "Units saved: " << unit_filename << "\n";
         }
         ImGui::SameLine();
         if(ImGui::Button("Save Level"))
         {
-            SaveLevel(string(LEVELS_PATH) + string(levelFileName), *level);
-            cout << "Level saved: " << levelFileName << "\n";
+            SaveLevel(string(LEVELS_PATH) + string(level_filename), *level);
+            cout << "Level saved: " << level_filename << "\n";
         }
 
         if(ImGui::Button("Test Zone"))
         {
             *level = LoadLevel("test.txt", *units, party);
-            sprintf(levelFileName, "test.txt");
+            sprintf(level_filename, "test.txt");
             GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
@@ -340,7 +393,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
         if(ImGui::Button("Tutorial"))
         {
             *level = LoadLevel("tutorial.txt", *units, party);
-            sprintf(levelFileName, "tutorial.txt");
+            sprintf(level_filename, "tutorial.txt");
             GlobalAIState = AI_NO_OP;
             GlobalPlayerTurn = true;
             level->turn_start = true;
@@ -354,7 +407,7 @@ EditorPass(vector<shared_ptr<Unit>> *units,
             if(ImGui::Button(s.c_str()))
             {
                 *level = LoadLevel(s, *units, party);
-                sprintf(levelFileName, "%s", s.c_str());
+                sprintf(level_filename, "%s", s.c_str());
                 GlobalAIState = AI_NO_OP;
                 GlobalPlayerTurn = true;
                 level->turn_start = true;
@@ -365,13 +418,14 @@ EditorPass(vector<shared_ptr<Unit>> *units,
                 ImGui::SameLine();
         }
 
-        ImGui::InputText("units", fileName, IM_ARRAYSIZE(fileName));
-        ImGui::InputText("level", levelFileName, IM_ARRAYSIZE(levelFileName));
+        ImGui::InputText("equip", equip_filename, IM_ARRAYSIZE(equip_filename));
+        ImGui::InputText("units", unit_filename, IM_ARRAYSIZE(unit_filename));
+        ImGui::InputText("level", level_filename, IM_ARRAYSIZE(level_filename));
     }
     ImGui::End();
 
     // Sub-Editors
-    UnitEditor(units);
+    UnitEditor(equipments, units);
     LevelEditor(level, *units);
     Audio(level);
 

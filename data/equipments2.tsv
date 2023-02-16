@@ -1,0 +1,12 @@
+COM	<name>	<type>	<class>	<push>	<move>	<dmg>	<p_dmg>	<s_dmg>	<min>	<max>
+WEA	Sword	0	0	0	0	2	2	2	0	0	
+WEA	Hammer	0	0	0	0	4	4	4	0	0	
+WEA	Lance	0	0	0	0	3	3	3	0	0	
+WEA	Bow	0	0	0	0	7	7	7	0	0	
+WEA	Balista	0	0	0	0	6	6	6	0	0	
+WEA	Spark	0	0	0	0	1	1	1	0	0	
+WEA	Heal	0	0	0	0	1	1	1	0	0	
+WEA	Potion	0	0	0	0	1	1	1	0	0	
+WEA	Shield	0	0	0	0	1	1	1	0	0	
+WEA	Helmet	0	0	0	0	1	1	1	0	0	
+WEA	WindRng	0	0	0	0	1	1	1	0	0	

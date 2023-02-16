@@ -23,6 +23,7 @@ GetInterfaceString(InterfaceState state)
     case NEUTRAL_OVER_UNIT:             return "Neutral over unit";
     case NEUTRAL_OVER_DEACTIVATED_UNIT: return "Neutral over deactivated unit";
     case SELECTED:                      return "Selected";
+    case ATTACK_THINKING:               return "Attack thinking";
     case ATTACK_TARGETING:              return "Attack targeting";
     case ATTACK_RESOLUTION:             return "Attack resolution";
 	default:

@@ -1,12 +1,8 @@
 COM	<name>	<team>	<hp>	<mov>	<prim>	<secnd>	<sprite>
-UNT	Lucina	Ally	3	3	1	0	lucina.png
-UNT	Stahl	Ally	3	3	2	0	stahl.png
-UNT	Vaike	Ally	3	3	1	0	vaike.png
-UNT	Olivia	Ally	3	3	1	0	olivia.png
-UNT	Tiki	Ally	2	4	6	0	tiki.png
-UNT	Thief	Enemy	3	3	1	0	thief.png
-UNT	Fighter	Enemy	3	3	1	0	fighter.png
-UNT	Soldier	Enemy	3	3	1	0	soldier.png
-UNT	Brute	Enemy	3	3	1	0	brute.png
-UNT	Archer	Enemy	3	3	1	0	archer.png
-UNT	Mage	Enemy	3	3	1	0	mage.png
+UNT	Lucina	Ally	3	3	Sword	 	lucina.png
+UNT	Tiki	Ally	3	3	Sword	 	tiki.png
+UNT	Stahl	Ally	3	3	Sword	 	stahl.png
+UNT	Vaike	Ally	3	3	Sword	 	vaike.png
+UNT	Thief	Ally	3	3	Sword	 	thief.png
+UNT	Soldier	Ally	3	3	Sword	 	soldier.png
+UNT	Fighter	Ally	3	3	Sword	 	fighter.png

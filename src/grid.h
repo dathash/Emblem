@@ -10,10 +10,10 @@
 // ========================= grid helper functions ========================
 // returns true if the position is in-bounds.
 bool
-IsValidBoundsPosition(int mapWidth, int mapHeight, const position &pos)
+IsValid(const position &pos)
 {
-    return (pos.col >= 0 && pos.col < mapWidth &&
-			pos.row >= 0 && pos.row < mapHeight);
+    return (pos.col >= 0 && pos.col < MAP_WIDTH &&
+			pos.row >= 0 && pos.row < MAP_HEIGHT);
 }
 
 // returns true if a given point is in a vector.
@@ -69,7 +69,7 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
         {
             position new_pos = {current.col + directionsCol[i],
                                 current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
+            if(IsValid(new_pos))
             {
                 int newCost = costs[current.col][current.row] + 1;
                 if(newCost < costs[new_pos.col][new_pos.row])
@@ -95,18 +95,37 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
 vector<position>
 Orthogonal(const Tilemap &map, const position &origin)
 {
-    vector<position> orthogonal;
+    vector<position> orthogonal = {};
 
     for(int col = 0; col < MAP_WIDTH; ++col)
     {
-        orthogonal.push_back(position(col, origin.row));
+        if(col != origin.col)
+            orthogonal.push_back(position(col, origin.row));
     }
     for(int row = 0; row < MAP_HEIGHT; ++row)
     {
-        orthogonal.push_back(position(origin.col, row));
+        if(row != origin.row)
+            orthogonal.push_back(position(origin.col, row));
     }
 
+    assert(orthogonal.size() == (MAP_WIDTH - 1) + (MAP_HEIGHT - 1));
     return orthogonal;
+}
+
+// returns a vector of positions representing squares in a line from a point.
+vector<position>
+Line(const Tilemap &map, const position &origin, const direction &dir)
+{
+    vector<position> line = {};
+
+    position current = origin + dir;
+    while(IsValid(current))
+    {
+        line.push_back(current);
+        current = current + dir;
+    }
+
+    return line;
 }
 
 // returns a vector of positions representing accessible squares for a given unit.
@@ -152,7 +171,7 @@ AccessibleAndAttackableFrom(const Tilemap &map, position origin,
         {
             position new_pos = {current.col + directionsCol[i],
                                 current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
+            if(IsValid(new_pos))
             {
                 int newCost;
                 if(map.tiles[new_pos.col][new_pos.row].occupant && 
@@ -215,6 +234,21 @@ int ManhattanDistance(const position &one, const position &two)
     return (abs(one.col - two.col) + abs(one.row - two.row));
 }
 
+// Assumes orthogonality
+// Determines if a straight path between two points is unobstructed.
+bool
+Unobstructed(const Tilemap &map, const position &one, const position &two)
+{
+    direction dir = GetDirection(one, two);
+    position cur = one + dir;
+    while(cur != two)
+    {
+        if(map.tiles[cur.col][cur.row].occupant)
+            return false;
+        cur = cur + dir;
+    }
+    return true;
+}
 
 
 void
@@ -320,7 +354,7 @@ GetField(const Tilemap &map, position origin, bool is_ally)
             direction dir = {-directionsRow[i], -directionsCol[i]};
             position new_pos = {current.col + directionsCol[i],
                                 current.row + directionsRow[i]};
-            if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
+            if(IsValid(new_pos))
             {
                 int newCost = distances[current.col][current.row] + 1;
 

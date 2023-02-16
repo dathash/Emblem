@@ -5,7 +5,6 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-// =============================== commands ====================================
 // inherited class, contains virtual method for implementing in children.
 class Command
 {
@@ -34,12 +33,10 @@ public:
     {
         position new_pos = cursor->pos + dir;
 
-        if(IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
+        if(IsValid(new_pos))
         {
-            // move cursor
             cursor->MoveTo(new_pos, dir * -1);
 
-            // change state
             const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
             if(!hoverTile->occupant)
             {
@@ -90,6 +87,7 @@ public:
             return;
 
         map->accessible.clear();
+
         // TODO: This should be simpler
         int movement = 0; 
         pair<vector<position>, vector<position>> result = 
@@ -130,7 +128,6 @@ private:
     Cursor *cursor;
 };
 
-
 class MoveSelectedCommand : public Command
 {
 public:
@@ -142,15 +139,14 @@ public:
 
     virtual void Execute()
     {
-        position new_pos = {cursor->pos.col + dir.col, cursor->pos.row + dir.row};
+        position new_pos = cursor->pos + dir;
 
-        if(!IsValidBoundsPosition(MAP_WIDTH, MAP_HEIGHT, new_pos))
+        if(!IsValid(new_pos))
             return;
 
-        // move cursor
         cursor->MoveTo(new_pos, dir * -1);
 
-        if(!cursor->selected->has_moved)
+        if(!cursor->selected->has_moved && VectorHasElement(new_pos, map.accessible))
             cursor->path_draw = GetPath(map, cursor->selected->initial_pos, cursor->pos, true);
     }
 
@@ -174,8 +170,13 @@ public:
             return;
 
         level->map.accessible.clear();
-        position pos = cursor->path_draw.back();
-        cursor->path_draw = {};
+
+        position pos = cursor->pos;
+        if(!cursor->path_draw.empty())
+        {
+            pos = cursor->path_draw.back();
+            cursor->path_draw = {};
+        }
 
         level->map.tiles[cursor->selected->initial_pos.col][cursor->selected->initial_pos.row].occupant = nullptr;
         level->map.tiles[pos.col][pos.row].occupant = cursor->selected;
@@ -237,42 +238,63 @@ private:
 };
 
 
-// ============================== finding target ===========================================
-class ChangeAttackDirectionCommand : public Command
+// ============================== Attacking ====================================
+class StopAttackingCommand : public Command
 {
 public:
-    ChangeAttackDirectionCommand(Cursor *cursor_in, Direction dir_in)
-    : cursor(cursor_in),
-      dir(dir_in)
-    {}
-
-    virtual void Execute()
-    {
-        cursor->attack_direction = dir;
-    }
-
-private:
-    Cursor *cursor; 
-    Direction dir;
-};
-
-
-class DetargetCommand : public Command
-{
-public:
-    DetargetCommand(Cursor *cursor_in)
+    StopAttackingCommand(Cursor *cursor_in)
     : cursor(cursor_in)
     {}
 
     virtual void Execute()
     { 
         cursor->PlaceAt(cursor->selected->pos);
-
         GlobalInterfaceState = SELECTED;
     }
 
 private:
     Cursor *cursor;
+};
+
+class MoveAttackingCommand : public Command
+{
+public:
+    MoveAttackingCommand(Cursor *cursor_in, Tilemap *map_in, direction dir_in)
+    : cursor(cursor_in),
+      map(map_in),
+      dir(dir_in)
+    {}
+
+    virtual void Execute()
+    {
+        position new_pos = cursor->pos + dir;
+
+        if(!IsValid(new_pos))
+            return;
+
+        cursor->MoveTo(new_pos, dir * -1);
+
+        if(new_pos == cursor->selected->pos)
+        {
+            map->attackable.clear();
+            GlobalInterfaceState = ATTACK_THINKING;
+            return;
+        }
+
+        if(VectorHasElement(new_pos, map->range))
+        {
+            cursor->targeting = new_pos;
+            map->attackable.clear();
+            map->attackable = {new_pos};
+        }
+
+        GlobalInterfaceState = ATTACK_TARGETING;
+    }
+
+private:
+    Cursor *cursor; 
+    Tilemap *map;
+    direction dir;
 };
 
 class SeekVictimsCommand : public Command
@@ -285,16 +307,67 @@ public:
 
     virtual void Execute()
     {
+        cursor->pos = cursor->selected->pos;
+
         level->map.range.clear();
 
-        vector<position> orthogonal = Orthogonal(level->map, cursor->pos);
-        // for attacking
-        for(const position &p : orthogonal)
+        vector<position> orthogonal = {};
+        orthogonal = Orthogonal(level->map, cursor->pos);
+        switch(cursor->selected->primary->type)
         {
-            level->map.range.push_back(p);
+            case EQUIP_NONE:
+            {
+            } break;
+            case EQUIP_PUNCH:
+            {
+                for(const position &p : orthogonal)
+                {
+                    int distance = ManhattanDistance(cursor->selected->pos, p);
+                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range
+                       && Unobstructed(level->map, cursor->selected->pos, p))
+                        level->map.range.push_back(p);
+                }
+            } break;
+            case EQUIP_LINE_SHOT:
+            {
+                for(const position &p : orthogonal)
+                {
+                    if(Unobstructed(level->map, cursor->selected->pos, p))
+                        level->map.range.push_back(p);
+                }
+            } break;
+            case EQUIP_ARTILLERY:
+            {
+                for(const position &p : orthogonal)
+                {
+                    int distance = ManhattanDistance(cursor->selected->pos, p);
+                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range)
+                        level->map.range.push_back(p);
+                }
+            } break;
+            case EQUIP_SELF_TARGET:
+            {
+            } break;
+            case EQUIP_LEAP:
+            {
+                for(const position &p : orthogonal)
+                {
+                    int distance = ManhattanDistance(cursor->selected->pos, p);
+                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range
+                       && !level->map.tiles[p.col][p.row].occupant)
+                        level->map.range.push_back(p);
+                }
+            } break;
+            case EQUIP_LASER:
+            {
+            } break;
+            default:
+            {
+            } break;
         }
+        level->map.attackable.clear();
 
-        GlobalInterfaceState = ATTACK_TARGETING;
+        GlobalInterfaceState = ATTACK_THINKING;
     }
 
 private:
@@ -312,8 +385,7 @@ public:
 
     virtual void Execute()
     {
-        cout << "BANG!\n";
-        Simulate(map, cursor->selected, cursor->attack_direction);
+        Simulate(map, *cursor->selected->primary, cursor->selected->pos, cursor->targeting);
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
@@ -432,7 +504,6 @@ public:
     }
 };
 
-// ============================= unit menu commands =======================
 class UpdateMenuCommand : public Command
 {
 public:
@@ -458,7 +529,7 @@ private:
     int direction;
 };
 
-// ================================= Game Over =================================
+// ================================= Meta =====================================
 class ToTitleScreenCommand : public Command
 {
 public:
@@ -542,8 +613,7 @@ private:
 class InputHandler
 {
 public:
-    // abstraction layer.
-    // simply executes the given command.
+    // abstraction layer. simply executes the given command.
     shared_ptr<Command> HandleInput(InputState *input)
     {
         if(!input->joystickCooldown)
@@ -599,10 +669,6 @@ public:
 
     void Update(InputState *input)
     {
-        // NOTE: uncomment if the player doesn't have any inputs on AI turn.
-        //if(!GlobalPlayerTurn)
-        //    return;
-
         shared_ptr<Command> newCommand = HandleInput(input);
         if(newCommand)
         {
@@ -616,7 +682,6 @@ public:
         }
     }
 
-    // helper functions to bind Commands to each button.
     void BindUp(shared_ptr<Command> command)
     {
         buttonUp = command;
@@ -789,14 +854,25 @@ public:
                 BindR(make_shared<SeekVictimsCommand>(cursor, level));
             } break;
 
+            case(ATTACK_THINKING):
+            {
+                BindUp(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(0, -1)));
+                BindDown(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(0, 1)));
+                BindLeft(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(-1, 0)));
+                BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<StopAttackingCommand>(cursor));
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+            } break;
             case(ATTACK_TARGETING):
             {
-                BindUp(make_shared<ChangeAttackDirectionCommand>(cursor, DIR_UP));
-                BindDown(make_shared<ChangeAttackDirectionCommand>(cursor, DIR_DOWN));
-                BindLeft(make_shared<ChangeAttackDirectionCommand>(cursor, DIR_LEFT));
-                BindRight(make_shared<ChangeAttackDirectionCommand>(cursor, DIR_RIGHT));
+                BindUp(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(0, -1)));
+                BindDown(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(0, 1)));
+                BindLeft(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(-1, 0)));
+                BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
                 BindA(make_shared<AttackCommand>(&(level->map), cursor));
-                BindB(make_shared<DetargetCommand>(cursor));
+                BindB(make_shared<StopAttackingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

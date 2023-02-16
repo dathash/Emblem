@@ -189,14 +189,22 @@ Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
         }
     }
 
-    if(GlobalInterfaceState == ATTACK_TARGETING)
+    if(GlobalInterfaceState == ATTACK_TARGETING ||
+       GlobalInterfaceState == ATTACK_THINKING
+      )
     {
         for(const position &cell : map.range)
         {
             RenderTileColor({cell.col, cell.row}, 
                             attackColor);
         }
+        for(const position &cell : map.attackable)
+        {
+            RenderTileColor({cell.col, cell.row}, 
+                            yellow);
+        }
     }
+
     if(cursor.selected)
     {
         RenderTileColor({cursor.selected->pos.col , cursor.selected->pos.row}, 
@@ -239,6 +247,7 @@ Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
         GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
         GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
         GlobalInterfaceState == SELECTED ||
+        GlobalInterfaceState == ATTACK_THINKING ||
         GlobalInterfaceState == ATTACK_TARGETING
       )
     {

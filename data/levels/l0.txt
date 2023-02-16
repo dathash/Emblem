@@ -6,18 +6,24 @@ ATL green.png
 
 MUS 21.wav
 
-MAP 0 0 0 0 0 1 1 1
-MAP 0 0 4 0 0 0 1 1
-MAP 0 0 0 0 0 0 2 1
-MAP 0 0 0 0 0 0 0 0
-MAP 0 0 0 0 0 0 0 0
-MAP 0 0 0 0 0 0 0 0
-MAP 0 0 0 0 2 2 2 1
-MAP 1 0 0 0 2 2 2 1
+MAP 0 0 0 0 0 1 1 1 
+MAP 0 0 4 0 0 0 1 1 
+MAP 0 0 0 0 0 0 2 1 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 2 2 2 1 
+MAP 1 0 0 0 2 2 2 1 
 
-COM <UNT <name> <col> <row>>
-UNT Lucina 2 2
-UNT Tiki 3 3
-UNT Stahl 1 3
+COM <name> <col> <row>
+UNT Lucina 2 2 
+UNT Tiki 3 3 
+UNT Stahl 1 3 
+UNT Fighter 1 1 
+UNT Soldier 3 1 
+UNT Thief 3 0 
+UNT Thief 2 1 
+UNT Thief 4 1 
+UNT Thief 3 2 
+UNT Vaike 2 4 
 
-UNT Fighter 1 1

@@ -10,11 +10,10 @@ struct Cursor
     position pos = {-1, -1};
     Unit *selected = nullptr;
 
-    Direction attack_direction = DIR_NONE;
+    position targeting = {-1, -1};
 
     Spritesheet sheet;
     path path_draw = {};
-
 
 
     Cursor(Spritesheet sheet_in)

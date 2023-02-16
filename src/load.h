@@ -6,6 +6,7 @@
 #define LOAD_H
 
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 Tile
@@ -78,19 +79,39 @@ LoadTextureImage(string path, string filename)
 }
 
 // =================================== level data ===============================
+string
+LoadEntireFile(string filename)
+{
+    stringstream buffer;
+    ifstream fp(filename);
+    if(!fp.is_open())
+    {
+        cout << "ERROR LoadEntireFile(): File could not be opened: " << filename << "\n";
+        return "";
+    }
+    buffer << fp.rdbuf();
+    fp.close();
+
+    return buffer.str();
+}
+
 // helper to split strings by a delimiter
-vector<string> split(const string &text, char sep) {
+vector<string>
+split(const string &text, char sep)
+{
     vector<string> tokens;
     size_t start = 0, end = 0;
-    while ((end = text.find(sep, start)) != string::npos) {
-        if (end != start) {
-          tokens.push_back(text.substr(start, end - start));
+    while((end = text.find(sep, start)) != string::npos)
+    {
+        if (end != start)
+        {
+            tokens.push_back(text.substr(start, end - start));
         }
         start = end + 1;
     }
-    if (end != start) {
+    if (end != start)
        tokens.push_back(text.substr(start));
-    }
+
     return tokens;
 }
 
@@ -109,13 +130,10 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
     Level level;
     level.name = filename_in;
 
-    ifstream fp;
-    fp.open(LEVELS_PATH + filename_in);
+    string buffer = LoadEntireFile(LEVELS_PATH + filename_in);
+    vector<string> lines = split(buffer, '\n');
 
-    if(!fp.is_open())
-        SDL_assert(!"ERROR LoadLevel: File could not be opened!\n");
-
-    while(getline(fp, line))
+    for(string &line : lines)
     {
         if(line.empty())
             continue;
@@ -176,14 +194,13 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             cout << "Warning LoadLevel: Unhandled line type: " << type << "\n";
         }
     }
-    fp.close();
 
 	return level;
 }
 
 // loads units from a file. returns a vector of them.
 vector<shared_ptr<Unit>>
-LoadUnits(string filename_in)
+LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
 {
     string line;
 	string type;
@@ -205,14 +222,24 @@ LoadUnits(string filename_in)
             if(type == "UNT")
             {
                 tokens = split(rest, '\t');
+
+                Equip *primary_copy = nullptr;
+                Equip *secondary_copy = nullptr;
+                Equip *tmp = GetEquipByName(equipments, tokens[4]);
+                if(tmp)
+                    primary_copy = new Equip(*tmp); 
+                tmp = GetEquipByName(equipments, tokens[5]);
+                if(tmp)
+                    secondary_copy = new Equip(*tmp); 
+
                 units.push_back(make_shared<Unit>(
                     tokens[0],						    // name
                     tokens[1] == "Ally" ? true : false, // team
                     stoi(tokens[2]), // health
                     stoi(tokens[3]), // movement
 
-                    (ItemType)stoi(tokens[4]),  // weapon
-                    (ItemType)stoi(tokens[5]),  // pocket
+                    primary_copy,
+                    secondary_copy,
 
                     Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[6]),
                                 32, ANIMATION_SPEED)
@@ -225,7 +252,79 @@ LoadUnits(string filename_in)
 	return units;
 }
 
+// loads equipments from a file. returns a vector of them.
+vector<shared_ptr<Equip>>
+LoadEquips(string filename_in)
+{
+    string line;
+	string type;
+	string rest;
+	vector<string> tokens;
+
+	vector<shared_ptr<Equip>> equipments;
+
+    ifstream fp;
+    fp.open(filename_in);
+    SDL_assert(fp.is_open());
+
+    while(getline(fp, line))
+    {
+        if(!line.empty())
+        {
+            type = line.substr(0, 3);
+            rest = line.substr(4);
+
+            if(type == "WEA")
+            {
+                tokens = split(rest, '\t');
+                equipments.push_back(make_shared<Equip>(
+                    tokens[0],						// name
+                    (EquipmentType)stoi(tokens[1]), // type
+                    (ClassType)stoi(tokens[2]),     // class type
+                    (PushType)stoi(tokens[3]),      // push type
+                    (MovementType)stoi(tokens[4]),  // movement type
+                    stoi(tokens[5]),                // damage
+                    stoi(tokens[6]),                // push damage
+                    stoi(tokens[7]),                // self damage
+                    stoi(tokens[8]),                // min range
+                    stoi(tokens[9])                 // max range
+                ));
+            }
+        }
+    }
+    fp.close();
+
+	return equipments;
+}
+
 // ================================ saving ====================================
+// saves the units to a file.
+void
+SaveEquips(string filename_in, const vector<shared_ptr<Equip>> &equipments)
+{
+    ofstream fp;
+    fp.open(filename_in);
+    SDL_assert(fp.is_open());
+    
+    fp << "COM\t<name>\t<type>\t<class>\t<push>\t<move>\t<dmg>\t<p_dmg>\t<s_dmg>\t<min>\t<max>\n";
+    for(const shared_ptr<Equip> &equip : equipments)
+    {
+        fp << "WEA\t"
+           << equip->name << "\t"
+           << equip->type << "\t"
+           << equip->cls << "\t"
+           << equip->push << "\t"
+           << equip->move << "\t"
+
+           << equip->damage << "\t"
+           << equip->push_damage << "\t"
+           << equip->self_damage << "\t"
+           << equip->min_range << "\t"
+           << equip->max_range << "\t"
+           << "\n";
+    }
+    fp.close();
+}
 
 // saves the units to a file.
 void
@@ -243,14 +342,15 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
            << unit->max_health << "\t"
            << unit->movement << "\t"
 
-           << unit->primary.type << "\t"
-           << unit->secondary.type << "\t"
+           << (unit->primary ? unit->primary->name : " ") << "\t"
+           << (unit->secondary ? unit->secondary->name : " ") << "\t"
 
            << unit->sheet.texture.filename
            << "\n";
     }
     fp.close();
 }
+
 
 // saves a level to a file.
 void
@@ -260,10 +360,6 @@ SaveLevel(string filename_in, const Level &level)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
     
-    fp << "COM Author: Alex Hartford\n";
-    fp << "COM Program: Emblem\n";
-    fp << "COM File: Level\n\n";
-
     fp << "ATL " << level.map.atlas.filename << "\n\n";
 
     fp << "MUS " << level.song->name << "\n\n";
@@ -280,7 +376,7 @@ SaveLevel(string filename_in, const Level &level)
     }
     fp << "\n";
 
-    fp << "COM <UNT <name> <col> <row> <ai>>\n";
+    fp << "COM <name> <col> <row>\n";
     for(const shared_ptr<Unit> &unit : level.combatants)
     {
         fp << "UNT " << unit->name << " "

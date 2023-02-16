@@ -123,8 +123,8 @@ struct Unit
     int max_health;
     int movement;
 
-    Item primary;
-    Item secondary;
+    Equip *primary = nullptr;
+    Equip *secondary = nullptr;
 
     position pos = {0, 0};
     position initial_pos = {0, 0};
@@ -135,6 +135,13 @@ struct Unit
     bool should_die = false;
 
     Spritesheet sheet;
+
+
+    ~Unit()
+    {
+        delete primary;
+        delete secondary;
+    }
 
     size_t
     ID()
@@ -151,8 +158,8 @@ struct Unit
     Unit(
          string name_in, bool is_ally_in,
          int health_in, int movement_in,
-         ItemType primary_type,
-         ItemType secondary_type,
+         Equip *primary_in,
+         Equip *secondary_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -160,11 +167,10 @@ struct Unit
       max_health(health_in),
       health(health_in),
       movement(movement_in),
+      primary(primary_in),
+      secondary(secondary_in),
       sheet(sheet_in)
-    {
-        primary = GetItem(primary_type);
-        secondary = GetItem(secondary_type);
-    }
+    {}
 
     Unit(const Unit &other)
     : name(other.name),
@@ -172,10 +178,12 @@ struct Unit
       max_health(other.max_health),
       health(other.health),
       movement(other.movement),
-      primary(other.primary),
-      secondary(other.secondary),
       sheet(other.sheet)
     {
+        if(other.primary)
+            primary = new Equip(*other.primary);
+        if(other.secondary)
+            secondary = new Equip(*other.secondary);
     }
 
     // Damages a unit and resolves things involved with that process.
@@ -222,6 +230,7 @@ struct Unit
     */
 };
 
+
 Unit *
 GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 {
@@ -233,6 +242,20 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
         }
     }
     cout << "WARN GetUnitByName: No unit of that name: " << name << "\n";
+    return nullptr;
+}
+
+Equip *
+GetEquipByName(const vector<shared_ptr<Equip>> &equipments, const string &name)
+{
+    for(shared_ptr<Equip> equip : equipments)
+    {
+        if(equip->ID() == hash<string>{}(name))
+        {
+            return equip.get();
+        }
+    }
+    cout << "WARN GetEquipByName: No equip of that name: " << name << "\n";
     return nullptr;
 }
 
@@ -249,6 +272,7 @@ struct Tilemap
     Tile tiles[MAP_WIDTH][MAP_HEIGHT] = {};
     vector<position> accessible = {};
     vector<position> range = {};
+    vector<position> attackable = {};
 
     Texture atlas;
     int atlas_tile_size = ATLAS_TILE_SIZE;

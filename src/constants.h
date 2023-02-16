@@ -43,9 +43,10 @@
 // startup
 #define INITIAL_LEVEL "l0.txt"
 #define INITIAL_UNITS "units.tsv"
+#define INITIAL_EQUIPS "equipments.tsv"
 
 // data
-#define UNITS_PATH "../data/"
+#define DATA_PATH "../data/"
 #define LEVELS_PATH "../data/levels/"
 
 // assets
@@ -91,6 +92,7 @@ enum InterfaceState
 
     SELECTED,
 
+    ATTACK_THINKING,
     ATTACK_TARGETING,
     ATTACK_RESOLUTION,
 };
@@ -136,11 +138,7 @@ const SDL_Color attackColor =       {250, 0, 0, 100};
 const SDL_Color healColor =         {0, 255, 0, 100};
 const SDL_Color clearColor =        {0, 0, 0, 0};
 
-const SDL_Color exhaustedMod =      {50,    0,  50, 0};
-const SDL_Color buffAtkMod =        {255,   0,   0, 0};
-const SDL_Color buffDefMod =        {0,   255, 255, 0};
-const SDL_Color buffAptMod =        {255, 150, 255, 0};
-const SDL_Color buffSpdMod =        {255, 255,   0, 0};
+const SDL_Color exhaustedMod =      {100,   0, 100, 0};
 const SDL_Color readyMod =          {255, 255, 255, 0};
 
 const SDL_Color editorColor =       {255, 255, 0, 100};

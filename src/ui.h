@@ -80,6 +80,7 @@ struct UI_State
     bool tile_info = false;
     bool unit_blurb = false;
     bool unit_selected = false;
+    bool attack_targeting = false;
     bool game_menu = false;
     bool game_over = false;
     bool unit_menu = false;
@@ -90,6 +91,7 @@ struct UI_State
         tile_info = false;
         unit_blurb = false;
         unit_selected = false;
+        attack_targeting = false;
         game_menu = false;
         game_over = false;
         unit_menu = false;
@@ -105,6 +107,7 @@ struct UI_State
             GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
             GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
             GlobalInterfaceState == SELECTED ||
+            GlobalInterfaceState == ATTACK_THINKING ||
             GlobalInterfaceState == ATTACK_TARGETING
 			)
         {
@@ -120,7 +123,7 @@ struct UI_State
             GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
             GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
             GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
-            GlobalInterfaceState == ATTACK_TARGETING
+            GlobalInterfaceState == ATTACK_THINKING
             )
 		{
 			unit_blurb = true;
@@ -137,6 +140,14 @@ struct UI_State
         else
         {
             unit_selected = false;
+        }
+        if(GlobalInterfaceState == ATTACK_TARGETING)
+        {
+            attack_targeting = true;
+        }
+        else
+        {
+            attack_targeting = false;
         }
 
 		if(GlobalInterfaceState == GAME_OVER)
@@ -219,9 +230,9 @@ DisplayHealthBar(int health, int max_health, int damage)
 }
 
 void
-DisplayItemInfo(const Item &item)
+DisplayEquipInfo(const Equip *equip)
 {
-    ImGui::Text("[%s]", GetItemString(item.type).c_str());
+    ImGui::Text("[%s]", equip->name.c_str());
 }
 
 void 
@@ -246,8 +257,16 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
             ImGui::SameLine(ImGui::GetWindowWidth() - 80);
 			ImGui::Text("%d/%d HP", unit.health, unit.max_health);
 
-            DisplayItemInfo(unit.primary);
-            DisplayItemInfo(unit.secondary);
+            if(unit.primary)
+            {
+                DisplayEquipInfo(unit.primary);
+            }
+
+            if(unit.secondary)
+            {
+                ImGui::SameLine();
+                DisplayEquipInfo(unit.secondary);
+            }
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -327,6 +346,8 @@ RenderUI(UI_State *ui,
 	if(ui->unit_blurb)
 		DisplayUnitBlurb(window_flags, *level.map.tiles[cursor.pos.col][cursor.pos.row].occupant);
 	if(ui->unit_selected)
+		DisplayUnitBlurb(window_flags, *cursor.selected);
+	if(ui->attack_targeting)
 		DisplayUnitBlurb(window_flags, *cursor.selected);
     if(ui->game_over)
         DisplayGameOver(window_flags);

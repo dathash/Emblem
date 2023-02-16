@@ -147,6 +147,11 @@ operator==(const position &a, const position &b)
 {
     return a.col == b.col && a.row == b.row;
 }
+bool
+operator!=(const position &a, const position &b)
+{
+    return a.col != b.col || a.row != b.row;
+}
 position
 operator+(const position &a, const position &b)
 {
@@ -174,8 +179,36 @@ std::ostream
 }
 
 typedef position direction;
+direction
+Convert(Direction dir)
+{
+    switch(dir)
+    {
+    case DIR_NONE: return {0, 0};
+    case DIR_UP: return {0, -1};
+    case DIR_DOWN: return {0, 1};
+    case DIR_LEFT: return {-1, 0};
+    case DIR_RIGHT: return {1, 0};
+    }
+}
+
 typedef vector<position> path;
 
+int
+min(int a, int b)
+{
+    if(a < b)
+        return a;
+    return b;
+}
+
+int
+max(int a, int b)
+{
+    if(a > b)
+        return a;
+    return b;
+}
 
 int
 clamp(int val, int min, int max)
