@@ -74,6 +74,25 @@
 #define VILLAGE_TILE {VILLAGE, nullptr, {1, 1}}
 #define CHEST_TILE {CHEST, nullptr, {0, 1}}
 
+enum Phase
+{
+    PHASE_AI,
+    PHASE_PLAYER,
+    PHASE_RESOLUTION,
+};
+string 
+GetPhaseString(Phase phase)
+{
+    switch(phase)
+    {
+    case PHASE_AI:         return "AI";
+    case PHASE_PLAYER:     return "Player";
+    case PHASE_RESOLUTION: return "Resolution";
+	default:
+		cout << "WARNING GetPhaseString: " << phase << "\n"; return "";
+	}
+}
+
 enum InterfaceState
 {
     NO_OP,
@@ -96,6 +115,29 @@ enum InterfaceState
     ATTACK_TARGETING,
     ATTACK_RESOLUTION,
 };
+string 
+GetInterfaceString(InterfaceState state)
+{
+    switch(state)
+    {
+    case NO_OP:                         return "No-Op";
+    case TITLE_SCREEN:                  return "Title screen";
+    case GAME_OVER:                     return "Game over";
+    case GAME_MENU:                     return "Game menu";
+    case GAME_MENU_OPTIONS:             return "Game menu options";
+    case ENEMY_RANGE:                   return "Enemy range";
+    case NEUTRAL_OVER_GROUND:           return "Neutral over ground";
+    case NEUTRAL_OVER_ENEMY:            return "Neutral over enemy";
+    case NEUTRAL_OVER_UNIT:             return "Neutral over unit";
+    case NEUTRAL_OVER_DEACTIVATED_UNIT: return "Neutral over deactivated unit";
+    case SELECTED:                      return "Selected";
+    case ATTACK_THINKING:               return "Attack thinking";
+    case ATTACK_TARGETING:              return "Attack targeting";
+    case ATTACK_RESOLUTION:             return "Attack resolution";
+	default:
+		cout << "WARNING GetInterfaceString " << state << "\n"; return "";
+	}
+}
 
 // AI
 enum AIState
@@ -106,6 +148,20 @@ enum AIState
 
     AI_ATTACK_RESOLUTION,
 };
+
+string 
+GetAIString(AIState state)
+{
+    switch (state)
+    {
+    case AI_NO_OP:                  return "No-op";
+    case AI_FINDING_NEXT:           return "Finding Next";
+    case AI_SELECTED:               return "Selected";
+    case AI_ATTACK_RESOLUTION:      return "Attack Resolution";
+	default:
+		cout << "WARNING GetAIString " << state << "\n"; return "";
+    }
+}
 
 enum Direction
 {

@@ -77,16 +77,16 @@ public:
 
     virtual void Execute()
     {
-        cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
-        cursor->selected->initial_pos = cursor->pos;
-
         GlobalInterfaceState = SELECTED;
         EmitEvent(PICK_UP_UNIT_EVENT);
 
-        if(cursor->selected->has_moved)
-            return;
+        cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
+        cursor->selected->initial_pos = cursor->pos;
 
         map->accessible.clear();
+
+        if(cursor->selected->has_moved)
+            return;
 
         // TODO: This should be simpler
         int movement = 0; 
@@ -470,9 +470,11 @@ public:
 class ChooseGameMenuOptionCommand : public Command
 {
 public:
-    ChooseGameMenuOptionCommand(Menu *menu_in, Level *level_in)
+    ChooseGameMenuOptionCommand(Menu *menu_in, Level *level_in,
+                                Cursor *cursor_in)
     : menu(menu_in),
-      level(level_in)
+      level(level_in),
+      cursor(cursor_in)
     {}
 
     virtual void Execute()
@@ -487,10 +489,8 @@ public:
             } break;
             case(1): // END TURN
             {
-                GlobalPlayerTurn = false;
-                GlobalInterfaceState = NO_OP;
-                GlobalAIState = AI_FINDING_NEXT;
-                EmitEvent(END_TURN_EVENT);
+                //cursor->selected = nullptr;
+                GoToResolutionPhase();
                 return;
             } break;
         }
@@ -499,6 +499,7 @@ public:
 private:
     Menu *menu;
     Level *level;
+    Cursor *cursor;
 };
 
 class BackToGameMenuCommand : public Command
@@ -578,10 +579,7 @@ public:
         *level = LoadLevel(level->name, units, party);
         level->song->Restart();
 
-        GlobalPlayerTurn = true;
-        level->turn_start = true;
-        EmitEvent(END_TURN_EVENT);
-        GlobalInterfaceState = NO_OP;
+        GoToAIPhase();
     }
 
 private:
@@ -593,27 +591,16 @@ private:
 class StartGameCommand : public Command
 {
 public:
-    StartGameCommand(Level *level_in,
-                     const vector<shared_ptr<Unit>> &units_in,
-                     const vector<shared_ptr<Unit>> &party_in
-                     )
-    : level(level_in),
-      units(units_in),
-      party(party_in)
+    StartGameCommand()
     {}
 
     virtual void Execute()
     {
-        GlobalPlayerTurn = true;
-        level->turn_start = true;
-        EmitEvent(START_GAME_EVENT);
-        return;
+        GoToAIPhase();
     }
 
 private:
-    Level *level;
-    const vector<shared_ptr<Unit>> &units;
-    const vector<shared_ptr<Unit>> &party;
+    Cursor *cursor;
 };
 
 // ============================== Input Handler ================================
@@ -750,7 +737,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<StartGameCommand>(level, units, party));
+                BindA(make_shared<StartGameCommand>());
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -773,7 +760,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level));
+                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level, cursor));
                 BindB(make_shared<ExitGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

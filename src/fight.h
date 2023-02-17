@@ -166,7 +166,8 @@ PerformMoveScenario(Tilemap *map, MovementType type, int self_damage,
 }
 
 void
-Simulate(Tilemap *map, const Equip &weapon, 
+Simulate(Tilemap *map,
+         const Equip &weapon, 
          const position &source, 
          const position &destination)
 {
@@ -236,5 +237,51 @@ Simulate(Tilemap *map, const Equip &weapon,
     } break;
     }
 }
+
+// ======================================== Resolution System ==================
+
+struct Attack
+{
+    Unit *unit;
+    position offset;
+
+    void
+    Resolve(Tilemap *map)
+    {
+        cout << "RESOLUTION\n";
+        cout << unit->name << "\n";
+        cout << unit->pos << "\n";
+        cout << offset << "\n";
+        Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
+    }
+};
+
+struct Resolution
+{
+    vector<Attack> attacks;
+    int frame = 0;
+
+    void
+    Update(Tilemap *map)
+    {
+        if(attacks.empty())
+            GoToAIPhase();
+
+        ++frame;
+        if(frame % AI_ACTION_SPEED)
+            return;
+
+        attacks.back().Resolve(map);
+        attacks.pop_back();
+    }
+
+    void
+    RemoveDeadUnits()
+    {
+        attacks.erase(remove_if(attacks.begin(), attacks.end(),
+                    [](auto const &a) { return a.unit->should_die; }),
+                    attacks.end());
+    }
+};
 
 #endif

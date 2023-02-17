@@ -333,7 +333,7 @@ RenderUI(UI_State *ui,
         return;
     }
 
-    if(!GlobalPlayerTurn)
+    if(GlobalPhase != PHASE_PLAYER)
     {
         ImGui::PopStyleVar();
         ImGui::PopStyleColor(3);

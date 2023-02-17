@@ -7,6 +7,13 @@
 
 #include <vector>
 
+void GoToAIPhase();
+struct Level;
+struct Cursor;
+void GoToPlayerPhase(Level *level, Cursor *cursor);
+void GoToResolutionPhase();
+void GameOver();
+
 // =============================== small-time ===================================
 struct InputState
 {
@@ -279,9 +286,6 @@ struct Level
     Sound *song = nullptr;
 
     int turn_count = -1;
-    //bool player_turn = false;
-    bool next_level = false;
-    bool turn_start = false;
 
     void
     CheckVictory()
@@ -291,25 +295,6 @@ struct Level
             song->FadeOut();
             EmitEvent(MISSION_COMPLETE_EVENT);
         }
-    }
-
-    bool
-    CheckNextTurn()
-    {
-        if(!turn_start)
-            return false;
-
-        turn_start = false;
-
-        if(GlobalPlayerTurn)
-        {
-            ++turn_count;
-        }
-
-        for(auto const &unit : combatants)
-            unit->Activate();
-
-        return true;
     }
 
     // Puts a piece on the board
@@ -344,9 +329,7 @@ struct Level
             position leader_pos = Leader();
             if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
             {
-                GlobalInterfaceState = GAME_OVER;
-                GlobalPlayerTurn = true;
-                return;
+                GameOver();
             }
         }
 
@@ -381,12 +364,7 @@ struct Level
                     return;
             }
 
-            // End player turn
-            GlobalInterfaceState = NO_OP;
-            GlobalAIState = AI_FINDING_NEXT;
-            GlobalPlayerTurn = false;
-            turn_start = true;
-            EmitEvent(END_TURN_EVENT);
+            GoToResolutionPhase();
         }
     }
 
@@ -405,8 +383,6 @@ struct Level
     void
     Update()
     {
-        // cleanup functions
-        RemoveDeadUnits();
         CheckForRemaining();
         CheckVictory();
     }

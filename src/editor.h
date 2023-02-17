@@ -351,11 +351,7 @@ EditorPass(
             *level = LoadLevel(level_filename, *units, party);
             cout << "Level loaded: " << level_filename << "\n";
 
-            GlobalAIState = AI_NO_OP;
-            GlobalPlayerTurn = true;
-            level->turn_start = true;
-            GlobalInterfaceState = NO_OP;
-            EmitEvent(END_TURN_EVENT);
+            GoToAIPhase();
         }
 
         if(ImGui::Button("Save Equips"))
@@ -380,22 +376,14 @@ EditorPass(
         {
             *level = LoadLevel("test.txt", *units, party);
             sprintf(level_filename, "test.txt");
-            GlobalAIState = AI_NO_OP;
-            GlobalPlayerTurn = true;
-            level->turn_start = true;
-            GlobalInterfaceState = NO_OP;
-            EmitEvent(END_TURN_EVENT);
+            GoToAIPhase();
         }
         ImGui::SameLine();
         if(ImGui::Button("Tutorial"))
         {
             *level = LoadLevel("tutorial.txt", *units, party);
             sprintf(level_filename, "tutorial.txt");
-            GlobalAIState = AI_NO_OP;
-            GlobalPlayerTurn = true;
-            level->turn_start = true;
-            GlobalInterfaceState = NO_OP;
-            EmitEvent(END_TURN_EVENT);
+            GoToAIPhase();
         }
 
         int wrap = 0;
@@ -405,11 +393,7 @@ EditorPass(
             {
                 *level = LoadLevel(s, *units, party);
                 sprintf(level_filename, "%s", s.c_str());
-                GlobalAIState = AI_NO_OP;
-                GlobalPlayerTurn = true;
-                level->turn_start = true;
-                GlobalInterfaceState = NO_OP;
-                EmitEvent(END_TURN_EVENT);
+                GoToAIPhase();
             }
             if(++wrap % 4)
                 ImGui::SameLine();

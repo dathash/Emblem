@@ -6,47 +6,6 @@
 #define AI_H
 
 // ============================= ai commands ================================
-class AIFindNextUnitCommand : public Command
-{
-public:
-    AIFindNextUnitCommand(Cursor *cursor_in, Level *level_in)
-    : cursor(cursor_in),
-      level(level_in)
-    {}
-
-    virtual void Execute()
-    {
-        // find a unit that hasn't acted yet.
-        Unit *selected = nullptr;
-        selected = FindNearest(level->map, cursor->pos,
-                [](const Unit &unit) -> bool
-                {
-                    return unit.IsAI() && !unit.is_exhausted;
-                }, false);
-
-        if(selected)
-        {
-            // move cursor
-            cursor->pos = selected->pos;
-        }
-        else
-        {
-            cursor->selected = nullptr;
-
-            GlobalAIState = AI_NO_OP;
-
-            GlobalPlayerTurn = true;
-            level->turn_start = true;
-
-            EmitEvent(END_TURN_EVENT);
-        }
-    }
-private: 
-    Cursor *cursor;
-    Level *level;
-};
-
-
 class AISelectUnitCommand : public Command
 {
 public:
@@ -92,15 +51,18 @@ AttackInRangeBehavior(const Unit &unit, const Tilemap &map)
 pair<position, Unit *>
 GetAction(const Unit &unit, const Tilemap &map)
 {
+    // switch here!
     return AttackInRangeBehavior(unit, map);    
 }
 
 class AIPerformUnitActionCommand : public Command
 {
 public:
-    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in)
+    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in,
+                               Resolution *resolution_in)
     : cursor(cursor_in),
-      map(map_in)
+      map(map_in),
+      resolution(resolution_in)
     {}
 
     virtual void Execute()
@@ -119,9 +81,15 @@ public:
         cursor->selected->pos = cursor->pos;
         cursor->selected->sheet.ChangeTrack(TRACK_ACTIVE);
 
-        // perform attack
+        // Prepare attack
         if(action.second)
         {
+            assert(cursor->selected->primary);
+            cout << "SETUP\n";
+            cout << cursor->selected->name << "\n";
+            cout << action.second->pos - cursor->selected->pos << "\n";
+            resolution->attacks.push_back({cursor->selected, 
+                                           action.second->pos - cursor->selected->pos});
             cursor->pos = action.second->pos;
 
             cursor->selected->Deactivate();
@@ -142,53 +110,56 @@ public:
 private:
     Cursor *cursor;
     Tilemap *map;
+    Resolution *resolution;
 };
 
 // ============================== struct ====================================
 struct AI
 {
+    queue<shared_ptr<Command>> commandQueue = {};
     int frame = 0;
 
+
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Level *level)
+    void Plan(Cursor *cursor, Level *level, Resolution *resolution)
     {
-        commandQueue.push(make_shared<AIFindNextUnitCommand>(cursor, level));
-        commandQueue.push(make_shared<AISelectUnitCommand>(cursor, &(level->map)));
-        commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map)));
+        Unit *selected = nullptr;
+        selected = FindNearest(level->map, cursor->pos,
+                [](const Unit &unit) -> bool
+                {
+                    return unit.IsAI() && !unit.is_exhausted;
+                }, false);
+        if(selected)
+        {
+            cursor->pos = selected->pos;
+            commandQueue.push(make_shared<AISelectUnitCommand>(cursor, &(level->map)));
+            commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map), resolution));
+        }
+        else
+        {
+            GoToPlayerPhase(level, cursor);
+        }
     }
 
     // Passes the args through to plan.
-    void Update(Cursor *cursor, Level *level)
+    void
+    Update(Cursor *cursor, Level *level, Resolution *resolution)
     {
-        if(GlobalPlayerTurn)
-            return;
-
         if(GlobalAIState == AI_NO_OP ||
-           GlobalAIState == AI_ATTACK_RESOLUTION
-          )
+           GlobalAIState == AI_ATTACK_RESOLUTION)
             return;
 
         if(commandQueue.empty())
-        {
-            Plan(cursor, level);
-        }
+            Plan(cursor, level, resolution);
 
         ++frame;
         // Every __ frames.
-        if(!(frame % AI_ACTION_SPEED))
-        {
-            commandQueue.front()->Execute();
-            commandQueue.pop();
-        }
-    }
+        if(frame % AI_ACTION_SPEED)
+            return;
 
-    void clearQueue()
-    {
-        commandQueue = {};
+        commandQueue.front()->Execute();
+        commandQueue.pop();
     }
-
-private:
-    queue<shared_ptr<Command>> commandQueue;
 };
 
 #endif

@@ -36,27 +36,31 @@ static ImFont *uiFontLarge;
 static bool GlobalRunning = false;
 static bool GlobalEditorMode = false;
 static bool GlobalDebug = true;
-static bool GlobalPlayerTurn = true;
 
 static bool GlobalPaused = false;
 static bool GlobalStep = false;
 static int GlobalSpeedMod = 1;
 
+
+#include "constants.h"
+// State
+static Phase GlobalPhase = PHASE_PLAYER;
+static InterfaceState GlobalInterfaceState;
+static AIState GlobalAIState;
+
 // ================================= my includes ===============================
 // NOTE: This is a unity build. This file is the only compilation unit, and it
 // pulls all of the following includes in at compile time.
 
-#include "constants.h"
-static InterfaceState GlobalInterfaceState;
-static AIState GlobalAIState;
 #include "utils.h"
 #include "event.h" // NOTE: Includes Global Event handler
 #include "animation.h"
 #include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
 #include "equip.h"
 #include "structs.h"
-#include "vfx.h"
 #include "cursor.h"
+#include "state.h"
+#include "vfx.h"
 #include "load.h"
 #include "init.h"
 #include "input.h"
@@ -174,6 +178,8 @@ int main(int argc, char *argv[])
     InputHandler handler(&cursor, level.map);
     AI ai;
 
+    Resolution resolution;
+
     GlobalInterfaceState = TITLE_SCREEN;
     GlobalAIState = AI_NO_OP;
 
@@ -195,12 +201,27 @@ int main(int argc, char *argv[])
            !(frame % GlobalSpeedMod))
         {
             GlobalStep = false;
-            handler.Update(&input);
-            handler.UpdateCommands(&cursor, &level, units, party, &game_menu);
 
-            ai.Update(&cursor, &level);
+            if(GlobalPhase == PHASE_AI)
+            {
+                ai.Update(&cursor, &level, &resolution);
+            }
+            else if(GlobalPhase == PHASE_PLAYER)
+            {
+                handler.Update(&input);
+                handler.UpdateCommands(&cursor, &level, units, party, &game_menu);
+            }
+            else
+            {
+                resolution.Update(&(level.map));
+            }
 
             cursor.Update(&level.map);
+
+            // NOTE: Must be in this order.
+            resolution.RemoveDeadUnits();
+            level.RemoveDeadUnits();
+
             level.Update();
 
             EventSystemUpdate();
@@ -212,6 +233,7 @@ int main(int argc, char *argv[])
                 sound->Update();
         }
 
+        /*
         // Resolve State
         if(level.next_level)
         {
@@ -231,20 +253,12 @@ int main(int argc, char *argv[])
             level.song->Stop();
             level = LoadLevel(levels[level_index], units, party);
 
-            GlobalPlayerTurn = true;
-            level.turn_start = true;
+            GoToAIPhase();
         }
-        if(level.CheckNextTurn())
-        {
-            cursor.PlaceAt(level.Leader());
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-
-            ai.clearQueue();
-            handler.clearQueue();
-        }
+        */
 
         // Render
-        Render(level.map, cursor, game_menu);
+        Render(level.map, cursor, game_menu, resolution);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

@@ -144,7 +144,10 @@ RenderHealthBarCombat(const position &p, int hp, int maxHp)
 
 // Renders the scene from the given game state.
 void
-Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
+Render(const Tilemap &map, 
+       const Cursor &cursor, 
+       const Menu &gameMenu,
+       const Resolution &resolution)
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -168,25 +171,16 @@ Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
     if(GlobalInterfaceState == SELECTED)
     {
         for(const position &cell : map.accessible)
-        {
-            RenderTileColor({cell.col, cell.row},
-                            moveColor);
-        }
+            RenderTileColor(cell, moveColor);
 
         for(const position &p : cursor.path_draw)
-        {
-            RenderTileColor({p.col, p.row}, 
-                            pathColor);
-        }
+            RenderTileColor(p, pathColor);
     }
 
     if(GlobalInterfaceState == ENEMY_RANGE)
     {
         for(const position &cell : map.accessible)
-        {
-            RenderTileColor({cell.col, cell.row}, 
-                            aiMoveColor);
-        }
+            RenderTileColor(cell, aiMoveColor);
     }
 
     if(GlobalInterfaceState == ATTACK_TARGETING ||
@@ -194,31 +188,24 @@ Render(const Tilemap &map, const Cursor &cursor, const Menu &gameMenu)
       )
     {
         for(const position &cell : map.range)
-        {
-            RenderTileColor({cell.col, cell.row}, 
-                            attackColor);
-        }
+            RenderTileColor(cell, attackColor);
         for(const position &cell : map.attackable)
-        {
-            RenderTileColor({cell.col, cell.row}, 
-                            yellow);
-        }
+            RenderTileColor(cell, yellow);
     }
 
     if(cursor.selected)
     {
-        RenderTileColor({cursor.selected->pos.col , cursor.selected->pos.row}, 
-                        healColor);
+        RenderTileColor(cursor.selected->pos, healColor);
     }
+
+    for(const Attack &attack : resolution.attacks)
+        RenderTileColor(attack.unit->pos + attack.offset, attackColor);
 
 // ================================ ai visualization  =============================
     if(GlobalAIState == AI_SELECTED)
     {
         for(const position &cell : map.accessible)
-        {
-            RenderTileColor({cell.col, cell.row}, 
-                            aiMoveColor);
-        }
+            RenderTileColor(cell, aiMoveColor);
     }
 
 // ================================= render sprites ================================================
