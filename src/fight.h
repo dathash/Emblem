@@ -17,7 +17,7 @@ GetFirstTarget(const Tilemap &map,
             return line[i];
     }
 
-    cout << "WARNING GetFirstTarget(): No targets.\n";
+    //cout << "WARNING GetFirstTarget(): No targets.\n";
     return {-1, -1};
 }
 

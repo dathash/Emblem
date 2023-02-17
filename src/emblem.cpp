@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 
 #if DEV_MODE
         if(GlobalEditorMode)
-            EditorPass(&equipments, &units, party, &level, levels);
+            EditorPass(&equipments, &units, party, &level, levels, &resolution);
         if(GlobalDebug)
             DebugUI();
 #endif

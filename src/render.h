@@ -39,7 +39,9 @@ RenderAttack(const Tilemap &map,
         } break;
         case EQUIP_LINE_SHOT:
         {
-            RenderTileColor(GetFirstTarget(map, attack.unit->pos, attack.offset), attackColor);
+            position result = GetFirstTarget(map, attack.unit->pos, attack.offset);
+            if(result != position(-1, -1))
+                RenderTileColor(result, attackColor);
         } break;
         case EQUIP_ARTILLERY:
         {
@@ -238,9 +240,7 @@ Render(const Tilemap &map,
     }
 
     if(cursor.selected)
-    {
         RenderTileColor(cursor.selected->pos, healColor);
-    }
 
     for(const Attack &attack : resolution.attacks)
     {

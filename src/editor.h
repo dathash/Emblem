@@ -331,7 +331,8 @@ EditorPass(
            vector<shared_ptr<Equip>> *equipments,
            vector<shared_ptr<Unit>> *units,
            const vector<shared_ptr<Unit>> &party,
-           Level *level, const vector<string> &levels)
+           Level *level, const vector<string> &levels,
+           Resolution *resolution)
 {
     // Internal variables
     static char equip_filename[128] = INITIAL_EQUIPS;
@@ -342,6 +343,8 @@ EditorPass(
     {
         if(ImGui::Button("Load"))
         {
+            resolution->attacks.clear();
+
             *equipments = LoadEquips(DATA_PATH + string(equip_filename));
             cout << "Units loaded: " << equip_filename << "\n";
 
@@ -373,6 +376,7 @@ EditorPass(
         }
         if(ImGui::Button("Test Zone"))
         {
+            resolution->attacks.clear();
             *level = LoadLevel("test.txt", *units, party);
             sprintf(level_filename, "test.txt");
             GoToAIPhase();
@@ -383,6 +387,7 @@ EditorPass(
         {
             if(ImGui::Button(s.c_str()))
             {
+                resolution->attacks.clear();
                 *level = LoadLevel(s, *units, party);
                 sprintf(level_filename, "%s", s.c_str());
                 GoToAIPhase();
