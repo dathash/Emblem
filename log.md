@@ -128,10 +128,6 @@ Genealogy's items are pretty close too.
 The story of the game is delivered through the characters.
 
 # TODO
-BUG
-Ram with no targets doesn't go anywhere.
-CHECK WITH ENEMY USE!
-
 AI
 * Attacks
 
@@ -157,6 +153,10 @@ Animations
 * Attacks
 * Surfacing
 
+Objectives
+Map Generation
+Strategy Layer
+Polish
 
 # Later
 Art

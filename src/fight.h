@@ -17,6 +17,9 @@ GetFirstTarget(const Tilemap &map,
             return line[i];
     }
 
+    if(!line.empty())
+        return line.back();
+
     //cout << "WARNING GetFirstTarget(): No targets.\n";
     return {-1, -1};
 }
@@ -39,6 +42,9 @@ void
 SimulatePush(Tilemap *map, int push_damage,
              const position &initial, const direction &dir)
 {
+    if(!IsValid(initial))
+        return;
+
     // Damage occupants (innate to weapon)
     if(!map->tiles[initial.col][initial.row].occupant)
         return;
@@ -49,7 +55,7 @@ SimulatePush(Tilemap *map, int push_damage,
 
     // Do the pushing
     position target = initial + dir;
-    if(!IsValid(target) || !IsValid(initial))
+    if(!IsValid(target))
         return;
 
     if(map->tiles[target.col][target.row].occupant)
@@ -115,12 +121,18 @@ void
 SimulateMove(Tilemap *map, int self_damage,
              const position &source, const position &target)
 {
+    cout << target << "\n";
+    cout << source << "\n";
     if(!IsValid(target) || !IsValid(source))
+    {
+        cout << "HERE\n";
         return;
+    }
 
-    if(map->tiles[source.col][source.row].occupant)
-        SimulateDamage(map->tiles[source.col][source.row].occupant, self_damage);
+    assert(map->tiles[source.col][source.row].occupant); // pretty sure
+    SimulateDamage(map->tiles[source.col][source.row].occupant, self_damage);
 
+    // Move my boy
     if(map->tiles[target.col][target.row].occupant)
     {
         // Bonk!
@@ -153,7 +165,10 @@ PerformMoveScenario(Tilemap *map, MovementType type, int self_damage,
         } break;
         case MOVEMENT_RAM:
         {
-            SimulateMove(map, self_damage, source, target - dir);
+            if(map->tiles[target.col][target.row].occupant)
+                SimulateMove(map, self_damage, source, target - dir);
+            else
+                SimulateMove(map, self_damage, source, target);
         } break;
         case MOVEMENT_LEAP:
         {
@@ -191,12 +206,13 @@ Simulate(Tilemap *map,
     {
         position subject = GetFirstTarget(*map, source, 
                                          GetDirection(source, destination));
-        if(!IsValid(subject))
-            return;
-
         Unit *victim = map->tiles[subject.col][subject.row].occupant;
         PerformMoveScenario(map, weapon.move, weapon.self_damage, 
                             source, subject, GetDirection(source, subject));
+
+        if(!IsValid(subject))
+            return;
+
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
         SimulateDamage(victim, weapon.damage);
