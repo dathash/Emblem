@@ -20,13 +20,11 @@ public:
         cursor->selected->initial_pos = cursor->pos;
 
         map->accessible.clear();
-        pair<vector<position>, vector<position>> result = 
-            AccessibleAndAttackableFrom(*map, cursor->pos,
-                                        cursor->selected->movement,
-                                        1,
-                                        1,
-                                        cursor->selected->IsAlly());
-        map->accessible = result.first;
+        map->accessible = Accessible(*map, cursor->pos,
+                                     cursor->selected->movement,
+                                     1,
+                                     1,
+                                     cursor->selected->IsAlly());
 
         GlobalAIState = AI_SELECTED;
     }

@@ -90,13 +90,11 @@ public:
 
         // TODO: This should be simpler
         int movement = 0; 
-        pair<vector<position>, vector<position>> result = 
-            AccessibleAndAttackableFrom(*map, cursor->pos,
-                                        cursor->selected->movement,
-                                        1,
-                                        1,
-                                        cursor->selected->IsAlly());
-        map->accessible = result.first;
+        map->accessible = Accessible(*map, cursor->pos,
+                                     cursor->selected->movement,
+                                     1,
+                                     1, 
+                                     cursor->selected->IsAlly());
     }
 
 private:
@@ -178,7 +176,7 @@ public:
             cursor->path_draw = {};
         }
 
-        level->map.tiles[cursor->selected->initial_pos.col][cursor->selected->initial_pos.row].occupant = nullptr;
+        level->map.tiles[cursor->selected->pos.col][cursor->selected->pos.row].occupant = nullptr;
         level->map.tiles[pos.col][pos.row].occupant = cursor->selected;
 
         cursor->selected->initial_pos = cursor->selected->pos;
@@ -207,13 +205,11 @@ public:
     virtual void Execute()
     {
         // TODO: We want this to be one at a time, so that none of the units land on eachother's prior square.
-        // Consult the game for more.
-        position goal = cursor->pos;
         for(shared_ptr<Unit> unit : level->combatants)
         {
             if(unit->has_moved)
             {
-                goal = unit->initial_pos;
+                position goal = unit->initial_pos;
                 assert(!level->map.tiles[goal.col][goal.row].occupant);
 
                 level->map.tiles[unit->pos.col][unit->pos.row].occupant = nullptr;
@@ -221,15 +217,38 @@ public:
 
                 unit->pos = goal;
                 unit->initial_pos = {0, 0};
+                unit->has_moved = false;
             }
         }
 
-        cursor->PlaceAt(goal);
+        if(cursor->selected)
+        {
+            cursor->selected->sheet.ChangeTrack(TRACK_IDLE);
+            return;
+        }
 
-        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
-        cursor->selected->sheet.ChangeTrack(TRACK_IDLE);
-        EmitEvent(PICK_UP_UNIT_EVENT);
+        Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
+        if(!over)
+        {
+            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+            return;
+        }
+
+        if(over->is_exhausted)
+        {
+            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            return;
+        }
+
+        if(over->IsAlly())
+        {
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            return;
+        }
+
+        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        return;
     }
 
 private:
@@ -413,13 +432,11 @@ public:
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
 
         map->accessible.clear();
-        pair<vector<position>, vector<position>> result = 
-            AccessibleAndAttackableFrom(*map, cursor->pos,
-                                        cursor->selected->movement,
-                                        1,
-                                        1, 
-                                        cursor->selected->IsAlly());
-        map->accessible = result.first;
+        map->accessible = Accessible(*map, cursor->pos,
+                                     cursor->selected->movement,
+                                     1,
+                                     1, 
+                                     cursor->selected->IsAlly());
 
         GlobalInterfaceState = ENEMY_RANGE;
     }
@@ -797,7 +814,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
+                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -809,7 +826,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<SelectEnemyCommand>(cursor, &(level->map)));
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
+                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -821,7 +838,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<SelectUnitCommand>(cursor, &(level->map)));
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
+                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -833,7 +850,7 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
+                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
             case(SELECTED):
@@ -844,7 +861,7 @@ public:
                 BindRight(make_shared<MoveSelectedCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<PlaceUnitCommand>(cursor, level));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
-                BindL(make_shared<NullCommand>());
+                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<SeekVictimsCommand>(cursor, level));
             } break;
 

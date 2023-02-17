@@ -129,16 +129,12 @@ Line(const Tilemap &map, const position &origin, const direction &dir)
 }
 
 // returns a vector of positions representing accessible squares for a given unit.
-// NOTE: This may be the most hideous function I have ever written.
-// TODO: Immolate this
-// TODO: This produces doubles. For accessible and attackable. Fix!
-pair<vector<position>, vector<position>>
-AccessibleAndAttackableFrom(const Tilemap &map, position origin, 
-                            int mov, int min, int max, 
-                            bool sourceIsAlly)
+vector<position>
+Accessible(const Tilemap &map, position origin, 
+           int mov, int min, int max, 
+           bool sourceIsAlly)
 {
     vector<position> accessible;
-    vector<position> attackable;
 
 	// initialize costs matrix
 	vector<vector<int>> costs;
@@ -203,29 +199,7 @@ AccessibleAndAttackableFrom(const Tilemap &map, position origin,
             }),
             accessible.end());
 
-    for(const position &p : accessible)
-    {
-        vector<position> from_here = InteractibleFrom(map, p, min, max);
-        for(const position &res : from_here)
-        {
-            attackable.push_back(res);
-        }
-    }
-
-    // SO SLOOOOOW
-    attackable.erase(remove_if(attackable.begin(), attackable.end(),
-            [map, accessible](const position &p)
-            {
-                for(const position &mask : accessible)
-                {
-                    if(p == mask)
-                        return true;
-                }
-                return false;
-            }),
-            attackable.end());
-
-    return pair<vector<position>, vector<position>>(accessible, attackable);
+    return accessible;
 }
 
 // Finds the manhattan distance between two positions.

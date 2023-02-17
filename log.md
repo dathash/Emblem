@@ -128,10 +128,14 @@ Genealogy's items are pretty close too.
 The story of the game is delivered through the characters.
 
 # TODO
-AI
-* Attacks
-
-AI pass (target buildings, get closer if no target, etc.)
+AI Attacks
+* Targeting Buildings
+* Approach if no targets
+* Artillery
+  * Bigger splash than one
+* Line Shots
+  * Ram? Pretty sure it will just be the same.
+* Longer range than one for punch
 
 Random Enemy Spawns
 Vek Surfacing
