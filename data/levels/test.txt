@@ -1,0 +1,21 @@
+ATL yellow.png
+
+MUS 21.wav
+
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 0 0 0 0 
+
+COM <name> <col> <row>
+UNT Thief 2 3 
+UNT Lucina 2 4 
+UNT Tiki 3 5 
+UNT Stahl 5 4 
+UNT Soldier 3 4 
+UNT Fighter 5 3 
+

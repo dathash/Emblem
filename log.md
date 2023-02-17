@@ -128,10 +128,14 @@ Genealogy's items are pretty close too.
 The story of the game is delivered through the characters.
 
 # TODO
-Turn Order
 AI
 * Attacks
-* Telegraphing
+
+AI pass (target buildings, get closer if no target, etc.)
+
+Random Enemy Spawns
+Vek Surfacing
+
 Visualization of attacks.
 * Punch
 * Line shots
@@ -140,15 +144,14 @@ Visualization of attacks.
 * Leap (Artillery variant)
 * Show Where the unit will end up by the end.
 * Show Damage outcome
-AI pass (target buildings)
-Random Enemy Spawns
-Vek Surfacing
+
 Animations
 * Movement
 * Pushing
 * Destruction
 * Death
 * Attacks
+* Surfacing
 
 
 # Later

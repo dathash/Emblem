@@ -13,6 +13,7 @@ enum ClassType
     CLASS_CASTER,
     CLASS_HEALER,
     CLASS_UTILITY,
+    CLASS_AI,
 };
 string
 GetClassString(ClassType type)
@@ -25,6 +26,7 @@ GetClassString(ClassType type)
         case CLASS_CASTER:   return "Caster";
         case CLASS_HEALER:   return "Healer";
         case CLASS_UTILITY:  return "Utility";
+        case CLASS_AI:       return "AI";
         default: cout << "Unhandled ClassType String\n"; return "";
     }
 }

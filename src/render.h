@@ -22,6 +22,50 @@ RenderTileColor(const position &pos, const SDL_Color &color)
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
+void
+RenderAttack(const Tilemap &map,
+             const Attack &attack)
+{
+    switch(attack.unit->primary->type)
+    {
+        case EQUIP_NONE:
+        {
+            cout << "WARNING: RenderAttack has NONE attack type.\n";
+            RenderTileColor(attack.unit->pos + attack.offset, yellow);
+        } break;
+        case EQUIP_PUNCH:
+        {
+            RenderTileColor(attack.unit->pos + attack.offset, attackColor);
+        } break;
+        case EQUIP_LINE_SHOT:
+        {
+            RenderTileColor(GetFirstTarget(map, attack.unit->pos, attack.offset), attackColor);
+        } break;
+        case EQUIP_ARTILLERY:
+        {
+            RenderTileColor(attack.unit->pos + attack.offset, attackColor);
+        } break;
+
+        // Not likely...
+        case EQUIP_SELF_TARGET:
+        {
+            cout << "NO VIS FOR SELF TARGET\n";
+        } break;
+        case EQUIP_LEAP:
+        {
+            cout << "NO VIS FOR LEAP\n";
+        } break;
+        case EQUIP_LASER:
+        {
+            cout << "NO VIS FOR LASER\n";
+        } break;
+
+        default:
+        {
+        } break;
+    }
+}
+
 // Renders an individual tile to the screen, given its game coords and tile (for texture).
 void
 RenderTileTexture(const Tilemap &map, const Tile &tile,
@@ -199,7 +243,9 @@ Render(const Tilemap &map,
     }
 
     for(const Attack &attack : resolution.attacks)
-        RenderTileColor(attack.unit->pos + attack.offset, attackColor);
+    {
+        RenderAttack(map, attack);
+    }
 
 // ================================ ai visualization  =============================
     if(GlobalAIState == AI_SELECTED)

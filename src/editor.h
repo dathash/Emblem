@@ -371,18 +371,10 @@ EditorPass(
             SaveLevel(string(LEVELS_PATH) + string(level_filename), *level);
             cout << "Level saved: " << level_filename << "\n";
         }
-
         if(ImGui::Button("Test Zone"))
         {
             *level = LoadLevel("test.txt", *units, party);
             sprintf(level_filename, "test.txt");
-            GoToAIPhase();
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Tutorial"))
-        {
-            *level = LoadLevel("tutorial.txt", *units, party);
-            sprintf(level_filename, "tutorial.txt");
             GoToAIPhase();
         }
 

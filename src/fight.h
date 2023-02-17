@@ -11,7 +11,7 @@ GetFirstTarget(const Tilemap &map,
                const position &pos, const direction &dir)
 {
     vector<position> line = Line(map, pos, dir);
-    for(int i = 0; i <= line.size(); ++i)
+    for(int i = 0; i < line.size(); ++i)
     {
         if(map.tiles[line[i].col][line[i].row].occupant)
             return line[i];

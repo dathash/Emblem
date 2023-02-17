@@ -9,7 +9,7 @@ MAP 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 2 0 
+MAP 0 0 0 0 0 0 0 0 
 
 COM <name> <col> <row>
 UNT Fighter 1 1 

@@ -85,9 +85,6 @@ public:
         if(action.second)
         {
             assert(cursor->selected->primary);
-            cout << "SETUP\n";
-            cout << cursor->selected->name << "\n";
-            cout << action.second->pos - cursor->selected->pos << "\n";
             resolution->attacks.push_back({cursor->selected, 
                                            action.second->pos - cursor->selected->pos});
             cursor->pos = action.second->pos;
