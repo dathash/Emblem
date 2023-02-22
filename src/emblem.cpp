@@ -55,7 +55,7 @@ static AIState GlobalAIState;
 #include "event.h" // NOTE: Includes Global Event handler
 #include "animation.h"
 #include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
-#include "equip.h"
+//#include "equip.h"
 #include "structs.h"
 static Player GlobalPlayer;
 

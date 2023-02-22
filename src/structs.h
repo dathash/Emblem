@@ -158,8 +158,8 @@ struct Unit
     int movement;
     bool fixed;
 
-    Equip *primary = nullptr;
-    Equip *secondary = nullptr;
+    //Equip *primary = nullptr;
+    //Equip *secondary = nullptr;
 
     position pos = {0, 0};
     position initial_pos = {0, 0};
@@ -170,13 +170,6 @@ struct Unit
     bool should_die = false;
 
     Spritesheet sheet;
-
-
-    ~Unit()
-    {
-        delete primary;
-        delete secondary;
-    }
 
     size_t
     ID()
@@ -206,8 +199,6 @@ struct Unit
          string name_in, Team team_in,
          int health_in, int movement_in,
          bool fixed_in,
-         Equip *primary_in,
-         Equip *secondary_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -216,8 +207,6 @@ struct Unit
       health(health_in),
       movement(movement_in),
       fixed(fixed_in),
-      primary(primary_in),
-      secondary(secondary_in),
       sheet(sheet_in)
     {}
 
@@ -229,12 +218,7 @@ struct Unit
       movement(other.movement),
       fixed(other.fixed),
       sheet(other.sheet)
-    {
-        if(other.primary)
-            primary = new Equip(*other.primary);
-        if(other.secondary)
-            secondary = new Equip(*other.secondary);
-    }
+    {}
 
     // Damages a unit and resolves things involved with that process.
     // Returns the amount of damage actually done.

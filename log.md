@@ -6,62 +6,15 @@ Plan
 > Build a fun little game!
 
 # Design
-What is appealing to me about tactics games?
-    Permadeath sacrifices
-    Taking Risks
-    Gaining new team members
-    The beginning of Fire Emblem games are always the best.
-    Middle of a level is best.
-        Beginning: Setting up, being overly cautious. Not good.
-        End: Ganging up on a boss. Pretty much a waste of time.
-    Individual Characters
-        Strong Characterization
-        Developing Relationships
- 
-Ideas
-* Social Psychology game
-    Characterization is deeply ingrained into combat.
-        Characters bark, speak their minds.
-            Cowardly character doesn't like getting sent to the front lines.
-                Performs worse.
-                Over time becomes more comfortable, confident.
-            Confident character tends to overextend.
-                Enemies hit them more often.
-        Conversations mid-battle.
-
-* Deep exploration of mechanics
-    Fire Emblem reaches a point where it's all sort of the same.
-    What if we dug in to this?
-        Made mechanics that lended themselves towards extremely specific playstyles?
-        Made objectives that required modes of thinking?
-        Dropped RPG elements to make way for the new puzzle-style mechanic?
-
-Why are we fighting?
-Fire Emblem maps are almost always about killing all the enemies
-What about other objectives?
-What about Save all the Innocents?
-What about Collect all the Items?
-What about Escape?
-What about anything else?
-
-What do RPG Mechanics really achieve?
-* Feeling of commitment to the game.
-* Numbers go up hehe
-* The strategic decision of nurturing a weak unit until they grow.
-
 Group mechanics (Units nearby eachother get bonuses)
 Leader mechanics (Genealogy stars)
 Fort with attack bonus instead of defense
-Knight Moves?
-Jumping tiles in general?
-Boost teammate units over stuff?
 Misty Step
 Area of Effect
 Grapple Mechanic, to hold units back so that Zarathustra can charge to the end.
 
 Ability system, like that of D&D.
 
-Really explicit die-rolls.
 Simple statistics
 I like the Two-handed fighter ability to reroll 1's.
 I like the FTD mechanic where halberds can use intelligence for damage.
@@ -69,46 +22,17 @@ I like the FTD mechanic where halberds can use intelligence for damage.
 I like the idea of magic items which gain points as you use them for specific
 things, like the sword that gets bonuses per-kill, or the armor that gets
 stronger as it takes more hits.
+
 I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
+
+Movements due to attacks
+* Your unit is blown back by their attack, providing a hasty retreat.
 
 # Story
 The story of the game is delivered through the characters.
 
 # TODO
-AI Attacks
-* Targeting Buildings
-* Approach if no targets
-* Artillery
-  * Bigger splash than one
-* Line Shots
-  * Ram? Pretty sure it will just be the same.
-* Longer range than one for punch
-
-Random Enemy Spawns
-Vek Surfacing
-
-Visualization of attacks.
-* Punch
-* Line shots
-* Ram (Line shot variant)
-* Artillery
-* Leap (Artillery variant)
-* Show Where the unit will end up by the end.
-* Show Damage outcome
-
-Animations
-* Movement
-* Pushing
-* Destruction
-* Death
-* Attacks
-* Surfacing
-
-Objectives
-Map Generation
-Strategy Layer
-Polish
 
 # Later
 Art

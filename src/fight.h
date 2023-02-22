@@ -186,77 +186,14 @@ PerformMoveScenario(Tilemap *map, MovementType type, int self_damage,
 }
 
 void
-Simulate(Tilemap *map,
-         const Equip &weapon, 
-         const position &source, 
+Simulate(Tilemap *map, 
+         Unit *source,
          const position &destination)
 {
-    switch(weapon.type)
-    {
-    case EQUIP_NONE:
-    {
-        cout << "No Weapon type: " << weapon.type << "\n";
-    } break;
-    case EQUIP_PUNCH:
-    {
-        position subject = destination;
-        Unit *victim = map->tiles[subject.col][subject.row].occupant;
-        PerformMoveScenario(map, weapon.move, weapon.self_damage, 
-                            source, subject, GetDirection(source, subject));
-        PerformPushScenario(map, weapon.push, weapon.push_damage, 
-                            subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
-    } break;
-    case EQUIP_LINE_SHOT:
-    {
-        position subject = GetFirstTarget(*map, source, 
-                                         GetDirection(source, destination));
-        Unit *victim = map->tiles[subject.col][subject.row].occupant;
-        PerformMoveScenario(map, weapon.move, weapon.self_damage, 
-                            source, subject, GetDirection(source, subject));
-
-        if(!IsValid(subject))
-            return;
-
-        PerformPushScenario(map, weapon.push, weapon.push_damage, 
-                            subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
-    } break;
-    case EQUIP_ARTILLERY:
-    {
-        position subject = destination;
-
-        Unit *victim = map->tiles[subject.col][subject.row].occupant;
-        PerformMoveScenario(map, weapon.move, weapon.self_damage, 
-                            source, subject, GetDirection(source, subject));
-        PerformPushScenario(map, weapon.push, weapon.push_damage, 
-                            subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
-    } break;
-    case EQUIP_SELF_TARGET:
-    {
-        cout << "Unimplemented weapon type: " << weapon.type << "\n";
-    } break;
-    case EQUIP_LEAP:
-    {
-        position subject = destination;
-
-        Unit *victim = map->tiles[subject.col][subject.row].occupant;
-        PerformMoveScenario(map, weapon.move, weapon.self_damage, 
-                            source, subject, GetDirection(source, subject));
-        PerformPushScenario(map, weapon.push, weapon.push_damage, 
-                            subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
-    } break;
-    case EQUIP_LASER:
-    {
-        cout << "Unimplemented weapon type: " << weapon.type << "\n";
-    } break;
-    default:
-    {
-        cout << "Unimplemented weapon type: " << weapon.type << "\n";
-    } break;
-    }
+    Unit *victim = map->tiles[subject.col][subject.row].occupant;
+    PerformPushScenario(map, weapon.push, weapon.push_damage, 
+                        destination, GetDirection(source->pos, destination));
+    SimulateDamage(victim, weapon.damage);
 }
 
 // ======================================== Resolution System ==================
