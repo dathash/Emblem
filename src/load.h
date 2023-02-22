@@ -181,6 +181,8 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             int col = stoi(tokens[1]);
             int row = stoi(tokens[2]);
 
+            //level.AddCombatant(unitCopy, {col, row});
+            // TODO: swap this?
             unitCopy->pos.col = col;
             unitCopy->pos.row = row;
             level.combatants.push_back(std::move(unitCopy));

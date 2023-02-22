@@ -507,7 +507,7 @@ public:
             case(1): // END TURN
             {
                 //cursor->selected = nullptr;
-                GoToResolutionPhase();
+                GoToAIPhase();
                 return;
             } break;
         }

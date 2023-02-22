@@ -34,16 +34,6 @@ GoToPlayerPhase(Level *level, Cursor *cursor)
 }
 
 void
-GoToResolutionPhase()
-{
-    GlobalPhase = PHASE_RESOLUTION;
-    GlobalInterfaceState = NO_OP;
-    GlobalAIState = AI_NO_OP;
-
-    EmitEvent(END_TURN_EVENT);
-}
-
-void
 GameOver()
 {
     cout << "HERE\n";

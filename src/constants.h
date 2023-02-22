@@ -76,18 +76,16 @@
 
 enum Phase
 {
-    PHASE_AI,
     PHASE_PLAYER,
-    PHASE_RESOLUTION,
+    PHASE_AI,
 };
 string 
 GetPhaseString(Phase phase)
 {
     switch(phase)
     {
-    case PHASE_AI:         return "AI";
     case PHASE_PLAYER:     return "Player";
-    case PHASE_RESOLUTION: return "Resolution";
+    case PHASE_AI:         return "AI";
 	default:
 		cout << "WARNING GetPhaseString: " << phase << "\n"; return "";
 	}

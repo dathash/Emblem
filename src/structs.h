@@ -313,7 +313,7 @@ struct Level
     void
     CheckVictory()
     {
-        if(turn_count > 4)
+        if(false)
         {
             song->FadeOut();
             EmitEvent(MISSION_COMPLETE_EVENT);
@@ -387,7 +387,7 @@ struct Level
                     return;
             }
 
-            GoToResolutionPhase();
+            GoToAIPhase();
         }
     }
 
