@@ -82,7 +82,6 @@ public:
         // Prepare attack
         if(action.second)
         {
-            assert(cursor->selected->primary);
             resolution->attacks.push_back({cursor->selected, 
                                            action.second->pos - cursor->selected->pos});
             cursor->pos = action.second->pos;

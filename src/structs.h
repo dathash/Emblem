@@ -11,7 +11,6 @@ void GoToAIPhase();
 struct Level;
 struct Cursor;
 void GoToPlayerPhase(Level *level, Cursor *cursor);
-void GoToResolutionPhase();
 void GameOver();
 
 // =============================== small-time ===================================
@@ -23,7 +22,6 @@ struct InputState
     bool right;
     bool a;
     bool b;
-    bool l;
     bool r;
 
 	int joystickCooldown = 0;
@@ -122,26 +120,6 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
-struct Player
-{
-    int health = 7;
-    int max_health = 7;
-
-    void
-    Reset()
-    {
-        health = max_health;
-    }
-
-    void
-    Damage(int amount)
-    {
-        health = clamp(health - amount, 0, max_health);
-        if(health == 0)
-            GameOver();
-    }
-};
-
 enum Team
 {
     TEAM_PLAYER,
@@ -156,7 +134,6 @@ struct Unit
     int health;
     int max_health;
     int movement;
-    bool fixed;
 
     //Equip *primary = nullptr;
     //Equip *secondary = nullptr;
@@ -198,7 +175,6 @@ struct Unit
     Unit(
          string name_in, Team team_in,
          int health_in, int movement_in,
-         bool fixed_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -206,7 +182,6 @@ struct Unit
       max_health(health_in),
       health(health_in),
       movement(movement_in),
-      fixed(fixed_in),
       sheet(sheet_in)
     {}
 
@@ -216,7 +191,6 @@ struct Unit
       max_health(other.max_health),
       health(other.health),
       movement(other.movement),
-      fixed(other.fixed),
       sheet(other.sheet)
     {}
 
@@ -363,7 +337,7 @@ struct Level
     void
     CheckForRemaining()
     {
-        if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT)
+        if(GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT)
         {
             for(auto const &u : combatants)
             {

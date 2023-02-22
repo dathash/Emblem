@@ -102,10 +102,10 @@ struct UI_State
     {
 		// Tile Info
         if(
-            GlobalInterfaceState == NEUTRAL_OVER_GROUND || 
-            GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
-            GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+            GlobalInterfaceState == NEUTRAL_GROUND || 
+            GlobalInterfaceState == NEUTRAL_ENEMY || 
+            GlobalInterfaceState == NEUTRAL_UNIT ||
+            GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT ||
             GlobalInterfaceState == SELECTED ||
             GlobalInterfaceState == ATTACK_THINKING ||
             GlobalInterfaceState == ATTACK_TARGETING
@@ -120,9 +120,9 @@ struct UI_State
 
 		// Unit Blurb
 		if(
-            GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
-            GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT
+            GlobalInterfaceState == NEUTRAL_ENEMY || 
+            GlobalInterfaceState == NEUTRAL_UNIT ||
+            GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT
             )
 		{
 			unit_blurb = true;
@@ -194,8 +194,10 @@ void
 DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
 {
 	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(450, 500));
     ImGui::SetNextWindowSize(ImVec2(150, 40));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 50));
 
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin(GetTileNameString(tile.type).c_str(), NULL, wf);
@@ -213,26 +215,9 @@ DisplayHealthBar(int health, int max_health, int damage = 0)
 {
 	float percentHealth = (((float)health - damage) / (float)max_health);
 	percentHealth = (0 < percentHealth ? percentHealth : 0);
-	if(percentHealth > 0.66)
-	{
-		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(0, 255, 0, 255));
-	}
-	else if(percentHealth > 0.33)
-	{
-		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(255, 255, 0, 255));
-	}
-	else
-	{
-		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(255, 0, 0, 255));
-	}
+    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, SdlToImColor(healthBarColor));
 	ImGui::ProgressBar(percentHealth, ImVec2(-1.0f, 0.0f));
 	ImGui::PopStyleColor();
-}
-
-void
-DisplayEquipInfo(const Equip *equip)
-{
-    ImGui::Text("[%s]", equip->name.c_str());
 }
 
 void 
@@ -240,7 +225,9 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 {
 	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(250, 180));
-    ImGui::SetNextWindowPos(ImVec2(625, 500));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   10));
 
     // Logic
 	ImGui::PushFont(uiFontLarge);
@@ -256,17 +243,6 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
             ImGui::Text("%d MOV", unit.movement);
             ImGui::SameLine(ImGui::GetWindowWidth() - 80);
 			ImGui::Text("%d/%d HP", unit.health, unit.max_health);
-
-            if(unit.primary)
-            {
-                DisplayEquipInfo(unit.primary);
-            }
-
-            if(unit.secondary)
-            {
-                ImGui::SameLine();
-                DisplayEquipInfo(unit.secondary);
-            }
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -303,31 +279,10 @@ DisplayGameOver(ImGuiWindowFlags wf)
     ImGui::End();
 }
 
-void
-DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
-{
-	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(900, 0));
-    ImGui::SetNextWindowSize(ImVec2(200, 130));
-
-    // Logic
-	ImGui::PushFont(uiFontLarge);
-    ImGui::Begin("Player", NULL, wf);
-    {
-		ImGui::PopFont();
-		ImGui::PushFont(uiFontMedium);
-            DisplayHealthBar(player.health, player.max_health);
-            ImGui::Text("Health: %d/%d", player.health, player.max_health);
-		ImGui::PopFont();
-    }
-    ImGui::End();
-}
-
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
-         const Level &level,
-         const Player &player
+         const Level &level
         )
 {
     ui->Update();
@@ -344,21 +299,21 @@ RenderUI(UI_State *ui,
 	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, SdlToImColor(uiTitleColor));
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 
     // TITLE SCREEN
     if(GlobalInterfaceState == TITLE_SCREEN)
     {
         DisplayTitleScreen(window_flags);
-        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(3);
         ImGui::PopStyleColor(3);
         return;
     }
 
-    DisplayPlayerState(window_flags, GlobalPlayer);
-
     if(GlobalPhase != PHASE_PLAYER)
     {
-        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(3);
         ImGui::PopStyleColor(3);
         return;
     }
@@ -375,7 +330,7 @@ RenderUI(UI_State *ui,
     if(ui->game_over)
         DisplayGameOver(window_flags);
 
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(3);
 	ImGui::PopStyleColor(3);
 }
 

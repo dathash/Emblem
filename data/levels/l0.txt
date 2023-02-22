@@ -1,30 +1,21 @@
-ATL green.png
+ATL yellow.png
 
 MUS 21.wav
 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
+MAP 2 2 0 0 6 0 0 0 
+MAP 2 1 0 0 0 0 6 0 
+MAP 2 1 0 1 5 0 0 0 
+MAP 0 0 0 1 1 1 0 1 
+MAP 0 0 0 0 2 0 0 0 
+MAP 0 2 0 0 0 0 0 0 
+MAP 2 0 0 0 0 0 0 2 
+MAP 0 0 2 0 0 0 2 2 
 
 COM <name> <col> <row>
-UNT Fighter 1 1 
-UNT Thief 2 1 
-UNT House 4 4 
-UNT House 5 5 
-UNT House 3 6 
-UNT House 2 6 
-UNT House 0 5 
-UNT House 0 4 
-UNT House 7 4 
-UNT House 7 5 
-UNT House 6 7 
-UNT Lucina 2 4 
-UNT Tiki 3 5 
-UNT Stahl 5 4 
-UNT Archer 3 1 
+UNT Lucina 1 6 
+UNT Tiki 2 7 
+UNT Stahl 0 5 
+UNT Thief 6 6 
+UNT Fighter 5 7 
+UNT Soldier 7 5 
 

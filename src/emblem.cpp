@@ -55,10 +55,7 @@ static AIState GlobalAIState;
 #include "event.h" // NOTE: Includes Global Event handler
 #include "animation.h"
 #include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
-//#include "equip.h"
 #include "structs.h"
-static Player GlobalPlayer;
-
 #include "cursor.h"
 #include "state.h"
 #include "vfx.h"
@@ -156,8 +153,7 @@ int main(int argc, char *argv[])
     };
 
 // ================================== load =================================
-    vector<shared_ptr<Equip>> equipments = LoadEquips(DATA_PATH + string(INITIAL_EQUIPS));
-    vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS), equipments);
+    vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS));
     vector<shared_ptr<Unit>> party = {};
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
@@ -265,11 +261,11 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level, GlobalPlayer);
+        RenderUI(&ui, cursor, level);
 
 #if DEV_MODE
         if(GlobalEditorMode)
-            EditorPass(&equipments, &units, party, &level, levels, &resolution);
+            EditorPass(&units, party, &level, levels, &resolution);
         if(GlobalDebug)
             DebugUI();
 #endif

@@ -66,9 +66,9 @@ LoadTextureImage(string path, string filename)
     SDL_Surface *surface = nullptr;
 
     surface = IMG_Load((path + filename).c_str());
-    SDL_assert(surface);
     if(!surface)
-        cout << "ERROR: " << filename << "\n";
+        cout << "ERROR LoadTextureImage: couldn't load at " << filename << "\n";
+    SDL_assert(surface);
     int width = surface->w;
     int height = surface->h;
     texture = SDL_CreateTextureFromSurface(GlobalRenderer, surface);
@@ -202,7 +202,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
 
 // loads units from a file. returns a vector of them.
 vector<shared_ptr<Unit>>
-LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
+LoadUnits(string filename_in)
 {
     string line;
 	string type;
@@ -225,26 +225,13 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
             {
                 tokens = split(rest, '\t');
 
-                Equip *primary_copy = nullptr;
-                Equip *secondary_copy = nullptr;
-                Equip *tmp = GetEquipByName(equipments, tokens[5]);
-                if(tmp)
-                    primary_copy = new Equip(*tmp); 
-                tmp = GetEquipByName(equipments, tokens[6]);
-                if(tmp)
-                    secondary_copy = new Equip(*tmp); 
-
                 units.push_back(make_shared<Unit>(
                     tokens[0],             // name
                     (Team)stoi(tokens[1]), // team
                     stoi(tokens[2]),       // health
                     stoi(tokens[3]),       // movement
-                    (bool)stoi(tokens[4]), // fixed?
 
-                    primary_copy,
-                    secondary_copy,
-
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[7]),
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[4]),
                                 32, ANIMATION_SPEED)
                 ));
             }
@@ -255,80 +242,6 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
 	return units;
 }
 
-// loads equipments from a file. returns a vector of them.
-vector<shared_ptr<Equip>>
-LoadEquips(string filename_in)
-{
-    string line;
-	string type;
-	string rest;
-	vector<string> tokens;
-
-	vector<shared_ptr<Equip>> equipments;
-
-    ifstream fp;
-    fp.open(filename_in);
-    SDL_assert(fp.is_open());
-
-    while(getline(fp, line))
-    {
-        if(!line.empty())
-        {
-            type = line.substr(0, 3);
-            rest = line.substr(4);
-
-            if(type == "WEA")
-            {
-                tokens = split(rest, '\t');
-                equipments.push_back(make_shared<Equip>(
-                    tokens[0],						// name
-                    (EquipmentType)stoi(tokens[1]), // type
-                    (ClassType)stoi(tokens[2]),     // class type
-                    (PushType)stoi(tokens[3]),      // push type
-                    (MovementType)stoi(tokens[4]),  // movement type
-                    stoi(tokens[5]),                // damage
-                    stoi(tokens[6]),                // push damage
-                    stoi(tokens[7]),                // self damage
-                    stoi(tokens[8]),                // min range
-                    stoi(tokens[9])                 // max range
-                ));
-            }
-        }
-    }
-    fp.close();
-
-	return equipments;
-}
-
-// ================================ saving ====================================
-// saves the units to a file.
-void
-SaveEquips(string filename_in, const vector<shared_ptr<Equip>> &equipments)
-{
-    ofstream fp;
-    fp.open(filename_in);
-    SDL_assert(fp.is_open());
-    
-    fp << "COM\t<name>\t<type>\t<class>\t<push>\t<move>\t<dmg>\t<p_dmg>\t<s_dmg>\t<min>\t<max>\n";
-    for(const shared_ptr<Equip> &equip : equipments)
-    {
-        fp << "WEA\t"
-           << equip->name << "\t"
-           << equip->type << "\t"
-           << equip->cls << "\t"
-           << equip->push << "\t"
-           << equip->move << "\t"
-
-           << equip->damage << "\t"
-           << equip->push_damage << "\t"
-           << equip->self_damage << "\t"
-           << equip->min_range << "\t"
-           << equip->max_range << "\t"
-           << "\n";
-    }
-    fp.close();
-}
-
 // saves the units to a file.
 void
 SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
@@ -337,17 +250,13 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
     
-    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<fixed>\t<prim>\t<secnd>\t<sprite>\n";
+    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<sprite>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT\t" << unit->name << "\t"
            << unit->team << "\t"
            << unit->max_health << "\t"
            << unit->movement << "\t"
-           << unit->fixed << "\t"
-
-           << (unit->primary ? unit->primary->name : " ") << "\t"
-           << (unit->secondary ? unit->secondary->name : " ") << "\t"
 
            << unit->sheet.texture.filename
            << "\n";

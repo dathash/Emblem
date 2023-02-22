@@ -30,13 +30,6 @@ SimulateDamage(Unit *victim, int amount)
     if(!victim)
         return;
 
-    if(victim->ID() == hash<string>{}("House"))
-    {
-        GlobalPlayer.Damage(amount);
-    }
-
-    // NOTE: This is called when damage is zero when pushing a unit.
-    // Keep that in mind for visualization purposes.
     //cout << amount << " Damage to " << victim->name << "\n";
     victim->Damage(amount);
     if(victim->health <= 0)
@@ -44,156 +37,12 @@ SimulateDamage(Unit *victim, int amount)
 }
 
 void
-SimulatePush(Tilemap *map, int push_damage,
-             const position &initial, const direction &dir)
-{
-    if(!IsValid(initial))
-        return;
-
-    // Damage occupants (innate to weapon)
-    if(!map->tiles[initial.col][initial.row].occupant)
-        return;
-    SimulateDamage(map->tiles[initial.col][initial.row].occupant, push_damage);
-
-    if(map->tiles[initial.col][initial.row].occupant->fixed)
-        return;
-
-    // Do the pushing
-    position target = initial + dir;
-    if(!IsValid(target))
-        return;
-
-    if(map->tiles[target.col][target.row].occupant)
-    {
-        // Bonk!
-        SimulateDamage(map->tiles[initial.col][initial.row].occupant, 1);
-        SimulateDamage(map->tiles[target.col][target.row].occupant, 1);
-    }
-    else if(map->tiles[initial.col][initial.row].occupant)
-    {
-        // Push 'em!
-        map->tiles[target.col][target.row].occupant = map->tiles[initial.col][initial.row].occupant;
-        map->tiles[initial.col][initial.row].occupant = nullptr;
-        map->tiles[target.col][target.row].occupant->pos = target;
-    }
-}
-
-void
-PerformPushScenario(Tilemap *map, PushType type, int push_damage,
-                    const position &pos, const direction &dir)
-{
-    switch(type)
-    {
-        case PUSH_NONE:
-        {
-
-        } break;
-        case PUSH_AWAY:
-        {
-            SimulatePush(map, push_damage, pos, dir);
-        } break;
-        case PUSH_TOWARDS:
-        {
-            SimulatePush(map, push_damage, pos, dir * -1);
-        } break;
-        case PUSH_TOWARDS_AND_AWAY:
-        {
-            SimulatePush(map, push_damage, pos + dir, dir);
-            SimulatePush(map, push_damage, pos - dir, dir * -1);
-        } break;
-        case PUSH_PERPENDICULAR:
-        {
-            direction perp = {dir.row, dir.col};
-            SimulatePush(map, push_damage, pos + perp, perp);
-            SimulatePush(map, push_damage, pos - perp, perp * -1);
-        } break;
-        case PUSH_ALL:
-        {
-            SimulatePush(map, push_damage, pos + dir, dir);
-            SimulatePush(map, push_damage, pos - dir, dir * -1);
-
-            direction perp = {dir.row, dir.col};
-            SimulatePush(map, push_damage, pos + perp, perp);
-            SimulatePush(map, push_damage, pos - perp, perp * -1);
-        } break;
-        default:
-        {
-        } break;
-    }
-}
-
-void
-SimulateMove(Tilemap *map, int self_damage,
-             const position &source, const position &target)
-{
-    cout << target << "\n";
-    cout << source << "\n";
-    if(!IsValid(target) || !IsValid(source))
-    {
-        cout << "HERE\n";
-        return;
-    }
-
-    assert(map->tiles[source.col][source.row].occupant); // pretty sure
-    SimulateDamage(map->tiles[source.col][source.row].occupant, self_damage);
-
-    // Move my boy
-    if(map->tiles[target.col][target.row].occupant)
-    {
-        // Bonk!
-        SimulateDamage(map->tiles[source.col][source.row].occupant, 1);
-        SimulateDamage(map->tiles[target.col][target.row].occupant, 1);
-    }
-    else if(map->tiles[source.col][source.row].occupant)
-    {
-        // Push 'em!
-        map->tiles[target.col][target.row].occupant = map->tiles[source.col][source.row].occupant;
-        map->tiles[source.col][source.row].occupant = nullptr;
-        map->tiles[target.col][target.row].occupant->pos = target;
-    }
-}
-
-void
-PerformMoveScenario(Tilemap *map, MovementType type, int self_damage,
-                    const position &source, const position &target,
-                    const direction &dir)
-{
-    switch(type)
-    {
-        case MOVEMENT_NONE:
-        {
-
-        } break;
-        case MOVEMENT_BACKONE:
-        {
-            SimulateMove(map, self_damage, source, source - dir);
-        } break;
-        case MOVEMENT_RAM:
-        {
-            if(map->tiles[target.col][target.row].occupant)
-                SimulateMove(map, self_damage, source, target - dir);
-            else
-                SimulateMove(map, self_damage, source, target);
-        } break;
-        case MOVEMENT_LEAP:
-        {
-            SimulateMove(map, self_damage, source, target);
-        } break;
-        default:
-        {
-        } break;
-    }
-}
-
-void
 Simulate(Tilemap *map, 
          Unit *source,
          const position &destination)
 {
-    Unit *victim = map->tiles[subject.col][subject.row].occupant;
-    PerformPushScenario(map, weapon.push, weapon.push_damage, 
-                        destination, GetDirection(source->pos, destination));
-    SimulateDamage(victim, weapon.damage);
+    Unit *victim = map->tiles[destination.col][destination.row].occupant;
+    SimulateDamage(victim, 1);
 }
 
 // ======================================== Resolution System ==================
@@ -210,7 +59,7 @@ struct Attack
         cout << unit->name << "\n";
         cout << unit->pos << "\n";
         cout << offset << "\n";
-        Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
+        Simulate(map, unit, unit->pos + offset);
     }
 };
 

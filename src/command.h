@@ -40,23 +40,23 @@ public:
             const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
             if(!hoverTile->occupant)
             {
-                GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+                GlobalInterfaceState = NEUTRAL_GROUND;
                 return;
             }
 
             if(hoverTile->occupant->is_exhausted)
             {
-                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+                GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
                 return;
             }
 
             if(hoverTile->occupant->IsAlly())
             {
-                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+                GlobalInterfaceState = NEUTRAL_UNIT;
                 return;
             }
 
-            GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+            GlobalInterfaceState = NEUTRAL_ENEMY;
             return;
         }
     }
@@ -117,7 +117,7 @@ public:
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected = nullptr;
 
-        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        GlobalInterfaceState = NEUTRAL_UNIT;
 
         EmitEvent(PLACE_UNIT_EVENT);
     }
@@ -231,23 +231,23 @@ public:
         Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
         if(!over)
         {
-            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+            GlobalInterfaceState = NEUTRAL_GROUND;
             return;
         }
 
         if(over->is_exhausted)
         {
-            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+            GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
             return;
         }
 
         if(over->IsAlly())
         {
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+            GlobalInterfaceState = NEUTRAL_UNIT;
             return;
         }
 
-        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        GlobalInterfaceState = NEUTRAL_ENEMY;
         return;
     }
 
@@ -333,57 +333,12 @@ public:
 
         vector<position> orthogonal = {};
         orthogonal = Orthogonal(level->map, cursor->pos);
-        switch(cursor->selected->primary->type)
+        for(const position &p : orthogonal)
         {
-            case EQUIP_NONE:
-            {
-            } break;
-            case EQUIP_PUNCH:
-            {
-                for(const position &p : orthogonal)
-                {
-                    int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range
-                       && Unobstructed(level->map, cursor->selected->pos, p))
-                        level->map.range.push_back(p);
-                }
-            } break;
-            case EQUIP_LINE_SHOT:
-            {
-                for(const position &p : orthogonal)
-                {
-                    if(Unobstructed(level->map, cursor->selected->pos, p))
-                        level->map.range.push_back(p);
-                }
-            } break;
-            case EQUIP_ARTILLERY:
-            {
-                for(const position &p : orthogonal)
-                {
-                    int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range)
-                        level->map.range.push_back(p);
-                }
-            } break;
-            case EQUIP_SELF_TARGET:
-            {
-            } break;
-            case EQUIP_LEAP:
-            {
-                for(const position &p : orthogonal)
-                {
-                    int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range
-                       && !level->map.tiles[p.col][p.row].occupant)
-                        level->map.range.push_back(p);
-                }
-            } break;
-            case EQUIP_LASER:
-            {
-            } break;
-            default:
-            {
-            } break;
+            int distance = ManhattanDistance(cursor->selected->pos, p);
+            if(distance >= 1 && distance <= 1
+               && Unobstructed(level->map, cursor->selected->pos, p))
+                level->map.range.push_back(p);
         }
         level->map.attackable.clear();
 
@@ -405,12 +360,12 @@ public:
 
     virtual void Execute()
     {
-        Simulate(map, *cursor->selected->primary, cursor->selected->pos, cursor->targeting);
+        Simulate(map, cursor->selected, cursor->targeting);
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
 
-        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+        GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
     }
 
 private:
@@ -456,7 +411,7 @@ public:
     virtual void Execute()
     {
         cursor->selected = nullptr;
-        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        GlobalInterfaceState = NEUTRAL_ENEMY;
     }
 
 private:
@@ -480,7 +435,7 @@ public:
 
     virtual void Execute()
     { 
-        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+        GlobalInterfaceState = NEUTRAL_GROUND;
     }
 };
 
@@ -596,8 +551,6 @@ public:
         *level = LoadLevel(level->name, units, party);
         level->song->Restart();
 
-        GlobalPlayer.Reset();
-
         GoToAIPhase();
     }
 
@@ -656,10 +609,6 @@ public:
             input->b = false;
             return buttonB;
         }
-        if(input->l) {
-            input->l = false;
-            return buttonL;
-        }
         if(input->r) {
             input->r = false;
             return buttonR;
@@ -676,7 +625,6 @@ public:
         BindRight(make_shared<MoveCommand>(cursor, map, direction(1, 0)));
         BindA(make_shared<OpenGameMenuCommand>());
         BindB(make_shared<NullCommand>());
-        BindL(make_shared<NullCommand>());
         BindR(make_shared<NullCommand>());
     }
 
@@ -684,9 +632,7 @@ public:
     {
         shared_ptr<Command> newCommand = HandleInput(input);
         if(newCommand)
-        {
             commandQueue.push(newCommand);
-        }
 
         while(!commandQueue.empty())
         {
@@ -695,38 +641,13 @@ public:
         }
     }
 
-    void BindUp(shared_ptr<Command> command)
-    {
-        buttonUp = command;
-    }
-    void BindDown(shared_ptr<Command> command)
-    {
-        buttonDown = command;
-    }
-    void BindLeft(shared_ptr<Command> command)
-    {
-        buttonLeft = command;
-    }
-    void BindRight(shared_ptr<Command> command)
-    {
-        buttonRight = command;
-    }
-    void BindA(shared_ptr<Command> command)
-    {
-        buttonA = command;
-    }
-    void BindB(shared_ptr<Command> command)
-    {
-        buttonB = command;
-    }
-    void BindL(shared_ptr<Command> command)
-    {
-        buttonL = command;
-    }
-    void BindR(shared_ptr<Command> command)
-    {
-        buttonR = command;
-    }
+    void BindUp(shared_ptr<Command> command) { buttonUp = command; }
+    void BindDown(shared_ptr<Command> command) { buttonDown = command; }
+    void BindLeft(shared_ptr<Command> command) { buttonLeft = command; }
+    void BindRight(shared_ptr<Command> command) { buttonRight = command; }
+    void BindA(shared_ptr<Command> command) { buttonA = command; }
+    void BindB(shared_ptr<Command> command) { buttonB = command; }
+    void BindR(shared_ptr<Command> command) { buttonR = command; }
 
     // updates what the user can do with their buttons.
     // contains some state: the minimum amount.
@@ -747,7 +668,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(TITLE_SCREEN):
@@ -758,7 +678,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<StartGameCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(GAME_OVER):
@@ -769,7 +688,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<RestartGameCommand>(level, units, party));
                 BindB(make_shared<ToTitleScreenCommand>());
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -781,7 +699,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level, cursor));
                 BindB(make_shared<ExitGameMenuCommand>());
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
@@ -792,7 +709,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<BackToGameMenuCommand>());
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
@@ -804,11 +720,10 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(NEUTRAL_OVER_GROUND):
+            case(NEUTRAL_GROUND):
             {
                 BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
                 BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
@@ -816,11 +731,10 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(NEUTRAL_OVER_ENEMY):
+            case(NEUTRAL_ENEMY):
             {
                 BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
                 BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
@@ -828,11 +742,10 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<SelectEnemyCommand>(cursor, &(level->map)));
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(NEUTRAL_OVER_UNIT):
+            case(NEUTRAL_UNIT):
             {
                 BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
                 BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
@@ -840,11 +753,10 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<SelectUnitCommand>(cursor, &(level->map)));
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(NEUTRAL_OVER_DEACTIVATED_UNIT):
+            case(NEUTRAL_DEACTIVATED_UNIT):
             {
                 BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
                 BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
@@ -852,7 +764,6 @@ public:
                 BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<OpenGameMenuCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
             } break;
             case(SELECTED):
@@ -863,7 +774,6 @@ public:
                 BindRight(make_shared<MoveSelectedCommand>(cursor, level->map, direction(1, 0)));
                 BindA(make_shared<PlaceUnitCommand>(cursor, level));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<SeekVictimsCommand>(cursor, level));
             } break;
 
@@ -875,7 +785,6 @@ public:
                 BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<StopAttackingCommand>(cursor));
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(ATTACK_TARGETING):
@@ -886,7 +795,6 @@ public:
                 BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
                 BindA(make_shared<AttackCommand>(&(level->map), cursor));
                 BindB(make_shared<StopAttackingCommand>(cursor));
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
             case(ATTACK_RESOLUTION):
@@ -897,7 +805,6 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<NullCommand>());
-                BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
 

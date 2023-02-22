@@ -19,7 +19,7 @@ void
 GoToPlayerPhase(Level *level, Cursor *cursor)
 {
     GlobalPhase = PHASE_PLAYER;
-    GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+    GlobalInterfaceState = NEUTRAL_UNIT;
     GlobalAIState = AI_NO_OP;
 
     cursor->selected = nullptr;

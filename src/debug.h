@@ -23,8 +23,7 @@ DebugUI()
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT));
 
-	ImGui::PushFont(uiFontLarge);
-    ImGui::PushStyleColor(ImGuiCol_Text, SdlToImColor(white));
+	ImGui::PushFont(uiFontSmall);
     ImGui::Begin("Debug", NULL, flags);
     {
         ImGui::Text("[%.2f FPS]", ImGui::GetIO().Framerate);
@@ -34,7 +33,6 @@ DebugUI()
         ImGui::Text("Speed 1/%d", GlobalSpeedMod);
     }
     ImGui::End();
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 

@@ -26,46 +26,7 @@ void
 RenderAttack(const Tilemap &map,
              const Attack &attack)
 {
-    switch(attack.unit->primary->type)
-    {
-        case EQUIP_NONE:
-        {
-            cout << "WARNING: RenderAttack has NONE attack type.\n";
-            RenderTileColor(attack.unit->pos + attack.offset, yellow);
-        } break;
-        case EQUIP_PUNCH:
-        {
-            RenderTileColor(attack.unit->pos + attack.offset, attackColor);
-        } break;
-        case EQUIP_LINE_SHOT:
-        {
-            position result = GetFirstTarget(map, attack.unit->pos, attack.offset);
-            if(result != position(-1, -1))
-                RenderTileColor(result, attackColor);
-        } break;
-        case EQUIP_ARTILLERY:
-        {
-            RenderTileColor(attack.unit->pos + attack.offset, attackColor);
-        } break;
-
-        // Not likely...
-        case EQUIP_SELF_TARGET:
-        {
-            cout << "NO VIS FOR SELF TARGET\n";
-        } break;
-        case EQUIP_LEAP:
-        {
-            cout << "NO VIS FOR LEAP\n";
-        } break;
-        case EQUIP_LASER:
-        {
-            cout << "NO VIS FOR LASER\n";
-        } break;
-
-        default:
-        {
-        } break;
-    }
+    RenderTileColor(attack.unit->pos + attack.offset, attackColor);
 }
 
 // Renders an individual tile to the screen, given its game coords and tile (for texture).
@@ -147,14 +108,21 @@ void
 RenderHealthBarSmall(const position &p, int hp, int maxHp)
 {
     float ratio = (float)hp / maxHp;
-    SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
+    //SDL_Color healthColor = PiecewiseColors(red, yellow, green, ratio);
+    SDL_Color healthColor = healthBarColor;
 
-    SDL_Rect bar_rect = {p.col * TILE_SIZE + 7 + X_OFFSET,
-                            p.row * TILE_SIZE + 50 + Y_OFFSET,
-                            50, 8};
-    SDL_Rect health_rect = {p.col * TILE_SIZE + 7 + X_OFFSET,
-                            p.row * TILE_SIZE + 50 + Y_OFFSET,
-                            (int)(50 * ratio), 8};
+    int wide = (int)(TILE_SIZE * 0.8);
+    int tall = (int)(TILE_SIZE * 0.1);
+    SDL_Rect bar_rect = {
+                         X_OFFSET + p.col * TILE_SIZE + (TILE_SIZE - wide) / 2,
+                         Y_OFFSET + p.row * TILE_SIZE,
+                         wide, tall
+                        };
+    SDL_Rect health_rect = {
+                         X_OFFSET + p.col * TILE_SIZE + (TILE_SIZE - wide) / 2,
+                         Y_OFFSET + p.row * TILE_SIZE,
+                         (int)(wide * ratio), tall
+                        };
 
     SDL_SetRenderDrawColor(GlobalRenderer, darkGray.r, darkGray.g, darkGray.b, darkGray.a);
     SDL_RenderFillRect(GlobalRenderer, &bar_rect);
@@ -275,10 +243,10 @@ Render(const Tilemap &map,
 // ================================= render cursor ================================================
     if(
         GlobalInterfaceState == ENEMY_RANGE ||
-        GlobalInterfaceState == NEUTRAL_OVER_GROUND ||
-        GlobalInterfaceState == NEUTRAL_OVER_ENEMY ||
-        GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-        GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+        GlobalInterfaceState == NEUTRAL_GROUND ||
+        GlobalInterfaceState == NEUTRAL_ENEMY ||
+        GlobalInterfaceState == NEUTRAL_UNIT ||
+        GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT ||
         GlobalInterfaceState == SELECTED ||
         GlobalInterfaceState == ATTACK_THINKING ||
         GlobalInterfaceState == ATTACK_TARGETING
