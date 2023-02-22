@@ -5,58 +5,6 @@ log
 Plan
 > Build a fun little game!
 
-Implementation
-Phase 1: Mechanical 
-Phase 3: Design 
-Phase 2: Writing
-Phase 4: Art
-Phase 5: Release
-
-# Release
-What I need for release:
-* Plan out the hours.
-  * Forty Days and Forty nights = 320 Hours remaining.
-  * Priorities: Engine and Design.
-* Engine
-  * 180 Hours
-    * Save/Load
-    * Cutscenes
-    * Items
-    * Conversation Features
-    * Green Units
-* Design
-  * 100 Hours
-    * New Mechanics
-    * 20 Levels
-    * Experience Curves
-    * 50 Items
-    * 25 Characters
-    * 15 Enemies
-* Writing
-  * 20 Hours
-* Art
-  * Outsource
-  * 10 Hours
-* Polish
-  * 20 Hours
-    * Multi-platform
-    * Resolution
-    * Animation tweaks
-    * Color tweaks
-* QA
-  * 20 Hours
-    * Bug passes
-    * Profiling
-
-* Marketing
-  * 10 Hours
-    * Develop Brand
-    * Posts to various forums
-
-* Playtesting
-  * 50 Hours
-    * Get it in front of 100 people.
-
 # Design
 What is appealing to me about tactics games?
     Permadeath sacrifices
