@@ -287,7 +287,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             unitCopy->pos.row = row;
             unitCopy->ai_behavior = (AIBehavior)stoi(tokens[3]);
             unitCopy->is_boss = (bool)stoi(tokens[4]);
-            level.combatants.push_back(move(unitCopy));
+            level.combatants.push_back(std::move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
         }
         else if(type == "COM")

@@ -16,7 +16,6 @@ struct InputState
     bool right;
     bool a;
     bool b;
-    bool l;
     bool r;
 
 	int joystickCooldown = 0;
@@ -40,19 +39,10 @@ struct Texture
         this->filename = filename_in;
     }
 
-    Texture()
-    {
-        //printf("WARN: Default texture constructor called.\n");
-    }
-
-    ~Texture()
-    {
-        //TODO: This causes some funny stuff to happen!
-        //      But I think it has to be called. Look into this.
-        //SDL_DestroyTexture(sdl_texture);
-    }
+    Texture() = default;
 };
 
+// NOTE: this corresponds to the sprite sheets themselves.
 enum SheetTrack
 {
     TRACK_IDLE,

@@ -43,11 +43,8 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     case SDLK_SPACE:
                         input->a = true;
                         break;
-                    case SDLK_LSHIFT:
-                        input->b = true;
-                        break;
                     case SDLK_q:
-                        input->l = true;
+                        input->b = true;
                         break;
                     case SDLK_e:
                         input->r = true;
@@ -73,11 +70,8 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     case SDLK_SPACE:
                         input->a = false;
                         break;
-                    case SDLK_LSHIFT:
-                        input->b = false;
-                        break;
                     case SDLK_q:
-                        input->l = false;
+                        input->b = false;
                         break;
                     case SDLK_e:
                         input->r = false;
@@ -142,8 +136,6 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     input->a = true;
                 else if(Event.jbutton.button == 1)
                     input->b = true;
-                else if(Event.jbutton.button == 11)
-                    input->l = true;
                 else if(Event.jbutton.button == 10)
                     input->r = true;
             }
@@ -153,8 +145,6 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     input->a = false;
                 else if(Event.jbutton.button == 1)
                     input->b = false;
-                else if(Event.jbutton.button == 9)
-                    input->l = false;
                 else if(Event.jbutton.button == 10)
                     input->r = false;
             }
