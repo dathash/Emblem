@@ -268,6 +268,8 @@ public:
     virtual void Execute()
     { 
         cursor->PlaceAt(cursor->selected->pos);
+        cursor->targeting = {-1, -1};
+
         GlobalInterfaceState = SELECTED;
     }
 
@@ -303,6 +305,7 @@ public:
         if(cursor->targeting == position(-1, -1) || 
            new_pos == cursor->selected->pos)
         {
+            cursor->targeting = position(-1, -1);
             map->attackable.clear();
             GlobalInterfaceState = ATTACK_THINKING;
             return;
@@ -333,13 +336,14 @@ public:
 
         vector<position> orthogonal = {};
         orthogonal = Orthogonal(level->map, cursor->pos);
+
         for(const position &p : orthogonal)
         {
             int distance = ManhattanDistance(cursor->selected->pos, p);
-            if(distance >= 1 && distance <= 1
-               && Unobstructed(level->map, cursor->selected->pos, p))
+            if(distance == cursor->selected->cls.range)
                 level->map.range.push_back(p);
         }
+
         level->map.attackable.clear();
 
         GlobalInterfaceState = ATTACK_THINKING;
@@ -364,6 +368,7 @@ public:
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
+        cursor->targeting = {-1, -1};
 
         GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
     }

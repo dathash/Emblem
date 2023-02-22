@@ -2,9 +2,6 @@
 emblem
 log
 
-Plan
-> Build a fun little game!
-
 # Design
 Group mechanics (Units nearby eachother get bonuses)
 Leader mechanics (Genealogy stars)
@@ -29,10 +26,57 @@ Genealogy's items are pretty close too.
 Movements due to attacks
 * Your unit is blown back by their attack, providing a hasty retreat.
 
-# Story
-The story of the game is delivered through the characters.
+2D cutscenes like in FE7, with some beautiful art while the dialogue occurs.
 
 # TODO
+Modifiers
+* rancor
+  * +x damage dealt
+* armor
+  * -x damage taken
+* dodge
+  * X * 20% chance to avoid an attack
+
+Abilities
+* Push
+  * pushes a unit x squares.
+* Freeze
+  * Freezes an enemy for x turns.
+* Cripple
+  * Enemy deals -x damage for one turn.
+* Command
+  * Unit can act x more times.
+Dance
+Warp
+Buff
+
+Weapon type mechanic
+* Class
+  * Tank
+    * 1 range
+    * 6 health
+    * Passive | Adjacent units have armor 1
+    * Active | Push 1
+  * Caster
+    * 2 range
+    * 4 health
+    * Passive | Adjacent units have rancor 1
+    * Active | Freeze 1
+  * Ranger
+    * 3 range
+    * 2 health
+    * Passive | Units in orthogonal lines have dodge 1
+    * Active | Cripple 1
+  * Commander
+    * 0 range
+    * 3 health
+    * Passive | Units in 2 range have armor 1 and rancor 1.
+    * Active | Command 1
+
+  * Healer
+  * Dancer
+  * Ouranomancer
+  * Splash
 
 # Later
 Art
@@ -54,106 +98,4 @@ POLISH
 
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
-
-# Plot
-## World
-Tolmec
-* Desert
-* Theocracy
-
-Imrryr
-* Plains
-* Lordship
-
-Gaul
-* Mountains
-* Nomads
-
-Heroes
-Close party, like in Bebop or in Lupin.
-The hero.
-The mentor.
-The brooding one.
-The heart.
-The lover.
-The witch.
-The rival.
-The mother.
-
-## Plot
-Two part story.
-
-## Characters
-### Commander
-Lucina
-    Mechanics
-        All based around giving allies bonuses, extra turns, extra movement, etc.
-        Alters alies' characteristics. Gives some double speed, etc.
-    Personality
-        Naive. Figuring things out.
-
-### Swordsman
-Priam
-    Mechanics
-        Strong DPS
-        Needs support to be useful.
-            High Crit, low hit?
-            Glass Cannon?
-    Personality
-        Super Cool
-        Always knows what has to be done
-
-### Lucky Charm
-Donnel
-    Mechanics
-        Weak, but when he's around, everyone gets boons.
-        Momentum-based mechanic. Every kill he gets, he doubles in
-        effectiveness.
-    Personality
-        Weak, Pitiful.
-        Becomes strong. Confident.
-        Has a role model: Priam
-
-### Archer
-Noire
-    Mechanics
-        Cripple characters, stunning from afar.
-    Personality
-        Pitiful, cracks under pressure.
-        Pushes others away.
-
-### Dancer
-
-
-### Thief
-    Mechanics
-        Hides in the shadows.
-            Literally let them hide in walls and such.
-            Flank enemies.
-            They can move, attack, then move again or hide.
-        Moves through all units.
-    Personality
-        A Historian. Like Soren.
-
-### Tank
-    Mechanics
-        Doesn't deal damage at all. Basically movable wall.
-        Able to throw allies around the battlefield.
-    Personality
-        Stoic. 
-        An enjoyer of the finer things in life.
-
-### Ouranomancer
-    Mechanics
-        Manipulates space.
-        Warps allies around the map.
-        Swaps the positioning of enemies.
-    Personality
-
-### Blaster
-    Mechanics
-        AOE. Out of control.
-        Consequences.
-    Personality
-
 

@@ -56,11 +56,9 @@ GetAction(const Unit &unit, const Tilemap &map)
 class AIPerformUnitActionCommand : public Command
 {
 public:
-    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in,
-                               Resolution *resolution_in)
+    AIPerformUnitActionCommand(Cursor *cursor_in, Tilemap *map_in)
     : cursor(cursor_in),
-      map(map_in),
-      resolution(resolution_in)
+      map(map_in)
     {}
 
     virtual void Execute()
@@ -82,8 +80,7 @@ public:
         // Prepare attack
         if(action.second)
         {
-            resolution->attacks.push_back({cursor->selected, 
-                                           action.second->pos - cursor->selected->pos});
+            Simulate(map, cursor->selected, action.second->pos);
             cursor->pos = action.second->pos;
 
             cursor->selected->Deactivate();
@@ -91,7 +88,6 @@ public:
             return;
         }
 
-        // resolution
         cursor->pos = cursor->selected->pos;
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
@@ -104,7 +100,6 @@ public:
 private:
     Cursor *cursor;
     Tilemap *map;
-    Resolution *resolution;
 };
 
 // ============================== struct ====================================
@@ -115,7 +110,7 @@ struct AI
 
 
     // Fills the command queue with the current plan.
-    void Plan(Cursor *cursor, Level *level, Resolution *resolution)
+    void Plan(Cursor *cursor, Level *level)
     {
         Unit *selected = nullptr;
         selected = FindNearest(level->map, cursor->pos,
@@ -127,7 +122,7 @@ struct AI
         {
             cursor->pos = selected->pos;
             commandQueue.push(make_shared<AISelectUnitCommand>(cursor, &(level->map)));
-            commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map), resolution));
+            commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map)));
         }
         else
         {
@@ -137,14 +132,14 @@ struct AI
 
     // Passes the args through to plan.
     void
-    Update(Cursor *cursor, Level *level, Resolution *resolution)
+    Update(Cursor *cursor, Level *level)
     {
         if(GlobalAIState == AI_NO_OP ||
            GlobalAIState == AI_ATTACK_RESOLUTION)
             return;
 
         if(commandQueue.empty())
-            Plan(cursor, level, resolution);
+            Plan(cursor, level);
 
         ++frame;
         // Every __ frames.

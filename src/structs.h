@@ -120,6 +120,86 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
+enum ModifierType
+{
+    MOD_ARMOR,
+    MOD_RANCOR,
+    MOD_DODGE,
+};
+
+struct Modifier
+{
+    ModifierType type;
+    int tier;
+};
+
+enum PassiveType
+{
+    PASSIVE_NONE,
+    PASSIVE_SHIELD,
+    PASSIVE_INFUSE,
+    PASSIVE_VISION,
+    //PASSIVE_MORALE,
+};
+
+struct Passive
+{
+    PassiveType type;
+    int tier;
+};
+
+enum ActiveType
+{
+    ACTIVE_NONE,
+    ACTIVE_PUSH,
+    ACTIVE_FREEZE,
+    ACTIVE_CRIPPLE,
+    //ACTIVE_COMMAND,
+};
+
+struct Active
+{
+    ActiveType type;
+    int tier;
+};
+
+enum ClassType
+{
+    CLASS_NONE,
+    CLASS_FIGHTER,
+    CLASS_CASTER,
+    CLASS_RANGER,
+};
+
+struct Class
+{
+    ClassType type;
+    int range;
+    Passive passive;
+    Active active;
+};
+
+Class
+GetClass(ClassType type)
+{
+    cout << type <<"\n";
+    switch(type)
+    {
+
+    case CLASS_NONE:    return {};
+
+    case CLASS_FIGHTER: return {type, 1, {PASSIVE_SHIELD, 1}, {ACTIVE_PUSH, 1}};
+
+    case CLASS_CASTER:  return {type, 2, {PASSIVE_INFUSE, 1}, {ACTIVE_FREEZE, 1}};
+
+    case CLASS_RANGER:  return {type, 3, {PASSIVE_VISION, 1}, {ACTIVE_CRIPPLE, 1}};
+
+    default: cout << "ERROR GetClass: " << type << "\n"; return {};
+
+    }
+}
+
+// ======================================= Units ===============================
 enum Team
 {
     TEAM_PLAYER,
@@ -131,12 +211,10 @@ struct Unit
 {
     string name;
     Team team;
+    Class cls;
     int health;
     int max_health;
     int movement;
-
-    //Equip *primary = nullptr;
-    //Equip *secondary = nullptr;
 
     position pos = {0, 0};
     position initial_pos = {0, 0};
@@ -147,6 +225,7 @@ struct Unit
     bool should_die = false;
 
     Spritesheet sheet;
+
 
     size_t
     ID()
@@ -173,8 +252,11 @@ struct Unit
     }
 
     Unit(
-         string name_in, Team team_in,
-         int health_in, int movement_in,
+         string name_in,
+         Team team_in,
+         ClassType cls_in,
+         int health_in, 
+         int movement_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -183,11 +265,14 @@ struct Unit
       health(health_in),
       movement(movement_in),
       sheet(sheet_in)
-    {}
+    {
+        cls = GetClass(cls_in);
+    }
 
     Unit(const Unit &other)
     : name(other.name),
       team(other.team),
+      cls(other.cls),
       max_health(other.max_health),
       health(other.health),
       movement(other.movement),

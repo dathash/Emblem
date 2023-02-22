@@ -22,13 +22,6 @@ RenderTileColor(const position &pos, const SDL_Color &color)
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
-void
-RenderAttack(const Tilemap &map,
-             const Attack &attack)
-{
-    RenderTileColor(attack.unit->pos + attack.offset, attackColor);
-}
-
 // Renders an individual tile to the screen, given its game coords and tile (for texture).
 void
 RenderTileTexture(const Tilemap &map, const Tile &tile,
@@ -160,8 +153,8 @@ RenderHealthBarCombat(const position &p, int hp, int maxHp)
 void
 Render(const Tilemap &map, 
        const Cursor &cursor, 
-       const Menu &gameMenu,
-       const Resolution &resolution)
+       const Menu &gameMenu
+      )
 {
     SDL_SetRenderDrawBlendMode(GlobalRenderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GlobalRenderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -209,11 +202,6 @@ Render(const Tilemap &map,
 
     if(cursor.selected)
         RenderTileColor(cursor.selected->pos, healColor);
-
-    for(const Attack &attack : resolution.attacks)
-    {
-        RenderAttack(map, attack);
-    }
 
 // ================================ ai visualization  =============================
     if(GlobalAIState == AI_SELECTED)

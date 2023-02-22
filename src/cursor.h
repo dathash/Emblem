@@ -9,7 +9,7 @@ struct Cursor
 {
     position pos = {0, 0};
     Unit *selected = nullptr;
-    position targeting = {0, 0};
+    position targeting = {-1, -1};
 
     Spritesheet sheet;
     path path_draw = {};

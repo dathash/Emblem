@@ -175,8 +175,6 @@ int main(int argc, char *argv[])
     InputHandler handler(&cursor, level.map);
     AI ai;
 
-    Resolution resolution;
-
     GlobalInterfaceState = TITLE_SCREEN;
     GlobalAIState = AI_NO_OP;
 
@@ -201,22 +199,17 @@ int main(int argc, char *argv[])
 
             if(GlobalPhase == PHASE_AI)
             {
-                ai.Update(&cursor, &level, &resolution);
+                ai.Update(&cursor, &level);
             }
             else if(GlobalPhase == PHASE_PLAYER)
             {
                 handler.Update(&input);
                 handler.UpdateCommands(&cursor, &level, units, party, &game_menu);
             }
-            else
-            {
-                resolution.Update(&(level.map));
-            }
 
             cursor.Update(&level.map);
 
             // NOTE: Must be in this order.
-            resolution.RemoveDeadUnits();
             level.RemoveDeadUnits();
 
             level.Update();
@@ -255,7 +248,7 @@ int main(int argc, char *argv[])
         */
 
         // Render
-        Render(level.map, cursor, game_menu, resolution);
+        Render(level.map, cursor, game_menu);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
@@ -265,7 +258,7 @@ int main(int argc, char *argv[])
 
 #if DEV_MODE
         if(GlobalEditorMode)
-            EditorPass(&units, party, &level, levels, &resolution);
+            EditorPass(&units, party, &level, levels);
         if(GlobalDebug)
             DebugUI();
 #endif

@@ -228,10 +228,10 @@ LoadUnits(string filename_in)
                 units.push_back(make_shared<Unit>(
                     tokens[0],             // name
                     (Team)stoi(tokens[1]), // team
-                    stoi(tokens[2]),       // health
-                    stoi(tokens[3]),       // movement
-
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[4]),
+                    (ClassType)stoi(tokens[2]), // class
+                    stoi(tokens[3]),       // health
+                    stoi(tokens[4]),       // movement
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[5]),
                                 32, ANIMATION_SPEED)
                 ));
             }
@@ -242,6 +242,7 @@ LoadUnits(string filename_in)
 	return units;
 }
 
+
 // saves the units to a file.
 void
 SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
@@ -249,12 +250,13 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     ofstream fp;
     fp.open(filename_in);
     SDL_assert(fp.is_open());
-    
-    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<sprite>\n";
+
+    fp << "COM\t<name>\t<team>\t<class>\t<hp>\t<mov>\t<range>\t<sprite>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT\t" << unit->name << "\t"
            << unit->team << "\t"
+           << unit->cls.type << "\t"
            << unit->max_health << "\t"
            << unit->movement << "\t"
 

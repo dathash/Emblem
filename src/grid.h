@@ -203,7 +203,8 @@ Accessible(const Tilemap &map, position origin,
 }
 
 // Finds the manhattan distance between two positions.
-int ManhattanDistance(const position &one, const position &two)
+int
+ManhattanDistance(const position &one, const position &two)
 {
     return (abs(one.col - two.col) + abs(one.row - two.row));
 }

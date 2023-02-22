@@ -41,19 +41,11 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
             units->push_back(make_shared<Unit>(
                 string("DEFAULT_CHANGE"),
                 TEAM_ENV,
-                3,
-                3,
+                CLASS_NONE,
+                1,
+                1,
                 Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED)
             ));
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("destroy"))
-        {
-            units->erase(units->begin() + selectedIndex);
-            if(selectedIndex > 0)
-            {
-                --selectedIndex;
-            }
         }
 
         for(int i = 0; i < units->size(); ++i)
@@ -74,6 +66,27 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::InputText("unit name", &(selected->name));
         ImGui::SliderInt("health", &selected->max_health, 1, 8);
         ImGui::SliderInt("movement", &selected->movement, 0, 5);
+
+        ImGui::Text("%d", selected->cls.type);
+        if(ImGui::Button("No class"))
+        {
+            selected->cls = GetClass(CLASS_FIGHTER);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Fighter"))
+        {
+            selected->cls = GetClass(CLASS_FIGHTER);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Caster"))
+        {
+            selected->cls = GetClass(CLASS_CASTER);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Ranger"))
+        {
+            selected->cls = GetClass(CLASS_RANGER);
+        }
     }
     ImGui::End();
 }
@@ -235,8 +248,8 @@ void
 EditorPass(
            vector<shared_ptr<Unit>> *units,
            const vector<shared_ptr<Unit>> &party,
-           Level *level, const vector<string> &levels,
-           Resolution *resolution)
+           Level *level, const vector<string> &levels
+          )
 {
     // Internal variables
     static char unit_filename[128] = INITIAL_UNITS;
@@ -246,8 +259,6 @@ EditorPass(
     {
         if(ImGui::Button("Load"))
         {
-            resolution->attacks.clear();
-
             *units = LoadUnits(DATA_PATH + string(unit_filename));
             cout << "Units loaded: " << unit_filename << "\n";
 
@@ -270,7 +281,6 @@ EditorPass(
         }
         if(ImGui::Button("Test Zone"))
         {
-            resolution->attacks.clear();
             *level = LoadLevel("test.txt", *units, party);
             sprintf(level_filename, "test.txt");
             GoToAIPhase();
@@ -281,7 +291,6 @@ EditorPass(
         {
             if(ImGui::Button(s.c_str()))
             {
-                resolution->attacks.clear();
                 *level = LoadLevel(s, *units, party);
                 sprintf(level_filename, "%s", s.c_str());
                 GoToAIPhase();
