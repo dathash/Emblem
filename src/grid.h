@@ -202,13 +202,6 @@ Accessible(const Tilemap &map, position origin,
     return accessible;
 }
 
-// Finds the manhattan distance between two positions.
-int
-ManhattanDistance(const position &one, const position &two)
-{
-    return (abs(one.col - two.col) + abs(one.row - two.row));
-}
-
 // Assumes orthogonality
 // Determines if a straight path between two points is unobstructed.
 bool

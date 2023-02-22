@@ -184,6 +184,8 @@ public:
 
         cursor->selected->has_moved = true;
 
+        level->UpdatePassiveEffects();
+
         cursor->selected->sheet.ChangeTrack(TRACK_ACTIVE);
         EmitEvent(PLACE_UNIT_EVENT);
     }

@@ -23,6 +23,9 @@ stronger as it takes more hits.
 I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
+Ability that chains through your units, so you want to set up a chain with your
+units relatively nearby eachother in a curve.
+
 Movements due to attacks
 * Your unit is blown back by their attack, providing a hasty retreat.
 
@@ -49,6 +52,7 @@ Abilities
 Dance
 Warp
 Buff
+Totem
 
 Weapon type mechanic
 * Class
@@ -77,6 +81,7 @@ Weapon type mechanic
   * Dancer
   * Ouranomancer
   * Splash
+  * Shaman
 
 # Later
 Art

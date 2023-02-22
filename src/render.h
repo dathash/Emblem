@@ -36,6 +36,20 @@ RenderTileTexture(const Tilemap &map, const Tile &tile,
     SDL_RenderCopy(GlobalRenderer, map.atlas.sdl_texture, &source, &destination);
 }
 
+void
+RenderPassiveRange(const position &pos, int range)
+{
+    for(int col = pos.col - range; col <= pos.col + range; ++col)
+    {
+        for(int row = pos.row - range; row <= pos.row + range; ++row)
+        {
+            if(IsValid({col, row}) &&
+               ManhattanDistance({col, row}, pos) <= range)
+                RenderTileColor({col, row}, healColor);
+        }
+    }
+}
+
 // Sets color modifiers based on the unit's properties.
 void
 SetSpriteModifiers(Unit *unit)
@@ -201,7 +215,10 @@ Render(const Tilemap &map,
     }
 
     if(cursor.selected)
+    {
+        RenderPassiveRange(cursor.selected->pos, cursor.selected->cls.range);
         RenderTileColor(cursor.selected->pos, healColor);
+    }
 
 // ================================ ai visualization  =============================
     if(GlobalAIState == AI_SELECTED)
@@ -218,7 +235,7 @@ Render(const Tilemap &map,
             const Tile &tileToRender = map.tiles[col][row];
             if(tileToRender.occupant)
             {
-                position screen_pos = {col , row};
+                position screen_pos = {col, row};
 
                 SetSpriteModifiers(tileToRender.occupant);
 

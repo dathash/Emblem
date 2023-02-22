@@ -241,8 +241,12 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
             ImGui::Text("%d MOV", unit.movement);
+            ImGui::SameLine();
+			ImGui::Text("%d RGE", unit.cls.range);
             ImGui::SameLine(ImGui::GetWindowWidth() - 80);
 			ImGui::Text("%d/%d HP", unit.health, unit.max_health);
+
+			ImGui::Text("%lu", unit.modifiers.size());
 		ImGui::PopFont();
     }
     ImGui::End();

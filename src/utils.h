@@ -194,6 +194,13 @@ Convert(Direction dir)
 
 typedef vector<position> path;
 
+// Finds the manhattan distance between two positions.
+int
+ManhattanDistance(const position &one, const position &two)
+{
+    return (abs(one.col - two.col) + abs(one.row - two.row));
+}
+
 int
 min(int a, int b)
 {

@@ -145,6 +145,7 @@ enum PassiveType
 struct Passive
 {
     PassiveType type;
+    int range;
     int tier;
 };
 
@@ -160,6 +161,7 @@ enum ActiveType
 struct Active
 {
     ActiveType type;
+    int range;
     int tier;
 };
 
@@ -182,20 +184,13 @@ struct Class
 Class
 GetClass(ClassType type)
 {
-    cout << type <<"\n";
     switch(type)
     {
-
     case CLASS_NONE:    return {};
-
-    case CLASS_FIGHTER: return {type, 1, {PASSIVE_SHIELD, 1}, {ACTIVE_PUSH, 1}};
-
-    case CLASS_CASTER:  return {type, 2, {PASSIVE_INFUSE, 1}, {ACTIVE_FREEZE, 1}};
-
-    case CLASS_RANGER:  return {type, 3, {PASSIVE_VISION, 1}, {ACTIVE_CRIPPLE, 1}};
-
+    case CLASS_FIGHTER: return {type, 1, {PASSIVE_SHIELD, 1, 1}, {ACTIVE_PUSH, 1, 1}};
+    case CLASS_CASTER:  return {type, 2, {PASSIVE_INFUSE, 1, 1}, {ACTIVE_FREEZE, 1, 2}};
+    case CLASS_RANGER:  return {type, 3, {PASSIVE_VISION, 1, 2}, {ACTIVE_CRIPPLE, 1, 3}};
     default: cout << "ERROR GetClass: " << type << "\n"; return {};
-
     }
 }
 
@@ -216,6 +211,8 @@ struct Unit
     int max_health;
     int movement;
 
+    vector<Modifier> modifiers = {};
+
     position pos = {0, 0};
     position initial_pos = {0, 0};
 
@@ -226,30 +223,11 @@ struct Unit
 
     Spritesheet sheet;
 
+    size_t ID() const { return hash<string>{}(name); }
+    bool IsAlly() const { return team == TEAM_PLAYER; }
+    bool IsAI() const { return team == TEAM_AI; }
 
-    size_t
-    ID()
-    {
-        return hash<string>{}(name);
-    }
-
-    bool
-    IsAlly() const
-    {
-        return team == TEAM_PLAYER;
-    }
-
-    bool
-    IsAI() const
-    {
-        return team == TEAM_AI;
-    }
-
-    void
-    Update()
-    {
-        sheet.Update();
-    }
+    void Update() { sheet.Update(); }
 
     Unit(
          string name_in,
@@ -278,6 +256,33 @@ struct Unit
       movement(other.movement),
       sheet(other.sheet)
     {}
+
+    void
+    ApplyPassive(const Passive &passive)
+    {
+        switch(passive.type)
+        {
+        case PASSIVE_NONE:
+        {
+        } break;
+        case PASSIVE_SHIELD:
+        {
+            modifiers.push_back({MOD_ARMOR, passive.tier});
+        } break;
+        case PASSIVE_INFUSE:
+        {
+            modifiers.push_back({MOD_RANCOR, passive.tier});
+        } break;
+        case PASSIVE_VISION:
+        {
+            modifiers.push_back({MOD_DODGE, passive.tier});
+        } break;
+        default:
+        {
+            cout << "ERROR ApplyPassive: " << passive.type << "\n";
+        } break;
+        }
+    }
 
     // Damages a unit and resolves things involved with that process.
     // Returns the amount of damage actually done.
@@ -352,6 +357,28 @@ struct Level
     Sound *song = nullptr;
 
     int turn_count = -1;
+
+
+    void
+    UpdatePassiveEffects()
+    {
+        for(shared_ptr<Unit> unit : combatants)
+        {
+            unit->modifiers.clear();
+        }
+        for(shared_ptr<Unit> source : combatants)
+        {
+            for(shared_ptr<Unit> target : combatants)
+            {
+                if(ManhattanDistance(source->pos, target->pos) <= source->cls.passive.range &&
+                   source->team == target->team)
+                {
+                    target->ApplyPassive(source->cls.passive);
+                }
+            }
+        }
+    }
+
 
     void
     CheckVictory()
