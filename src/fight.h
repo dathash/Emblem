@@ -30,6 +30,11 @@ SimulateDamage(Unit *victim, int amount)
     if(!victim)
         return;
 
+    if(victim->ID() == hash<string>{}("House"))
+    {
+        GlobalPlayer.Damage(amount);
+    }
+
     // NOTE: This is called when damage is zero when pushing a unit.
     // Keep that in mind for visualization purposes.
     //cout << amount << " Damage to " << victim->name << "\n";

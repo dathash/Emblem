@@ -122,6 +122,26 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
+struct Player
+{
+    int health = 7;
+    int max_health = 7;
+
+    void
+    Reset()
+    {
+        health = max_health;
+    }
+
+    void
+    Damage(int amount)
+    {
+        health = clamp(health - amount, 0, max_health);
+        if(health == 0)
+            GameOver();
+    }
+};
+
 enum Team
 {
     TEAM_PLAYER,
@@ -217,10 +237,13 @@ struct Unit
     }
 
     // Damages a unit and resolves things involved with that process.
-    void
+    // Returns the amount of damage actually done.
+    int
     Damage(int amount)
     {
+        int result = min(amount, health);
         health = clamp(health - amount, 0, max_health);
+        return result;
     }
 
     // Damages a unit and resolves things involved with that process.

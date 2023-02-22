@@ -46,6 +46,9 @@ GoToResolutionPhase()
 void
 GameOver()
 {
+    cout << "HERE\n";
+    GlobalPhase = PHASE_PLAYER;
+    GlobalAIState = AI_NO_OP;
     GlobalInterfaceState = GAME_OVER;
 }
 

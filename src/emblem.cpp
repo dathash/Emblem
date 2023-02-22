@@ -41,7 +41,6 @@ static bool GlobalPaused = false;
 static bool GlobalStep = false;
 static int GlobalSpeedMod = 1;
 
-
 #include "constants.h"
 // State
 static Phase GlobalPhase = PHASE_PLAYER;
@@ -58,6 +57,8 @@ static AIState GlobalAIState;
 #include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
 #include "equip.h"
 #include "structs.h"
+static Player GlobalPlayer;
+
 #include "cursor.h"
 #include "state.h"
 #include "vfx.h"
@@ -264,7 +265,7 @@ int main(int argc, char *argv[])
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level);
+        RenderUI(&ui, cursor, level, GlobalPlayer);
 
 #if DEV_MODE
         if(GlobalEditorMode)

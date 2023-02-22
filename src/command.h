@@ -596,6 +596,8 @@ public:
         *level = LoadLevel(level->name, units, party);
         level->song->Restart();
 
+        GlobalPlayer.Reset();
+
         GoToAIPhase();
     }
 

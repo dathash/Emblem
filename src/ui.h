@@ -209,7 +209,7 @@ DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
 
 // Displays a health bar, with an overlay for the damage to be done.
 void 
-DisplayHealthBar(int health, int max_health, int damage)
+DisplayHealthBar(int health, int max_health, int damage = 0)
 {
 	float percentHealth = (((float)health - damage) / (float)max_health);
 	percentHealth = (0 < percentHealth ? percentHealth : 0);
@@ -303,10 +303,31 @@ DisplayGameOver(ImGuiWindowFlags wf)
     ImGui::End();
 }
 
+void
+DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
+{
+	// Window sizing
+    ImGui::SetNextWindowPos(ImVec2(900, 0));
+    ImGui::SetNextWindowSize(ImVec2(200, 130));
+
+    // Logic
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Player", NULL, wf);
+    {
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontMedium);
+            DisplayHealthBar(player.health, player.max_health);
+            ImGui::Text("Health: %d/%d", player.health, player.max_health);
+		ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
-         const Level &level
+         const Level &level,
+         const Player &player
         )
 {
     ui->Update();
@@ -332,6 +353,8 @@ RenderUI(UI_State *ui,
         ImGui::PopStyleColor(3);
         return;
     }
+
+    DisplayPlayerState(window_flags, GlobalPlayer);
 
     if(GlobalPhase != PHASE_PLAYER)
     {

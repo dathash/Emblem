@@ -183,7 +183,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
 
             unitCopy->pos.col = col;
             unitCopy->pos.row = row;
-            level.combatants.push_back(move(unitCopy));
+            level.combatants.push_back(std::move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
         }
         else if(type == "COM")
