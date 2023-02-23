@@ -36,18 +36,6 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
 {
     ImGui::Begin("unit editor");
     {
-        if(ImGui::Button("create"))
-        {
-            units->push_back(make_shared<Unit>(
-                string("DEFAULT_CHANGE"),
-                TEAM_ENV,
-                CLASS_NONE,
-                1,
-                1,
-                Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED)
-            ));
-        }
-
         for(int i = 0; i < units->size(); ++i)
         {
             char buffer[256];
@@ -66,6 +54,7 @@ UnitEditor(vector<shared_ptr<Unit>> *units)
         ImGui::InputText("unit name", &(selected->name));
         ImGui::SliderInt("health", &selected->max_health, 1, 8);
         ImGui::SliderInt("movement", &selected->movement, 0, 5);
+        ImGui::SliderInt("range", &selected->range, 0, 4);
 
         ImGui::Text("%d", selected->cls.type);
         if(ImGui::Button("No class"))
@@ -217,24 +206,20 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
                 hover_tile->occupant = nullptr;
             }
             else
-            {
                 cout << "MISUSE: No unit to delete.\n";
-            }
         }
 
         if(hover_tile->occupant)
         {
-            ImGui::Text("Over unit.");
-
+            ImGui::Text("Over %s", hover_tile->occupant->name.c_str());
             if(ImGui::Button("Dmg"))
-            {
                 hover_tile->occupant->Damage(1);
-            }
             ImGui::SameLine();
             if(ImGui::Button("Heal"))
-            {
                 hover_tile->occupant->Heal(1);
-            }
+            ImGui::SliderInt("ai", (int*)&hover_tile->occupant->ai, 0, 4);
+            ImGui::SameLine();
+            ImGui::Text("%s", GetAITypeString(hover_tile->occupant->ai).c_str());
         }
 
         RenderTileColor({editor_cursor.col, editor_cursor.row}, editorColor);
@@ -264,8 +249,6 @@ EditorPass(
 
             *level = LoadLevel(level_filename, *units, party);
             cout << "Level loaded: " << level_filename << "\n";
-
-            GoToAIPhase();
         }
 
         if(ImGui::Button("Save Units"))
@@ -283,7 +266,6 @@ EditorPass(
         {
             *level = LoadLevel("test.txt", *units, party);
             sprintf(level_filename, "test.txt");
-            GoToAIPhase();
         }
 
         int wrap = 0;
@@ -293,7 +275,6 @@ EditorPass(
             {
                 *level = LoadLevel(s, *units, party);
                 sprintf(level_filename, "%s", s.c_str());
-                GoToAIPhase();
             }
             if(++wrap % 4)
                 ImGui::SameLine();

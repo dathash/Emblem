@@ -20,20 +20,16 @@ IsValid(const position &pos)
 bool
 VectorHasElement(const position &pos_in, const vector<position> &vector_in)
 {
-    bool has = false;
     for(const position &p : vector_in)
-    {
         if(pos_in == p)
-        {
-            has = true;
-        }
-    }
-    return has;
+           return true;
+
+    return false;
 }
 
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
-Interactible(const Tilemap &map, const position &origin, int min, int max)
+Interactible(const Tilemap &map, const position &origin, int range)
 {
     vector<position> interactible;
 
@@ -43,9 +39,8 @@ Interactible(const Tilemap &map, const position &origin, int min, int max)
 	{
         vector<int> currentColumn = {};
         for(int row = 0; row < MAP_HEIGHT; ++row)
-        {
             currentColumn.push_back(100);
-        }
+
         costs.push_back(currentColumn);
 	}
 
@@ -74,17 +69,15 @@ Interactible(const Tilemap &map, const position &origin, int min, int max)
                 if(newCost < costs[new_pos.col][new_pos.row])
                 {
                     costs[new_pos.col][new_pos.row] = newCost;
-                    if(costs[new_pos.col][new_pos.row] <= max)
-                    {
+                    if(costs[new_pos.col][new_pos.row] <= range)
                         unexplored.push(new_pos);
-                    }
                 }
             }
         }
     }
 
     interactible.erase(remove_if(interactible.begin(), interactible.end(),
-            [&costs, min](const position &p) { return costs[p.col][p.row] < min; }),
+            [&costs, range](const position &p) { return costs[p.col][p.row] < range; }),
             interactible.end());
     return interactible;
 }
@@ -175,15 +168,14 @@ Accessible(const Tilemap &map, position origin,
                 }
                 else
                 {
-                    newCost = costs[current.col][current.row] + 1;
+                    newCost = costs[current.col][current.row] +
+                              map.tiles[new_pos.col][new_pos.row].penalty;
                 }
                 if(newCost < costs[new_pos.col][new_pos.row])
                 {
                     costs[new_pos.col][new_pos.row] = newCost;
                     if(costs[new_pos.col][new_pos.row] <= mov)
-                    {
                         unexplored.push(new_pos);
-                    }
                 }
             }
         }
@@ -214,20 +206,6 @@ Unobstructed(const Tilemap &map, const position &one, const position &two)
         cur = cur + dir;
     }
     return true;
-}
-
-
-void
-PrintDistanceField(const vector<vector<int>> &field)
-{
-    for(vector<int> row : field)
-    {
-        for(int val : row)
-        {
-            cout << std::setw(3) << val << " ";
-        }
-        cout << "\n";
-    }
 }
 
 void
@@ -271,7 +249,6 @@ PrintField(const vector<vector<position>> &field)
 
 // Get a field of directions which indicate shortest paths to a specified node.
 // Also produces a Distance Field, which indicates distance at each point.
-// NOTE: Currently just prints out the distance field.
 vector<vector<direction>>
 GetField(const Tilemap &map, position origin, bool is_ally)
 {
@@ -280,9 +257,7 @@ GetField(const Tilemap &map, position origin, bool is_ally)
 	{
         vector<direction> currentColumn = {};
         for(int row = 0; row < MAP_HEIGHT; ++row)
-        {
             currentColumn.push_back(direction(-1, -1));
-        }
         field.push_back(currentColumn);
 	}
 
@@ -291,9 +266,7 @@ GetField(const Tilemap &map, position origin, bool is_ally)
 	{
         vector<int> currentColumn = {};
         for(int row = 0; row < MAP_HEIGHT; ++row)
-        {
             currentColumn.push_back(100);
-        }
         distances.push_back(currentColumn);
 	}
 
@@ -304,9 +277,8 @@ GetField(const Tilemap &map, position origin, bool is_ally)
     unexplored.push(origin);
     field[origin.col][origin.row] = direction(-2, -2);
     if(map.tiles[origin.col][origin.row].type == WALL)
-    {
         field[origin.col][origin.row] = direction(-1, -1);
-    }
+
     distances[origin.col][origin.row] = 0;
 
     while(!unexplored.empty())
@@ -322,7 +294,8 @@ GetField(const Tilemap &map, position origin, bool is_ally)
                                 current.row + directionsRow[i]};
             if(IsValid(new_pos))
             {
-                int newCost = distances[current.col][current.row] + 1;
+                int newCost = distances[current.col][current.row] + 
+                              map.tiles[new_pos.col][new_pos.row].penalty;
 
                 if(map.tiles[new_pos.col][new_pos.row].occupant &&
                    (map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != is_ally))
@@ -340,17 +313,9 @@ GetField(const Tilemap &map, position origin, bool is_ally)
         }
     }
 
-    return field;
-}
+    PrintField(field);
 
-void
-PrintPath(const path &path_in)
-{
-    cout << "PATH:\n";
-    for(const position &pos : path_in)
-    {
-        cout << pos << "\n";
-    }
+    return field;
 }
 
 // Given a start and end position, returns the shortest path between them,
@@ -361,7 +326,7 @@ GetPath(const Tilemap &map,
         position destination,
         bool is_ally)
 {
-    path path_result;
+    path result;
     vector<vector<position>> field = GetField(map, destination, is_ally);
 
     position next = start;
@@ -369,13 +334,13 @@ GetPath(const Tilemap &map,
     while(!(from.col == -2 && from.row == -2) &&
           !(from.col == -1 && from.row == -1))
     {
-        path_result.push_back(next);
+        result.push_back(next);
         from = field[next.col][next.row];
         // TODO: Col and row get swapped for some reason. I put in a hotfix.
         next = position(next.col + from.row,
                         next.row + from.col);
     }
-    return path_result;
+    return result;
 }
 
 
@@ -385,37 +350,26 @@ GetPath(const Tilemap &map,
 position
 FurthestMovementOnPath(const Tilemap &map, const path &path_in, int movement)
 {
-    SDL_assert(path_in.size());
-    if(movement > path_in.size())
-    {
+    SDL_assert(!path_in.empty());
+    if(movement >= path_in.size())
         return {0, 0};
-    }
+
+    cout << "=====================================\n";
+    cout << path_in.size() <<"\n";
     for(int i = movement; i > 0; --i) // Start at the furthest square, test all.
     {
+        cout << i << "\n";
         if(!map.tiles[path_in[i].col][path_in[i].row].occupant)
-        {
             return path_in[i];
-        }
     }
+
     return {0, 0};
 }
 
 
 //  ================================ NEW AI METHODS ============================
-void
-PrintPossibilities(const vector<pair<position, Unit *>> &v)
-{
-    cout << "Possilibities:\n";
-    for(const pair<position, Unit *> &poss : v)
-    {
-        cout << "Point: " << poss.first.col << " " << poss.first.row << " | ";
-        cout << poss.second->name << "\n";
-    }
-}
 
 // Finds all possible squares for attacking enemies.
-// SLOW: This shouldn't have to do exhaustive search. How about going through
-// the enemy units instead?
 vector<pair<position, Unit *>>
 FindAttackingSquares(const Tilemap &map, const Unit &unit,
                      const vector<position> &range)
@@ -425,14 +379,10 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit,
 
     for(const position &pos : range)
     {
-        interactible = Interactible(map, pos, 1, 1);
+        interactible = Interactible(map, pos, unit.range);
         for(const position &i : interactible)
-        {
             if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->IsAlly())
-            {
                 result.push_back(pair<position, Unit *>(pos, map.tiles[i.col][i.row].occupant));
-            }
-        }
     }
 
     return result;

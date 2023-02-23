@@ -335,13 +335,12 @@ public:
         level->map.range.clear();
 
         vector<position> interactible = Interactible(level->map, cursor->pos, 
-                                                     cursor->selected->cls.range, 
-                                                     cursor->selected->cls.range);
+                                                     cursor->selected->range);
 
         for(const position &p : interactible)
         {
             int distance = ManhattanDistance(cursor->selected->pos, p);
-            if(distance == cursor->selected->cls.range)
+            if(distance == cursor->selected->range)
                 level->map.range.push_back(p);
         }
 
@@ -567,15 +566,18 @@ private:
 class StartGameCommand : public Command
 {
 public:
-    StartGameCommand()
+    StartGameCommand(Level *level_in, Cursor *cursor_in)
+    : level(level_in),
+      cursor(cursor_in)
     {}
 
     virtual void Execute()
     {
-        GoToAIPhase();
+        GoToPlayerPhase(level, cursor);
     }
 
 private:
+    Level *level;
     Cursor *cursor;
 };
 
@@ -680,7 +682,7 @@ public:
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<StartGameCommand>());
+                BindA(make_shared<StartGameCommand>(level, cursor));
                 BindB(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;

@@ -33,22 +33,85 @@ private:
 
 
 pair<position, Unit *>
-AttackInRangeBehavior(const Unit &unit, const Tilemap &map)
+PursueBehavior(const Unit &unit, const Tilemap &map)
 {
     vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
-    if(possibilities.empty())
-        return {unit.pos, nullptr};
-    return possibilities[0];
+    if(!possibilities.empty())
+        return possibilities[0];
+
+    Unit *nearest = FindNearest(map, unit.pos,
+                    [](const Unit &unit) -> bool { return unit.IsAlly(); }
+                    , false);
+
+    path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
+    if(path_to_nearest.size())
+    {
+        position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.movement);
+        if(furthest == position(0, 0))
+            furthest = unit.pos;
+        return {furthest, nullptr};
+    }
+
+    return {unit.pos, NULL};
 }
 
+
+pair<position, Unit *>
+StaticBehavior(const Unit &unit, const Tilemap &map)
+{
+    pair<position, Unit *> action = {};
+    vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
+
+    for(auto poss : possibilities)
+        if(poss.first == unit.pos)
+            return poss;
+
+    return {unit.pos, NULL};
+}
+
+
+pair<position, Unit *>
+AttackTwoBehavior(const Unit &unit, const Tilemap &map)
+{
+    Unit *nearest = FindNearest(map, unit.pos,
+                    [](const Unit &unit) -> bool { return unit.IsAlly(); }, false);
+
+    path path_to_nearest = GetPath(map, unit.pos, nearest->pos, false);
+    if(!path_to_nearest.empty())
+    {
+        position furthest = FurthestMovementOnPath(map, path_to_nearest, unit.movement);
+        if(furthest == position(0, 0))
+            furthest = unit.pos;
+        return {furthest, nullptr};
+    }
+
+    return {unit.pos, nullptr};
+}
+
+pair<position, Unit *>
+AttackRangeBehavior(const Unit &unit, const Tilemap &map)
+{
+    vector<pair<position, Unit *>> possibilities = FindAttackingSquares(map, unit, map.accessible);
+    if(!possibilities.empty())
+        return possibilities[0];
+
+    return {unit.pos, nullptr};
+}
 
 // Scans the map and determines the best course of action to take.
 // Uses techniques specified by the unit's ai_behavior field.
 pair<position, Unit *>
 GetAction(const Unit &unit, const Tilemap &map)
 {
-    // switch here!
-    return AttackInRangeBehavior(unit, map);    
+    switch(unit.ai)
+    {
+        case AI_NONE: cout << "WARN GetAction: " << unit.name << "\n"; return {unit.pos, nullptr};
+        case AI_PURSUE:       return PursueBehavior(unit, map);
+        case AI_STATIC:       return StaticBehavior(unit, map);
+        case AI_ATTACK_RANGE: return AttackRangeBehavior(unit, map);
+        case AI_ATTACK_TWO:   return AttackTwoBehavior(unit, map);
+        default: SDL_assert(!"Shouldn't get here!\n"); return {};
+    }
 }
 
 class AIPerformUnitActionCommand : public Command
@@ -112,10 +175,8 @@ struct AI
     {
         Unit *selected = nullptr;
         selected = FindNearest(level->map, cursor->pos,
-                [](const Unit &unit) -> bool
-                {
-                    return unit.IsAI() && !unit.is_exhausted;
-                }, false);
+                   [](const Unit &unit) -> bool { return unit.IsAI() && !unit.is_exhausted; }, false);
+
         if(selected)
         {
             cursor->pos = selected->pos;
@@ -123,9 +184,7 @@ struct AI
             commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map)));
         }
         else
-        {
             GoToPlayerPhase(level, cursor);
-        }
     }
 
     // Passes the args through to plan.

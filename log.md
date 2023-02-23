@@ -49,8 +49,10 @@ Abilities
   * Enemy deals -x damage for one turn.
 * Command
   * Unit can act x more times.
+* Dash
+* Leap/Warp
+* Swap
 Dance
-Warp
 Buff
 Totem
 

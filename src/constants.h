@@ -63,12 +63,12 @@
 #define LEADER_ID hash<string>{}("Lucina")
 
 #define FLOOR_TILE {FLOOR, {0, 0}}
-#define WALL_TILE {WALL, {1, 0}}
-#define FOREST_TILE {FOREST, {2, 0}, {MOD_DODGE, 1}}
-#define SWAMP_TILE {SWAMP, {5, 1}}
-#define FORT_TILE {FORT, {4, 0}, {MOD_ARMOR, 1}}
+#define WALL_TILE {WALL, {1, 0}, 10}
+#define FOREST_TILE {FOREST, {2, 0}, 1, {MOD_DODGE, 1}}
+#define SWAMP_TILE {SWAMP, {5, 1}, 2}
+#define FORT_TILE {FORT, {4, 0}, 1, {MOD_ARMOR, 1}}
 #define GOAL_TILE {GOAL, {5, 0}}
-#define VILLAGE_TILE {VILLAGE, {1, 1}, {MOD_RANCOR, 1}}
+#define VILLAGE_TILE {VILLAGE, {1, 1}, 1, {MOD_RANCOR, 1}}
 #define CHEST_TILE {CHEST, {0, 1}}
 
 enum Phase

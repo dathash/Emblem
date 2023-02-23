@@ -180,21 +180,20 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             SDL_assert(unitCopy);
             int col = stoi(tokens[1]);
             int row = stoi(tokens[2]);
+            AIType ai = (AIType)stoi(tokens[3]);
 
+            // TODO: swap this in?
             //level.AddCombatant(unitCopy, {col, row});
-            // TODO: swap this?
+
             unitCopy->pos.col = col;
             unitCopy->pos.row = row;
+            unitCopy->ai = ai;
             level.combatants.push_back(std::move(unitCopy));
             level.map.tiles[col][row].occupant = level.combatants.back().get();
         }
-        else if(type == "COM")
-        {
-        }
+        else if(type == "COM") {}
         else
-        {
             cout << "Warning LoadLevel: Unhandled line type: " << type << "\n";
-        }
     }
     level.UpdatePassiveEffects();
 
@@ -227,12 +226,13 @@ LoadUnits(string filename_in)
                 tokens = split(rest, '\t');
 
                 units.push_back(make_shared<Unit>(
-                    tokens[0],             // name
-                    (Team)stoi(tokens[1]), // team
-                    (ClassType)stoi(tokens[2]), // class
-                    stoi(tokens[3]),       // health
-                    stoi(tokens[4]),       // movement
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[5]),
+                    tokens[0],                   // name
+                    (Team)stoi(tokens[1]),       // team
+                    (ClassType)stoi(tokens[2]),  // class
+                    stoi(tokens[3]),             // health
+                    stoi(tokens[4]),             // movement
+                    stoi(tokens[5]),             // range
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[6]),
                                 32, ANIMATION_SPEED)
                 ));
             }
@@ -260,13 +260,13 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
            << unit->cls.type << "\t"
            << unit->max_health << "\t"
            << unit->movement << "\t"
+           << unit->range << "\t"
 
            << unit->sheet.texture.filename
            << "\n";
     }
     fp.close();
 }
-
 
 // saves a level to a file.
 void
@@ -298,6 +298,7 @@ SaveLevel(string filename_in, const Level &level)
         fp << "UNT " << unit->name << " "
                      << unit->pos.col << " "
                      << unit->pos.row << " "
+                     << unit->ai << " "
                      << "\n";
     }
     fp << "\n";

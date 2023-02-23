@@ -127,7 +127,17 @@ enum ModifierType
     MOD_RANCOR,
     MOD_DODGE,
 };
-
+string
+GetModifierTypeString(ModifierType type)
+{
+    switch(type)
+    {
+        case MOD_NONE:   return "";
+        case MOD_ARMOR:  return "armor";
+        case MOD_RANCOR: return "rancor";
+        case MOD_DODGE:  return "dodge";
+    }
+}
 struct Modifier
 {
     ModifierType type;
@@ -199,7 +209,6 @@ enum ClassType
 struct Class
 {
     ClassType type;
-    int range;
     Passive passive;
     Active active;
 };
@@ -210,10 +219,32 @@ GetClass(ClassType type)
     switch(type)
     {
     case CLASS_NONE:    return {};
-    case CLASS_FIGHTER: return {type, 1, {PASSIVE_SHIELD, 1, 1}, {ACTIVE_PUSH, 1, 1}};
-    case CLASS_CASTER:  return {type, 2, {PASSIVE_INFUSE, 1, 2}, {ACTIVE_FREEZE, 1, 2}};
-    case CLASS_RANGER:  return {type, 3, {PASSIVE_VISION, 1, 3}, {ACTIVE_CRIPPLE, 1, 3}};
+    case CLASS_FIGHTER: return {type, {PASSIVE_SHIELD, 1, 1}, {ACTIVE_PUSH, 1, 1}};
+    case CLASS_CASTER:  return {type, {PASSIVE_INFUSE, 1, 2}, {ACTIVE_FREEZE, 1, 2}};
+    case CLASS_RANGER:  return {type, {PASSIVE_VISION, 1, 3}, {ACTIVE_CRIPPLE, 1, 3}};
     default: cout << "ERROR GetClass: " << type << "\n"; return {};
+    }
+}
+
+enum AIType
+{
+    AI_NONE,
+    AI_PURSUE,
+    AI_STATIC,
+    AI_ATTACK_RANGE,
+    AI_ATTACK_TWO,
+};
+
+string
+GetAITypeString(AIType type)
+{
+    switch(type)
+    {
+        case AI_NONE:           return "no ai";
+        case AI_PURSUE:         return "pursue";
+        case AI_STATIC:         return "static";
+        case AI_ATTACK_RANGE:   return "range";
+        case AI_ATTACK_TWO:     return "two";
     }
 }
 
@@ -233,15 +264,17 @@ struct Unit
     int health;
     int max_health;
     int movement;
+    int range;
 
     vector<Modifier> modifiers = {};
 
     position pos = {0, 0};
     position initial_pos = {0, 0};
 
+    AIType ai = AI_NONE;
+
     bool has_moved = false;
     bool is_exhausted = false;
-
     bool should_die = false;
 
     Spritesheet sheet;
@@ -258,6 +291,7 @@ struct Unit
          ClassType cls_in,
          int health_in, 
          int movement_in,
+         int range_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -265,6 +299,7 @@ struct Unit
       max_health(health_in),
       health(health_in),
       movement(movement_in),
+      range(range_in),
       sheet(sheet_in)
     {
         cls = GetClass(cls_in);
@@ -277,6 +312,8 @@ struct Unit
       max_health(other.max_health),
       health(other.health),
       movement(other.movement),
+      range(other.range),
+      ai(other.ai),
       sheet(other.sheet)
     {}
 
@@ -356,6 +393,7 @@ struct Tile
 {
     TileType type = FLOOR;
     position atlas_index = {0, 16};
+    int penalty = 1;
     Modifier mod = {};
     Unit *occupant = nullptr;
 };

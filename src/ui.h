@@ -194,17 +194,17 @@ void
 DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
 {
 	// Window sizing
-    ImGui::SetNextWindowSize(ImVec2(150, 40));
+    ImGui::SetNextWindowSize(ImVec2(150, 80));
     ImGui::SetNextWindowPos(
             ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
-                   Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 50));
+                   Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 90));
 
-	ImGui::PushFont(uiFontLarge);
+	ImGui::PushFont(uiFontMedium);
     ImGui::Begin(GetTileNameString(tile.type).c_str(), NULL, wf);
-    {
-		ImGui::PushFont(uiFontMedium);
-		ImGui::PopFont();
-    }
+        ImGui::PushFont(uiFontSmall);
+        if(tile.mod.type != MOD_NONE)
+            ImGui::Text("%s %d", GetModifierTypeString(tile.mod.type).c_str(), tile.mod.tier);
+        ImGui::PopFont();
     ImGui::End();
     ImGui::PopFont();
 }
@@ -242,7 +242,7 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 		ImGui::PushFont(uiFontSmall);
             ImGui::Text("%d MOV,", unit.movement);
             ImGui::SameLine();
-			ImGui::Text("%d RGE,", unit.cls.range);
+			ImGui::Text("%d RGE,", unit.range);
             ImGui::SameLine(ImGui::GetWindowWidth() - 80);
 			ImGui::Text("%d/%d HP", unit.health, unit.max_health);
 
