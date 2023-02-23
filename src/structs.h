@@ -122,6 +122,7 @@ struct Spritesheet
 // =================================== Gameplay ================================
 enum ModifierType
 {
+    MOD_NONE,
     MOD_ARMOR,
     MOD_RANCOR,
     MOD_DODGE,
@@ -141,13 +142,24 @@ enum PassiveType
     PASSIVE_VISION,
     //PASSIVE_MORALE,
 };
-
 struct Passive
 {
     PassiveType type;
-    int range;
     int tier;
+    int range;
 };
+string
+GetPassiveString(PassiveType type)
+{
+    switch(type)
+    {
+        case PASSIVE_NONE:      return "No passive";
+        case PASSIVE_SHIELD:    return "Shield";
+        case PASSIVE_INFUSE:    return "Infuse";
+        case PASSIVE_VISION:    return "Vision";
+        default: cout << "ERROR GetPassiveString: " << type << "\n"; return "";
+    }
+}
 
 enum ActiveType
 {
@@ -157,13 +169,24 @@ enum ActiveType
     ACTIVE_CRIPPLE,
     //ACTIVE_COMMAND,
 };
-
 struct Active
 {
     ActiveType type;
-    int range;
     int tier;
+    int range;
 };
+string
+GetActiveString(ActiveType type)
+{
+    switch(type)
+    {
+        case ACTIVE_NONE:       return "No active";
+        case ACTIVE_PUSH:       return "Push";
+        case ACTIVE_FREEZE:     return "Freeze";
+        case ACTIVE_CRIPPLE:    return "Cripple";
+        default: cout << "ERROR GetActiveString: " << type << "\n"; return "";
+    }
+}
 
 enum ClassType
 {
@@ -188,8 +211,8 @@ GetClass(ClassType type)
     {
     case CLASS_NONE:    return {};
     case CLASS_FIGHTER: return {type, 1, {PASSIVE_SHIELD, 1, 1}, {ACTIVE_PUSH, 1, 1}};
-    case CLASS_CASTER:  return {type, 2, {PASSIVE_INFUSE, 1, 1}, {ACTIVE_FREEZE, 1, 2}};
-    case CLASS_RANGER:  return {type, 3, {PASSIVE_VISION, 1, 2}, {ACTIVE_CRIPPLE, 1, 3}};
+    case CLASS_CASTER:  return {type, 2, {PASSIVE_INFUSE, 1, 2}, {ACTIVE_FREEZE, 1, 2}};
+    case CLASS_RANGER:  return {type, 3, {PASSIVE_VISION, 1, 3}, {ACTIVE_CRIPPLE, 1, 3}};
     default: cout << "ERROR GetClass: " << type << "\n"; return {};
     }
 }
@@ -332,8 +355,9 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 struct Tile
 {
     TileType type = FLOOR;
-    Unit *occupant = nullptr;
     position atlas_index = {0, 16};
+    Modifier mod = {};
+    Unit *occupant = nullptr;
 };
 
 struct Tilemap
@@ -365,13 +389,15 @@ struct Level
         for(shared_ptr<Unit> unit : combatants)
         {
             unit->modifiers.clear();
+            if(map.tiles[unit->pos.col][unit->pos.row].mod.type != MOD_NONE)
+                unit->modifiers.push_back(map.tiles[unit->pos.col][unit->pos.row].mod);
         }
         for(shared_ptr<Unit> source : combatants)
         {
             for(shared_ptr<Unit> target : combatants)
             {
                 if(ManhattanDistance(source->pos, target->pos) <= source->cls.passive.range &&
-                   source->team == target->team)
+                   source->team == target->team && source != target)
                 {
                     target->ApplyPassive(source->cls.passive);
                 }
@@ -449,7 +475,7 @@ struct Level
     void
     CheckForRemaining()
     {
-        if(GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT)
+        if(GlobalInterfaceState == NEUTRAL_DEACTIVATED)
         {
             for(auto const &u : combatants)
             {

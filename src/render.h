@@ -22,6 +22,22 @@ RenderTileColor(const position &pos, const SDL_Color &color)
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
+// Renders pip to the screen, given its game coords and color.
+void
+RenderPipColor(const position &pos, const SDL_Color &color)
+{
+    SDL_assert(pos.col >= 0 && pos.row >= 0);
+    SDL_Rect tileRect = {TILE_SIZE / 3 + pos.col * TILE_SIZE + X_OFFSET,
+                         TILE_SIZE / 3 + pos.row * TILE_SIZE + Y_OFFSET,
+                         TILE_SIZE - (TILE_SIZE / 3) * 2, 
+                         TILE_SIZE - (TILE_SIZE / 3) * 2};
+
+    SDL_SetRenderDrawColor(GlobalRenderer, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(GlobalRenderer, &tileRect);
+    SDL_SetRenderDrawColor(GlobalRenderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(GlobalRenderer, &tileRect);
+}
+
 // Renders an individual tile to the screen, given its game coords and tile (for texture).
 void
 RenderTileTexture(const Tilemap &map, const Tile &tile,
@@ -45,7 +61,7 @@ RenderPassiveRange(const position &pos, int range)
         {
             if(IsValid({col, row}) &&
                ManhattanDistance({col, row}, pos) <= range)
-                RenderTileColor({col, row}, healColor);
+                RenderPipColor({col, row}, darkGray);
         }
     }
 }
@@ -216,7 +232,7 @@ Render(const Tilemap &map,
 
     if(cursor.selected)
     {
-        RenderPassiveRange(cursor.selected->pos, cursor.selected->cls.range);
+        RenderPassiveRange(cursor.selected->pos, cursor.selected->cls.passive.range);
         RenderTileColor(cursor.selected->pos, healColor);
     }
 
@@ -251,7 +267,7 @@ Render(const Tilemap &map,
         GlobalInterfaceState == NEUTRAL_GROUND ||
         GlobalInterfaceState == NEUTRAL_ENEMY ||
         GlobalInterfaceState == NEUTRAL_UNIT ||
-        GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT ||
+        GlobalInterfaceState == NEUTRAL_DEACTIVATED ||
         GlobalInterfaceState == SELECTED ||
         GlobalInterfaceState == ATTACK_THINKING ||
         GlobalInterfaceState == ATTACK_TARGETING

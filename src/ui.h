@@ -105,7 +105,7 @@ struct UI_State
             GlobalInterfaceState == NEUTRAL_GROUND || 
             GlobalInterfaceState == NEUTRAL_ENEMY || 
             GlobalInterfaceState == NEUTRAL_UNIT ||
-            GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT ||
+            GlobalInterfaceState == NEUTRAL_DEACTIVATED ||
             GlobalInterfaceState == SELECTED ||
             GlobalInterfaceState == ATTACK_THINKING ||
             GlobalInterfaceState == ATTACK_TARGETING
@@ -122,7 +122,7 @@ struct UI_State
 		if(
             GlobalInterfaceState == NEUTRAL_ENEMY || 
             GlobalInterfaceState == NEUTRAL_UNIT ||
-            GlobalInterfaceState == NEUTRAL_DEACTIVATED_UNIT
+            GlobalInterfaceState == NEUTRAL_DEACTIVATED
             )
 		{
 			unit_blurb = true;
@@ -240,13 +240,78 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontSmall);
-            ImGui::Text("%d MOV", unit.movement);
+            ImGui::Text("%d MOV,", unit.movement);
             ImGui::SameLine();
-			ImGui::Text("%d RGE", unit.cls.range);
+			ImGui::Text("%d RGE,", unit.cls.range);
             ImGui::SameLine(ImGui::GetWindowWidth() - 80);
 			ImGui::Text("%d/%d HP", unit.health, unit.max_health);
 
-			ImGui::Text("%lu", unit.modifiers.size());
+            ImGui::Text("Modifiers");
+            for(const Modifier &mod : unit.modifiers)
+            {
+                switch(mod.type)
+                {
+                    case MOD_NONE:   ImGui::Text("NONE,"); break;
+                    case MOD_ARMOR:  ImGui::Text("Armor %d,", mod.tier); break;
+                    case MOD_RANCOR: ImGui::Text("Rancor %d,", mod.tier); break;
+                    case MOD_DODGE:  ImGui::Text("Dodge %d,", mod.tier); break;
+                }
+                ImGui::SameLine();
+            }
+		ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
+void 
+DisplayPassive(ImGuiWindowFlags wf, const Passive &passive)
+{
+    ImGui::SetNextWindowSize(ImVec2(250, 130));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   200));
+
+	ImGui::PushFont(uiFontMedium);
+    ImGui::Begin("Passive", NULL, wf);
+    {
+        ImGui::Text("%s", GetPassiveString(passive.type).c_str());
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontSmall);
+        switch(passive.type)
+        {
+            case PASSIVE_NONE: ImGui::TextWrapped("No effect."); break;
+            case PASSIVE_SHIELD: ImGui::TextWrapped("Gives adjacent units -armor %d-", passive.tier); break;
+            case PASSIVE_INFUSE: ImGui::TextWrapped("Gives adjacent units -rancor %d-", passive.tier); break;
+            case PASSIVE_VISION: ImGui::TextWrapped("Gives adjacent units -dodge %d-", passive.tier); break;
+            default: cout << "ERROR DisplayPassive " << passive.type << "\n"; break;
+        }
+		ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
+void 
+DisplayActive(ImGuiWindowFlags wf, const Active &active)
+{
+    ImGui::SetNextWindowSize(ImVec2(250, 130));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   330));
+
+	ImGui::PushFont(uiFontMedium);
+    ImGui::Begin("Active", NULL, wf);
+    {
+        ImGui::Text("%s", GetActiveString(active.type).c_str());
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontSmall);
+        switch(active.type)
+        {
+            case ACTIVE_NONE: ImGui::TextWrapped("No effect."); break;
+            case ACTIVE_PUSH: ImGui::TextWrapped("Pushes adjacent units %d space%s", active.tier, active.tier == 1 ? "" : "s"); break;
+            case ACTIVE_FREEZE: ImGui::TextWrapped("Freezes a unit in place for %d turn%s", active.tier, active.tier == 1 ? "" : "s"); break;
+            case ACTIVE_CRIPPLE: ImGui::TextWrapped("Reduces damage by %d for 1 turn", active.tier); break;
+            default: cout << "ERROR DisplayActive " << active.type << "\n"; break;
+        }
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -326,7 +391,11 @@ RenderUI(UI_State *ui,
 	if(ui->tile_info)
 		DisplayTileInfo(window_flags, level.map.tiles[cursor.pos.col][cursor.pos.row]);
 	if(ui->unit_blurb)
+    {
 		DisplayUnitBlurb(window_flags, *level.map.tiles[cursor.pos.col][cursor.pos.row].occupant);
+		DisplayPassive(window_flags, level.map.tiles[cursor.pos.col][cursor.pos.row].occupant->cls.passive);
+		//DisplayActive(window_flags, level.map.tiles[cursor.pos.col][cursor.pos.row].occupant->cls.active);
+    }
 	if(ui->unit_selected)
 		DisplayUnitBlurb(window_flags, *cursor.selected);
 	if(ui->attack_targeting)

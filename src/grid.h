@@ -31,10 +31,9 @@ VectorHasElement(const position &pos_in, const vector<position> &vector_in)
     return has;
 }
 
-
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
-InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
+Interactible(const Tilemap &map, const position &origin, int min, int max)
 {
     vector<position> interactible;
 
@@ -131,8 +130,7 @@ Line(const Tilemap &map, const position &origin, const direction &dir)
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
 Accessible(const Tilemap &map, position origin, 
-           int mov, int min, int max, 
-           bool sourceIsAlly)
+           int mov, bool sourceIsAlly)
 {
     vector<position> accessible;
 
@@ -427,7 +425,7 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit,
 
     for(const position &pos : range)
     {
-        interactible = InteractibleFrom(map, pos, 1, 1);
+        interactible = Interactible(map, pos, 1, 1);
         for(const position &i : interactible)
         {
             if(map.tiles[i.col][i.row].occupant && map.tiles[i.col][i.row].occupant->IsAlly())

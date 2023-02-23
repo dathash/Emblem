@@ -62,17 +62,14 @@
 // gameplay
 #define LEADER_ID hash<string>{}("Lucina")
 
-#define EXP_FOR_COMBAT 1
-#define EXP_FOR_KILL 2
-
-#define FLOOR_TILE {FLOOR, nullptr, {0, 0}}
-#define WALL_TILE {WALL, nullptr, {1, 0}}
-#define FOREST_TILE {FOREST, nullptr, {2, 0}}
-#define SWAMP_TILE {SWAMP, nullptr, {5, 1}}
-#define FORT_TILE {FORT, nullptr, {4, 0}}
-#define GOAL_TILE {GOAL, nullptr, {5, 0}}
-#define VILLAGE_TILE {VILLAGE, nullptr, {1, 1}}
-#define CHEST_TILE {CHEST, nullptr, {0, 1}}
+#define FLOOR_TILE {FLOOR, {0, 0}}
+#define WALL_TILE {WALL, {1, 0}}
+#define FOREST_TILE {FOREST, {2, 0}, {MOD_DODGE, 1}}
+#define SWAMP_TILE {SWAMP, {5, 1}}
+#define FORT_TILE {FORT, {4, 0}, {MOD_ARMOR, 1}}
+#define GOAL_TILE {GOAL, {5, 0}}
+#define VILLAGE_TILE {VILLAGE, {1, 1}, {MOD_RANCOR, 1}}
+#define CHEST_TILE {CHEST, {0, 1}}
 
 enum Phase
 {
@@ -105,7 +102,7 @@ enum InterfaceState
     NEUTRAL_GROUND,
     NEUTRAL_ENEMY,
     NEUTRAL_UNIT,
-    NEUTRAL_DEACTIVATED_UNIT,
+    NEUTRAL_DEACTIVATED,
 
     SELECTED,
 
@@ -127,7 +124,7 @@ GetInterfaceString(InterfaceState state)
     case NEUTRAL_GROUND:                return "Neutral ground";
     case NEUTRAL_ENEMY:                 return "Neutral enemy";
     case NEUTRAL_UNIT:                  return "Neutral unit";
-    case NEUTRAL_DEACTIVATED_UNIT:      return "Neutral deactivated unit";
+    case NEUTRAL_DEACTIVATED:           return "Neutral deactivated";
     case SELECTED:                      return "Selected";
     case ATTACK_THINKING:               return "Attack thinking";
     case ATTACK_TARGETING:              return "Attack targeting";
@@ -196,6 +193,8 @@ const SDL_Color exhaustedMod =      {100,   0, 100, 0};
 const SDL_Color readyMod =          {255, 255, 255, 0};
 
 const SDL_Color editorColor =       {255, 255, 0, 100};
+
+const SDL_Color nearlyTransparent = {255, 255, 255, 50};
 
 // UI
 const SDL_Color backgroundColor =   {226, 216, 107, 255};

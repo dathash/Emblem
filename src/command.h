@@ -46,7 +46,7 @@ public:
 
             if(hoverTile->occupant->is_exhausted)
             {
-                GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
+                GlobalInterfaceState = NEUTRAL_DEACTIVATED;
                 return;
             }
 
@@ -92,8 +92,6 @@ public:
         int movement = 0; 
         map->accessible = Accessible(*map, cursor->pos,
                                      cursor->selected->movement,
-                                     1,
-                                     1, 
                                      cursor->selected->IsAlly());
     }
 
@@ -239,7 +237,7 @@ public:
 
         if(over->is_exhausted)
         {
-            GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
+            GlobalInterfaceState = NEUTRAL_DEACTIVATED;
             return;
         }
 
@@ -336,10 +334,11 @@ public:
 
         level->map.range.clear();
 
-        vector<position> orthogonal = {};
-        orthogonal = Orthogonal(level->map, cursor->pos);
+        vector<position> interactible = Interactible(level->map, cursor->pos, 
+                                                     cursor->selected->cls.range, 
+                                                     cursor->selected->cls.range);
 
-        for(const position &p : orthogonal)
+        for(const position &p : interactible)
         {
             int distance = ManhattanDistance(cursor->selected->pos, p);
             if(distance == cursor->selected->cls.range)
@@ -372,7 +371,7 @@ public:
         cursor->selected = nullptr;
         cursor->targeting = {-1, -1};
 
-        GlobalInterfaceState = NEUTRAL_DEACTIVATED_UNIT;
+        GlobalInterfaceState = NEUTRAL_DEACTIVATED;
     }
 
 private:
@@ -396,8 +395,6 @@ public:
         map->accessible.clear();
         map->accessible = Accessible(*map, cursor->pos,
                                      cursor->selected->movement,
-                                     1,
-                                     1, 
                                      cursor->selected->IsAlly());
 
         GlobalInterfaceState = ENEMY_RANGE;
@@ -763,7 +760,7 @@ public:
                 BindR(make_shared<NullCommand>());
             } break;
 
-            case(NEUTRAL_DEACTIVATED_UNIT):
+            case(NEUTRAL_DEACTIVATED):
             {
                 BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
                 BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));

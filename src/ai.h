@@ -22,8 +22,6 @@ public:
         map->accessible.clear();
         map->accessible = Accessible(*map, cursor->pos,
                                      cursor->selected->movement,
-                                     1,
-                                     1,
                                      cursor->selected->IsAlly());
 
         GlobalAIState = AI_SELECTED;

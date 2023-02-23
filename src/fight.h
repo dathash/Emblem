@@ -25,10 +25,16 @@ GetFirstTarget(const Tilemap &map,
 }
 
 void
-SimulateDamage(Unit *victim, int amount)
+SimulateDamage(Unit *victim, int amount, int probability)
 {
     if(!victim)
         return;
+
+    if(Roll(d100) > probability)
+    {
+        cout << "Missed!\n";
+        return;
+    }
 
     //cout << amount << " Damage to " << victim->name << "\n";
     victim->Damage(amount);
@@ -42,7 +48,31 @@ Simulate(Tilemap *map,
          const position &destination)
 {
     Unit *victim = map->tiles[destination.col][destination.row].occupant;
-    SimulateDamage(victim, 1);
+
+    if(!victim) // TODO: for now. Eventually, we want to be able to attack anything.
+        return;
+
+    int damage = 1;
+    int probability = 100;
+    for(const Modifier &mod : source->modifiers)
+    {
+        switch(mod.type)
+        {
+            case MOD_RANCOR: damage += mod.tier; break;
+            default: cout << "Modifier had no effect\n";
+        }
+    }
+    for(const Modifier &mod : victim->modifiers)
+    {
+        switch(mod.type)
+        {
+            case MOD_ARMOR: damage -= mod.tier; break;
+            case MOD_DODGE: probability -= (20 * mod.tier); break;
+            default: cout << "Modifier had no effect\n";
+        }
+    }
+
+    SimulateDamage(victim, clamp(damage, 0, 9), clamp(probability, 0, 100));
 }
 
 #endif

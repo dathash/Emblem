@@ -196,6 +196,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             cout << "Warning LoadLevel: Unhandled line type: " << type << "\n";
         }
     }
+    level.UpdatePassiveEffects();
 
 	return level;
 }
