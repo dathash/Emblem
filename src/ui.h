@@ -164,7 +164,6 @@ struct UI_State
 void
 DisplayTitleScreen(ImGuiWindowFlags wf)
 {
-	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(200, 100));
     ImGui::SetNextWindowSize(ImVec2(800, 550));
 
@@ -193,9 +192,10 @@ DisplayTitleScreen(ImGuiWindowFlags wf)
 void 
 DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
 {
-	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(450, 500));
-    ImGui::SetNextWindowSize(ImVec2(150, 40));
+    ImGui::SetNextWindowSize(ImVec2(150, 80));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 90));
 
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin(GetTileNameString(tile.type).c_str(), NULL, wf);
@@ -238,9 +238,10 @@ DisplayEquipInfo(const Equip *equip)
 void 
 DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 {
-	// Window sizing
     ImGui::SetNextWindowSize(ImVec2(250, 180));
-    ImGui::SetNextWindowPos(ImVec2(625, 500));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   160));
 
     // Logic
 	ImGui::PushFont(uiFontLarge);
@@ -285,11 +286,9 @@ GetHealthColor(int val, int max)
 void 
 DisplayGameOver(ImGuiWindowFlags wf)
 {
-	// Window sizing
     ImGui::SetNextWindowPos(ImVec2(400, 300), 0, ImVec2(0.5, 0.5));
     ImGui::SetNextWindowSize(ImVec2(420, 310));
 
-    // Logic
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Game Over", NULL, wf);
     {
@@ -306,11 +305,12 @@ DisplayGameOver(ImGuiWindowFlags wf)
 void
 DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
 {
-	// Window sizing
-    ImGui::SetNextWindowPos(ImVec2(900, 0));
-    ImGui::SetNextWindowSize(ImVec2(200, 130));
+    ImGui::SetNextWindowSize(ImVec2(250, 140));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
+                   10));
 
-    // Logic
+
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Player", NULL, wf);
     {

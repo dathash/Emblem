@@ -22,10 +22,10 @@
 // rendering
 #define MAP_WIDTH 8
 #define MAP_HEIGHT 8
-#define TILE_SIZE 60
+#define TILE_SIZE 80
 #define SCREEN_WIDTH 1120
 #define SCREEN_HEIGHT 800
-#define X_OFFSET 400
+#define X_OFFSET 200
 #define Y_OFFSET 10
 
 #define PORTRAIT_SIZE 600
@@ -198,15 +198,17 @@ const SDL_Color readyMod =          {255, 255, 255, 0};
 const SDL_Color editorColor =       {255, 255, 0, 100};
 
 // UI
-const SDL_Color backgroundColor =   {165, 179, 201, 255};
+const SDL_Color backgroundColor =   {226, 216, 107, 255};
 const SDL_Color uiColor =           {255, 224, 145, 255};
 const SDL_Color uiDarkColor =       {138, 110, 39, 255};
-const SDL_Color uiTitleColor =      {120, 100, 50, 255};
+const SDL_Color uiTitleColor =      {230, 144, 101, 255};
 const SDL_Color outlineColor =      {85, 70, 31, 255};
 const SDL_Color uiAltColor =        {60, 100, 30, 255};
 const SDL_Color enemyColor =        {150, 60, 30, 255};
 const SDL_Color uiTextColor =       {0, 0, 0, 255};
 const SDL_Color uiSelectorColor =   {119, 100, 55, 100};
+
+const SDL_Color healthBarColor =    {128, 136, 96, 255};
 
 // Palette Colors
 const SDL_Color black =             {0,   0,   0,   255};

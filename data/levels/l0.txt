@@ -1,4 +1,4 @@
-ATL green.png
+ATL yellow.png
 
 MUS 21.wav
 
