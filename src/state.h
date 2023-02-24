@@ -37,8 +37,15 @@ void GoToResolutionPhase() {
     EmitEvent(END_TURN_EVENT);
 }
 
+void GoToSpawningPhase() {
+    GlobalPhase = PHASE_SPAWNING;
+    GlobalInterfaceState = NO_OP;
+    GlobalAIState = AI_NO_OP;
+
+    EmitEvent(END_TURN_EVENT);
+}
+
 void GameOver() {
-    cout << "HERE\n";
     GlobalPhase = PHASE_PLAYER;
     GlobalAIState = AI_NO_OP;
     GlobalInterfaceState = GAME_OVER;

@@ -73,14 +73,20 @@ I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
 # TODO
+Random Enemy Spawns
+Vek Surfacing
+
 AI Attacks
 * Artillery
   * Bigger splash than one
 * Sub-optimal attacks
+* Avoid other ai attacks (as dangerous)
 
-Random Enemy Spawns
-Vek Surfacing
+Objectives
+Map Generation
 
+Strategy Layer
+Polish
 Visualization of attacks.
 * Punch
 * Line shots
@@ -97,11 +103,6 @@ Animations
 * Death
 * Attacks
 * Surfacing
-
-Objectives
-Map Generation
-Strategy Layer
-Polish
 
 # Later
 Art

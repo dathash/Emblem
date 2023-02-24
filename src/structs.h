@@ -415,7 +415,18 @@ struct Level
         //CheckForRemaining();
         CheckVictory();
     }
+
+    void
+    SpawnMoreUnits()
+    {
+    }
 };
+
+// Returns a copy of a random unit in a pool.
+shared_ptr<Unit>
+GetRandomUnit(const vector<shared_ptr<Unit>> &pool) {
+    return make_shared<Unit>(*pool[RandomInt(pool.size() - 1)]);
+}
 
 // ================================= Menu ======================================
 Texture

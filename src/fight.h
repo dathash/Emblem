@@ -282,7 +282,7 @@ struct Resolution
 
     void Update(Tilemap *map) {
         if(attacks.empty())
-            GoToAIPhase();
+            GoToSpawningPhase();
 
         ++frame;
         if(frame % AI_ACTION_SPEED)

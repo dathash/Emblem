@@ -207,18 +207,24 @@ int main(int argc, char *argv[])
         {
             GlobalStep = false;
 
-            if(GlobalPhase == PHASE_AI)
+            switch(GlobalPhase)
+            {
+            case PHASE_AI:
             {
                 ai.Update(&cursor, &level, &resolution);
-            }
-            else if(GlobalPhase == PHASE_PLAYER)
+            } break;
+            case PHASE_PLAYER:
             {
                 handler.Update(&input);
                 handler.UpdateCommands(&cursor, &level, units, party, &game_menu);
-            }
-            else
+            } break;
+            case PHASE_RESOLUTION:
             {
                 resolution.Update(&(level.map));
+            } break;
+            case PHASE_SPAWNING:
+            {
+            } break;
             }
 
             cursor.Update(&level.map);

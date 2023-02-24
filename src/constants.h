@@ -80,7 +80,9 @@ enum Phase
     PHASE_PLAYER,
     PHASE_AI,
     PHASE_RESOLUTION,
+    PHASE_SPAWNING,
 };
+
 string 
 GetPhaseString(Phase phase)
 {
@@ -89,6 +91,7 @@ GetPhaseString(Phase phase)
     case PHASE_PLAYER:     return "Player";
     case PHASE_AI:         return "AI";
     case PHASE_RESOLUTION: return "Resolution";
+    case PHASE_SPAWNING:   return "Spawning";
 	}
 }
 
