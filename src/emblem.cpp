@@ -67,17 +67,21 @@ static Player GlobalPlayer;
 #include "input.h"
 #include "grid.h"
 #include "fight.h"
-#include "ui.h"
 #include "command.h"
 #include "ai.h"
+#include "ui.h"
 #include "render.h"
 #include "editor.h"
 #include "debug.h"
-
+#include "test.h"
 
 // ================================= the main ==================================
 int main(int argc, char *argv[])
 {
+#if DEV_MODE
+    RunTests();
+#endif
+
     srand(time(NULL));
 
     if(!Initialize())

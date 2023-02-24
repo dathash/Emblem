@@ -138,7 +138,7 @@ struct Player
     {
         health = clamp(health - amount, 0, max_health);
         if(health == 0)
-            GameOver();
+            GameOver(); // TODO: this results in a seg fault since we don't get rid of unresolved attacks.
     }
 };
 
@@ -196,6 +196,12 @@ struct Unit
         return team == TEAM_AI;
     }
 
+    bool
+    IsEnv() const
+    {
+        return team == TEAM_ENV;
+    }
+
     void
     Update()
     {
@@ -212,8 +218,8 @@ struct Unit
          )
     : name(name_in),
       team(team_in),
-      max_health(health_in),
       health(health_in),
+      max_health(health_in),
       movement(movement_in),
       fixed(fixed_in),
       primary(primary_in),
@@ -224,8 +230,8 @@ struct Unit
     Unit(const Unit &other)
     : name(other.name),
       team(other.team),
-      max_health(other.max_health),
       health(other.health),
+      max_health(other.max_health),
       movement(other.movement),
       fixed(other.fixed),
       sheet(other.sheet)
@@ -406,7 +412,7 @@ struct Level
     void
     Update()
     {
-        CheckForRemaining();
+        //CheckForRemaining();
         CheckVictory();
     }
 };

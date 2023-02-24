@@ -7,66 +7,45 @@
 
 // ============================= Dice ==========================================
 // Rolls a d100. range: 00 to 99.
-int
-d100()
-{
+int d100() {
     return rand() % 100;
 }
-
-// range: 01 to 20.
-int
-d20()
-{
-    return (rand() % 20) + 1;
-}
-
-int
-d1()
-{
+int d1() {
     return 1;
 }
-int
-d0()
-{
+int d0() {
     return 0;
 }
 // range: 01 to 04. (etc.)
-int
-d4()
-{
+int d4() {
     return (rand() % 4) + 1;
 }
-int
-d6()
-{
+int d6() {
     return (rand() % 6) + 1;
 }
-int
-d8()
-{
+int d8() {
     return (rand() % 8) + 1;
 }
-int
-d10()
-{
+int d10() {
     return (rand() % 10) + 1;
 }
-int
-d12()
-{
+int d12() {
     return (rand() % 12) + 1;
+}
+int d20() {
+    return (rand() % 20) + 1;
 }
 
 // Rolls a number of dice.
-int
-Roll(int (*die)(), int num = 1)
-{
+int Roll(int (*die)(), int num = 1) {
     int result = 0;
     for(int i = 0; i < num; ++i)
-    {
         result += die();
-    }
     return result;
+}
+
+int RandomInt(int max) {
+    return (rand() % max) + 1;
 }
 
 
@@ -138,11 +117,6 @@ struct position
     }
 };
 bool
-operator<(const position &a, const position &b)
-{
-    return a.row < b.row || (!(b.row < a.row) && a.col < b.col);
-}
-bool
 operator==(const position &a, const position &b)
 {
     return a.col == b.col && a.row == b.row;
@@ -167,11 +141,6 @@ operator*(const position &a, int i)
 {
     return {a.col * i, a.row * i};
 }
-position
-operator*(const position &a, float f)
-{
-    return {(int)(a.col * f), (int)(a.row * f)};
-}
 std::ostream
 &operator<<(std::ostream &os, position const &p)
 {
@@ -179,18 +148,21 @@ std::ostream
 }
 
 typedef position direction;
-direction
-Convert(Direction dir)
-{
-    switch(dir)
-    {
-    case DIR_NONE: return {0, 0};
-    case DIR_UP: return {0, -1};
-    case DIR_DOWN: return {0, 1};
-    case DIR_LEFT: return {-1, 0};
-    case DIR_RIGHT: return {1, 0};
-    }
+int Length(const direction &dir_in) {
+    return abs(dir_in.col) + abs(dir_in.row);
 }
+
+direction Normalized(const direction &dir_in) {
+    int length = Length(dir_in);
+    if(!length) return {0, 0};
+    return {dir_in.col / length, dir_in.row / length};
+}
+
+// Finds the direction from one position to another.
+direction GetDirection(const position &one, const position &two) {
+    return Normalized(two - one);
+}
+
 
 typedef vector<position> path;
 
@@ -237,34 +209,6 @@ clamp(const position &pos, const position &min, const position &max)
     return result;
 }
 
-// Finds the direction from one position to another.
-direction GetDirection(const position &one, const position &two)
-{
-    direction result;
-    position difference = one - two;
-    if(abs(difference.col) > abs(difference.row))
-    {
-        result = {1, 0};
-        // SIGN
-        if(difference.col > 0)
-        {
-            result = result * -1;
-        }
-    }
-    else
-    {
-        result = {0, 1};
-        // SIGN
-        if(difference.row > 0)
-        {
-            result = result * -1;
-        }
-    }
-
-    return result;
-}
-
-// ================================= Library ===================================
 SDL_Color
 LerpColors(const SDL_Color &one, const SDL_Color &two, float ratio)
 {
@@ -293,9 +237,7 @@ PiecewiseColors(const SDL_Color &one, const SDL_Color &two, const SDL_Color &thr
     return three;
 }
 
-ImU32
-SdlToImColor(const SDL_Color &in)
-{
+ImU32 SdlToImColor(const SDL_Color &in) {
     return IM_COL32(in.r, in.g, in.b, in.a);
 }
 
@@ -308,114 +250,78 @@ ImToSdlColor(ImU32 in)
 */
 
 // ======================== Easing Functions ===================================
-float
-Lerp(float a, float b, float amount)
-{
+float Lerp(float a, float b, float amount) {
     return a * (1.0 - amount) + (b * amount);
 }
 
-float
-Identity(float t)
-{
+float Identity(float t) {
     return t;
 }
 
-float
-Flip(float t)
-{
+float Flip(float t) {
     return 1 - t;
 }
 
-float
-SmoothStart2(float t)
-{
+float SmoothStart2(float t) {
     return t * t;
 }
 
-float
-SmoothStart3(float t)
-{
+float SmoothStart3(float t) {
     return t * t * t;
 }
 
-float
-SmoothStart4(float t)
-{
+float SmoothStart4(float t) {
     return t * t * t * t;
 }
 
-float
-SmoothStart5(float t)
-{
+float SmoothStart5(float t) {
     return t * t * t * t * t;
 }
 
-float
-SmoothStop2(float t)
-{
+float SmoothStop2(float t) {
     return Flip(SmoothStart2(Flip(t)));
 }
 
-float
-SmoothStop3(float t)
-{
+float SmoothStop3(float t) {
     return Flip(SmoothStart3(Flip(t)));
 }
 
-float
-SmoothStop4(float t)
-{
+float SmoothStop4(float t) {
     return Flip(SmoothStart4(Flip(t)));
 }
 
-float
-SmoothStop5(float t)
-{
+float SmoothStop5(float t) {
     return Flip(SmoothStart5(Flip(t)));
 }
 
-float
-SmoothStartStop(float t)
-{
+float SmoothStartStop(float t) {
     return Lerp(SmoothStart2(t), SmoothStop2(t), t);
 }
 
-float
-SmoothStartStopCustom(float t, float (*in) (float), float (*out) (float))
-{
+float SmoothStartStopCustom(float t, float (*in) (float), float (*out) (float)) {
     return Lerp(in(t), out(t), t);
 }
 
-float
-Spike(float t)
-{
+float Spike(float t) {
     if (t <= .5f)
         return SmoothStart2(t/0.5);
  
     return SmoothStart2(Flip(t)/0.5);
 }
 
-float
-Parabola(float t)
-{
+float Parabola(float t) {
     return t * (1 - t);
 }
 
-float
-BounceClampBottom(float t)
-{
+float BounceClampBottom(float t) {
     return fabs(t);
 }
 
-float
-BounceClampTop(float t)
-{
+float BounceClampTop(float t) {
     return 1.0f - fabs(1.0f - t);
 }
 
-float
-BounceClampBottomTop(float t)
-{
+float BounceClampBottomTop(float t) {
     return BounceClampTop(BounceClampTop(t));
 }
 

@@ -4,15 +4,14 @@ OBJ = ${SRC:.cpp=.o}
 
 LDFLAGS = -L /opt/homebrew/lib -lSDL2_image -lSDL2 -lSDL2_ttf
 INCFLAGS = -I../src/ -I../ext/ -I../ext/imgui/ -I../ext/imgui/backends -I/opt/homebrew/include/SDL2
-FLAGS = -std=c++14 -Wno-deprecated -glldb -O0 # -Wall 
-OUT = em
+FLAGS = -std=c++14 -Wno-deprecated -glldb -O0 -Wall 
 
 CC = clang++
 
 # For debugging
 print-%  : ; @echo $* = $($*)
 
-$(OUT): $(OBJ)
+em: $(OBJ)
 	@$(CC) $(FLAGS) $(INCFLAGS) $(LDFLAGS) $^ -o $@
 	@printf "\e[33mLinking\e[90m %s\e[0m\n" $@
 	@printf "\e[34mDone!\e[0m\n"
@@ -22,6 +21,7 @@ $(OUT): $(OBJ)
 	@printf "\e[36mCompile\e[90m %s\e[0m\n" $@
 
 ../src/emblem.o: ../src/*.h
+../src/test.o: ../src/*.h
 
 clean:
 	@rm -f $(OUT) $(OBJ)

@@ -75,10 +75,6 @@ EventSystemUpdate()
             {
                 PlaySfx("dance.wav");
             } break;
-            default:
-            {
-                cout << "WARN: Unimplemented Event " << event.type << "\n";
-            } break;
         }
     }
 }

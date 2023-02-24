@@ -27,4 +27,5 @@ UNT Lucina 2 4
 UNT Tiki 3 5 
 UNT Stahl 5 4 
 UNT Archer 3 1 
+UNT Soldier 6 1 
 

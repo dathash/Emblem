@@ -38,7 +38,7 @@
 
 // animation
 #define ANIMATION_SPEED 10
-#define AI_ACTION_SPEED 10
+#define AI_ACTION_SPEED 15
 
 // startup
 #define INITIAL_LEVEL "l0.txt"
@@ -62,8 +62,9 @@
 // gameplay
 #define LEADER_ID hash<string>{}("Lucina")
 
-#define EXP_FOR_COMBAT 1
-#define EXP_FOR_KILL 2
+#define POINTS_FOR_PLAYER_UNIT 5
+#define POINTS_FOR_BUILDING 5
+#define POINTS_FOR_AI_UNIT -2
 
 #define FLOOR_TILE {FLOOR, nullptr, {0, 0}}
 #define WALL_TILE {WALL, nullptr, {1, 0}}
@@ -78,6 +79,7 @@ enum Phase
 {
     PHASE_PLAYER,
     PHASE_AI,
+    PHASE_RESOLUTION,
 };
 string 
 GetPhaseString(Phase phase)
@@ -86,8 +88,7 @@ GetPhaseString(Phase phase)
     {
     case PHASE_PLAYER:     return "Player";
     case PHASE_AI:         return "AI";
-	default:
-		cout << "WARNING GetPhaseString: " << phase << "\n"; return "";
+    case PHASE_RESOLUTION: return "Resolution";
 	}
 }
 
@@ -132,8 +133,6 @@ GetInterfaceString(InterfaceState state)
     case ATTACK_THINKING:               return "Attack thinking";
     case ATTACK_TARGETING:              return "Attack targeting";
     case ATTACK_RESOLUTION:             return "Attack resolution";
-	default:
-		cout << "WARNING GetInterfaceString " << state << "\n"; return "";
 	}
 }
 
@@ -156,19 +155,8 @@ GetAIString(AIState state)
     case AI_FINDING_NEXT:           return "Finding Next";
     case AI_SELECTED:               return "Selected";
     case AI_ATTACK_RESOLUTION:      return "Attack Resolution";
-	default:
-		cout << "WARNING GetAIString " << state << "\n"; return "";
     }
 }
-
-enum Direction
-{
-    DIR_NONE,
-    DIR_LEFT,
-    DIR_RIGHT,
-    DIR_UP,
-    DIR_DOWN,
-};
 
 // MAP
 enum TileType
@@ -190,7 +178,6 @@ const SDL_Color pathColor =         {100, 250, 250, 100};
 const SDL_Color aiMoveColor =       {150, 0, 0, 100};
 const SDL_Color attackColor =       {250, 0, 0, 100};
 const SDL_Color healColor =         {0, 255, 0, 100};
-const SDL_Color clearColor =        {0, 0, 0, 0};
 
 const SDL_Color exhaustedMod =      {100,   0, 100, 0};
 const SDL_Color readyMod =          {255, 255, 255, 0};

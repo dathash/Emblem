@@ -109,19 +109,19 @@ UnitEditor(
 
             ImGui::InputText("equip name", &(equipments->at(index)->name));
 
-            ImGui::SliderInt("type", (int *)&(equipments->at(index)->type), 0, 10);
+            ImGui::SliderInt("t", (int *)&(equipments->at(index)->type), 0, 10);
             ImGui::SameLine();
             ImGui::Text("%s", GetEquipmentString(equipments->at(index)->type).c_str());
 
-            ImGui::SliderInt("class", (int *)&(equipments->at(index)->cls), 0, 10);
+            ImGui::SliderInt("c", (int *)&(equipments->at(index)->cls), 0, 10);
             ImGui::SameLine();
             ImGui::Text("%s", GetClassString(equipments->at(index)->cls).c_str());
 
-            ImGui::SliderInt("push", (int *)&(equipments->at(index)->push), 0, 10);
+            ImGui::SliderInt("p", (int *)&(equipments->at(index)->push), 0, 10);
             ImGui::SameLine();
             ImGui::Text("%s", GetPushString(equipments->at(index)->push).c_str());
 
-            ImGui::SliderInt("move", (int *)&(equipments->at(index)->move), 0, 10);
+            ImGui::SliderInt("m", (int *)&(equipments->at(index)->move), 0, 10);
             ImGui::SameLine();
             ImGui::Text("%s", GetMovementString(equipments->at(index)->move).c_str());
 
@@ -290,7 +290,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 
         if(hover_tile->occupant)
         {
-            ImGui::Text("Over unit.");
+            ImGui::Text("%s", hover_tile->occupant->name.c_str());
 
             if(ImGui::Button("Dmg"))
             {

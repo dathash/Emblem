@@ -35,7 +35,8 @@ RenderAttack(const Tilemap &map,
         } break;
         case EQUIP_PUNCH:
         {
-            RenderTileColor(attack.unit->pos + attack.offset, attackColor);
+            for(int i = 1; i <= attack.unit->primary->max_range; ++i)
+                RenderTileColor(attack.unit->pos + (attack.offset * i), attackColor);
         } break;
         case EQUIP_LINE_SHOT:
         {
@@ -61,11 +62,16 @@ RenderAttack(const Tilemap &map,
         {
             cout << "NO VIS FOR LASER\n";
         } break;
-
-        default:
-        {
-        } break;
     }
+}
+
+position
+ToScreenPosition(const position &map_pos)
+{
+    return {
+        map_pos.col * TILE_SIZE + X_OFFSET,
+        map_pos.row * TILE_SIZE + Y_OFFSET
+    };
 }
 
 // Renders an individual tile to the screen, given its game coords and tile (for texture).
@@ -121,7 +127,6 @@ RenderPortrait(int x, int y, const Unit &unit, bool flipped)
         case EXPR_HAPPY: portrait = &unit.happy; break;
         case EXPR_ANGRY: portrait = &unit.angry; break;
         case EXPR_WINCE: portrait = &unit.wince; break;
-        default: SDL_assert(!"ERROR RenderPortrait: Invalid expression."); break;
     }
     SDL_Rect destination = {x, y, 
                             PORTRAIT_SIZE,
@@ -140,6 +145,21 @@ RenderText(const Texture &texture, int x, int y)
 {
     SDL_Rect destination = {x, y, texture.width, texture.height};
     SDL_RenderCopy(GlobalRenderer, texture.sdl_texture, NULL, &destination);
+}
+
+void
+RenderText(string text, int x, int y, const SDL_Color &color = black)
+{
+    Texture texture = LoadTextureText(text.c_str(), color, 0);
+    SDL_Rect destination = {x, y, texture.width, texture.height};
+    SDL_RenderCopy(GlobalRenderer, texture.sdl_texture, NULL, &destination);
+}
+
+void
+RenderNumber(int num, const position &pos, const SDL_Color &color = black)
+{
+    position screen_pos = ToScreenPosition(pos);
+    RenderText(to_string(num), screen_pos.col, screen_pos.row, color);
 }
 
 // Renders a Health Bar (For use underneath units)
@@ -233,6 +253,11 @@ Render(const Tilemap &map,
     {
         for(const position &cell : map.accessible)
             RenderTileColor(cell, aiMoveColor);
+        vector<Choice> choices = GetChoices(*cursor.selected, map);
+        //for(const Choice &choice : choices)
+        //    RenderNumber(choice.action_score, choice.action.move, red);
+        for(const Choice &choice : choices)
+            RenderNumber(choice.location_score, choice.action.move, green);
     }
 
     if(GlobalInterfaceState == ATTACK_TARGETING ||

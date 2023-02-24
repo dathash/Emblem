@@ -30,9 +30,6 @@ GetTileNameString(TileType type)
     case FORT: return "Fort";
     case VILLAGE: return "House";
     case CHEST: return "Chest";
-	default:
-		assert(!"ERROR: Unhandled Tile name string in UI.\n");
-		return "";
 	}
 }
 

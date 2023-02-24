@@ -27,7 +27,6 @@ GetClassString(ClassType type)
         case CLASS_HEALER:   return "Healer";
         case CLASS_UTILITY:  return "Utility";
         case CLASS_AI:       return "AI";
-        default: cout << "Unhandled ClassType String\n"; return "";
     }
 }
 
@@ -53,7 +52,6 @@ GetEquipmentString(EquipmentType type)
         case EQUIP_SELF_TARGET: return "Self";
         case EQUIP_LEAP:      return "Leap";
         case EQUIP_LASER:     return "Laser";
-        default: cout << "Unhandled EquipmentType String\n"; return "";
     }
 }
 
@@ -77,7 +75,6 @@ GetPushString(PushType type)
         case PUSH_TOWARDS_AND_AWAY:  return "Towards + Away";
         case PUSH_PERPENDICULAR:     return "Perpendicular";
         case PUSH_ALL:      return "All";
-        default: cout << "Unhandled PushType String\n"; return "";
     }
 }
 
@@ -97,7 +94,6 @@ GetMovementString(MovementType type)
         case MOVEMENT_BACKONE:  return "Back one";
         case MOVEMENT_RAM:      return "Ram";
         case MOVEMENT_LEAP:     return "Leap";
-        default: cout << "Unhandled MovementTypeString\n"; return "";
     }
 }
 

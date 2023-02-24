@@ -30,7 +30,6 @@ TileTypeToTile(TileType type)
             return VILLAGE_TILE;
         case(CHEST):
             return CHEST_TILE;
-        default: cout << "ERROR: Unhandled tile type in load.h::TileTypeToTile!\n"; return {};
     }
 }
 

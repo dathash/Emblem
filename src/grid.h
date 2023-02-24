@@ -31,6 +31,11 @@ VectorHasElement(const position &pos_in, const vector<position> &vector_in)
     return has;
 }
 
+bool IsEdge(const position &pos_in)
+{
+    return (pos_in.col == 0 || pos_in.col == MAP_WIDTH - 1
+         || pos_in.row == 0 || pos_in.row == MAP_HEIGHT - 1);
+}
 
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
@@ -131,8 +136,7 @@ Line(const Tilemap &map, const position &origin, const direction &dir)
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
 Accessible(const Tilemap &map, position origin, 
-           int mov, int min, int max, 
-           bool sourceIsAlly)
+           int mov, bool sourceIsAlly)
 {
     vector<position> accessible;
 
@@ -446,7 +450,8 @@ FindAttackingSquares(const Tilemap &map, const Unit &unit,
     return result;
 }
 
-// Finds the nearest unit to the cursor, based on the given predicate expression.
+// Finds the nearest unit to the cursor 
+// which fulfills the given predicate expression.
 Unit *FindNearest(const Tilemap &map, const position &origin, 
                   bool predicate(const Unit &), bool is_ally)
 {
@@ -471,5 +476,13 @@ Unit *FindNearest(const Tilemap &map, const position &origin,
     return result;
 }
 
+// Finds the distance to the nearest unit to the cursor 
+// which fulfills the given predicate expression.
+int DistanceToNearest(const Tilemap &map, const position &origin, 
+                      bool predicate(const Unit &), bool is_ally)
+{
+    Unit *nearest = FindNearest(map, origin, predicate, is_ally);
+    return ManhattanDistance(nearest->pos, origin);
+}
 
 #endif

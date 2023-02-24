@@ -5,9 +5,7 @@
 #ifndef STATE_H
 #define STATE_H
 
-void
-GoToAIPhase()
-{
+void GoToAIPhase() {
     GlobalPhase = PHASE_AI;
     GlobalInterfaceState = NO_OP;
     GlobalAIState = AI_FINDING_NEXT;
@@ -15,9 +13,7 @@ GoToAIPhase()
     EmitEvent(END_TURN_EVENT);
 }
 
-void
-GoToPlayerPhase(Level *level, Cursor *cursor)
-{
+void GoToPlayerPhase(Level *level, Cursor *cursor) {
     GlobalPhase = PHASE_PLAYER;
     GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     GlobalAIState = AI_NO_OP;
@@ -33,9 +29,15 @@ GoToPlayerPhase(Level *level, Cursor *cursor)
     EmitEvent(END_TURN_EVENT);
 }
 
-void
-GameOver()
-{
+void GoToResolutionPhase() {
+    GlobalPhase = PHASE_RESOLUTION;
+    GlobalInterfaceState = NO_OP;
+    GlobalAIState = AI_NO_OP;
+
+    EmitEvent(END_TURN_EVENT);
+}
+
+void GameOver() {
     cout << "HERE\n";
     GlobalPhase = PHASE_PLAYER;
     GlobalAIState = AI_NO_OP;

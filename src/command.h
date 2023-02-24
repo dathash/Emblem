@@ -33,32 +33,20 @@ public:
     {
         position new_pos = cursor->pos + dir;
 
-        if(IsValid(new_pos))
-        {
-            cursor->MoveTo(new_pos, dir * -1);
-
-            const Tile *hoverTile = &map.tiles[new_pos.col][new_pos.row];
-            if(!hoverTile->occupant)
-            {
-                GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-                return;
-            }
-
-            if(hoverTile->occupant->is_exhausted)
-            {
-                GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-                return;
-            }
-
-            if(hoverTile->occupant->IsAlly())
-            {
-                GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-                return;
-            }
-
-            GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        if(!IsValid(new_pos))
             return;
-        }
+
+        cursor->MoveTo(new_pos, dir * -1);
+
+        const Unit *over = map.tiles[new_pos.col][new_pos.row].occupant;
+        if(!over || over->IsEnv())
+            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+        else if(over->is_exhausted)
+            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+        else if(over->IsAlly())
+            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        else
+            GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
     }
 
 private: 
@@ -84,16 +72,11 @@ public:
         cursor->selected->initial_pos = cursor->pos;
 
         map->accessible.clear();
-
         if(cursor->selected->has_moved)
             return;
 
-        // TODO: This should be simpler
-        int movement = 0; 
         map->accessible = Accessible(*map, cursor->pos,
                                      cursor->selected->movement,
-                                     1,
-                                     1, 
                                      cursor->selected->IsAlly());
     }
 
@@ -227,9 +210,8 @@ public:
             return;
         }
 
-
         Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
-        if(!over)
+        if(!over || over->IsEnv())
         {
             GlobalInterfaceState = NEUTRAL_OVER_GROUND;
             return;
@@ -296,7 +278,6 @@ public:
         if(VectorHasElement(new_pos, map->range))
         {
             cursor->targeting = new_pos;
-            map->attackable.clear();
             map->attackable = {new_pos};
         }
 
@@ -373,15 +354,15 @@ public:
                 for(const position &p : orthogonal)
                 {
                     int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range
+                    if(distance >= cursor->selected->primary->min_range 
+                       && distance <= cursor->selected->primary->max_range
                        && !level->map.tiles[p.col][p.row].occupant)
+                    {
                         level->map.range.push_back(p);
+                    }
                 }
             } break;
             case EQUIP_LASER:
-            {
-            } break;
-            default:
             {
             } break;
         }
@@ -431,12 +412,9 @@ public:
     {
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
 
-        map->accessible.clear();
         map->accessible = Accessible(*map, cursor->pos,
                                      cursor->selected->movement,
-                                     1,
-                                     1, 
-                                     cursor->selected->IsAlly());
+                                     !cursor->selected->IsAlly());
 
         GlobalInterfaceState = ENEMY_RANGE;
     }
@@ -487,11 +465,8 @@ public:
 class ChooseGameMenuOptionCommand : public Command
 {
 public:
-    ChooseGameMenuOptionCommand(Menu *menu_in, Level *level_in,
-                                Cursor *cursor_in)
-    : menu(menu_in),
-      level(level_in),
-      cursor(cursor_in)
+    ChooseGameMenuOptionCommand(Menu *menu_in)
+    : menu(menu_in)
     {}
 
     virtual void Execute()
@@ -506,8 +481,7 @@ public:
             } break;
             case(1): // END TURN
             {
-                //cursor->selected = nullptr;
-                GoToAIPhase();
+                GoToResolutionPhase();
                 return;
             } break;
         }
@@ -515,8 +489,6 @@ public:
 
 private:
     Menu *menu;
-    Level *level;
-    Cursor *cursor;
 };
 
 class BackToGameMenuCommand : public Command
@@ -617,9 +589,6 @@ public:
     {
         GoToAIPhase();
     }
-
-private:
-    Cursor *cursor;
 };
 
 // ============================== Input Handler ================================
@@ -779,7 +748,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level, cursor));
+                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
                 BindB(make_shared<ExitGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -900,16 +869,10 @@ public:
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
             } break;
-
-            default:
-            {
-                SDL_assert(!"Unimplemented GlobalInterfaceState!\n");
-            } break;
         }
     }
 
-    void clearQueue()
-    {
+    void clearQueue() {
         commandQueue = {};
     }
 

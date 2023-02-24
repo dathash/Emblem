@@ -41,10 +41,6 @@ struct Sound
                                 MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_ASYNC, 
                                 &GlobalSfxGroup, NULL, &sound);
             } break;
-            default:
-            {
-                SDL_assert(!"Shouldn't get here!\n");
-            } break;
         }
     }
 

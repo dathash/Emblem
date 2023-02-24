@@ -20,7 +20,6 @@ GetFirstTarget(const Tilemap &map,
     if(!line.empty())
         return line.back();
 
-    //cout << "WARNING GetFirstTarget(): No targets.\n";
     return {-1, -1};
 }
 
@@ -37,7 +36,8 @@ SimulateDamage(Unit *victim, int amount)
 
     // NOTE: This is called when damage is zero when pushing a unit.
     // Keep that in mind for visualization purposes.
-    //cout << amount << " Damage to " << victim->name << "\n";
+    cout << amount << " damage to " << victim->name << "\n";
+
     victim->Damage(amount);
     if(victim->health <= 0)
         victim->should_die = true;
@@ -53,6 +53,8 @@ SimulatePush(Tilemap *map, int push_damage,
     // Damage occupants (innate to weapon)
     if(!map->tiles[initial.col][initial.row].occupant)
         return;
+
+    cout << "Pushed.\n";
     SimulateDamage(map->tiles[initial.col][initial.row].occupant, push_damage);
 
     if(map->tiles[initial.col][initial.row].occupant->fixed)
@@ -66,6 +68,7 @@ SimulatePush(Tilemap *map, int push_damage,
     if(map->tiles[target.col][target.row].occupant)
     {
         // Bonk!
+        cout << "collision.\n";
         SimulateDamage(map->tiles[initial.col][initial.row].occupant, 1);
         SimulateDamage(map->tiles[target.col][target.row].occupant, 1);
     }
@@ -116,9 +119,6 @@ PerformPushScenario(Tilemap *map, PushType type, int push_damage,
             SimulatePush(map, push_damage, pos + perp, perp);
             SimulatePush(map, push_damage, pos - perp, perp * -1);
         } break;
-        default:
-        {
-        } break;
     }
 }
 
@@ -126,11 +126,9 @@ void
 SimulateMove(Tilemap *map, int self_damage,
              const position &source, const position &target)
 {
-    cout << target << "\n";
-    cout << source << "\n";
     if(!IsValid(target) || !IsValid(source))
     {
-        cout << "HERE\n";
+        cout << "Not moving.\n";
         return;
     }
 
@@ -179,9 +177,6 @@ PerformMoveScenario(Tilemap *map, MovementType type, int self_damage,
         {
             SimulateMove(map, self_damage, source, target);
         } break;
-        default:
-        {
-        } break;
     }
 }
 
@@ -200,12 +195,25 @@ Simulate(Tilemap *map,
     case EQUIP_PUNCH:
     {
         position subject = destination;
-        Unit *victim = map->tiles[subject.col][subject.row].occupant;
+
+        direction with = Normalized((direction)(destination - source));
+        vector<Unit *> victims = {};
+        for(int i = 1; i <= weapon.max_range; ++i)
+        {
+            position target = source + (with * i);
+            if(!IsValid(target)) continue;
+            Unit *victim = map->tiles[target.col][target.row].occupant;
+            if(victim) victims.push_back(victim);
+        }
+
         PerformMoveScenario(map, weapon.move, weapon.self_damage, 
                             source, subject, GetDirection(source, subject));
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
+
+        cout << victims.size() << "\n";
+        for(Unit *victim : victims)
+            SimulateDamage(victim, weapon.damage);
     } break;
     case EQUIP_LINE_SHOT:
     {
@@ -252,10 +260,6 @@ Simulate(Tilemap *map,
     {
         cout << "Unimplemented weapon type: " << weapon.type << "\n";
     } break;
-    default:
-    {
-        cout << "Unimplemented weapon type: " << weapon.type << "\n";
-    } break;
     }
 }
 
@@ -266,13 +270,7 @@ struct Attack
     Unit *unit;
     position offset;
 
-    void
-    Resolve(Tilemap *map)
-    {
-        cout << "RESOLUTION\n";
-        cout << unit->name << "\n";
-        cout << unit->pos << "\n";
-        cout << offset << "\n";
+    void Resolve(Tilemap *map) {
         Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
     }
 };
@@ -282,9 +280,7 @@ struct Resolution
     vector<Attack> attacks;
     int frame = 0;
 
-    void
-    Update(Tilemap *map)
-    {
+    void Update(Tilemap *map) {
         if(attacks.empty())
             GoToAIPhase();
 
@@ -296,9 +292,7 @@ struct Resolution
         attacks.pop_back();
     }
 
-    void
-    RemoveDeadUnits()
-    {
+    void RemoveDeadUnits() {
         attacks.erase(remove_if(attacks.begin(), attacks.end(),
                     [](auto const &a) { return a.unit->should_die; }),
                     attacks.end());

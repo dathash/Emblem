@@ -12,9 +12,7 @@ enum AnimationValue
     FADE_OUT_ANIMATION,
     FADE_IN_OUT_ANIMATION,
     ATTACK_RANGED_HIT_ANIMATION,
-    ATTACK_RANGED_CRIT_ANIMATION,
     ATTACK_MELEE_ANIMATION,
-    ATTACK_LEAP_ANIMATION,
     MOVE_ANIMATION,
     MOVE_UNIT_ANIMATION,
 };
@@ -139,7 +137,6 @@ struct Animation
             case CHANNEL_TWO: return channel_two.Value(Time());
             case CHANNEL_THREE: return channel_three.Value(Time());
             case CHANNEL_FOUR: return channel_four.Value(Time());
-            default: assert(!"We only support four channels of animation.\n"); return 0.0f;
         }
     }
 
@@ -249,11 +246,6 @@ GetAnimation(AnimationValue anim, float frame_modulation = 1.0f)
                     {{0.0 ,  0.0 },  // channel 1
                      {1.0 ,  1.0 }},
                      Identity));
-        }
-        default:
-        {
-            assert(!"ERROR GetAnimation: Animation type not defined\n");
-            return nullptr;
         }
     }
 }
