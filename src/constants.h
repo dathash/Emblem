@@ -68,21 +68,20 @@
 
 enum Phase
 {
-    PHASE_PLAYER,
     PHASE_AI,
+    PHASE_PLAYER,
     PHASE_RESOLUTION,
     PHASE_SPAWNING,
 };
-
 string 
 GetPhaseString(Phase phase)
 {
     switch(phase)
     {
-    case PHASE_PLAYER:     return "Player";
-    case PHASE_AI:         return "AI";
-    case PHASE_RESOLUTION: return "Resolution";
-    case PHASE_SPAWNING:   return "Spawning";
+        case PHASE_AI:          return "AI";
+        case PHASE_PLAYER:      return "Player";
+        case PHASE_RESOLUTION:  return "Resolution";
+        case PHASE_SPAWNING:    return "Spawning";
 	}
 }
 

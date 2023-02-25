@@ -7,13 +7,6 @@
 
 #include <vector>
 
-void GoToAIPhase();
-struct Level;
-struct Cursor;
-void GoToPlayerPhase(Level *level, Cursor *cursor);
-void GoToResolutionPhase();
-void GameOver();
-
 // =============================== small-time ===================================
 struct InputState
 {
@@ -38,7 +31,9 @@ struct Texture
     int width;
     int height;
 
-    Texture(SDL_Texture *sdl_texture_in, string dir_in, string filename_in, int width_in, int height_in)
+    Texture(SDL_Texture *sdl_texture_in, 
+            string dir_in, string filename_in, 
+            int width_in, int height_in)
     {
         this->sdl_texture = sdl_texture_in;
         this->width = width_in;
@@ -82,12 +77,9 @@ struct Spritesheet
     }
 
     // called each frame
-    void
-    Update()
-    {
+    void Update() {
         counter++;
-        if(!(counter % speed))
-        {
+        if(!(counter % speed)) {
             int new_frame = frame + 1;
             if(new_frame >= frames)
                 this->frame = 0;
@@ -97,17 +89,13 @@ struct Spritesheet
     }
 
     // switches the sprite to the next animation track
-    void
-    ChangeTrack(SheetTrack track_in)
-    {
+    void ChangeTrack(SheetTrack track_in) {
         SDL_assert(track_in < tracks && track_in >= 0);
         this->track = track_in;
         this->frame = 0;
     }
 
-    void
-    ChangeTrackMovement(const direction &dir)
-    {
+    void ChangeTrackMovement(const direction &dir) {
         if(dir == position(1, 0))
             ChangeTrack(TRACK_RIGHT);
         else if(dir == position(-1, 0))
@@ -122,20 +110,20 @@ struct Spritesheet
 };
 
 // =================================== Gameplay ================================
+
+// CIRCULAR
+void GameOver();
+
 struct Player
 {
     int health = 7;
     int max_health = 7;
 
-    void
-    Reset()
-    {
+    void Reset() {
         health = max_health;
     }
 
-    void
-    Damage(int amount)
-    {
+    void Damage(int amount) {
         health = clamp(health - amount, 0, max_health);
         if(health == 0)
             GameOver(); // TODO: this results in a seg fault since we don't get rid of unresolved attacks.
@@ -171,40 +159,28 @@ struct Unit
 
     Spritesheet sheet;
 
-
-    ~Unit()
-    {
+    ~Unit() {
         delete primary;
         delete secondary;
     }
 
-    size_t
-    ID()
-    {
+    size_t ID() {
         return hash<string>{}(name);
     }
 
-    bool
-    IsAlly() const
-    {
+    bool IsAlly() const {
         return team == TEAM_PLAYER;
     }
 
-    bool
-    IsAI() const
-    {
+    bool IsAI() const {
         return team == TEAM_AI;
     }
 
-    bool
-    IsEnv() const
-    {
+    bool IsEnv() const {
         return team == TEAM_ENV;
     }
 
-    void
-    Update()
-    {
+    void Update() {
         sheet.Update();
     }
 
@@ -244,30 +220,23 @@ struct Unit
 
     // Damages a unit and resolves things involved with that process.
     // Returns the amount of damage actually done.
-    int
-    Damage(int amount)
-    {
+    int Damage(int amount) {
         int result = min(amount, health);
         health = clamp(health - amount, 0, max_health);
         return result;
     }
 
     // Damages a unit and resolves things involved with that process.
-    void
-    Heal(int amount)
-    {
+    void Heal(int amount) {
         health = clamp(health + amount, 0, max_health);
     }
 
-    void
-    Deactivate()
-    {
+    void Deactivate() {
         is_exhausted = true;
         sheet.ChangeTrack(TRACK_IDLE);
     }
-    void
-    Activate()
-    {
+
+    void Activate() {
         has_moved = false;
         is_exhausted = false;
     }
@@ -308,19 +277,19 @@ GetTileTypeString(TileType type)
 {
     switch (type)
     {
-    case TILE_FLOOR:   return "Plain";
-    case TILE_WATER:   return "Water";
-    case TILE_FLAME:   return "Flame";
-    case TILE_ACID:    return "Acid";
-    case TILE_SMOKE:   return "Smoke";
-    case TILE_DESERT:  return "Desert";
-    case TILE_WALL:    return "Hill";
-    case TILE_FOREST:  return "Forest";
-    case TILE_SWAMP:   return "Swamp";
-    case TILE_GOAL:    return "Goal";
-    case TILE_FORT:    return "Fort";
-    case TILE_VILLAGE: return "House";
-    case TILE_CHEST:   return "Chest";
+        case TILE_FLOOR:   return "Plain";
+        case TILE_WATER:   return "Water";
+        case TILE_FLAME:   return "Flame";
+        case TILE_ACID:    return "Acid";
+        case TILE_SMOKE:   return "Smoke";
+        case TILE_DESERT:  return "Desert";
+        case TILE_WALL:    return "Hill";
+        case TILE_FOREST:  return "Forest";
+        case TILE_SWAMP:   return "Swamp";
+        case TILE_GOAL:    return "Goal";
+        case TILE_FORT:    return "Fort";
+        case TILE_VILLAGE: return "House";
+        case TILE_CHEST:   return "Chest";
 	}
 }
 
@@ -337,11 +306,11 @@ GetTileEffectString(TileEffect type)
 {
     switch(type)
     {
-    case EFFECT_NONE:  return "No tile effect";
-    case EFFECT_FIRE:  return "Fire";
-    case EFFECT_ACID:  return "Acid";
-    case EFFECT_SMOKE: return "Smoke";
-    case EFFECT_WATER: return "Water";
+        case EFFECT_NONE:  return "No tile effect";
+        case EFFECT_FIRE:  return "Fire";
+        case EFFECT_ACID:  return "Acid";
+        case EFFECT_SMOKE: return "Smoke";
+        case EFFECT_WATER: return "Water";
 	}
 }
 
@@ -393,7 +362,6 @@ GetRandomUnit(const vector<shared_ptr<Unit>> &pool) {
     return make_shared<Unit>(*pool[RandomInt(pool.size() - 1)]);
 }
 
-
 // Finds an available space on the given map, while avoiding tiles in the mask.
 // the ai_side parameter ensures the space is on the
 position
@@ -421,6 +389,9 @@ struct Spawner
 };
 
 
+// CIRCULAR
+void GoToAIPhase();
+
 struct Level
 {
     string name = "";
@@ -433,6 +404,12 @@ struct Level
 
     int turn_count = -1;
 
+    void SimulateEffects()
+    {
+        // Fire
+        // Event stuff
+    }
+
     void SpawnPhase() {
         SpawnUnits();
         SetRisingPoints(map);
@@ -442,12 +419,12 @@ struct Level
     // Starting point for balancing spawns:
     // We want a total number of threats based on a per-turn basis.
     // This means combined surface and rising monsters.
-
     //         E | N | H
     // Turn 1: 4 | 5 | 6
     // Turn 2: 4 | 5 | 6
     // Turn 3: 5 | 6 | 7
     // Turn 4: 5 | 6 | 7
+    // For now, we just want 5 guys all the time.
     void
     SetRisingPoints(const Tilemap &map)
     {

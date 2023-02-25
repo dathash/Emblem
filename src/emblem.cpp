@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_RESOLUTION:
             {
+                level.SimulateEnvironmentEffects();
                 resolution.Update(&(level.map));
             } break;
             case PHASE_SPAWNING:

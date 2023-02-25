@@ -83,15 +83,18 @@ Effects
 * On fire
 * Acid
 * Frozen
-* Smoke
 etc
 
+Repair
+
 Special tiles
-* Fire
-* Desert
-* Acid
-* Forest
-* Water
+* Fire (applies on fire condition)
+* Desert (attacked changes to smoke)
+* Forest (attacking changes to fire)
+* Ice (attacking changes to water)
+* Acid (stepping applies acid)
+* Smoke (Can't attack or repair)
+* Water (Can't attack or repair)
 
 Implement the squads
 
