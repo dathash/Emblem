@@ -66,15 +66,6 @@
 #define POINTS_FOR_BUILDING 5
 #define POINTS_FOR_AI_UNIT -2
 
-#define FLOOR_TILE {FLOOR, nullptr, {0, 0}}
-#define WALL_TILE {WALL, nullptr, {1, 0}}
-#define FOREST_TILE {FOREST, nullptr, {2, 0}}
-#define SWAMP_TILE {SWAMP, nullptr, {5, 1}}
-#define FORT_TILE {FORT, nullptr, {4, 0}}
-#define GOAL_TILE {GOAL, nullptr, {5, 0}}
-#define VILLAGE_TILE {VILLAGE, nullptr, {1, 1}}
-#define CHEST_TILE {CHEST, nullptr, {0, 1}}
-
 enum Phase
 {
     PHASE_PLAYER,
@@ -160,19 +151,6 @@ GetAIString(AIState state)
     case AI_ATTACK_RESOLUTION:      return "Attack Resolution";
     }
 }
-
-// MAP
-enum TileType
-{
-    FLOOR,
-    WALL,
-    FOREST,
-    SWAMP,
-    GOAL,
-    FORT,
-    VILLAGE,
-    CHEST,
-};
 
 // ============================ color palette ==================================
 // Tile overlays

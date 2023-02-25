@@ -287,12 +287,94 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
     return nullptr;
 }
 // ========================== map stuff =======================================
+enum TileType
+{
+    TILE_FLOOR,
+    TILE_WATER,
+    TILE_FLAME,
+    TILE_ACID,
+    TILE_SMOKE,
+    TILE_DESERT,
+    TILE_WALL,
+    TILE_FOREST,
+    TILE_SWAMP,
+    TILE_GOAL,
+    TILE_FORT,
+    TILE_VILLAGE,
+    TILE_CHEST,
+};
+string 
+GetTileTypeString(TileType type)
+{
+    switch (type)
+    {
+    case TILE_FLOOR:   return "Plain";
+    case TILE_WATER:   return "Water";
+    case TILE_FLAME:   return "Flame";
+    case TILE_ACID:    return "Acid";
+    case TILE_SMOKE:   return "Smoke";
+    case TILE_DESERT:  return "Desert";
+    case TILE_WALL:    return "Hill";
+    case TILE_FOREST:  return "Forest";
+    case TILE_SWAMP:   return "Swamp";
+    case TILE_GOAL:    return "Goal";
+    case TILE_FORT:    return "Fort";
+    case TILE_VILLAGE: return "House";
+    case TILE_CHEST:   return "Chest";
+	}
+}
+
+enum TileEffect
+{
+    EFFECT_NONE,
+    EFFECT_FIRE,
+    EFFECT_ACID,
+    EFFECT_SMOKE,
+    EFFECT_WATER,
+};
+string 
+GetTileEffectString(TileEffect type)
+{
+    switch(type)
+    {
+    case EFFECT_NONE:  return "No tile effect";
+    case EFFECT_FIRE:  return "Fire";
+    case EFFECT_ACID:  return "Acid";
+    case EFFECT_SMOKE: return "Smoke";
+    case EFFECT_WATER: return "Water";
+	}
+}
+
+
 struct Tile
 {
-    TileType type = FLOOR;
+    position atlas_index = {0, 0};
+
+    TileType type = TILE_FLOOR;
+
+    TileEffect effect = EFFECT_NONE;
     Unit *occupant = nullptr;
-    position atlas_index = {0, 16};
 };
+Tile
+GetTile(TileType type)
+{
+    switch(type)
+    {
+        case(TILE_FLOOR):    return {{0, 0}, type};
+        case(TILE_WATER):    return {{3, 0}, type};
+        case(TILE_FLAME):    return {{0, 2}, type};
+        case(TILE_ACID):     return {{1, 2}, type};
+        case(TILE_SMOKE):    return {{3, 2}, type};
+        case(TILE_DESERT):   return {{2, 2}, type};
+        case(TILE_WALL):     return {{1, 0}, type};
+        case(TILE_FOREST):   return {{2, 0}, type};
+        case(TILE_SWAMP):    return {{5, 1}, type};
+        case(TILE_GOAL):     return {{5, 0}, type};
+        case(TILE_FORT):     return {{4, 0}, type};
+        case(TILE_VILLAGE):  return {{1, 1}, type};
+        case(TILE_CHEST):    return {{0, 1}, type};
+    }
+}
 
 struct Tilemap
 {

@@ -5,7 +5,6 @@
 #ifndef UI_H
 #define UI_H
 
-// ======================== General UI helper functions ========================
 void 
 TextCentered(string text) {
     auto windowWidth = ImGui::GetWindowSize().x;
@@ -15,63 +14,6 @@ TextCentered(string text) {
     ImGui::Text("%s", text.c_str());
 }
 
-
-// switch-case to get a ui-printable name from the tile's type enum.
-string 
-GetTileNameString(TileType type)
-{
-    switch (type)
-    {
-    case FLOOR: return "Plain";
-    case WALL: return "Hill";
-    case FOREST: return "Forest";
-    case SWAMP: return "Swamp";
-    case GOAL: return "Goal";
-    case FORT: return "Fort";
-    case VILLAGE: return "House";
-    case CHEST: return "Chest";
-	}
-}
-
-string
-GetDieString(int (*die)())
-{
-    if(die == d1)
-        return "d1";
-    else if(die == d4)
-        return "d4";
-    else if(die == d6)
-        return "d6";
-    else if(die == d8)
-        return "d8";
-    else if(die == d10)
-        return "d10";
-    else if(die == d12)
-        return "d12";
-    cout << "WARNING: Bad die format: " << die << "\n";
-    return "";
-}
-
-int
-GetMaxValue(int (*die)())
-{
-    if(die == d1)
-        return 1;
-    else if(die == d4)
-        return 4;
-    else if(die == d6)
-        return 6;
-    else if(die == d8)
-        return 8;
-    else if(die == d10)
-        return 10;
-    else if(die == d12)
-        return 12;
-    cout << "WARNING: Bad die format: " << die << "\n";
-    return 0;
-}
-
-// ============================ New UI =========================================
 struct UI_State
 {
     bool tile_info = false;
@@ -195,7 +137,7 @@ DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
                    Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 90));
 
 	ImGui::PushFont(uiFontLarge);
-    ImGui::Begin(GetTileNameString(tile.type).c_str(), NULL, wf);
+    ImGui::Begin(GetTileTypeString(tile.type).c_str(), NULL, wf);
     {
 		ImGui::PushFont(uiFontMedium);
 		ImGui::PopFont();

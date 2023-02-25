@@ -74,10 +74,24 @@ Genealogy's items are pretty close too.
 
 # TODO
 AI Attacks
-* Artillery
-  * Bigger splash than one
-* Sub-optimal attacks
-* Avoid other ai attacks (as dangerous)
+* Avoid other ai attacks (dangerous)
+* Avoid repeated behavior
+
+Robust turn queue for actions to resolve.
+
+Effects
+* On fire
+* Acid
+* Frozen
+* Smoke
+etc
+
+Special tiles
+* Fire
+* Desert
+* Acid
+* Forest
+* Water
 
 Implement the squads
 

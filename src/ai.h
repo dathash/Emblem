@@ -95,6 +95,19 @@ int Evaluate(const Unit &unit, const position &pos, const direction &dir,
         } break;
         case EQUIP_ARTILLERY:
         {
+            // NOTE: This code uses the pos parameter as the target of the attack.
+            // This is a stupid workaround TODO.
+            assert(IsValid(pos));
+
+            Unit *victim = map.tiles[pos.col][pos.row].occupant;
+            if(!victim || pos == unit.pos) return 0;
+
+            switch(victim->team)
+            {
+                case TEAM_PLAYER:   return POINTS_FOR_PLAYER_UNIT;
+                case TEAM_ENV:      return POINTS_FOR_BUILDING;
+                case TEAM_AI:       return POINTS_FOR_AI_UNIT;
+            }
             return 0;
         } break;
         default: cout << "AI shouldn't have this kind of attack. " << unit.primary->type << "\n"; return 0;
@@ -121,7 +134,7 @@ PrintChoice(const Choice &choice)
 }
 
 vector<Choice>
-GetChoices(const Unit &unit, const Tilemap &map)
+GetChoicesOrthogonal(const Unit &unit, const Tilemap &map)
 {
     vector<Choice> choices = {};
     vector<direction> directions = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
@@ -142,9 +155,52 @@ GetChoices(const Unit &unit, const Tilemap &map)
             }
         }
 
-        choices.push_back({{pos, pos + directions[best]},
-                           best_value,
-                           EvaluateLocation(unit, pos, map)});
+        int location = EvaluateLocation(unit, pos, map);
+
+        if(location >= 0)
+        {
+            choices.push_back({{pos, pos + directions[best]},
+                               best_value,
+                               location});
+        }
+    }
+    return choices;
+}
+
+vector<Choice>
+GetChoicesArtillery(const Unit &unit, const Tilemap &map)
+{
+    vector<Choice> choices = {};
+    vector<position> orthogonal = {};
+
+    for(const position &pos : map.accessible)
+    {
+        int value = 0;
+        position best_target = {-1, -1};
+        int best_value = 0;
+
+        orthogonal = Orthogonal(map, pos);
+        for(const position &target : orthogonal)
+        {
+            if(Distance(target, unit.pos) >= unit.primary->min_range)
+            {
+                value = Evaluate(unit, target, {0, 0}, map);
+                if(value > best_value)
+                {
+                    best_value = value;
+                    best_target = target;
+                }
+            }
+        }
+
+        int location = EvaluateLocation(unit, pos, map);
+
+        if(location >= 0)
+        {
+            choices.push_back({{pos, best_target},
+                               best_value,
+                               location});
+        }
     }
     return choices;
 }
@@ -174,11 +230,10 @@ BestAction(const vector<Choice> &choices)
 
     assert(best_choices.size());
 
-    //if(Roll(d20) > 3)
-    if(second_best_choices.size())
-        return second_best_choices[RandomInt(second_best_choices.size() - 1)];
-    else
+    if(true)
         return best_choices[RandomInt(best_choices.size() - 1)];
+    else // Choose this sometimes on easy difficulties?
+        return second_best_choices[RandomInt(second_best_choices.size() - 1)];
 }
 
 Choice
@@ -203,7 +258,11 @@ BestLocation(const vector<Choice> &choices)
 
 // Scans the map and determines the best course of action to take.
 Action GetAction(const Unit &unit, const Tilemap &map) {
-    vector<Choice> choices = GetChoices(unit, map);
+    vector<Choice> choices = {};
+    if(unit.primary->type == EQUIP_ARTILLERY)
+        choices = GetChoicesArtillery(unit, map);
+    else
+        choices = GetChoicesOrthogonal(unit, map);
     assert(choices.size());
 
     Choice action_choice = BestAction(choices);

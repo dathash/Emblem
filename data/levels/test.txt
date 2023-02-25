@@ -14,5 +14,7 @@ MAP 0 0 0 0 0 0 0 0
 COM <name> <col> <row>
 UNT Lucina 2 4 
 UNT Thief 4 3 
+UNT Mage 2 1 
 
-SPW Soldier
+SPW Soldier 
+

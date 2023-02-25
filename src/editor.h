@@ -183,61 +183,90 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 
     ImGui::Begin("level editor");
     {
+        ImGui::Checkbox("spawning", &GlobalSpawning);
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
         if(ImGui::Button("none"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = FLOOR_TILE;
+            *hover_tile = GetTile(TILE_FLOOR);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
         if(ImGui::Button("wall"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = WALL_TILE;
+            *hover_tile = GetTile(TILE_FLOOR);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
         if(ImGui::Button("cover"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = FOREST_TILE;
+            *hover_tile = GetTile(TILE_FOREST);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
         if(ImGui::Button("slow"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = SWAMP_TILE;
+            *hover_tile = GetTile(TILE_SWAMP);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
         if(ImGui::Button("goal"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = GOAL_TILE;
+            *hover_tile = GetTile(TILE_GOAL);
+            hover_tile->occupant = tmp;
+        }
+
+        if(ImGui::Button("water"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_WATER);
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("fire"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_FLAME);
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("acid"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_ACID);
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("smoke"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_SMOKE);
             hover_tile->occupant = tmp;
         }
 
         if(ImGui::Button("fort"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = FORT_TILE;
+            *hover_tile = GetTile(TILE_FORT);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
         if(ImGui::Button("village"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = VILLAGE_TILE;
+            *hover_tile = GetTile(TILE_VILLAGE);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
         if(ImGui::Button("chest"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = CHEST_TILE;
+            *hover_tile = GetTile(TILE_CHEST);
             hover_tile->occupant = tmp;
         }
 
@@ -246,7 +275,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         if(ImGui::Button("add"))
         {
             if(!(hover_tile->occupant ||
-                 hover_tile->type == WALL))
+                 hover_tile->type == TILE_WALL))
             {
                 level->combatants.push_back(make_shared<Unit>(*units[selectedIndex]));
                 level->combatants.back()->pos.col = editor_cursor.col;

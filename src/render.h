@@ -66,11 +66,11 @@ RenderAttack(const Tilemap &map,
 }
 
 position
-ToScreenPosition(const position &map_pos)
+ToScreenPosition(const position &map_pos, const position &offset = {0, 0})
 {
     return {
-        map_pos.col * TILE_SIZE + X_OFFSET,
-        map_pos.row * TILE_SIZE + Y_OFFSET
+        map_pos.col * TILE_SIZE + X_OFFSET + offset.col,
+        map_pos.row * TILE_SIZE + Y_OFFSET + offset.row
     };
 }
 
@@ -156,9 +156,11 @@ RenderText(string text, int x, int y, const SDL_Color &color = black)
 }
 
 void
-RenderNumber(int num, const position &pos, const SDL_Color &color = black)
+RenderNumber(int num, const position &pos, 
+             const position &offset = {0, 0}, 
+             const SDL_Color &color = black)
 {
-    position screen_pos = ToScreenPosition(pos);
+    position screen_pos = ToScreenPosition(pos, offset);
     RenderText(to_string(num), screen_pos.col, screen_pos.row, color);
 }
 
@@ -259,11 +261,11 @@ Render(const Tilemap &map,
     {
         for(const position &cell : map.accessible)
             RenderTileColor(cell, aiMoveColor);
-        vector<Choice> choices = GetChoices(*cursor.selected, map);
-        //for(const Choice &choice : choices)
-        //    RenderNumber(choice.action_score, choice.action.move, red);
+        vector<Choice> choices = GetChoicesOrthogonal(*cursor.selected, map);
         for(const Choice &choice : choices)
-            RenderNumber(choice.location_score, choice.action.move, green);
+            RenderNumber(choice.action_score, choice.action.move, {5, 0}, red);
+        for(const Choice &choice : choices)
+            RenderNumber(choice.location_score, choice.action.move, {35, 0}, green);
     }
 
     if(GlobalInterfaceState == ATTACK_TARGETING ||

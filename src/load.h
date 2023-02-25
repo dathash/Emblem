@@ -9,30 +9,6 @@
 #include <sstream>
 #include <vector>
 
-Tile
-TileTypeToTile(TileType type)
-{
-    switch(type)
-    {
-        case(FLOOR):
-            return FLOOR_TILE;
-        case(WALL):
-            return WALL_TILE;
-        case(FOREST):
-            return FOREST_TILE;
-        case(SWAMP):
-            return SWAMP_TILE;
-        case(FORT):
-            return FORT_TILE;
-        case(GOAL):
-            return GOAL_TILE;
-        case(VILLAGE):
-            return VILLAGE_TILE;
-        case(CHEST):
-            return CHEST_TILE;
-    }
-}
-
 // ============================== loading data =================================
 // Loads a Texture displaying the given text in the given color.
 // Now with wrapping, set by the line_length parameter
@@ -152,7 +128,7 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         else if(type == "MAP")
         {
             for(int col = 0; col < MAP_WIDTH; ++col)
-                level.map.tiles[col][mapRow] = TileTypeToTile((TileType)stoi(tokens[col]));
+                level.map.tiles[col][mapRow] = GetTile((TileType)stoi(tokens[col]));
 
             ++mapRow;
         }

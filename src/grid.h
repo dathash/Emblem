@@ -65,7 +65,6 @@ InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)
     return interactible;
 }
 
-// TODO: Other weapon types
 // returns a vector of positions representing orthogonal squares for a given unit.
 vector<position>
 Orthogonal(const Tilemap &map, const position &origin)
@@ -285,7 +284,7 @@ GetField(const Tilemap &map, position origin, bool is_ally)
     queue<position> unexplored;
     unexplored.push(origin);
     field[origin.col][origin.row] = direction(-2, -2);
-    if(map.tiles[origin.col][origin.row].type == WALL)
+    if(map.tiles[origin.col][origin.row].type == TILE_WALL)
     {
         field[origin.col][origin.row] = direction(-1, -1);
     }

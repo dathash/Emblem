@@ -40,6 +40,7 @@ static bool GlobalDebug = true;
 static bool GlobalPaused = false;
 static bool GlobalStep = false;
 static int GlobalSpeedMod = 1;
+static bool GlobalSpawning = true;
 
 #include "constants.h"
 // State
@@ -224,7 +225,8 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_SPAWNING:
             {
-                level.SpawnPhase();
+                if(GlobalSpawning)
+                    level.SpawnPhase();
                 GoToPlayerPhase(&level, &cursor);
             } break;
             }

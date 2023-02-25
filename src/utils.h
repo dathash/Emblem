@@ -44,6 +44,45 @@ int Roll(int (*die)(), int num = 1) {
     return result;
 }
 
+string
+GetDieString(int (*die)())
+{
+    if(die == d1)
+        return "d1";
+    else if(die == d4)
+        return "d4";
+    else if(die == d6)
+        return "d6";
+    else if(die == d8)
+        return "d8";
+    else if(die == d10)
+        return "d10";
+    else if(die == d12)
+        return "d12";
+    cout << "WARNING: Bad die format: " << die << "\n";
+    return "";
+}
+
+int
+GetMaxValue(int (*die)())
+{
+    if(die == d1)
+        return 1;
+    else if(die == d4)
+        return 4;
+    else if(die == d6)
+        return 6;
+    else if(die == d8)
+        return 8;
+    else if(die == d10)
+        return 10;
+    else if(die == d12)
+        return 12;
+    cout << "WARNING: Bad die format: " << die << "\n";
+    return 0;
+}
+
+
 // Range: (0, max)
 int RandomInt(int max) {
     return rand() % (max + 1);
@@ -162,6 +201,10 @@ direction Normalized(const direction &dir_in) {
 // Finds the direction from one position to another.
 direction GetDirection(const position &one, const position &two) {
     return Normalized(two - one);
+}
+// Finds the distance from one position to another.
+int Distance(const position &one, const position &two) {
+    return Length(two - one);
 }
 
 // ========================= grid helper functions ========================
