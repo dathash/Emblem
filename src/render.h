@@ -216,7 +216,8 @@ RenderHealthBarCombat(const position &p, int hp, int maxHp)
 
 // Renders the scene from the given game state.
 void
-Render(const Tilemap &map, 
+Render(const Tilemap &map,
+       const vector<position> &rising,
        const Cursor &cursor, 
        const Menu &gameMenu,
        const Resolution &resolution)
@@ -237,6 +238,11 @@ Render(const Tilemap &map,
             const Tile &tile = map.tiles[col][row];
             RenderTileTexture(map, tile, screen_pos);
         }
+    }
+
+    for(const position& cell : rising)
+    {
+        RenderTileColor(cell, white);
     }
 
 // ================================= render selected or targeted =====================================

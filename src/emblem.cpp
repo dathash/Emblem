@@ -224,6 +224,8 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_SPAWNING:
             {
+                level.SpawnPhase();
+                GoToPlayerPhase(&level, &cursor);
             } break;
             }
 
@@ -269,7 +271,7 @@ int main(int argc, char *argv[])
         */
 
         // Render
-        Render(level.map, cursor, game_menu, resolution);
+        Render(level.map, level.spawner.rising, cursor, game_menu, resolution);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

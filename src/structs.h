@@ -305,16 +305,106 @@ struct Tilemap
     int atlas_tile_size = ATLAS_TILE_SIZE;
 };
 
+// Returns a copy of a random unit in a pool.
+shared_ptr<Unit>
+GetRandomUnit(const vector<shared_ptr<Unit>> &pool) {
+    return make_shared<Unit>(*pool[RandomInt(pool.size() - 1)]);
+}
+
+
+// Finds an available space on the given map, while avoiding tiles in the mask.
+// the ai_side parameter ensures the space is on the
+position
+GetOpenSpace(const Tilemap &map, const vector<position> &mask, bool ai_side, bool avoid_edges = false) {
+    vector<position> choices = {};
+    for(int col = (avoid_edges ? 1 : 0); col < (avoid_edges ? MAP_WIDTH - 1 : MAP_WIDTH); ++col) {
+        for(int row = (ai_side ? 4 : (avoid_edges ? 1 : 0)); row < (avoid_edges ? MAP_HEIGHT - 1 : MAP_HEIGHT); ++row) {
+            if(!map.tiles[col][row].occupant && !VectorContains({col, row}, mask))
+                choices.push_back({col, row});
+        }
+    }
+    if(choices.empty())
+    {
+        cout << "WARN GetOpenSpace: No open spaces!\n";
+        return {-1, -1};
+    }
+
+    return choices[RandomInt(choices.size() - 1)];
+}
+
+struct Spawner
+{
+    vector<shared_ptr<Unit>> pool = {};
+    vector<position> rising = {};
+};
+
+
 struct Level
 {
     string name = "";
 
     Tilemap map;
     vector<shared_ptr<Unit>> combatants;
+    Spawner spawner;
 
     Sound *song = nullptr;
 
     int turn_count = -1;
+
+    void SpawnPhase() {
+        SpawnUnits();
+        SetRisingPoints(map);
+    }
+
+    // TODO:
+    // Starting point for balancing spawns:
+    // We want a total number of threats based on a per-turn basis.
+    // This means combined surface and rising monsters.
+
+    //         E | N | H
+    // Turn 1: 4 | 5 | 6
+    // Turn 2: 4 | 5 | 6
+    // Turn 3: 5 | 6 | 7
+    // Turn 4: 5 | 6 | 7
+    void
+    SetRisingPoints(const Tilemap &map)
+    {
+        int number_on_field = GetNumberOf(TEAM_AI);
+        int number_rising = spawner.rising.size();
+        int total_enemies = number_on_field + number_rising;
+
+        int spawn_amount = 5 - total_enemies;
+
+        for(int i = 0; i < spawn_amount; ++i)
+            spawner.rising.push_back(GetOpenSpace(map, spawner.rising, true));
+    }
+
+    void
+    SpawnUnits()
+    {
+        if(spawner.pool.empty())
+        {
+            cout << "WARN: Spawner pool is empty. Spawning nothing.\n";
+            return;
+        }
+
+        vector<position> keep = {};
+
+        for(const position &pos : spawner.rising)
+        {
+            if(!map.tiles[pos.col][pos.row].occupant)
+            {
+                shared_ptr<Unit> copy = GetRandomUnit(spawner.pool);
+                AddCombatant(copy, pos);
+            }
+            else
+            {
+                keep.push_back(pos);
+            }
+        }
+
+        spawner.rising = keep;
+    }
 
     void
     CheckVictory()
@@ -397,9 +487,8 @@ struct Level
         }
     }
 
-    int
-    GetNumberOf(Team team = TEAM_PLAYER) const
-    {
+    int GetNumberOf(Team team = TEAM_PLAYER) const {
+        
         int result = 0;
         for(shared_ptr<Unit> unit : combatants)
         {
@@ -413,20 +502,9 @@ struct Level
     Update()
     {
         //CheckForRemaining();
-        CheckVictory();
-    }
-
-    void
-    SpawnMoreUnits()
-    {
+        //CheckVictory();
     }
 };
-
-// Returns a copy of a random unit in a pool.
-shared_ptr<Unit>
-GetRandomUnit(const vector<shared_ptr<Unit>> &pool) {
-    return make_shared<Unit>(*pool[RandomInt(pool.size() - 1)]);
-}
 
 // ================================= Menu ======================================
 Texture

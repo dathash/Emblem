@@ -15,3 +15,4 @@ COM <name> <col> <row>
 UNT Lucina 2 4 
 UNT Thief 4 3 
 
+SPW Soldier

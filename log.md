@@ -73,21 +73,19 @@ I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
 # TODO
-Random Enemy Spawns
-Vek Surfacing
-
 AI Attacks
 * Artillery
   * Bigger splash than one
 * Sub-optimal attacks
 * Avoid other ai attacks (as dangerous)
 
-Objectives
-Map Generation
+Implement the squads
 
-Strategy Layer
-Polish
+Make Maps
+Objectives
+
 Visualization of attacks.
+CHECK OUT HOW MATTHEW DID IT
 * Punch
 * Line shots
 * Ram (Line shot variant)
@@ -97,12 +95,20 @@ Visualization of attacks.
 * Show Damage outcome
 
 Animations
+CHECK OUT HOW MATTHEW DID IT
 * Movement
 * Pushing
 * Destruction
 * Death
 * Attacks
 * Surfacing
+
+Strategy Layer
+Experience points and pilot abilities
+Polish
+
+Ideas
+* Just pre-render numbers and draw them as bitmaps
 
 # Later
 Art

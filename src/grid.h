@@ -7,36 +7,6 @@
 
 #include <queue>
 
-// ========================= grid helper functions ========================
-// returns true if the position is in-bounds.
-bool
-IsValid(const position &pos)
-{
-    return (pos.col >= 0 && pos.col < MAP_WIDTH &&
-			pos.row >= 0 && pos.row < MAP_HEIGHT);
-}
-
-// returns true if a given point is in a vector.
-bool
-VectorHasElement(const position &pos_in, const vector<position> &vector_in)
-{
-    bool has = false;
-    for(const position &p : vector_in)
-    {
-        if(pos_in == p)
-        {
-            has = true;
-        }
-    }
-    return has;
-}
-
-bool IsEdge(const position &pos_in)
-{
-    return (pos_in.col == 0 || pos_in.col == MAP_WIDTH - 1
-         || pos_in.row == 0 || pos_in.row == MAP_HEIGHT - 1);
-}
-
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
 InteractibleFrom(const Tilemap &map, const position &origin, int min, int max)

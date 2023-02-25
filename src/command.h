@@ -127,7 +127,7 @@ public:
 
         cursor->MoveTo(new_pos, dir * -1);
 
-        if(!cursor->selected->has_moved && VectorHasElement(new_pos, map.accessible))
+        if(!cursor->selected->has_moved && VectorContains(new_pos, map.accessible))
             cursor->path_draw = GetPath(map, cursor->selected->initial_pos, cursor->pos, true);
     }
 
@@ -275,7 +275,7 @@ public:
 
         cursor->MoveTo(new_pos, dir * -1);
 
-        if(VectorHasElement(new_pos, map->range))
+        if(VectorContains(new_pos, map->range))
         {
             cursor->targeting = new_pos;
             map->attackable = {new_pos};

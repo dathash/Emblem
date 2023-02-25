@@ -166,16 +166,19 @@ BestAction(const vector<Choice> &choices)
             best_action_score = choice.action_score;
             best_choices = {choice};
         }
-
-        if(choice.action_score == best_action_score)
+        else if(choice.action_score == best_action_score)
             best_choices.push_back(choice);
-
-        if(choice.action_score == second_best_action_score)
+        else if(choice.action_score == second_best_action_score)
             second_best_choices.push_back(choice);
     }
 
-    return best_choices[RandomInt(best_choices.size()) - 1];
-    // TODO: sub-optimal
+    assert(best_choices.size());
+
+    //if(Roll(d20) > 3)
+    if(second_best_choices.size())
+        return second_best_choices[RandomInt(second_best_choices.size() - 1)];
+    else
+        return best_choices[RandomInt(best_choices.size() - 1)];
 }
 
 Choice
@@ -195,7 +198,7 @@ BestLocation(const vector<Choice> &choices)
         if(choice.location_score == best_location_score)
             best_locations.push_back(choice);
     }
-    return best_locations[RandomInt(best_locations.size()) - 1];
+    return best_locations[RandomInt(best_locations.size() - 1)];
 }
 
 // Scans the map and determines the best course of action to take.
@@ -280,9 +283,7 @@ struct AI
             commandQueue.push(make_shared<AIPerformUnitActionCommand>(cursor, &(level->map), resolution));
         }
         else
-        {
-            GoToPlayerPhase(level, cursor);
-        }
+            GoToSpawningPhase();
     }
 
     // Passes the args through to plan.
