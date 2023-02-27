@@ -62,6 +62,10 @@ RenderAttack(const Tilemap &map,
         {
             cout << "NO VIS FOR LASER\n";
         } break;
+        case EQUIP_HEAL:
+        {
+            cout << "NO VIS FOR HEAL\n";
+        } break;
     }
 }
 

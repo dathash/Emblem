@@ -1,5 +1,5 @@
 COM	<name>	<team>	<hp>	<mov>	<fixed>	<prim>	<secnd>	<sprite>
-UNT	Lucina	0	3	3	0	Sword	 	lucina.png
+UNT	Lucina	0	3	3	0	Sword	Hammer	lucina.png
 UNT	Tiki	0	3	3	0	Spark	 	tiki.png
 UNT	Stahl	0	3	3	0	Bow	 	stahl.png
 UNT	Vaike	0	3	3	0	Hammer	 	vaike.png

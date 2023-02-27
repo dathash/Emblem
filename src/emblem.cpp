@@ -68,6 +68,7 @@ static Player GlobalPlayer;
 #include "input.h"
 #include "grid.h"
 #include "fight.h"
+#include "resolution.h"
 #include "command.h"
 #include "ai.h"
 #include "ui.h"
@@ -221,7 +222,6 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_RESOLUTION:
             {
-                level.SimulateEnvironmentEffects();
                 resolution.Update(&(level.map));
             } break;
             case PHASE_SPAWNING:

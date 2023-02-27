@@ -27,6 +27,7 @@ GetClassString(ClassType type)
         case CLASS_HEALER:   return "Healer";
         case CLASS_UTILITY:  return "Utility";
         case CLASS_AI:       return "AI";
+        default:             return "";
     }
 }
 
@@ -39,6 +40,7 @@ enum EquipmentType
     EQUIP_SELF_TARGET,
     EQUIP_LEAP,
     EQUIP_LASER,
+    EQUIP_HEAL,
 };
 string
 GetEquipmentString(EquipmentType type)
@@ -52,6 +54,8 @@ GetEquipmentString(EquipmentType type)
         case EQUIP_SELF_TARGET: return "Self";
         case EQUIP_LEAP:      return "Leap";
         case EQUIP_LASER:     return "Laser";
+        case EQUIP_HEAL:      return "Heal";
+        default:              return "";
     }
 }
 
@@ -75,6 +79,7 @@ GetPushString(PushType type)
         case PUSH_TOWARDS_AND_AWAY:  return "Towards + Away";
         case PUSH_PERPENDICULAR:     return "Perpendicular";
         case PUSH_ALL:      return "All";
+        default:                return "";
     }
 }
 
@@ -94,6 +99,7 @@ GetMovementString(MovementType type)
         case MOVEMENT_BACKONE:  return "Back one";
         case MOVEMENT_RAM:      return "Ram";
         case MOVEMENT_LEAP:     return "Leap";
+        default:                return "";
     }
 }
 
@@ -147,24 +153,19 @@ struct Equip
       max_range(max_range_in)
     {}
 
-    size_t
-    ID()
-    {
-        return hash<string>{}(name);
-    }
+    size_t ID() { return hash<string>{}(name); }
 };
 
 Equip *
 GetEquipByName(const vector<shared_ptr<Equip>> &equipments, const string &name)
 {
-    for(shared_ptr<Equip> equip : equipments)
-    {
+    if(name == " ") return nullptr;
+
+    for(shared_ptr<Equip> equip : equipments) {
         if(equip->ID() == hash<string>{}(name))
-        {
             return equip.get();
-        }
     }
-    //cout << "WARN GetEquipByName: No equip of that name: " << name << "\n";
+    cout << "WARN GetEquipByName: No equip of that name: " << name << "\n";
     return nullptr;
 }
 

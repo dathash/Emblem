@@ -38,6 +38,7 @@ UnitEditor(
 {
     ImGui::Begin("unit editor");
     {
+        /*
         if(ImGui::Button("create"))
         {
             units->push_back(make_shared<Unit>(
@@ -61,6 +62,7 @@ UnitEditor(
                 --selectedIndex;
             }
         }
+        */
 
         for(int i = 0; i < units->size(); ++i)
         {
@@ -87,6 +89,8 @@ UnitEditor(
             ImGui::Text("Primary | %s", selected->primary->name.c_str());
         if(selected->secondary)
             ImGui::Text("Secondary | %s", selected->secondary->name.c_str());
+        if(selected->healing)
+            ImGui::Text("Healing | %s", selected->healing->name.c_str());
 
         static int index = 0;
         ImGui::SliderInt("index", &index, 0, 30);
@@ -95,7 +99,7 @@ UnitEditor(
             ImGui::Text("%s", equipments->at(index)->name.c_str());
             if(ImGui::Button("Primary"))
             {
-                if(selected->primary)
+                if(selected->primary) // TODO: Shouldn't have to do this. the pointer should be null, and you can call delete on nullptr.
                     delete selected->primary;
                 selected->primary = new Equip(*equipments->at(index));
             }
@@ -105,6 +109,13 @@ UnitEditor(
                 if(selected->secondary)
                     delete selected->secondary;
                 selected->secondary = new Equip(*equipments->at(index));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Healing"))
+            {
+                if(selected->healing)
+                    delete selected->healing;
+                selected->healing = new Equip(*equipments->at(index));
             }
 
             ImGui::InputText("equip name", &(equipments->at(index)->name));

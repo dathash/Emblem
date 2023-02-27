@@ -18,6 +18,8 @@ struct InputState
     bool b;
     bool l;
     bool r;
+    bool x;
+    bool y;
 
 	int joystickCooldown = 0;
 };
@@ -128,6 +130,11 @@ struct Player
         if(health == 0)
             GameOver(); // TODO: this results in a seg fault since we don't get rid of unresolved attacks.
     }
+
+    void Heal(int amount) {
+        health = clamp(health + amount, 0, max_health);
+        // TODO: grid defense
+    }
 };
 
 enum Team
@@ -148,6 +155,7 @@ struct Unit
 
     Equip *primary = nullptr;
     Equip *secondary = nullptr;
+    Equip *healing = nullptr;
 
     position pos = {0, 0};
     position initial_pos = {0, 0};
@@ -162,6 +170,7 @@ struct Unit
     ~Unit() {
         delete primary;
         delete secondary;
+        delete healing;
     }
 
     size_t ID() {
@@ -190,6 +199,7 @@ struct Unit
          bool fixed_in,
          Equip *primary_in,
          Equip *secondary_in,
+         Equip *healing_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -200,6 +210,7 @@ struct Unit
       fixed(fixed_in),
       primary(primary_in),
       secondary(secondary_in),
+      healing(healing_in),
       sheet(sheet_in)
     {}
 
@@ -216,6 +227,8 @@ struct Unit
             primary = new Equip(*other.primary);
         if(other.secondary)
             secondary = new Equip(*other.secondary);
+        if(other.healing)
+            healing = new Equip(*other.healing);
     }
 
     // Damages a unit and resolves things involved with that process.
@@ -226,7 +239,7 @@ struct Unit
         return result;
     }
 
-    // Damages a unit and resolves things involved with that process.
+    // Heals a unit and resolves things involved with that process.
     void Heal(int amount) {
         health = clamp(health + amount, 0, max_health);
     }
@@ -242,19 +255,18 @@ struct Unit
     }
 };
 
+
 Unit *
 GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 {
-    for(shared_ptr<Unit> unit : units)
-    {
+    for(shared_ptr<Unit> unit : units) {
         if(unit->ID() == hash<string>{}(name))
-        {
             return unit.get();
-        }
     }
     cout << "WARN GetUnitByName: No unit of that name: " << name << "\n";
     return nullptr;
 }
+
 // ========================== map stuff =======================================
 enum TileType
 {
@@ -403,12 +415,6 @@ struct Level
     Sound *song = nullptr;
 
     int turn_count = -1;
-
-    void SimulateEffects()
-    {
-        // Fire
-        // Event stuff
-    }
 
     void SpawnPhase() {
         SpawnUnits();

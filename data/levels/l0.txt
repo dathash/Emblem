@@ -12,7 +12,7 @@ MAP 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 
 
 COM <name> <col> <row>
-UNT Thief 2 1 
+UNT Thief 1 4 
 UNT House 4 4 
 UNT House 5 5 
 UNT House 2 6 
@@ -22,8 +22,8 @@ UNT House 6 7
 UNT Lucina 2 4 
 UNT Tiki 3 5 
 UNT Stahl 5 4 
-UNT Archer 3 1 
-UNT Soldier 6 1 
+UNT Archer 4 3 
+UNT Soldier 6 4 
 
 SPW Fighter 
 SPW Soldier 

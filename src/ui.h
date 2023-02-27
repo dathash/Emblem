@@ -201,11 +201,15 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
             {
                 DisplayEquipInfo(unit.primary);
             }
-
             if(unit.secondary)
             {
                 ImGui::SameLine();
                 DisplayEquipInfo(unit.secondary);
+            }
+            if(unit.healing)
+            {
+                ImGui::SameLine();
+                DisplayEquipInfo(unit.healing);
             }
 		ImGui::PopFont();
     }

@@ -84,14 +84,20 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     case SDLK_SPACE:
                         input->a = true;
                         break;
-                    case SDLK_RSHIFT:
-                        input->l = true;
+                    case SDLK_LSHIFT:
+                        input->b = true;
                         break;
                     case SDLK_q:
-                        input->b = true;
+                        input->l = true;
                         break;
                     case SDLK_e:
                         input->r = true;
+                        break;
+                    case SDLK_x:
+                        input->x = true;
+                        break;
+                    case SDLK_z:
+                        input->y = true;
                         break;
                     case SDLK_w:
                         input->up = true;
@@ -114,14 +120,20 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     case SDLK_SPACE:
                         input->a = false;
                         break;
-                    case SDLK_RSHIFT:
-                        input->l = false;
+                    case SDLK_LSHIFT:
+                        input->b = false;
                         break;
                     case SDLK_q:
-                        input->b = false;
+                        input->l = false;
                         break;
                     case SDLK_e:
                         input->r = false;
+                        break;
+                    case SDLK_x:
+                        input->x = true;
+                        break;
+                    case SDLK_z:
+                        input->y = true;
                         break;
                     case SDLK_w:
                         input->up = false;

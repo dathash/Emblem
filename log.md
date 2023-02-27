@@ -73,19 +73,29 @@ I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
 # TODO
+Robust turn queue for actions to resolve.
+
 AI Attacks
 * Avoid other ai attacks (dangerous)
 * Avoid repeated behavior
 
-Robust turn queue for actions to resolve.
+Turn Undo
+
+Time Limit
+
+Multiple levels in a row
+
 
 Effects
 * On fire
 * Acid
 * Frozen
 etc
+Weapons that apply effects when:
+* Pushing
+* Damaging
+* Moving
 
-Repair
 
 Special tiles
 * Fire (applies on fire condition)

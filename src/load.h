@@ -211,12 +211,16 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
 
                 Equip *primary_copy = nullptr;
                 Equip *secondary_copy = nullptr;
+                Equip *healing_copy = nullptr;
                 Equip *tmp = GetEquipByName(equipments, tokens[5]);
                 if(tmp)
                     primary_copy = new Equip(*tmp); 
                 tmp = GetEquipByName(equipments, tokens[6]);
                 if(tmp)
                     secondary_copy = new Equip(*tmp); 
+                tmp = GetEquipByName(equipments, "Potion");
+                if(tmp)
+                    healing_copy = new Equip(*tmp); 
 
                 units.push_back(make_shared<Unit>(
                     tokens[0],             // name
@@ -227,6 +231,7 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
 
                     primary_copy,
                     secondary_copy,
+                    healing_copy,
 
                     Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[7]),
                                 32, ANIMATION_SPEED)

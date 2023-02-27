@@ -190,7 +190,7 @@ public:
         // TODO: We want this to be one at a time, so that none of the units land on eachother's prior square.
         for(shared_ptr<Unit> unit : level->combatants)
         {
-            if(unit->has_moved)
+            if(unit->has_moved && !unit->is_exhausted)
             {
                 position goal = unit->initial_pos;
                 assert(!level->map.tiles[goal.col][goal.row].occupant);
@@ -240,10 +240,10 @@ private:
 
 
 // ============================== Attacking ====================================
-class StopAttackingCommand : public Command
+class StopActingCommand : public Command
 {
 public:
-    StopAttackingCommand(Cursor *cursor_in)
+    StopActingCommand(Cursor *cursor_in)
     : cursor(cursor_in)
     {}
 
@@ -281,6 +281,13 @@ public:
             map->attackable = {new_pos};
         }
 
+        if(cursor->with->type == EQUIP_SELF_TARGET ||
+           cursor->with->type == EQUIP_HEAL)
+        {
+            GlobalInterfaceState = ATTACK_TARGETING;
+            return;
+        }
+
         if(cursor->targeting == position(-1, -1) || 
            new_pos == cursor->selected->pos)
         {
@@ -301,20 +308,22 @@ private:
 class SeekVictimsCommand : public Command
 {
 public:
-    SeekVictimsCommand(Cursor *cursor_in, Level *level_in)
+    SeekVictimsCommand(Cursor *cursor_in, Level *level_in, Equip *with_in)
     : cursor(cursor_in),
-      level(level_in)
+      level(level_in),
+      with(with_in)
     {}
 
     virtual void Execute()
     {
         cursor->pos = cursor->selected->pos;
+        cursor->with = with;
 
         level->map.range.clear();
 
         vector<position> orthogonal = {};
         orthogonal = Orthogonal(level->map, cursor->pos);
-        switch(cursor->selected->primary->type)
+        switch(with->type)
         {
             case EQUIP_NONE:
             {
@@ -324,7 +333,7 @@ public:
                 for(const position &p : orthogonal)
                 {
                     int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range
+                    if(distance >= with->min_range && distance <= with->max_range
                        && Unobstructed(level->map, cursor->selected->pos, p))
                         level->map.range.push_back(p);
                 }
@@ -342,7 +351,7 @@ public:
                 for(const position &p : orthogonal)
                 {
                     int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range && distance <= cursor->selected->primary->max_range)
+                    if(distance >= with->min_range && distance <= with->max_range)
                         level->map.range.push_back(p);
                 }
             } break;
@@ -354,8 +363,8 @@ public:
                 for(const position &p : orthogonal)
                 {
                     int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= cursor->selected->primary->min_range 
-                       && distance <= cursor->selected->primary->max_range
+                    if(distance >= with->min_range 
+                       && distance <= with->max_range
                        && !level->map.tiles[p.col][p.row].occupant)
                     {
                         level->map.range.push_back(p);
@@ -364,6 +373,13 @@ public:
             } break;
             case EQUIP_LASER:
             {
+            } break;
+            case EQUIP_HEAL:
+            {
+                level->map.range.push_back(cursor->selected->pos);
+                cursor->targeting = cursor->selected->pos;
+                GlobalInterfaceState = ATTACK_TARGETING;
+                return;
             } break;
         }
         level->map.attackable.clear();
@@ -374,7 +390,9 @@ public:
 private:
     Cursor *cursor;
     Level *level;
+    Equip *with;
 };
+
 
 class AttackCommand : public Command
 {
@@ -386,10 +404,11 @@ public:
 
     virtual void Execute()
     {
-        Simulate(map, *cursor->selected->primary, cursor->selected->pos, cursor->targeting);
+        Simulate(map, *cursor->with, cursor->selected->pos, cursor->targeting);
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
+        cursor->with = nullptr;
 
         GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
     }
@@ -633,6 +652,14 @@ public:
             input->r = false;
             return buttonR;
         }
+        if(input->x) {
+            input->x = false;
+            return buttonX;
+        }
+        if(input->y) {
+            input->y = false;
+            return buttonY;
+        }
 
         return nullptr;
     }
@@ -647,6 +674,8 @@ public:
         BindB(make_shared<NullCommand>());
         BindL(make_shared<NullCommand>());
         BindR(make_shared<NullCommand>());
+        BindX(make_shared<NullCommand>());
+        BindY(make_shared<NullCommand>());
     }
 
     void Update(InputState *input)
@@ -696,6 +725,14 @@ public:
     {
         buttonR = command;
     }
+    void BindX(shared_ptr<Command> command)
+    {
+        buttonX = command;
+    }
+    void BindY(shared_ptr<Command> command)
+    {
+        buttonY = command;
+    }
 
     // updates what the user can do with their buttons.
     // contains some state: the minimum amount.
@@ -718,6 +755,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
             case(TITLE_SCREEN):
             {
@@ -729,6 +768,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
             case(GAME_OVER):
             {
@@ -740,6 +781,8 @@ public:
                 BindB(make_shared<ToTitleScreenCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
 
             case(GAME_MENU):
@@ -752,6 +795,8 @@ public:
                 BindB(make_shared<ExitGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
             case(GAME_MENU_OPTIONS):
             {
@@ -763,6 +808,8 @@ public:
                 BindB(make_shared<BackToGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
 
             case(ENEMY_RANGE):
@@ -775,6 +822,8 @@ public:
                 BindB(make_shared<DeselectEnemyCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_GROUND):
@@ -787,6 +836,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_ENEMY):
@@ -799,6 +850,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_UNIT):
@@ -811,6 +864,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
 
             case(NEUTRAL_OVER_DEACTIVATED_UNIT):
@@ -823,6 +878,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
             case(SELECTED):
             {
@@ -833,7 +890,9 @@ public:
                 BindA(make_shared<PlaceUnitCommand>(cursor, level));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<SeekVictimsCommand>(cursor, level));
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
+                BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
+                BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
             } break;
 
             case(ATTACK_THINKING):
@@ -843,9 +902,11 @@ public:
                 BindLeft(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(-1, 0)));
                 BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<StopAttackingCommand>(cursor));
+                BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
             case(ATTACK_TARGETING):
             {
@@ -854,9 +915,11 @@ public:
                 BindLeft(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(-1, 0)));
                 BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
                 BindA(make_shared<AttackCommand>(&(level->map), cursor));
-                BindB(make_shared<StopAttackingCommand>(cursor));
+                BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
             case(ATTACK_RESOLUTION):
             {
@@ -868,6 +931,8 @@ public:
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
             } break;
         }
     }
@@ -885,6 +950,8 @@ private:
     shared_ptr<Command> buttonB;
     shared_ptr<Command> buttonL;
     shared_ptr<Command> buttonR;
+    shared_ptr<Command> buttonX;
+    shared_ptr<Command> buttonY;
 
     queue<shared_ptr<Command>> commandQueue = {};
 };
