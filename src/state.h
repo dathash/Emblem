@@ -21,8 +21,6 @@ void GoToPlayerPhase(Level *level, Cursor *cursor) {
     cursor->selected = nullptr;
     cursor->PlaceAt(level->Leader());
 
-    ++level->turn_count;
-
     for(auto const &unit : level->combatants)
         unit->Activate();
 
@@ -49,6 +47,11 @@ void GameOver() {
     GlobalPhase = PHASE_PLAYER;
     GlobalAIState = AI_NO_OP;
     GlobalInterfaceState = GAME_OVER;
+}
+void Victory() {
+    GlobalPhase = PHASE_PLAYER;
+    GlobalAIState = AI_NO_OP;
+    GlobalInterfaceState = VICTORY;
 }
 
 #endif

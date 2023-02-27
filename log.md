@@ -75,16 +75,29 @@ Genealogy's items are pretty close too.
 # TODO
 Robust turn queue for actions to resolve.
 
+How the data should be structured:
+Enemies should always be in the queue.
+At the end of each AI Phase, the queue is laid out.
+When you kill enemies, the queue is updated.
+
+At the start of the game, 
+
 AI Attacks
 * Avoid other ai attacks (dangerous)
 * Avoid repeated behavior
 
+Random enemy spawns at the start of level
+Choose unit drop locations at start of level
+
 Turn Undo
+    Info we have to store:
+    * map
+    * unit positions in combatants
 
-Time Limit
+"Inactive" instead of dead for player units. Make them into pushable objects
+that don't take more damage, but can be healed.
 
-Multiple levels in a row
-
+Eight levels
 
 Effects
 * On fire
@@ -136,6 +149,8 @@ Polish
 
 Ideas
 * Just pre-render numbers and draw them as bitmaps
+
+Gamepad again
 
 # Later
 Art

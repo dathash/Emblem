@@ -22,19 +22,8 @@ struct UI_State
     bool attack_targeting = false;
     bool game_menu = false;
     bool game_over = false;
+    bool victory = false;
     bool unit_menu = false;
-
-    void
-    Clear()
-    {
-        tile_info = false;
-        unit_blurb = false;
-        unit_selected = false;
-        attack_targeting = false;
-        game_menu = false;
-        game_over = false;
-        unit_menu = false;
-    }
 
     void 
     Update()
@@ -97,6 +86,14 @@ struct UI_State
 		{
 			game_over = false;
 		}
+		if(GlobalInterfaceState == VICTORY)
+		{
+			victory = true;
+		}
+		else
+		{
+			victory = false;
+		}
     }
 };
 
@@ -136,11 +133,26 @@ DisplayTileInfo(ImGuiWindowFlags wf, const Tile &tile)
             ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
                    Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 90));
 
-	ImGui::PushFont(uiFontLarge);
+    ImGui::PushFont(uiFontMedium);
     ImGui::Begin(GetTileTypeString(tile.type).c_str(), NULL, wf);
     {
-		ImGui::PushFont(uiFontMedium);
-		ImGui::PopFont();
+    }
+    ImGui::End();
+    ImGui::PopFont();
+}
+
+void 
+DisplayTurnCount(ImGuiWindowFlags wf, int turn, int victory_turn)
+{
+    ImGui::SetNextWindowSize(ImVec2(100, 80));
+    ImGui::SetNextWindowPos(
+            ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 170,
+                   Y_OFFSET + TILE_SIZE * MAP_HEIGHT - 90));
+
+    ImGui::PushFont(uiFontMedium);
+    ImGui::Begin("Left", NULL, wf);
+    {
+        ImGui::Text("%d", victory_turn - turn);
     }
     ImGui::End();
     ImGui::PopFont();
@@ -245,6 +257,25 @@ DisplayGameOver(ImGuiWindowFlags wf)
     ImGui::End();
 }
 
+void 
+DisplayVictory(ImGuiWindowFlags wf)
+{
+    ImGui::SetNextWindowPos(ImVec2(400, 300), 0, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowSize(ImVec2(500, 200));
+
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Victory", NULL, wf);
+    {
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontMedium);
+            ImGui::Text("You won!");
+            ImGui::Text("[SPACE] to play next level");
+            ImGui::Text("[SHIFT] to quit");
+		ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void
 DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
 {
@@ -298,6 +329,7 @@ RenderUI(UI_State *ui,
     }
 
     DisplayPlayerState(window_flags, GlobalPlayer);
+    DisplayTurnCount(window_flags, level.turn_count, level.victory_turn);
 
     if(GlobalPhase != PHASE_PLAYER)
     {
@@ -317,6 +349,8 @@ RenderUI(UI_State *ui,
 		DisplayUnitBlurb(window_flags, *cursor.selected);
     if(ui->game_over)
         DisplayGameOver(window_flags);
+    if(ui->victory)
+        DisplayVictory(window_flags);
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor(3);

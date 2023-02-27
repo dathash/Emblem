@@ -68,10 +68,10 @@
 
 enum Phase
 {
+    PHASE_SPAWNING,
     PHASE_AI,
     PHASE_PLAYER,
     PHASE_RESOLUTION,
-    PHASE_SPAWNING,
 };
 string 
 GetPhaseString(Phase phase)
@@ -90,6 +90,7 @@ enum InterfaceState
     NO_OP,
     TITLE_SCREEN,
     GAME_OVER,
+    VICTORY,
 
     GAME_MENU,
     GAME_MENU_OPTIONS,
@@ -115,6 +116,7 @@ GetInterfaceString(InterfaceState state)
     case NO_OP:                         return "No-Op";
     case TITLE_SCREEN:                  return "Title screen";
     case GAME_OVER:                     return "Game over";
+    case VICTORY:                       return "Victory";
     case GAME_MENU:                     return "Game menu";
     case GAME_MENU_OPTIONS:             return "Game menu options";
     case ENEMY_RANGE:                   return "Enemy range";

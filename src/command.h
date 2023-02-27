@@ -147,6 +147,8 @@ public:
 
     virtual void Execute()
     {
+        // TODO: Undo doesn't work properly when your unit is placed on its source square.
+        // Sol'n: perhaps have placing unit on their source square be a no-op?
         if(cursor->selected->has_moved)
             return;
 
@@ -316,10 +318,13 @@ public:
 
     virtual void Execute()
     {
-        cursor->pos = cursor->selected->pos;
-        cursor->with = with;
+        if(!with) return;
 
+        cursor->pos = cursor->selected->pos;
+        cursor->targeting = {-1, -1};
+        cursor->with = with;
         level->map.range.clear();
+        level->map.attackable.clear();
 
         vector<position> orthogonal = {};
         orthogonal = Orthogonal(level->map, cursor->pos);
@@ -382,7 +387,6 @@ public:
                 return;
             } break;
         }
-        level->map.attackable.clear();
 
         GlobalInterfaceState = ATTACK_THINKING;
     }
@@ -598,6 +602,37 @@ private:
     const vector<shared_ptr<Unit>> &party;
 };
 
+class NextLevelCommand : public Command
+{
+public:
+    NextLevelCommand(Level *level_in,
+                       const vector<shared_ptr<Unit>> &units_in,
+                       const vector<shared_ptr<Unit>> &party_in,
+                       const vector<string> &levels_in
+                       )
+    : level(level_in),
+      units(units_in),
+      party(party_in),
+      levels(levels_in)
+    {}
+
+    virtual void Execute()
+    {
+        *level = LoadLevel(levels[RandomInt(levels.size() - 1)], units, party);
+        level->song->Restart();
+
+        GlobalPlayer.Reset();
+
+        GoToAIPhase();
+    }
+
+private:
+    Level *level;
+    const vector<shared_ptr<Unit>> &units;
+    const vector<shared_ptr<Unit>> &party;
+    const vector<string> &levels;
+};
+
 class StartGameCommand : public Command
 {
 public:
@@ -681,56 +716,44 @@ public:
     void Update(InputState *input)
     {
         shared_ptr<Command> newCommand = HandleInput(input);
-        if(newCommand)
-        {
+        if(newCommand) {
             commandQueue.push(newCommand);
         }
 
-        while(!commandQueue.empty())
-        {
+        while(!commandQueue.empty()) {
             commandQueue.front()->Execute();
             commandQueue.pop();
         }
     }
 
-    void BindUp(shared_ptr<Command> command)
-    {
+    void BindUp(shared_ptr<Command> command) {
         buttonUp = command;
     }
-    void BindDown(shared_ptr<Command> command)
-    {
+    void BindDown(shared_ptr<Command> command) {
         buttonDown = command;
     }
-    void BindLeft(shared_ptr<Command> command)
-    {
+    void BindLeft(shared_ptr<Command> command) {
         buttonLeft = command;
     }
-    void BindRight(shared_ptr<Command> command)
-    {
+    void BindRight(shared_ptr<Command> command) {
         buttonRight = command;
     }
-    void BindA(shared_ptr<Command> command)
-    {
+    void BindA(shared_ptr<Command> command) {
         buttonA = command;
     }
-    void BindB(shared_ptr<Command> command)
-    {
+    void BindB(shared_ptr<Command> command) {
         buttonB = command;
     }
-    void BindL(shared_ptr<Command> command)
-    {
+    void BindL(shared_ptr<Command> command) {
         buttonL = command;
     }
-    void BindR(shared_ptr<Command> command)
-    {
+    void BindR(shared_ptr<Command> command) {
         buttonR = command;
     }
-    void BindX(shared_ptr<Command> command)
-    {
+    void BindX(shared_ptr<Command> command) {
         buttonX = command;
     }
-    void BindY(shared_ptr<Command> command)
-    {
+    void BindY(shared_ptr<Command> command) {
         buttonY = command;
     }
 
@@ -740,6 +763,7 @@ public:
     void UpdateCommands(Cursor *cursor, Level *level, 
                         const vector<shared_ptr<Unit>> &units,
                         const vector<shared_ptr<Unit>> &party,
+                        const vector<string> &levels,
                         Menu *gameMenu
                        )
     {
@@ -766,6 +790,7 @@ public:
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<StartGameCommand>());
                 BindB(make_shared<NullCommand>());
+                //BindB(make_shared<QuitGameCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
                 BindX(make_shared<NullCommand>());
@@ -778,6 +803,19 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<RestartGameCommand>(level, units, party));
+                BindB(make_shared<ToTitleScreenCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
+            } break;
+            case(VICTORY):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NextLevelCommand>(level, units, party, levels));
                 BindB(make_shared<ToTitleScreenCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -890,9 +928,9 @@ public:
                 BindA(make_shared<PlaceUnitCommand>(cursor, level));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
                 BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
-                BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
+                BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
             } break;
 
             case(ATTACK_THINKING):
@@ -904,9 +942,9 @@ public:
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
+                BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
+                BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
             } break;
             case(ATTACK_TARGETING):
             {
@@ -917,9 +955,9 @@ public:
                 BindA(make_shared<AttackCommand>(&(level->map), cursor));
                 BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
+                BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
+                BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
             } break;
             case(ATTACK_RESOLUTION):
             {

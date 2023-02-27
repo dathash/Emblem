@@ -218,11 +218,20 @@ int main(int argc, char *argv[])
             case PHASE_PLAYER:
             {
                 handler.Update(&input);
-                handler.UpdateCommands(&cursor, &level, units, party, &game_menu);
+                handler.UpdateCommands(&cursor, &level, units, party, levels, &game_menu);
             } break;
             case PHASE_RESOLUTION:
             {
                 resolution.Update(&(level.map));
+
+                ++level.turn_count;
+                if(level.CheckVictory())
+                {
+                    resolution.Clear();
+                    level.song->FadeOut();
+                    EmitEvent(MISSION_COMPLETE_EVENT);
+                    Victory();
+                }
             } break;
             case PHASE_SPAWNING:
             {
@@ -237,8 +246,6 @@ int main(int argc, char *argv[])
             // NOTE: Must be in this order.
             resolution.RemoveDeadUnits();
             level.RemoveDeadUnits();
-
-            level.Update();
 
             EventSystemUpdate();
 

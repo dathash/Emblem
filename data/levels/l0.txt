@@ -1,5 +1,7 @@
 ATL yellow.png
 
+VIC 3
+
 MUS 21.wav
 
 MAP 0 0 0 0 0 0 0 0 
@@ -12,18 +14,18 @@ MAP 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 
 
 COM <name> <col> <row>
-UNT Thief 1 4 
-UNT House 4 4 
-UNT House 5 5 
-UNT House 2 6 
-UNT House 0 5 
-UNT House 7 5 
-UNT House 6 7 
-UNT Lucina 2 4 
 UNT Tiki 3 5 
-UNT Stahl 5 4 
-UNT Archer 4 3 
-UNT Soldier 6 4 
+UNT Archer 3 1 
+UNT House 6 6 
+UNT House 6 4 
+UNT House 2 6 
+UNT House 1 6 
+UNT House 1 4 
+UNT House 5 6 
+UNT Archer 5 1 
+UNT Thief 2 2 
+UNT Lucina 4 5 
+UNT Stahl 4 6 
 
 SPW Fighter 
 SPW Soldier 

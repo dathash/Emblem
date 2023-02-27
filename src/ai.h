@@ -324,17 +324,12 @@ struct AI
 {
     queue<shared_ptr<Command>> commandQueue = {};
     int frame = 0;
-
+    vector<shared_ptr<Unit>> remaining = {};
 
     // Fills the command queue with the current plan.
     void Plan(Cursor *cursor, Level *level, Resolution *resolution)
     {
         Unit *selected = nullptr;
-        selected = FindNearest(level->map, cursor->pos,
-                [](const Unit &unit) -> bool
-                {
-                    return unit.IsAI() && !unit.is_exhausted;
-                }, false);
         if(selected)
         {
             cursor->pos = selected->pos;

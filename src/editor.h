@@ -7,9 +7,7 @@
 
 #if DEV_MODE
 
-void
-Audio(Level *level)
-{
+void Audio(Level *level) {
     ImGui::Begin("Audio");
     {
         static float music_volume = DEFAULT_MUSIC_VOLUME;
@@ -31,10 +29,8 @@ Audio(Level *level)
 }
 
 static uint8_t selectedIndex = 0;
-void
-UnitEditor(
-           vector<shared_ptr<Equip>> *equipments,
-           vector<shared_ptr<Unit>> *units)
+void UnitEditor(vector<shared_ptr<Equip>> *equipments,
+                vector<shared_ptr<Unit>> *units)
 {
     ImGui::Begin("unit editor");
     {
@@ -194,7 +190,9 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
 
     ImGui::Begin("level editor");
     {
+        ImGui::Text("%s", level->name.c_str());
         ImGui::Checkbox("spawning", &GlobalSpawning);
+        ImGui::SliderInt("victory", &level->victory_turn, 1, 6);
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
         if(ImGui::Button("none"))
@@ -224,7 +222,6 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             *hover_tile = GetTile(TILE_SWAMP);
             hover_tile->occupant = tmp;
         }
-        ImGui::SameLine();
         if(ImGui::Button("goal"))
         {
             Unit *tmp = hover_tile->occupant;
@@ -396,6 +393,12 @@ EditorPass(
 
             GoToAIPhase();
         }
+        ImGui::SameLine();
+        if(ImGui::Button("Save"))
+        {
+            SaveLevel(string(LEVELS_PATH) + level->name, *level);
+            cout << "Level saved: " << level->name << "\n";
+        }
 
         if(ImGui::Button("Save Equips"))
         {
@@ -409,11 +412,12 @@ EditorPass(
             cout << "Units saved: " << unit_filename << "\n";
         }
         ImGui::SameLine();
-        if(ImGui::Button("Save Level"))
+        if(ImGui::Button("Save Level As"))
         {
             SaveLevel(string(LEVELS_PATH) + string(level_filename), *level);
             cout << "Level saved: " << level_filename << "\n";
         }
+
         if(ImGui::Button("Test Zone"))
         {
             resolution->attacks.clear();
@@ -421,7 +425,6 @@ EditorPass(
             sprintf(level_filename, "test.txt");
             GoToAIPhase();
         }
-
         int wrap = 0;
         for(const string &s : levels)
         {

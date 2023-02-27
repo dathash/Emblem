@@ -414,11 +414,23 @@ struct Level
 
     Sound *song = nullptr;
 
-    int turn_count = -1;
+    int turn_count = 0;
+    int victory_turn = 1;
 
     void SpawnPhase() {
         SpawnUnits();
         SetRisingPoints(map);
+    }
+
+    vector<shared_ptr<Unit>> Queue()
+    {
+        vector<shared_ptr<Unit>> result = {};
+        for(auto unit : combatants)
+        {
+            if(unit->IsAI())
+                result.push_back(unit);
+        }
+        return result;
     }
 
     // TODO:
@@ -471,20 +483,12 @@ struct Level
         spawner.rising = keep;
     }
 
-    void
-    CheckVictory()
-    {
-        if(false)
-        {
-            song->FadeOut();
-            EmitEvent(MISSION_COMPLETE_EVENT);
-        }
+    bool CheckVictory() {
+        return turn_count >= victory_turn;
     }
 
     // Puts a piece on the board
-    void
-    AddCombatant(shared_ptr<Unit> newcomer, const position &pos)
-    {
+    void AddCombatant(shared_ptr<Unit> newcomer, const position &pos) {
         newcomer->pos = pos;
         combatants.push_back(newcomer);
         SDL_assert(!map.tiles[pos.col][pos.row].occupant);
@@ -532,26 +536,6 @@ struct Level
             map.tiles[tile.col][tile.row].occupant = nullptr;
     }
 
-
-    // A mutation function that just checks if there are any units left to
-    // move, and ends the player's turn if there aren't.
-    // TODO: This would be so much simpler as a function called when you deactivate a unit.
-    // Look into this refactoring.
-    void
-    CheckForRemaining()
-    {
-        if(GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT)
-        {
-            for(auto const &u : combatants)
-            {
-                if(u->IsAlly() && !u->is_exhausted)
-                    return;
-            }
-
-            GoToAIPhase();
-        }
-    }
-
     int GetNumberOf(Team team = TEAM_PLAYER) const {
         
         int result = 0;
@@ -561,13 +545,6 @@ struct Level
                 ++result;
         }
         return result;
-    }
-
-    void
-    Update()
-    {
-        //CheckForRemaining();
-        //CheckVictory();
     }
 };
 

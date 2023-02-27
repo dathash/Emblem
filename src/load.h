@@ -125,6 +125,10 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         {
             level.song = GetMusic(rest);
         }
+        else if(type == "VIC")
+        {
+            level.victory_turn = stoi(rest);
+        }
         else if(type == "MAP")
         {
             for(int col = 0; col < MAP_WIDTH; ++col)
@@ -354,6 +358,8 @@ SaveLevel(string filename_in, const Level &level)
     SDL_assert(fp.is_open());
     
     fp << "ATL " << level.map.atlas.filename << "\n\n";
+
+    fp << "VIC " << level.victory_turn << "\n\n";
 
     fp << "MUS " << level.song->name << "\n\n";
 

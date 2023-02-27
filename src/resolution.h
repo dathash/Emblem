@@ -32,6 +32,10 @@ struct Resolution
         attacks.pop_back();
     }
 
+    void Clear() {
+        attacks.clear();
+    }
+
     void RemoveDeadUnits() {
         attacks.erase(remove_if(attacks.begin(), attacks.end(),
                     [](auto const &a) { return a.unit->should_die; }),
