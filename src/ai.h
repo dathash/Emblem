@@ -330,6 +330,11 @@ struct AI
     void Plan(Cursor *cursor, Level *level, Resolution *resolution)
     {
         Unit *selected = nullptr;
+        // TODO: Find the next unit to have act, according to the queue.
+        selected = FindNearest(level->map, {0, 0},
+            [](const Unit &unit) -> bool
+            { return unit.IsAI() && !unit.is_exhausted; }, false);
+
         if(selected)
         {
             cursor->pos = selected->pos;

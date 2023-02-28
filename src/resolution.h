@@ -17,19 +17,20 @@ struct Attack
 
 struct Resolution
 {
-    vector<Attack> attacks;
+    vector<Attack> attacks = {};
     int frame = 0;
 
-    void Update(Tilemap *map) {
+    bool Update(Tilemap *map) {
         if(attacks.empty())
-            GoToAIPhase();
+            return true;
 
         ++frame;
         if(frame % AI_ACTION_SPEED)
-            return;
+            return false;
 
         attacks.back().Resolve(map);
         attacks.pop_back();
+        return false;
     }
 
     void Clear() {

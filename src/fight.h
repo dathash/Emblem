@@ -78,6 +78,7 @@ SimulatePush(Tilemap *map, int push_damage,
     // Do the pushing
     position target = initial + dir;
     if(!IsValid(target)) return;
+
     Unit *bonk = map->tiles[target.col][target.row].occupant;
 
     if(bonk)
@@ -141,17 +142,14 @@ void
 SimulateMove(Tilemap *map, int self_damage,
              const position &source, const position &target)
 {
-    if(!IsValid(target) || !IsValid(source))
-    {
-        cout << "Not moving.\n";
-        return;
-    }
+    cout << "Moving " << source << " to " << target << "\n";
+    if(!IsValid(target) || !IsValid(source) || (source == target)) return;
     cout << "Moved.\n";
 
     assert(map->tiles[source.col][source.row].occupant); // pretty sure
     SimulateDamage(map->tiles[source.col][source.row].occupant, self_damage);
 
-    // Move my boy
+    // Move
     if(map->tiles[target.col][target.row].occupant)
     {
         // Bonk!
@@ -186,7 +184,10 @@ PerformMoveScenario(Tilemap *map, MovementType type, int self_damage,
         case MOVEMENT_RAM:
         {
             if(map->tiles[target.col][target.row].occupant)
+            {
+                cout << target << "|||" << dir << "|||" << source << "\n";
                 SimulateMove(map, self_damage, source, target - dir);
+            }
             else
                 SimulateMove(map, self_damage, source, target);
         } break;
@@ -235,17 +236,17 @@ Simulate(Tilemap *map,
     case EQUIP_LINE_SHOT:
     {
         position subject = GetFirstTarget(*map, source, 
-                                         GetDirection(source, destination));
+                                          GetDirection(source, destination));
         Unit *victim = map->tiles[subject.col][subject.row].occupant;
         PerformMoveScenario(map, weapon.move, weapon.self_damage, 
                             source, subject, GetDirection(source, subject));
 
-        if(!IsValid(subject))
-            return;
+        if(!IsValid(subject)) return;
 
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
         SimulateDamage(victim, weapon.damage);
+
     } break;
     case EQUIP_ARTILLERY:
     {

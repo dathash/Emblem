@@ -60,7 +60,7 @@
 #define DEFAULT_SHEET "thief.png"
 
 // gameplay
-#define LEADER_ID hash<string>{}("Lucina")
+#define LEADER_ID hash<string>{}("Guy")
 
 #define POINTS_FOR_PLAYER_UNIT 5
 #define POINTS_FOR_BUILDING 5

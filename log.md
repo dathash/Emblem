@@ -74,13 +74,17 @@ Genealogy's items are pretty close too.
 
 # TODO
 Robust turn queue for actions to resolve.
-
 How the data should be structured:
-Enemies should always be in the queue.
-At the end of each AI Phase, the queue is laid out.
-When you kill enemies, the queue is updated.
 
-At the start of the game, 
+At the start of each AI Phase, the queue is laid out.
+During Player Phase
+* When you kill enemies, gain env effects, etc, the queue is updated.
+
+RES PHASE
+* Environment
+* AI
+* Rising
+* Spawning
 
 AI Attacks
 * Avoid other ai attacks (dangerous)

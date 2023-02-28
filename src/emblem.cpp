@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
     vector<shared_ptr<Equip>> equipments = LoadEquips(DATA_PATH + string(INITIAL_EQUIPS));
     vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS), equipments);
     vector<shared_ptr<Unit>> party = {};
+    vector<shared_ptr<Unit>> queue = {};
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
                              string("l2.txt"), string("l3.txt"),
@@ -222,15 +223,20 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_RESOLUTION:
             {
-                resolution.Update(&(level.map));
-
-                ++level.turn_count;
-                if(level.CheckVictory())
+                if(resolution.Update(&(level.map)))
                 {
-                    resolution.Clear();
-                    level.song->FadeOut();
-                    EmitEvent(MISSION_COMPLETE_EVENT);
-                    Victory();
+                    ++level.turn_count;
+                    if(level.CheckVictory())
+                    {
+                        resolution.Clear();
+                        level.song->FadeOut();
+                        EmitEvent(MISSION_COMPLETE_EVENT);
+                        Victory();
+                    }
+                    else
+                    {
+                        GoToAIPhase();
+                    }
                 }
             } break;
             case PHASE_SPAWNING:

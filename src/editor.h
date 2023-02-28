@@ -195,48 +195,48 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         ImGui::SliderInt("victory", &level->victory_turn, 1, 6);
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
-        if(ImGui::Button("none"))
+        if(ImGui::Button("plains"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_FLOOR);
+            *hover_tile = GetTile(TILE_PLAIN);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("wall"))
+        if(ImGui::Button("mountain"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_FLOOR);
+            *hover_tile = GetTile(TILE_MOUNTAIN);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("cover"))
+        if(ImGui::Button("forest"))
         {
             Unit *tmp = hover_tile->occupant;
             *hover_tile = GetTile(TILE_FOREST);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("slow"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_SWAMP);
-            hover_tile->occupant = tmp;
-        }
-        if(ImGui::Button("goal"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_GOAL);
-            hover_tile->occupant = tmp;
-        }
-
         if(ImGui::Button("water"))
         {
             Unit *tmp = hover_tile->occupant;
             *hover_tile = GetTile(TILE_WATER);
             hover_tile->occupant = tmp;
         }
+        if(ImGui::Button("fort"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_FORT);
+            hover_tile->occupant = tmp;
+        }
+
+        if(ImGui::Button("swamp"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_SWAMP);
+            hover_tile->occupant = tmp;
+        }
         ImGui::SameLine();
-        if(ImGui::Button("fire"))
+        if(ImGui::Button("flame"))
         {
             Unit *tmp = hover_tile->occupant;
             *hover_tile = GetTile(TILE_FLAME);
@@ -250,6 +250,13 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
+        if(ImGui::Button("desert"))
+        {
+            Unit *tmp = hover_tile->occupant;
+            *hover_tile = GetTile(TILE_DESERT);
+            hover_tile->occupant = tmp;
+        }
+        ImGui::SameLine();
         if(ImGui::Button("smoke"))
         {
             Unit *tmp = hover_tile->occupant;
@@ -257,42 +264,21 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
 
-        if(ImGui::Button("fort"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_FORT);
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("village"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_VILLAGE);
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("chest"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_CHEST);
-            hover_tile->occupant = tmp;
-        }
 
 
         ImGui::Text("Units:");
         if(ImGui::Button("add"))
         {
-            if(!(hover_tile->occupant ||
-                 hover_tile->type == TILE_WALL))
+            if(hover_tile->occupant)
+            {
+                cout << "MISUSE: Cannot place unit there.\n";
+            }
+            else
             {
                 level->combatants.push_back(make_shared<Unit>(*units[selectedIndex]));
                 level->combatants.back()->pos.col = editor_cursor.col;
                 level->combatants.back()->pos.row = editor_cursor.row;
                 hover_tile->occupant = level->combatants.back().get();
-            }
-            else
-            {
-                cout << "MISUSE: Cannot place unit there.\n";
             }
         }
 
