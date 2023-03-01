@@ -297,6 +297,39 @@ DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
     ImGui::End();
 }
 
+void
+DisplayTurnQueue(ImGuiWindowFlags wf)
+{
+    ImGui::SetNextWindowSize(ImVec2(180, 400));
+    ImGui::SetNextWindowPos(ImVec2(10, 10));
+
+
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Queue", NULL, wf);
+    {
+    }
+    ImGui::End();
+    ImGui::PopFont();
+}
+
+void
+DisplayUndoPrompt(ImGuiWindowFlags wf)
+{
+    ImGui::SetNextWindowSize(ImVec2(400, 200));
+    ImGui::SetNextWindowPos(ImVec2(320, 200));
+
+	ImGui::PushFont(uiFontLarge);
+    ImGui::Begin("Undo", NULL, wf);
+    {
+		ImGui::PopFont();
+		ImGui::PushFont(uiFontMedium);
+            ImGui::Text("Really Undo?");
+            ImGui::Text("You only have one.");
+		ImGui::PopFont();
+    }
+    ImGui::End();
+}
+
 void 
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
@@ -351,6 +384,11 @@ RenderUI(UI_State *ui,
         DisplayGameOver(window_flags);
     if(ui->victory)
         DisplayVictory(window_flags);
+
+    if(GlobalInterfaceState == GAME_MENU_QUEUE)
+        DisplayTurnQueue(window_flags);
+    if(GlobalInterfaceState == GAME_MENU_UNDO)
+        DisplayUndoPrompt(window_flags);
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor(3);

@@ -58,6 +58,7 @@ static AIState GlobalAIState;
 #include "audio.h" // NOTE: Includes Global Audio engine and Sound groups, as well as GlobalMusic and GlobalSfx.
 #include "equip.h"
 #include "structs.h"
+#include "resolution.h"
 static Player GlobalPlayer;
 
 #include "cursor.h"
@@ -68,7 +69,6 @@ static Player GlobalPlayer;
 #include "input.h"
 #include "grid.h"
 #include "fight.h"
-#include "resolution.h"
 #include "command.h"
 #include "ai.h"
 #include "ui.h"
@@ -175,12 +175,15 @@ int main(int argc, char *argv[])
     int level_index = 0;
     Level level = LoadLevel(levels[level_index], units, party);
 
+    Level backup;
+    Resolution res_backup;
+
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		                      32, ANIMATION_SPEED));
 
 	UI_State ui = {};
 
-    Menu game_menu({"Options", "End Turn"});
+    Menu game_menu({"Queue", "Undo Turn", "Options", "End Turn"});
 
     InputState input = {};
     InputHandler handler(&cursor, level.map);
@@ -219,7 +222,7 @@ int main(int argc, char *argv[])
             case PHASE_PLAYER:
             {
                 handler.Update(&input);
-                handler.UpdateCommands(&cursor, &level, units, party, levels, &game_menu);
+                handler.UpdateCommands(&cursor, &level, backup, &resolution, res_backup, units, party, levels, &game_menu);
             } break;
             case PHASE_RESOLUTION:
             {
@@ -243,7 +246,7 @@ int main(int argc, char *argv[])
             {
                 if(GlobalSpawning)
                     level.SpawnPhase();
-                GoToPlayerPhase(&level, &cursor);
+                GoToPlayerPhase(&level, &backup, resolution, &res_backup, &cursor);
             } break;
             }
 

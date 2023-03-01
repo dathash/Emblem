@@ -240,6 +240,39 @@ private:
     Cursor *cursor;
 };
 
+class UndoTurnCommand : public Command
+{
+public:
+    UndoTurnCommand(Level *level_in, const Level &backup_in, 
+                    Resolution *resolution_in, const Resolution &res_backup_in,
+                    Cursor *cursor_in)
+    : level(level_in),
+      backup(backup_in),
+      resolution(resolution_in),
+      res_backup(res_backup_in),
+      cursor(cursor_in)
+    {}
+
+    virtual void Execute()
+    {
+        *level = backup;
+        cursor->pos = level->Leader();
+        cursor->Reset();
+        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+
+        *resolution = Resolution(res_backup);
+
+        GlobalPlayer.health = GlobalPlayer.backup_health;
+    }
+
+private:
+    Level *level;
+    const Level &backup;
+    Resolution *resolution;
+    const Resolution &res_backup;
+    Cursor *cursor;
+};
+
 
 // ============================== Attacking ====================================
 class StopActingCommand : public Command
@@ -497,12 +530,22 @@ public:
         EmitEvent(SELECT_MENU_OPTION_EVENT);
         switch(menu->current)
         {
-            case(0): // OPTIONS
+            case(0): // QUEUE
+            {
+                GlobalInterfaceState = GAME_MENU_QUEUE;
+                return;
+            } break;
+            case(1): // UNDO
+            {
+                GlobalInterfaceState = GAME_MENU_UNDO;
+                return;
+            } break;
+            case(2): // OPTIONS
             {
                 GlobalInterfaceState = GAME_MENU_OPTIONS;
                 return;
             } break;
-            case(1): // END TURN
+            case(3): // END TURN
             {
                 GoToResolutionPhase();
                 return;
@@ -760,7 +803,9 @@ public:
     // updates what the user can do with their buttons.
     // contains some state: the minimum amount.
     // each individual command takes only what is absolutely necessary for its completion.
-    void UpdateCommands(Cursor *cursor, Level *level, 
+    void UpdateCommands(Cursor *cursor,
+                        Level *level, const Level &backup,
+                        Resolution *resolution, const Resolution &res_backup,
                         const vector<shared_ptr<Unit>> &units,
                         const vector<shared_ptr<Unit>> &party,
                         const vector<string> &levels,
@@ -843,6 +888,32 @@ public:
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
+                BindB(make_shared<BackToGameMenuCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
+            } break;
+            case(GAME_MENU_QUEUE):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<NullCommand>());
+                BindB(make_shared<BackToGameMenuCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<NullCommand>());
+            } break;
+            case(GAME_MENU_UNDO):
+            {
+                BindUp(make_shared<NullCommand>());
+                BindDown(make_shared<NullCommand>());
+                BindLeft(make_shared<NullCommand>());
+                BindRight(make_shared<NullCommand>());
+                BindA(make_shared<UndoTurnCommand>(level, backup, resolution, res_backup, cursor));
                 BindB(make_shared<BackToGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());

@@ -13,7 +13,12 @@ void GoToAIPhase() {
     EmitEvent(END_TURN_EVENT);
 }
 
-void GoToPlayerPhase(Level *level, Cursor *cursor) {
+void GoToPlayerPhase(Level *level, 
+                     Level *backup, 
+                     const Resolution &res,
+                     Resolution *res_backup, 
+                     Cursor *cursor)
+{
     GlobalPhase = PHASE_PLAYER;
     GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     GlobalAIState = AI_NO_OP;
@@ -25,6 +30,20 @@ void GoToPlayerPhase(Level *level, Cursor *cursor) {
         unit->Activate();
 
     EmitEvent(END_TURN_EVENT);
+
+    // set up backup for undo turn.
+    // TODO: we can move this out sometime.
+    // Thinking of like a "backup" struct that just
+    // stores absolute necessities in one place.
+    *backup = Level(*level);
+
+    for(const Incident &incident : res.incidents)
+    {
+        Unit *old_ptr = incident.unit;
+        Unit *new_ptr = backup->map.tiles[old_ptr->pos.col][old_ptr->pos.row].occupant;
+        res_backup->incidents.push_back({new_ptr, incident.offset, incident.type});
+    }
+    GlobalPlayer.backup_health = GlobalPlayer.health;
 }
 
 void GoToResolutionPhase() {

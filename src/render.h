@@ -24,7 +24,7 @@ RenderTileColor(const position &pos, const SDL_Color &color)
 
 void
 RenderAttack(const Tilemap &map,
-             const Attack &attack)
+             const Incident &attack)
 {
     switch(attack.unit->primary->type)
     {
@@ -168,6 +168,19 @@ RenderNumber(int num, const position &pos,
     RenderText(to_string(num), screen_pos.col, screen_pos.row, color);
 }
 
+// Displays the turn order of enemies on the map.
+void
+RenderQueueOrder(const Tilemap &map, 
+                 const Resolution &resolution)
+{
+    // NOTE: We pull attacks off the back of the queue.
+    for(int i = 0; i < resolution.incidents.size(); ++i) {
+        RenderNumber(i + 1,
+                     resolution.incidents[resolution.incidents.size() - 1 - i].unit->pos, 
+                     {20, 20}, black);
+    }
+}
+
 // Renders a Health Bar (For use underneath units)
 void
 RenderHealthBarSmall(const position &p, int hp, int maxHp)
@@ -285,9 +298,14 @@ Render(const Tilemap &map,
     if(cursor.selected)
         RenderTileColor(cursor.selected->pos, healColor);
 
-    for(const Attack &attack : resolution.attacks)
+    for(const Incident &incident : resolution.incidents)
     {
-        RenderAttack(map, attack);
+        if(incident.type == INCIDENT_ATTACK)
+            RenderAttack(map, incident);
+        else
+        {
+            ; // TODO: Render Environment effects
+        }
     }
 
 // ================================ ai visualization  =============================
@@ -330,8 +348,13 @@ Render(const Tilemap &map,
         RenderSprite(cursor.pos, cursor.sheet);
     }
 
+// ==================================== queue ==================================
+    if(GlobalInterfaceState == GAME_MENU_QUEUE)
+    {
+        RenderQueueOrder(map, resolution);
+    }
 
-// ==================================== menus =====================================================
+// ==================================== menus ==================================
     // Game Menu
     if(GlobalInterfaceState == GAME_MENU)
     {

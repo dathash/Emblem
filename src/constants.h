@@ -94,6 +94,8 @@ enum InterfaceState
 
     GAME_MENU,
     GAME_MENU_OPTIONS,
+    GAME_MENU_QUEUE,
+    GAME_MENU_UNDO,
 
     ENEMY_RANGE,
 
@@ -119,6 +121,8 @@ GetInterfaceString(InterfaceState state)
     case VICTORY:                       return "Victory";
     case GAME_MENU:                     return "Game menu";
     case GAME_MENU_OPTIONS:             return "Game menu options";
+    case GAME_MENU_QUEUE:               return "Game menu queue";
+    case GAME_MENU_UNDO:                return "Game menu undo";
     case ENEMY_RANGE:                   return "Enemy range";
     case NEUTRAL_OVER_GROUND:           return "Neutral over ground";
     case NEUTRAL_OVER_ENEMY:            return "Neutral over enemy";

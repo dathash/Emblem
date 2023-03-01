@@ -73,31 +73,6 @@ I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
 # TODO
-Robust turn queue for actions to resolve.
-How the data should be structured:
-
-At the start of each AI Phase, the queue is laid out.
-During Player Phase
-* When you kill enemies, gain env effects, etc, the queue is updated.
-
-RES PHASE
-* Environment
-* AI
-* Rising
-* Spawning
-
-AI Attacks
-* Avoid other ai attacks (dangerous)
-* Avoid repeated behavior
-
-Random enemy spawns at the start of level
-Choose unit drop locations at start of level
-
-Turn Undo
-    Info we have to store:
-    * map
-    * unit positions in combatants
-
 "Inactive" instead of dead for player units. Make them into pushable objects
 that don't take more damage, but can be healed.
 
@@ -128,6 +103,7 @@ Implement the squads
 Make Maps
 Objectives
 
+
 Visualization of attacks.
 CHECK OUT HOW MATTHEW DID IT
 * Punch
@@ -137,6 +113,15 @@ CHECK OUT HOW MATTHEW DID IT
 * Leap (Artillery variant)
 * Show Where the unit will end up by the end.
 * Show Damage outcome
+
+
+AI Attacks
+* Avoid other ai attacks (dangerous)
+* Avoid repeated behavior
+
+Random enemy spawns at the start of level
+Choose unit drop locations at start of level
+
 
 Animations
 CHECK OUT HOW MATTHEW DID IT

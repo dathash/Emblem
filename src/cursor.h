@@ -11,19 +11,25 @@ struct Cursor
     Unit *selected = nullptr;
     position targeting = {0, 0};
     Equip *with = nullptr;
+    path path_draw = {};
 
     Spritesheet sheet;
-    path path_draw = {};
 
 
     Cursor(Spritesheet sheet_in)
     : sheet(sheet_in)
     {}
 
-    void
-    Update(Tilemap *map)
-    {
+    void Update(Tilemap *map) {
         sheet.Update();
+    }
+
+
+    void Reset() {
+        selected = nullptr;
+        targeting = {-1, -1};
+        with = nullptr;
+        path_draw = {};
     }
 
 

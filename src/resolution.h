@@ -5,10 +5,25 @@
 #ifndef RESOLUTION_H
 #define RESOLUTION_H
 
-struct Attack
+enum IncidentType
+{
+    INCIDENT_ATTACK,
+    INCIDENT_ENVIRONMENTAL,
+};
+
+
+// CIRCULAR
+void
+Simulate(Tilemap *map,
+         const Equip &weapon, 
+         position source, 
+         position destination);
+
+struct Incident
 {
     Unit *unit;
     position offset;
+    IncidentType type = INCIDENT_ATTACK;
 
     void Resolve(Tilemap *map) {
         Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
@@ -17,30 +32,30 @@ struct Attack
 
 struct Resolution
 {
-    vector<Attack> attacks = {};
+    vector<Incident> incidents = {};
     int frame = 0;
 
     bool Update(Tilemap *map) {
-        if(attacks.empty())
+        if(incidents.empty())
             return true;
 
         ++frame;
         if(frame % AI_ACTION_SPEED)
             return false;
 
-        attacks.back().Resolve(map);
-        attacks.pop_back();
+        incidents.back().Resolve(map);
+        incidents.pop_back();
         return false;
     }
 
     void Clear() {
-        attacks.clear();
+        incidents.clear();
     }
 
     void RemoveDeadUnits() {
-        attacks.erase(remove_if(attacks.begin(), attacks.end(),
+        incidents.erase(remove_if(incidents.begin(), incidents.end(),
                     [](auto const &a) { return a.unit->should_die; }),
-                    attacks.end());
+                    incidents.end());
     }
 };
 

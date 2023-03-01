@@ -297,8 +297,9 @@ public:
         if(action.attack != position(-1, -1))
         {
             assert(cursor->selected->primary);
-            resolution->attacks.push_back({cursor->selected, 
-                                           action.attack - cursor->selected->pos});
+            resolution->incidents.push_back({cursor->selected, 
+                                             action.attack - cursor->selected->pos,
+                                             INCIDENT_ATTACK});
             cursor->pos = action.attack;
         }
         else

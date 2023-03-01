@@ -120,6 +120,7 @@ struct Player
 {
     int health = 7;
     int max_health = 7;
+    int backup_health = 0;
 
     void Reset() {
         health = max_health;
@@ -408,6 +409,28 @@ struct Level
 
     int turn_count = 0;
     int victory_turn = 1;
+
+    bool can_undo = true;
+
+    Level() = default;
+
+    Level(const Level &other)
+    : name(other.name),
+      map(other.map),
+      spawner(other.spawner),
+      song(other.song),
+      turn_count(other.turn_count),
+      victory_turn(other.victory_turn),
+      can_undo(other.can_undo)
+    {
+        for(shared_ptr<Unit> unit : other.combatants)
+        {
+            shared_ptr<Unit> copy = make_shared<Unit>(*unit);
+            copy->pos = unit->pos;
+            combatants.push_back(copy);
+            map.tiles[copy->pos.col][copy->pos.row].occupant = copy.get();
+        }
+    }
 
     void SpawnPhase() {
         SpawnUnits();

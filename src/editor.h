@@ -366,7 +366,7 @@ EditorPass(
     {
         if(ImGui::Button("Load"))
         {
-            resolution->attacks.clear();
+            resolution->Clear();
 
             *equipments = LoadEquips(DATA_PATH + string(equip_filename));
             cout << "Units loaded: " << equip_filename << "\n";
@@ -406,7 +406,7 @@ EditorPass(
 
         if(ImGui::Button("Test Zone"))
         {
-            resolution->attacks.clear();
+            resolution->Clear();
             *level = LoadLevel("test.txt", *units, party);
             sprintf(level_filename, "test.txt");
             GoToAIPhase();
@@ -416,7 +416,7 @@ EditorPass(
         {
             if(ImGui::Button(s.c_str()))
             {
-                resolution->attacks.clear();
+                resolution->Clear();
                 *level = LoadLevel(s, *units, party);
                 sprintf(level_filename, "%s", s.c_str());
                 GoToAIPhase();
