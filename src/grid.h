@@ -284,11 +284,6 @@ GetField(const Tilemap &map, position origin, bool is_ally)
     queue<position> unexplored;
     unexplored.push(origin);
     field[origin.col][origin.row] = direction(-2, -2);
-    if(map.tiles[origin.col][origin.row].type == TILE_MOUNTAIN ||
-       map.tiles[origin.col][origin.row].type == TILE_WATER)
-    {
-        field[origin.col][origin.row] = direction(-1, -1);
-    }
     distances[origin.col][origin.row] = 0;
 
     while(!unexplored.empty())

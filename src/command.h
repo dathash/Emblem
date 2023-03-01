@@ -164,6 +164,10 @@ public:
         level->map.tiles[cursor->selected->pos.col][cursor->selected->pos.row].occupant = nullptr;
         level->map.tiles[pos.col][pos.row].occupant = cursor->selected;
 
+        EffectType effect = level->map.tiles[pos.col][pos.row].effect;
+        if(effect != EFFECT_NONE)
+            cursor->selected->ApplyEffect(effect);
+
         cursor->selected->initial_pos = cursor->selected->pos;
         cursor->selected->pos = pos;
 
@@ -261,6 +265,7 @@ public:
         cursor->pos = level->Leader();
         cursor->Reset();
 
+        cout << "BACKUP: " << res_backup.incidents.size() << "\n";
         *resolution = Resolution(res_backup);
 
         GlobalPlayer.health = GlobalPlayer.backup_health;

@@ -202,6 +202,8 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
     {
         ImGui::Text("%s", level->name.c_str());
         ImGui::Checkbox("spawning", &GlobalSpawning);
+        ImGui::SameLine();
+        ImGui::Checkbox("godmode", &GlobalGodMode);
         ImGui::SliderInt("victory", &level->victory_turn, 1, 6);
         // =======================  Tile stuff  ================================
         ImGui::Text("Tiles:");
@@ -212,40 +214,6 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("mountain"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_MOUNTAIN);
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("forest"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_FOREST);
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("water"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_WATER);
-            hover_tile->occupant = tmp;
-        }
-        if(ImGui::Button("fort"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_FORT);
-            hover_tile->occupant = tmp;
-        }
-
-        if(ImGui::Button("swamp"))
-        {
-            Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_SWAMP);
-            hover_tile->occupant = tmp;
-        }
-        ImGui::SameLine();
         if(ImGui::Button("flame"))
         {
             Unit *tmp = hover_tile->occupant;
@@ -253,24 +221,24 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("acid"))
+        if(ImGui::Button("storm"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_ACID);
+            *hover_tile = GetTile(TILE_STORM);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("desert"))
+        if(ImGui::Button("wind"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_DESERT);
+            *hover_tile = GetTile(TILE_WIND);
             hover_tile->occupant = tmp;
         }
         ImGui::SameLine();
-        if(ImGui::Button("smoke"))
+        if(ImGui::Button("fort"))
         {
             Unit *tmp = hover_tile->occupant;
-            *hover_tile = GetTile(TILE_SMOKE);
+            *hover_tile = GetTile(TILE_FORT);
             hover_tile->occupant = tmp;
         }
 

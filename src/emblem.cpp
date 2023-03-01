@@ -41,6 +41,7 @@ static bool GlobalPaused = false;
 static bool GlobalStep = false;
 static int GlobalSpeedMod = 1;
 static bool GlobalSpawning = true;
+static bool GlobalGodMode = true;
 
 #include "constants.h"
 // State

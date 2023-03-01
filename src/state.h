@@ -37,6 +37,7 @@ void GoToPlayerPhase(Level *level,
     // stores absolute necessities in one place.
     *backup = Level(*level);
 
+    res_backup->incidents = {};
     for(const Incident &incident : res.incidents)
     {
         Unit *old_ptr = incident.unit;

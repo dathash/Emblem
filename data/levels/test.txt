@@ -1,15 +1,15 @@
 ATL new.png
 
-MUS 21.wav
-
 VIC 2
 
+MUS 21.wav
+
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
-MAP 0 0 0 0 0 0 0 0 
+MAP 0 0 0 0 1 2 3 4 
 MAP 0 0 0 0 0 0 0 0 
 MAP 0 0 0 0 0 0 0 0 
 

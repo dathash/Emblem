@@ -243,6 +243,9 @@ struct Unit
     // Damages a unit and resolves things involved with that process.
     // Returns the amount of damage actually done.
     int Damage(int amount) {
+        cout << amount << " Damage to " << name << "\n";
+        if(GlobalGodMode && IsAlly()) return 0;
+
         int result = min(amount, health);
         health = clamp(health - amount, 0, max_health);
         if(health <= 0)
@@ -292,16 +295,10 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 enum TileType
 {
     TILE_PLAIN,
-    TILE_MOUNTAIN,
-    TILE_FOREST,
-    TILE_WATER,
-    TILE_FORT,
-
-    TILE_SWAMP,
     TILE_FLAME,
-    TILE_ACID,
-    TILE_DESERT,
-    TILE_SMOKE,
+    TILE_STORM,
+    TILE_WIND,
+    TILE_FORT,
 };
 string 
 GetTileTypeString(TileType type)
@@ -309,36 +306,10 @@ GetTileTypeString(TileType type)
     switch (type)
     {
         case TILE_PLAIN:   return "Plains";
-        case TILE_MOUNTAIN:return "Mountain";
-        case TILE_FOREST:  return "Forest";
-        case TILE_WATER:   return "Water";
-        case TILE_FORT:    return "Fort";
-        case TILE_SWAMP:   return "Swamp";
         case TILE_FLAME:   return "Flame";
-        case TILE_ACID:    return "Acid";
-        case TILE_DESERT:  return "Desert";
-        case TILE_SMOKE:   return "Smoke";
-	}
-}
-
-enum TileEffect
-{
-    TILE_EFFECT_NONE,
-    TILE_EFFECT_FIRE,
-    TILE_EFFECT_ACID,
-    TILE_EFFECT_SMOKE,
-    TILE_EFFECT_WATER,
-};
-string 
-GetTileEffectString(TileEffect type)
-{
-    switch(type)
-    {
-        case TILE_EFFECT_NONE:  return "No tile effect";
-        case TILE_EFFECT_FIRE:  return "Fire Tile";
-        case TILE_EFFECT_ACID:  return "Acid Tile";
-        case TILE_EFFECT_SMOKE: return "Smoke Tile";
-        case TILE_EFFECT_WATER: return "Water Tile";
+        case TILE_STORM:   return "Storm";
+        case TILE_WIND:    return "Wind";
+        case TILE_FORT:    return "Fort";
 	}
 }
 
@@ -348,8 +319,8 @@ struct Tile
     position atlas_index = {0, 0};
 
     TileType type = TILE_PLAIN;
+    EffectType effect = EFFECT_NONE;
 
-    TileEffect effect = TILE_EFFECT_NONE;
     Unit *occupant = nullptr;
 };
 Tile
@@ -357,16 +328,11 @@ GetTile(TileType type)
 {
     switch(type)
     {
-        case(TILE_PLAIN):    return {{0, 0}, type};
-        case(TILE_MOUNTAIN): return {{1, 0}, type};
-        case(TILE_FOREST):   return {{2, 0}, type};
-        case(TILE_WATER):    return {{3, 0}, type};
-        case(TILE_FORT):     return {{4, 0}, type};
-        case(TILE_SWAMP):    return {{0, 1}, type};
-        case(TILE_FLAME):    return {{1, 1}, type};
-        case(TILE_ACID):     return {{2, 1}, type};
-        case(TILE_DESERT):   return {{3, 1}, type};
-        case(TILE_SMOKE):    return {{4, 1}, type};
+        case(TILE_PLAIN):    return {{0, 0}, type, EFFECT_NONE};
+        case(TILE_FLAME):    return {{1, 1}, type, EFFECT_AFLAME};
+        case(TILE_STORM):    return {{4, 1}, type, EFFECT_PARALYZED};
+        case(TILE_WIND):     return {{3, 1}, type, EFFECT_SWIFT};
+        case(TILE_FORT):     return {{4, 0}, type, EFFECT_STONE};
     }
 }
 

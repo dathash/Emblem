@@ -6,6 +6,11 @@ Plan
 > Build a fun little game!
 
 # Design
+## Questions
+Should placing a unit on a tile change the tile to neutral again? This seems
+reasonable from programming, but might not play as well.
+
+## Foundations
 What is appealing to me about tactics games?
     Permadeath sacrifices
     Taking Risks
@@ -72,55 +77,64 @@ stronger as it takes more hits.
 I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
-# TODO
-All effects wear off at the end of the turn.
-
-Effects
-* Paralyzed
-* Burned
-
-* Swift
-* Stoneskin
-
-Abilities
-* Tailwind
-
-
-Eight levels
-
-Special tiles
-* Fire (applies on fire condition)
-* Desert (attacked changes to smoke)
-* Forest (attacking changes to fire)
-* Ice (attacking changes to water)
-* Acid (stepping applies acid)
-* Smoke (Can't attack or repair)
-* Water (Can't attack or repair)
-
-Team design
+# Team design
 Rome
-* High Mobility
-* Support
-  * Applies Swift
-  * Can Manipulate all of the battlefield
+* 5 mov
+* 3 hp
+* passive | swift
+* Abilities
+  * Tailwind | Move all units one over.
+  * Buff | Applies Swift
+
 
 Guy
 * 2 movement
-* Super high health plus permanent stoneskin.
+* 4 hp
+* passive | stoneskin.
+* Abilities
+  * Shield | Apply Stone to a unit
+  * Brand | 1-2 range, solid damage.
 
 Bata
-* Moderate Mobility
-* Low Health
-* Super high damage output.
-* Chaos? Random chance maybe?
+* 3 mov
+* 2 hp
+* passive | immune to fire damage.
+* Abilities
+  * Fireball | diamond pattern, 2 dmg plus apply fire.
+  * Flame Wall | Puts up a wall of flame, blocking attacks.
 
 Suba
-* Move slow
-* Overdrive ability?
-* Crowd Control
+* 2 mov
+* 3 hp
+* passive | overdrive, double speed and dmg when on 1 hp.
+* Abilities
+  * Volt Tackle | ram attack
+  * Jolt | line shot, no dmg with paralyze.
+
+Fire 2
+Quick, up in your face, paladin with two blades.
+
+Wind 2
+Grappler, can hold units in a whole line in place.
+
+Lightning 2
 * Chain through guys like lightning squad?
 
-Make Maps
+Stone 2
+Create blockages on the map, with stones.
+# TODO
+Paralyzed | Cannot move, only attack
+Swift | move again after attack
+Stone | 1 attack damage reduction
+
+Put environmental effects in the turn queue.
+
+Sanding pass!!!
+
+Team Design implementation
+Playtesting
+
+Ten levels
 Objectives
 
 
