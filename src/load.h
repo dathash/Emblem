@@ -213,31 +213,19 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
             {
                 tokens = split(rest, '\t');
 
-                Equip *primary_copy = nullptr;
-                Equip *secondary_copy = nullptr;
-                Equip *healing_copy = nullptr;
-                Equip *tmp = GetEquipByName(equipments, tokens[5]);
-                if(tmp)
-                    primary_copy = new Equip(*tmp); 
-                tmp = GetEquipByName(equipments, tokens[6]);
-                if(tmp)
-                    secondary_copy = new Equip(*tmp); 
-                tmp = GetEquipByName(equipments, "Potion");
-                if(tmp)
-                    healing_copy = new Equip(*tmp); 
-
                 units.push_back(make_shared<Unit>(
                     tokens[0],             // name
                     (Team)stoi(tokens[1]), // team
                     stoi(tokens[2]),       // health
                     stoi(tokens[3]),       // movement
                     (bool)stoi(tokens[4]), // fixed?
+                    tokens[5] == " " ? nullptr : new Equip(*GetEquipByName(equipments, tokens[5])),
+                    tokens[6] == " " ? nullptr : new Equip(*GetEquipByName(equipments, tokens[6])),
+                    tokens[7] == " " ? nullptr : new Equip(*GetEquipByName(equipments, tokens[7])),
 
-                    primary_copy,
-                    secondary_copy,
-                    healing_copy,
+                    (EffectType)stoi(tokens[8]), // passive
 
-                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[7]),
+                    Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[9]), // sprite
                                 32, ANIMATION_SPEED)
                 ));
             }
@@ -279,11 +267,12 @@ LoadEquips(string filename_in)
                     (ClassType)stoi(tokens[2]),     // class type
                     (PushType)stoi(tokens[3]),      // push type
                     (MovementType)stoi(tokens[4]),  // movement type
-                    stoi(tokens[5]),                // damage
-                    stoi(tokens[6]),                // push damage
-                    stoi(tokens[7]),                // self damage
-                    stoi(tokens[8]),                // min range
-                    stoi(tokens[9])                 // max range
+                    (EffectType)stoi(tokens[5]),    // movement type
+                    stoi(tokens[6]),                // damage
+                    stoi(tokens[7]),                // push damage
+                    stoi(tokens[8]),                // self damage
+                    stoi(tokens[9]),                // min range
+                    stoi(tokens[10])                // max range
                 ));
             }
         }
@@ -302,7 +291,7 @@ SaveEquips(string filename_in, const vector<shared_ptr<Equip>> &equipments)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
     
-    fp << "COM\t<name>\t<type>\t<class>\t<push>\t<move>\t<dmg>\t<p_dmg>\t<s_dmg>\t<min>\t<max>\n";
+    fp << "COM\t<name>\t<type>\t<class>\t<push>\t<move>\t<effec>\t<dmg>\t<p_dmg>\t<s_dmg>\t<min>\t<max>\n";
     for(const shared_ptr<Equip> &equip : equipments)
     {
         fp << "WEA\t"
@@ -311,6 +300,7 @@ SaveEquips(string filename_in, const vector<shared_ptr<Equip>> &equipments)
            << equip->cls << "\t"
            << equip->push << "\t"
            << equip->move << "\t"
+           << equip->effect << "\t"
 
            << equip->damage << "\t"
            << equip->push_damage << "\t"
@@ -330,7 +320,7 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
     fp.open(filename_in);
     SDL_assert(fp.is_open());
     
-    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<fixed>\t<prim>\t<secnd>\t<sprite>\n";
+    fp << "COM\t<name>\t<team>\t<hp>\t<mov>\t<fixed>\t<prim>\t<secnd>\t<util>\t<e1>\t<e2>\t<sprite>\n";
     for(const shared_ptr<Unit> &unit : units)
     {
         fp << "UNT\t" << unit->name << "\t"
@@ -341,6 +331,9 @@ SaveUnits(string filename_in, const vector<shared_ptr<Unit>> &units)
 
            << (unit->primary ? unit->primary->name : " ") << "\t"
            << (unit->secondary ? unit->secondary->name : " ") << "\t"
+           << (unit->utility ? unit->utility->name : " ") << "\t"
+
+           << unit->passive.type << "\t"
 
            << unit->sheet.texture.filename
            << "\n";

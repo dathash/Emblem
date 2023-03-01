@@ -1,8 +1,12 @@
-COM
-UNT	Lucina	Ally	3	3	Sword	 	lucina.txt
-UNT	Tiki	Ally	3	3	Sword	 	tiki.txt
-UNT	Stahl	Ally	3	3	Sword	 	stahl.txt
-UNT	Vaike	Ally	3	3	Sword	 	vaike.txt
-UNT	Thief	Ally	3	3	Sword	 	thief.txt
-UNT	Soldier	Ally	3	3	Sword	 	soldier.txt
-UNT	Fighter	Ally	3	3	Sword	 	fighter.txt
+COM	<name>	<team>	<hp>	<mov>	<fixed>	<prim>	<secnd>	<util>	<e1>	<e2>	<sprite>
+UNT	Guy	0	3	3	0	Sword	Hammer	 	Stone	 	guy.png
+UNT	Butter	0	3	3	0	Spark	 	 	 	 	butter.png
+UNT	Rome	0	3	3	0	Bow	 	 	Swift	 	rome.png
+UNT	Suba	0	3	3	0	Lance	 	 	 	 	suba.png
+UNT	Thief	1	3	4	0	Claw	 	 	 	 	thief.png
+UNT	Soldier	1	3	3	0	Ram	 	 	 	 	soldier.png
+UNT	Fighter	1	3	3	0	Claw II	 	 	 	 	fighter.png
+UNT	Archer	1	2	3	0	Bow	 	 	 	 	archer.png
+UNT	Mage	1	2	3	0	Hurl	 	 	 	 	mage.png
+UNT	Rock	2	1	0	0	 	 	 	 	 	rock.png
+UNT	House	2	2	0	1	 	 	 	 	 	building.png

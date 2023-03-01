@@ -39,8 +39,22 @@ SimulateDamage(Unit *victim, int amount)
     cout << amount << " damage to " << victim->name << "\n";
 
     victim->Damage(amount);
-    if(victim->health <= 0)
-        victim->should_die = true;
+}
+
+void
+SimulateEffect(Unit *victim, EffectType type)
+{
+    if(!victim)
+    {
+        cout << "WARNING! SimulateEffect: No victim. Shouldn't get here.\n";
+        return;
+    }
+    if(victim->IsEnv()) return;
+    if(type == EFFECT_NONE) return;
+
+    cout << GetEffectString(type) << " effect applied to " << victim->name << "\n";
+
+    victim->ApplyEffect(type);
 }
 
 void
@@ -143,11 +157,12 @@ SimulateMove(Tilemap *map, int self_damage,
              const position &source, const position &target)
 {
     cout << "Moving " << source << " to " << target << "\n";
-    if(!IsValid(target) || !IsValid(source) || (source == target)) return;
+    if(!IsValid(target) || !IsValid(source)) return;
     cout << "Moved.\n";
 
     assert(map->tiles[source.col][source.row].occupant); // pretty sure
     SimulateDamage(map->tiles[source.col][source.row].occupant, self_damage);
+    if(source == target) return;
 
     // Move
     if(map->tiles[target.col][target.row].occupant)
@@ -231,7 +246,10 @@ Simulate(Tilemap *map,
 
         cout << victims.size() << "\n";
         for(Unit *victim : victims)
+        {
             SimulateDamage(victim, weapon.damage);
+            SimulateEffect(victim, weapon.effect);
+        }
     } break;
     case EQUIP_LINE_SHOT:
     {

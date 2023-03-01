@@ -5,6 +5,40 @@
 #ifndef EQUIP_H
 #define EQUIP_H
 
+enum EffectType
+{
+    EFFECT_NONE,
+    EFFECT_AFLAME,
+    EFFECT_PARALYZED,
+    EFFECT_SWIFT,
+    EFFECT_STONE,
+};
+struct Effect
+{
+    EffectType type = EFFECT_NONE;
+};
+string GetEffectString(EffectType type) {
+    switch(type)
+    {
+        case EFFECT_NONE:       return "No Effect";
+        case EFFECT_AFLAME:     return "Aflame";
+        case EFFECT_PARALYZED:  return "Para";
+        case EFFECT_SWIFT:      return "Swift";
+        case EFFECT_STONE:      return "Stone";
+    }
+}
+Effect
+GetEffectByName(const string &name)
+{
+    if(name == " ") return {};
+    else if(name == "Aflame") return {EFFECT_AFLAME};
+    else if(name == "Para")   return {EFFECT_PARALYZED};
+    else if(name == "Swift")  return {EFFECT_SWIFT};
+    else if(name == "Stone")  return {EFFECT_STONE};
+    else cout << "WARN GetEffectByName: Incorrect name " << name << "\n"; return {};
+}
+
+
 enum ClassType
 {
     CLASS_NONE,
@@ -103,18 +137,6 @@ GetMovementString(MovementType type)
     }
 }
 
-/*
-enum EffectType
-{
-    EFFECT_NONE,
-    EFFECT_ACID,
-    EFFECT_FIRE,
-    EFFECT_SMOKE,
-    EFFECT_SHIELD,
-    EFFECT_ROCK,
-};
-*/
-
 struct Equip
 {
     string name;
@@ -122,6 +144,7 @@ struct Equip
     ClassType     cls         = CLASS_NONE;
     PushType      push        = PUSH_NONE;
     MovementType  move        = MOVEMENT_NONE;
+    EffectType    effect      = EFFECT_NONE;
 
     int damage      = 1;
     int push_damage = 1;
@@ -136,6 +159,7 @@ struct Equip
          ClassType cls_in,
          PushType push_in,
          MovementType move_in,
+         EffectType effect_in,
          int damage_in,
          int push_damage_in,
          int self_damage_in,
@@ -146,6 +170,7 @@ struct Equip
       cls(cls_in),
       push(push_in),
       move(move_in),
+      effect(effect_in),
       damage(damage_in),
       push_damage(push_damage_in),
       self_damage(self_damage_in),

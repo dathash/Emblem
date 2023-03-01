@@ -375,8 +375,7 @@ public:
                 for(const position &p : orthogonal)
                 {
                     int distance = ManhattanDistance(cursor->selected->pos, p);
-                    if(distance >= with->min_range && distance <= with->max_range
-                       && Unobstructed(level->map, cursor->selected->pos, p))
+                    if(distance >= with->min_range && distance <= with->max_range)
                         level->map.range.push_back(p);
                 }
             } break;
@@ -517,7 +516,7 @@ class ExitGameMenuCommand : public Command
 public:
 
     virtual void Execute()
-    { 
+    {
         GlobalInterfaceState = NEUTRAL_OVER_GROUND;
     }
 };
@@ -525,8 +524,10 @@ public:
 class ChooseGameMenuOptionCommand : public Command
 {
 public:
-    ChooseGameMenuOptionCommand(Menu *menu_in)
-    : menu(menu_in)
+    ChooseGameMenuOptionCommand(Menu *menu_in,
+                                Level *level_in)
+    : menu(menu_in),
+      level(level_in)
     {}
 
     virtual void Execute()
@@ -551,6 +552,7 @@ public:
             } break;
             case(3): // END TURN
             {
+                level->TickEffects(TEAM_PLAYER);
                 GoToResolutionPhase();
                 return;
             } break;
@@ -559,6 +561,7 @@ public:
 
 private:
     Menu *menu;
+    Level *level;
 };
 
 class BackToGameMenuCommand : public Command
@@ -878,7 +881,7 @@ public:
                 BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu));
+                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level));
                 BindB(make_shared<ExitGameMenuCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
@@ -1003,7 +1006,7 @@ public:
                 BindA(make_shared<PlaceUnitCommand>(cursor, level));
                 BindB(make_shared<DeselectUnitCommand>(cursor));
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->utility));
                 BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
                 BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
             } break;
@@ -1017,7 +1020,7 @@ public:
                 BindA(make_shared<NullCommand>());
                 BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
-                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->utility));
                 BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
                 BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
             } break;
@@ -1030,7 +1033,7 @@ public:
                 BindA(make_shared<AttackCommand>(&(level->map), cursor));
                 BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
-                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->healing));
+                BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->utility));
                 BindX(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->secondary));
                 BindY(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->primary));
             } break;

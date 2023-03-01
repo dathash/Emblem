@@ -128,7 +128,7 @@ struct Player
 
     void Damage(int amount) {
         health = clamp(health - amount, 0, max_health);
-        if(health == 0)
+        if(health <= 0)
             GameOver(); // TODO: this results in a seg fault since we don't get rid of unresolved attacks.
     }
 
@@ -137,6 +137,7 @@ struct Player
         // TODO: grid defense
     }
 };
+
 
 enum Team
 {
@@ -156,7 +157,10 @@ struct Unit
 
     Equip *primary = nullptr;
     Equip *secondary = nullptr;
-    Equip *healing = nullptr;
+    Equip *utility = nullptr;
+
+    vector<Effect> effects = {};
+    Effect passive = {EFFECT_NONE};
 
     position pos = {0, 0};
     position initial_pos = {0, 0};
@@ -171,7 +175,7 @@ struct Unit
     ~Unit() {
         delete primary;
         delete secondary;
-        delete healing;
+        delete utility;
     }
 
     size_t ID() {
@@ -200,7 +204,8 @@ struct Unit
          bool fixed_in,
          Equip *primary_in,
          Equip *secondary_in,
-         Equip *healing_in,
+         Equip *utility_in,
+         EffectType effect_type_in,
          Spritesheet sheet_in
          )
     : name(name_in),
@@ -211,9 +216,11 @@ struct Unit
       fixed(fixed_in),
       primary(primary_in),
       secondary(secondary_in),
-      healing(healing_in),
+      utility(utility_in),
       sheet(sheet_in)
-    {}
+    {
+        passive = {effect_type_in};
+    }
 
     Unit(const Unit &other)
     : name(other.name),
@@ -222,14 +229,15 @@ struct Unit
       max_health(other.max_health),
       movement(other.movement),
       fixed(other.fixed),
+      passive(other.passive),
       sheet(other.sheet)
     {
         if(other.primary)
             primary = new Equip(*other.primary);
         if(other.secondary)
             secondary = new Equip(*other.secondary);
-        if(other.healing)
-            healing = new Equip(*other.healing);
+        if(other.utility)
+            utility = new Equip(*other.utility);
     }
 
     // Damages a unit and resolves things involved with that process.
@@ -237,12 +245,24 @@ struct Unit
     int Damage(int amount) {
         int result = min(amount, health);
         health = clamp(health - amount, 0, max_health);
+        if(health <= 0)
+            should_die = true;
         return result;
     }
 
     // Heals a unit and resolves things involved with that process.
     void Heal(int amount) {
         health = clamp(health + amount, 0, max_health);
+    }
+
+    void ApplyEffect(EffectType type) {
+        effects.push_back({type});
+    }
+
+    void RemoveEffect(EffectType type) {
+        effects.erase(remove_if(effects.begin(), effects.end(),
+                [type](const Effect &effect) { return effect.type == type; }),
+                effects.end());
     }
 
     void Deactivate() {
@@ -303,22 +323,22 @@ GetTileTypeString(TileType type)
 
 enum TileEffect
 {
-    EFFECT_NONE,
-    EFFECT_FIRE,
-    EFFECT_ACID,
-    EFFECT_SMOKE,
-    EFFECT_WATER,
+    TILE_EFFECT_NONE,
+    TILE_EFFECT_FIRE,
+    TILE_EFFECT_ACID,
+    TILE_EFFECT_SMOKE,
+    TILE_EFFECT_WATER,
 };
 string 
 GetTileEffectString(TileEffect type)
 {
     switch(type)
     {
-        case EFFECT_NONE:  return "No tile effect";
-        case EFFECT_FIRE:  return "Fire";
-        case EFFECT_ACID:  return "Acid";
-        case EFFECT_SMOKE: return "Smoke";
-        case EFFECT_WATER: return "Water";
+        case TILE_EFFECT_NONE:  return "No tile effect";
+        case TILE_EFFECT_FIRE:  return "Fire Tile";
+        case TILE_EFFECT_ACID:  return "Acid Tile";
+        case TILE_EFFECT_SMOKE: return "Smoke Tile";
+        case TILE_EFFECT_WATER: return "Water Tile";
 	}
 }
 
@@ -329,7 +349,7 @@ struct Tile
 
     TileType type = TILE_PLAIN;
 
-    TileEffect effect = EFFECT_NONE;
+    TileEffect effect = TILE_EFFECT_NONE;
     Unit *occupant = nullptr;
 };
 Tile
@@ -430,6 +450,38 @@ struct Level
             combatants.push_back(copy);
             map.tiles[copy->pos.col][copy->pos.row].occupant = copy.get();
         }
+    }
+
+    void TickEffect(shared_ptr<Unit> unit, const Effect &effect)
+    {
+        switch(effect.type)
+        {
+            case EFFECT_NONE: 
+            {
+            } break;
+            case EFFECT_AFLAME: 
+            {
+                unit->Damage(1);
+            } break;
+            default:
+            {
+                cout << effect.type << ": This ability has no tick effect\n";
+            } break;
+        }
+    }
+
+    void TickEffects(Team team) {
+        for(shared_ptr<Unit> unit : combatants) {
+            if(unit->team == team) {
+                for(const Effect &effect : unit->effects) {
+                    TickEffect(unit, effect);
+                }
+                unit->effects = {};
+
+                TickEffect(unit, unit->passive);
+            }
+        }
+
     }
 
     void SpawnPhase() {

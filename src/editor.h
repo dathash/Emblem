@@ -74,19 +74,25 @@ void UnitEditor(vector<shared_ptr<Equip>> *equipments,
         SDL_assert(selectedIndex < units->size());
         Unit *selected = (*units)[selectedIndex].get();
 
-        ImGui::Text("%s | %zu", selected->name.c_str(), selected->ID());
         ImGui::InputText("unit name", &(selected->name));
         ImGui::SliderInt("health", &selected->max_health, 1, 8);
         ImGui::SliderInt("movement", &selected->movement, 1, 8);
         ImGui::Checkbox("fixed?", &selected->fixed);
 
-        ImGui::Text("Items");
+        ImGui::Text("Passive | %s", GetEffectString(selected->passive.type).c_str());
+
         if(selected->primary)
             ImGui::Text("Primary | %s", selected->primary->name.c_str());
         if(selected->secondary)
+        {
+            ImGui::SameLine();
             ImGui::Text("Secondary | %s", selected->secondary->name.c_str());
-        if(selected->healing)
-            ImGui::Text("Healing | %s", selected->healing->name.c_str());
+        }
+        if(selected->utility)
+        {
+            ImGui::SameLine();
+            ImGui::Text("Utility | %s", selected->utility->name.c_str());
+        }
 
         static int index = 0;
         ImGui::SliderInt("index", &index, 0, 30);
@@ -107,11 +113,11 @@ void UnitEditor(vector<shared_ptr<Equip>> *equipments,
                 selected->secondary = new Equip(*equipments->at(index));
             }
             ImGui::SameLine();
-            if(ImGui::Button("Healing"))
+            if(ImGui::Button("Utility"))
             {
-                if(selected->healing)
-                    delete selected->healing;
-                selected->healing = new Equip(*equipments->at(index));
+                if(selected->utility)
+                    delete selected->utility;
+                selected->utility = new Equip(*equipments->at(index));
             }
 
             ImGui::InputText("equip name", &(equipments->at(index)->name));
@@ -131,6 +137,10 @@ void UnitEditor(vector<shared_ptr<Equip>> *equipments,
             ImGui::SliderInt("m", (int *)&(equipments->at(index)->move), 0, 10);
             ImGui::SameLine();
             ImGui::Text("%s", GetMovementString(equipments->at(index)->move).c_str());
+
+            ImGui::SliderInt("e", (int *)&(equipments->at(index)->effect), 0, 10);
+            ImGui::SameLine();
+            ImGui::Text("%s", GetEffectString(equipments->at(index)->effect).c_str());
 
             ImGui::SliderInt("damage", &(equipments->at(index)->damage), 0, 3);
             ImGui::SliderInt("push damage", &(equipments->at(index)->push_damage), 0, 3);
@@ -315,32 +325,31 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         {
             ImGui::Text("%s", hover_tile->occupant->name.c_str());
 
-            if(ImGui::Button("Dmg"))
-            {
+            if(ImGui::Button("Dmg")) {
                 hover_tile->occupant->Damage(1);
             }
+
             ImGui::SameLine();
-            if(ImGui::Button("Heal"))
-            {
+            if(ImGui::Button("Heal")) {
                 hover_tile->occupant->Heal(1);
             }
-        }
 
-        //static bool showDebugPaths = false;
-        /*
-        ImGui::Checkbox("debug paths", &showDebugPaths);
-        if(showDebugPaths)
-            GenerateDebugPaths(*level, &path_debug);
-
-        // Render overlays to the main target
-        if(path_debug.size() > 0)
-        {
-            for(const position &p : path_debug)
-            {
-                RenderTileColor({p.col, p.row}, healColor);
+            if(ImGui::Button("aflame")) {
+                hover_tile->occupant->effects.push_back({EFFECT_AFLAME});
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("para")) {
+                hover_tile->occupant->effects.push_back({EFFECT_PARALYZED});
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("swift")) {
+                hover_tile->occupant->effects.push_back({EFFECT_SWIFT});
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("stone")) {
+                hover_tile->occupant->effects.push_back({EFFECT_STONE});
             }
         }
-        */
 
         RenderTileColor({editor_cursor.col, editor_cursor.row}, editorColor);
     }

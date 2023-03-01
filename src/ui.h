@@ -181,15 +181,21 @@ DisplayHealthBar(int health, int max_health, int damage = 0)
 }
 
 void
-DisplayEquipInfo(const Equip *equip)
+DisplayEquipInfo(const Equip &equip)
 {
-    ImGui::Text("[%s]", equip->name.c_str());
+    ImGui::Text("[%s]", equip.name.c_str());
+}
+
+void
+DisplayEffect(const Effect &effect)
+{
+    ImGui::Text("[%s]", GetEffectString(effect.type).c_str());
 }
 
 void 
 DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 {
-    ImGui::SetNextWindowSize(ImVec2(250, 180));
+    ImGui::SetNextWindowSize(ImVec2(250, 220));
     ImGui::SetNextWindowPos(
             ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
                    160));
@@ -211,17 +217,28 @@ DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 
             if(unit.primary)
             {
-                DisplayEquipInfo(unit.primary);
+                DisplayEquipInfo(*unit.primary);
             }
             if(unit.secondary)
             {
                 ImGui::SameLine();
-                DisplayEquipInfo(unit.secondary);
+                DisplayEquipInfo(*unit.secondary);
             }
-            if(unit.healing)
+            if(unit.utility)
             {
                 ImGui::SameLine();
-                DisplayEquipInfo(unit.healing);
+                DisplayEquipInfo(*unit.utility);
+            }
+
+            ImGui::Text("P-");
+            ImGui::SameLine();
+            DisplayEffect(unit.passive);
+
+            ImGui::Text("T-");
+            for(const Effect &effect : unit.effects)
+            {
+                ImGui::SameLine();
+                DisplayEffect(effect);
             }
 		ImGui::PopFont();
     }

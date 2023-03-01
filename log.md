@@ -73,21 +73,20 @@ I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
 # TODO
-"Inactive" instead of dead for player units. Make them into pushable objects
-that don't take more damage, but can be healed.
-
-Eight levels
+All effects wear off at the end of the turn.
 
 Effects
-* On fire
-* Acid
-* Frozen
-etc
-Weapons that apply effects when:
-* Pushing
-* Damaging
-* Moving
+* Paralyzed
+* Burned
 
+* Swift
+* Stoneskin
+
+Abilities
+* Tailwind
+
+
+Eight levels
 
 Special tiles
 * Fire (applies on fire condition)
@@ -98,7 +97,28 @@ Special tiles
 * Smoke (Can't attack or repair)
 * Water (Can't attack or repair)
 
-Implement the squads
+Team design
+Rome
+* High Mobility
+* Support
+  * Applies Swift
+  * Can Manipulate all of the battlefield
+
+Guy
+* 2 movement
+* Super high health plus permanent stoneskin.
+
+Bata
+* Moderate Mobility
+* Low Health
+* Super high damage output.
+* Chaos? Random chance maybe?
+
+Suba
+* Move slow
+* Overdrive ability?
+* Crowd Control
+* Chain through guys like lightning squad?
 
 Make Maps
 Objectives
@@ -131,6 +151,9 @@ CHECK OUT HOW MATTHEW DID IT
 * Death
 * Attacks
 * Surfacing
+
+"Inactive" instead of dead for player units. Make them into pushable objects
+that don't take more damage, but can be healed.
 
 Strategy Layer
 Experience points and pilot abilities

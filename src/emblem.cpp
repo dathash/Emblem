@@ -222,7 +222,8 @@ int main(int argc, char *argv[])
             case PHASE_PLAYER:
             {
                 handler.Update(&input);
-                handler.UpdateCommands(&cursor, &level, backup, &resolution, res_backup, units, party, levels, &game_menu);
+                handler.UpdateCommands(&cursor, &level, backup, &resolution, res_backup, 
+                                       units, party, levels, &game_menu);
             } break;
             case PHASE_RESOLUTION:
             {
@@ -239,6 +240,7 @@ int main(int argc, char *argv[])
                     else
                     {
                         GoToAIPhase();
+                        level.TickEffects(TEAM_AI);
                     }
                 }
             } break;
