@@ -313,7 +313,7 @@ DisplayTurnQueue(ImGuiWindowFlags wf)
 }
 
 void
-DisplayUndoPrompt(ImGuiWindowFlags wf)
+DisplayUndoPrompt(ImGuiWindowFlags wf, bool can_undo)
 {
     ImGui::SetNextWindowSize(ImVec2(400, 200));
     ImGui::SetNextWindowPos(ImVec2(320, 200));
@@ -323,8 +323,16 @@ DisplayUndoPrompt(ImGuiWindowFlags wf)
     {
 		ImGui::PopFont();
 		ImGui::PushFont(uiFontMedium);
+        if(can_undo)
+        {
             ImGui::Text("Really Undo?");
             ImGui::Text("You only have one.");
+        }
+        else
+        {
+            ImGui::Text("No undos left.");
+            ImGui::Text("I warned you!");
+        }
 		ImGui::PopFont();
     }
     ImGui::End();
@@ -388,7 +396,7 @@ RenderUI(UI_State *ui,
     if(GlobalInterfaceState == GAME_MENU_QUEUE)
         DisplayTurnQueue(window_flags);
     if(GlobalInterfaceState == GAME_MENU_UNDO)
-        DisplayUndoPrompt(window_flags);
+        DisplayUndoPrompt(window_flags, level.can_undo);
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor(3);

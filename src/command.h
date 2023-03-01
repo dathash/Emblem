@@ -255,14 +255,18 @@ public:
 
     virtual void Execute()
     {
+        if(!level->can_undo) return;
+
         *level = backup;
         cursor->pos = level->Leader();
         cursor->Reset();
-        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
 
         *resolution = Resolution(res_backup);
 
         GlobalPlayer.health = GlobalPlayer.backup_health;
+        level->can_undo = false;
+
+        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
     }
 
 private:
