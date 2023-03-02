@@ -8,8 +8,18 @@
 enum IncidentType
 {
     INCIDENT_ATTACK,
-    INCIDENT_ENVIRONMENTAL,
+    INCIDENT_AFLAME,
+    INCIDENT_ENVIRONMENT,
 };
+string GetIncidentString(IncidentType type)
+{
+    switch(type)
+    {
+        case INCIDENT_ATTACK:   return "Attack";
+        case INCIDENT_AFLAME:   return "Aflame";
+        case INCIDENT_ENVIRONMENT: return "Environment";
+    }
+}
 
 
 // CIRCULAR
@@ -26,8 +36,22 @@ struct Incident
     IncidentType type = INCIDENT_ATTACK;
 
     void Resolve(Tilemap *map) {
-        if(!unit->HasEffect(EFFECT_PARALYZED))
-            Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
+        switch(type)
+        {
+            case INCIDENT_ATTACK:
+            {
+                if(!unit->HasEffect(EFFECT_PARALYZED))
+                    Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
+            } break;
+            case INCIDENT_AFLAME:
+            {
+                unit->Damage(1);
+                cout << "Fire damage!!!\n";
+            } break;
+            case INCIDENT_ENVIRONMENT:
+            {
+            } break;
+        }
     }
 };
 
@@ -55,7 +79,7 @@ struct Resolution
 
     void RemoveDeadUnits() {
         incidents.erase(remove_if(incidents.begin(), incidents.end(),
-                    [](auto const &a) { return a.unit->should_die; }),
+                    [](auto const &a) { return a.unit->should_die || a.unit->HasEffect(EFFECT_PARALYZED); }),
                     incidents.end());
     }
 };

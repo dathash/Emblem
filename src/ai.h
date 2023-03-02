@@ -23,7 +23,8 @@ public:
         bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
         map->accessible = Accessible(*map, cursor->pos,
                                      (paralyzed ? 0 : cursor->selected->movement),
-                                     cursor->selected->IsAlly());
+                                     cursor->selected->IsAlly(),
+                                     cursor->selected->HasEffect(EFFECT_SWIFT));
 
         GlobalAIState = AI_SELECTED;
     }
@@ -306,6 +307,12 @@ public:
         else
         {
             cursor->pos = cursor->selected->pos;
+        }
+
+        if(cursor->selected->HasEffect(EFFECT_AFLAME))
+        {
+            resolution->incidents.insert(resolution->incidents.begin(), 
+                                         {cursor->selected, {0, 0}, INCIDENT_AFLAME});
         }
 
         cursor->selected->Deactivate();

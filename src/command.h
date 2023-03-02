@@ -23,9 +23,8 @@ public:
 class MoveCommand : public Command
 {
 public:
-    MoveCommand(Cursor *cursor_in, const Tilemap &map_in, direction dir_in)
+    MoveCommand(Cursor *cursor_in, direction dir_in)
     : cursor(cursor_in),
-      map(map_in),
       dir(dir_in)
     {}
 
@@ -37,21 +36,10 @@ public:
             return;
 
         cursor->MoveTo(new_pos, dir * -1);
-
-        const Unit *over = map.tiles[new_pos.col][new_pos.row].occupant;
-        if(!over || over->IsEnv())
-            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-        else if(over->is_exhausted)
-            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-        else if(over->IsAlly())
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-        else
-            GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
     }
 
 private: 
     Cursor *cursor;
-    const Tilemap &map;
     direction dir;
 };
 
@@ -65,20 +53,43 @@ public:
 
     virtual void Execute()
     {
-        GlobalInterfaceState = SELECTED;
-        EmitEvent(PICK_UP_UNIT_EVENT);
-
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
-        cursor->selected->initial_pos = cursor->pos;
+        if(!cursor->selected) return;
 
-        map->accessible.clear();
-        if(cursor->selected->has_moved)
-            return;
+        if(cursor->selected->IsEnv()) return;
+        else if(cursor->selected->IsAlly())
+        {
+            cursor->selected->initial_pos = cursor->pos;
 
-        bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
-        map->accessible = Accessible(*map, cursor->pos,
-                                     (paralyzed ? 0 : cursor->selected->movement),
-                                     cursor->selected->IsAlly());
+            map->accessible.clear();
+            if(cursor->selected->has_moved)
+                return;
+
+            bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
+            int movement = (paralyzed ? 0 : cursor->selected->movement);
+            movement = (cursor->selected->HasEffect(EFFECT_SWIFT) ? movement + 2 : movement);
+            map->accessible = Accessible(*map, cursor->pos,
+                                         movement,
+                                         cursor->selected->IsAlly(),
+                                         cursor->selected->HasEffect(EFFECT_SWIFT));
+
+            GlobalInterfaceState = SELECTED;
+            EmitEvent(PICK_UP_UNIT_EVENT);
+        }
+        else
+        {
+            cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
+
+            bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
+            int movement = (paralyzed ? 0 : cursor->selected->movement);
+            movement = (cursor->selected->HasEffect(EFFECT_SWIFT) ? movement + 2 : movement);
+            map->accessible = Accessible(*map, cursor->pos,
+                                         movement,
+                                         cursor->selected->IsAlly(),
+                                         cursor->selected->HasEffect(EFFECT_SWIFT));
+
+            GlobalInterfaceState = ENEMY_RANGE;
+        }
     }
 
 private:
@@ -101,7 +112,7 @@ public:
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected = nullptr;
 
-        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        GlobalInterfaceState = NEUTRAL;
 
         EmitEvent(PLACE_UNIT_EVENT);
     }
@@ -129,7 +140,9 @@ public:
         cursor->MoveTo(new_pos, dir * -1);
 
         if(!cursor->selected->has_moved && VectorContains(new_pos, map.accessible))
-            cursor->path_draw = GetPath(map, cursor->selected->initial_pos, cursor->pos, true);
+            cursor->path_draw = GetPath(map, cursor->selected->initial_pos, cursor->pos, 
+                                        true, 
+                                        cursor->selected->HasEffect(EFFECT_SWIFT));
     }
 
 private:
@@ -217,26 +230,7 @@ public:
             return;
         }
 
-        Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
-        if(!over || over->IsEnv())
-        {
-            GlobalInterfaceState = NEUTRAL_OVER_GROUND;
-            return;
-        }
-
-        if(over->is_exhausted)
-        {
-            GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
-            return;
-        }
-
-        if(over->IsAlly())
-        {
-            GlobalInterfaceState = NEUTRAL_OVER_UNIT;
-            return;
-        }
-
-        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        GlobalInterfaceState = NEUTRAL;
         return;
     }
 
@@ -263,7 +257,7 @@ public:
         if(!level->can_undo) return;
 
         *level = backup;
-        cursor->pos = level->Leader();
+        cursor->pos = level->FirstAlly();
         cursor->Reset();
 
         cout << "BACKUP: " << res_backup.incidents.size() << "\n";
@@ -272,7 +266,7 @@ public:
         GlobalPlayer.health = GlobalPlayer.backup_health;
         level->can_undo = false;
 
-        GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+        GlobalInterfaceState = NEUTRAL;
     }
 
 private:
@@ -326,8 +320,7 @@ public:
             map->attackable = {new_pos};
         }
 
-        if(cursor->with->type == EQUIP_SELF_TARGET ||
-           cursor->with->type == EQUIP_HEAL)
+        if(cursor->with->type == EQUIP_SELF_TARGET)
         {
             GlobalInterfaceState = ATTACK_TARGETING;
             return;
@@ -421,13 +414,6 @@ public:
             case EQUIP_LASER:
             {
             } break;
-            case EQUIP_HEAL:
-            {
-                level->map.range.push_back(cursor->selected->pos);
-                cursor->targeting = cursor->selected->pos;
-                GlobalInterfaceState = ATTACK_TARGETING;
-                return;
-            } break;
         }
 
         GlobalInterfaceState = ATTACK_THINKING;
@@ -456,7 +442,7 @@ public:
         cursor->selected = nullptr;
         cursor->with = nullptr;
 
-        GlobalInterfaceState = NEUTRAL_OVER_DEACTIVATED_UNIT;
+        GlobalInterfaceState = NEUTRAL;
     }
 
 private:
@@ -465,31 +451,6 @@ private:
 };
 
 // ======================= selecting enemy commands ==========================
-class SelectEnemyCommand : public Command
-{
-public:
-    SelectEnemyCommand(Cursor *cursor_in, Tilemap *map_in)
-    : cursor(cursor_in),
-      map(map_in)
-    {}
-
-    virtual void Execute()
-    {
-        cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
-
-        bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
-        map->accessible = Accessible(*map, cursor->pos,
-                                     (paralyzed ? 0 : cursor->selected->movement),
-                                     cursor->selected->IsAlly());
-
-        GlobalInterfaceState = ENEMY_RANGE;
-    }
-
-private:
-    Cursor *cursor;
-    Tilemap *map;
-};
-
 class DeselectEnemyCommand : public Command
 {
 public:
@@ -500,7 +461,7 @@ public:
     virtual void Execute()
     {
         cursor->selected = nullptr;
-        GlobalInterfaceState = NEUTRAL_OVER_ENEMY;
+        GlobalInterfaceState = NEUTRAL;
     }
 
 private:
@@ -508,102 +469,52 @@ private:
 };
 
 // ======================= game menu commands =========================================
-class OpenGameMenuCommand : public Command
+class UndoCommand : public Command
 {
 public:
 
     virtual void Execute()
     { 
-        GlobalInterfaceState = GAME_MENU;
+        GlobalInterfaceState = UNDO;
     }
 };
 
-class ExitGameMenuCommand : public Command
+class QueueCommand : public Command
 {
 public:
 
     virtual void Execute()
     {
-        GlobalInterfaceState = NEUTRAL_OVER_GROUND;
+        GlobalInterfaceState = QUEUE;
     }
 };
 
-class ChooseGameMenuOptionCommand : public Command
+class EndTurnCommand : public Command
 {
 public:
-    ChooseGameMenuOptionCommand(Menu *menu_in,
-                                Level *level_in)
-    : menu(menu_in),
-      level(level_in)
+    EndTurnCommand(Level *level_in)
+    : level(level_in)
     {}
 
+
     virtual void Execute()
-    { 
-        EmitEvent(SELECT_MENU_OPTION_EVENT);
-        switch(menu->current)
-        {
-            case(0): // QUEUE
-            {
-                GlobalInterfaceState = GAME_MENU_QUEUE;
-                return;
-            } break;
-            case(1): // UNDO
-            {
-                GlobalInterfaceState = GAME_MENU_UNDO;
-                return;
-            } break;
-            case(2): // OPTIONS
-            {
-                GlobalInterfaceState = GAME_MENU_OPTIONS;
-                return;
-            } break;
-            case(3): // END TURN
-            {
-                level->TickEffects(TEAM_PLAYER);
-                GoToResolutionPhase();
-                return;
-            } break;
-        }
+    {
+        level->TickEffects(TEAM_PLAYER);
+        GoToResolutionPhase();
+        return;
     }
 
 private:
-    Menu *menu;
     Level *level;
 };
 
-class BackToGameMenuCommand : public Command
+class ReturnToNeutralCommand : public Command
 {
 public:
-
     virtual void Execute()
     { 
-        GlobalInterfaceState = GAME_MENU;
+        GlobalInterfaceState = NEUTRAL;
     }
-};
-
-class UpdateMenuCommand : public Command
-{
-public:
-    UpdateMenuCommand(Menu *menu_in, int direction_in)
-    : menu(menu_in),
-      direction(direction_in)
-    {}
-
-    virtual void Execute()
-    { 
-        EmitEvent(MOVE_MENU_EVENT);
-        int newCurrent = menu->current + direction;
-        if(newCurrent >= menu->rows)
-            menu->current = 0;
-        else if(newCurrent < 0)
-            menu->current = menu->rows - 1;
-        else
-            menu->current = newCurrent;
-    }
-
-private:
-    Menu *menu;
-    int direction;
 };
 
 // ================================= Meta =====================================
@@ -650,7 +561,7 @@ public:
 
         GlobalPlayer.Reset();
 
-        GoToAIPhase();
+        GlobalInterfaceState = WARP;
     }
 
 private:
@@ -680,7 +591,7 @@ public:
 
         GlobalPlayer.Reset();
 
-        GoToAIPhase();
+        GlobalInterfaceState = WARP;
     }
 
 private:
@@ -698,8 +609,61 @@ public:
 
     virtual void Execute()
     {
-        GoToAIPhase();
+        GlobalInterfaceState = WARP;
     }
+};
+
+// ================================= warp mode commands ========================
+class WarpCommand : public Command
+{
+public:
+    WarpCommand(Cursor *cursor_in, Level *level_in)
+    : cursor(cursor_in),
+      level(level_in)
+    {}
+
+    virtual void Execute()
+    {
+        const Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
+        if(!Warpable(cursor->pos)) return;
+
+        if(!over)
+        {
+            if(level->to_warp.empty()) return;
+
+            level->AddCombatant(level->to_warp.back(), cursor->pos);
+            level->to_warp.pop_back();
+        }
+        else
+        {
+            cout << "TODO! Can't swap warp spots yet.\n";
+        }
+
+        return;
+    }
+
+private: 
+    Cursor *cursor;
+    Level *level;
+};
+
+
+class ReadyCommand : public Command
+{
+public:
+    ReadyCommand(Level *level_in)
+    : level(level_in)
+    {}
+
+
+    virtual void Execute()
+    {
+        if(level->to_warp.empty())
+            GoToAIPhase();
+    }
+
+private: 
+    Level *level;
 };
 
 // ============================== Input Handler ================================
@@ -758,11 +722,11 @@ public:
 
     InputHandler(Cursor *cursor, const Tilemap &map)
     {
-        BindUp(make_shared<MoveCommand>(cursor, map, direction(0, -1)));
-        BindDown(make_shared<MoveCommand>(cursor, map, direction(0, 1)));
-        BindLeft(make_shared<MoveCommand>(cursor, map, direction(-1, 0)));
-        BindRight(make_shared<MoveCommand>(cursor, map, direction(1, 0)));
-        BindA(make_shared<OpenGameMenuCommand>());
+        BindUp(make_shared<NullCommand>());
+        BindDown(make_shared<NullCommand>());
+        BindLeft(make_shared<NullCommand>());
+        BindRight(make_shared<NullCommand>());
+        BindA(make_shared<NullCommand>());
         BindB(make_shared<NullCommand>());
         BindL(make_shared<NullCommand>());
         BindR(make_shared<NullCommand>());
@@ -882,53 +846,27 @@ public:
                 BindY(make_shared<NullCommand>());
             } break;
 
-            case(GAME_MENU):
-            {
-                BindUp(make_shared<UpdateMenuCommand>(gameMenu, -1));
-                BindDown(make_shared<UpdateMenuCommand>(gameMenu, 1));
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<ChooseGameMenuOptionCommand>(gameMenu, level));
-                BindB(make_shared<ExitGameMenuCommand>());
-                BindL(make_shared<NullCommand>());
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
-            } break;
-            case(GAME_MENU_OPTIONS):
+            case(QUEUE):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<NullCommand>());
-                BindB(make_shared<BackToGameMenuCommand>());
+                BindB(make_shared<ReturnToNeutralCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
                 BindX(make_shared<NullCommand>());
                 BindY(make_shared<NullCommand>());
             } break;
-            case(GAME_MENU_QUEUE):
-            {
-                BindUp(make_shared<NullCommand>());
-                BindDown(make_shared<NullCommand>());
-                BindLeft(make_shared<NullCommand>());
-                BindRight(make_shared<NullCommand>());
-                BindA(make_shared<NullCommand>());
-                BindB(make_shared<BackToGameMenuCommand>());
-                BindL(make_shared<NullCommand>());
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
-            } break;
-            case(GAME_MENU_UNDO):
+            case(UNDO):
             {
                 BindUp(make_shared<NullCommand>());
                 BindDown(make_shared<NullCommand>());
                 BindLeft(make_shared<NullCommand>());
                 BindRight(make_shared<NullCommand>());
                 BindA(make_shared<UndoTurnCommand>(level, backup, resolution, res_backup, cursor));
-                BindB(make_shared<BackToGameMenuCommand>());
+                BindB(make_shared<ReturnToNeutralCommand>());
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
                 BindX(make_shared<NullCommand>());
@@ -949,60 +887,18 @@ public:
                 BindY(make_shared<NullCommand>());
             } break;
 
-            case(NEUTRAL_OVER_GROUND):
+            case(NEUTRAL):
             {
-                BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
-                BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
-                BindLeft(make_shared<MoveCommand>(cursor, level->map, direction(-1, 0)));
-                BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
-                BindA(make_shared<OpenGameMenuCommand>());
-                BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
-            } break;
-
-            case(NEUTRAL_OVER_ENEMY):
-            {
-                BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
-                BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
-                BindLeft(make_shared<MoveCommand>(cursor, level->map, direction(-1, 0)));
-                BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
-                BindA(make_shared<SelectEnemyCommand>(cursor, &(level->map)));
-                BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
-            } break;
-
-            case(NEUTRAL_OVER_UNIT):
-            {
-                BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
-                BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
-                BindLeft(make_shared<MoveCommand>(cursor, level->map, direction(-1, 0)));
-                BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
+                BindUp(make_shared<MoveCommand>(cursor, direction(0, -1)));
+                BindDown(make_shared<MoveCommand>(cursor, direction(0, 1)));
+                BindLeft(make_shared<MoveCommand>(cursor, direction(-1, 0)));
+                BindRight(make_shared<MoveCommand>(cursor, direction(1, 0)));
                 BindA(make_shared<SelectUnitCommand>(cursor, &(level->map)));
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
-            } break;
-
-            case(NEUTRAL_OVER_DEACTIVATED_UNIT):
-            {
-                BindUp(make_shared<MoveCommand>(cursor, level->map, direction(0, -1)));
-                BindDown(make_shared<MoveCommand>(cursor, level->map, direction(0, 1)));
-                BindLeft(make_shared<MoveCommand>(cursor, level->map, direction(-1, 0)));
-                BindRight(make_shared<MoveCommand>(cursor, level->map, direction(1, 0)));
-                BindA(make_shared<OpenGameMenuCommand>());
-                BindB(make_shared<NullCommand>());
-                BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<NullCommand>());
-                BindX(make_shared<NullCommand>());
-                BindY(make_shared<NullCommand>());
+                BindR(make_shared<UndoCommand>());
+                BindX(make_shared<QueueCommand>());
+                BindY(make_shared<EndTurnCommand>(level));
             } break;
             case(SELECTED):
             {
@@ -1056,6 +952,20 @@ public:
                 BindR(make_shared<NullCommand>());
                 BindX(make_shared<NullCommand>());
                 BindY(make_shared<NullCommand>());
+            } break;
+
+            case(WARP):
+            {
+                BindUp(make_shared<MoveCommand>(cursor, direction(0, -1)));
+                BindDown(make_shared<MoveCommand>(cursor, direction(0, 1)));
+                BindLeft(make_shared<MoveCommand>(cursor, direction(-1, 0)));
+                BindRight(make_shared<MoveCommand>(cursor, direction(1, 0)));
+                BindA(make_shared<WarpCommand>(cursor, level));
+                BindB(make_shared<NullCommand>());
+                BindL(make_shared<NullCommand>());
+                BindR(make_shared<NullCommand>());
+                BindX(make_shared<NullCommand>());
+                BindY(make_shared<ReadyCommand>(level));
             } break;
         }
     }

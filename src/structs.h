@@ -305,10 +305,10 @@ GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 enum TileType
 {
     TILE_PLAIN,
-    TILE_FLAME,
-    TILE_STORM,
-    TILE_WIND,
     TILE_FORT,
+    TILE_FLAME,
+    TILE_WIND,
+    TILE_STORM,
 };
 string 
 GetTileTypeString(TileType type)
@@ -316,10 +316,10 @@ GetTileTypeString(TileType type)
     switch (type)
     {
         case TILE_PLAIN:   return "Plains";
-        case TILE_FLAME:   return "Flame";
-        case TILE_STORM:   return "Storm";
-        case TILE_WIND:    return "Wind";
         case TILE_FORT:    return "Fort";
+        case TILE_FLAME:   return "Flame";
+        case TILE_WIND:    return "Wind";
+        case TILE_STORM:   return "Storm";
 	}
 }
 
@@ -339,10 +339,10 @@ GetTile(TileType type)
     switch(type)
     {
         case(TILE_PLAIN):    return {{0, 0}, type, EFFECT_NONE};
-        case(TILE_FLAME):    return {{1, 1}, type, EFFECT_AFLAME};
-        case(TILE_STORM):    return {{4, 1}, type, EFFECT_PARALYZED};
-        case(TILE_WIND):     return {{3, 1}, type, EFFECT_SWIFT};
-        case(TILE_FORT):     return {{4, 0}, type, EFFECT_STONE};
+        case(TILE_FORT):     return {{1, 0}, type, EFFECT_STONE};
+        case(TILE_FLAME):    return {{2, 0}, type, EFFECT_AFLAME};
+        case(TILE_WIND):     return {{3, 0}, type, EFFECT_SWIFT};
+        case(TILE_STORM):    return {{4, 0}, type, EFFECT_PARALYZED};
     }
 }
 
@@ -398,7 +398,7 @@ struct Level
     string name = "";
 
     Tilemap map;
-    vector<shared_ptr<Unit>> combatants;
+    vector<shared_ptr<Unit>> combatants = {};
     Spawner spawner;
 
     Sound *song = nullptr;
@@ -407,6 +407,8 @@ struct Level
     int victory_turn = 1;
 
     bool can_undo = true;
+
+    vector<shared_ptr<Unit>> to_warp = {};
 
     Level() = default;
 
@@ -432,10 +434,10 @@ struct Level
     {
         switch(effect.type)
         {
-            case EFFECT_NONE: 
+            case EFFECT_NONE:
             {
             } break;
-            case EFFECT_AFLAME: 
+            case EFFECT_AFLAME:
             {
                 unit->Damage(1);
             } break;
@@ -541,28 +543,25 @@ struct Level
 
     // Returns the position of the leader.
     position
-    Leader()
+    FirstAlly()
     {
         for(const shared_ptr<Unit> &unit : combatants)
-        {
-            if(unit->ID() == LEADER_ID)
-                return unit->pos;
-        }
-        SDL_assert(!"ERROR Level.Leader(): No leader!\n");
-        return position(0, 0);
+            if(unit->IsAlly()) return unit->pos;
+
+        return position(-1, -1);
     }
 
     void
     RemoveDeadUnits()
     {
         // Quit if Leader is dead
-        if(GlobalInterfaceState != GAME_OVER)
+        if(GlobalInterfaceState != GAME_OVER &&
+           GlobalInterfaceState != WARP &&
+           GlobalInterfaceState != TITLE_SCREEN)
         {
-            position leader_pos = Leader();
-            if(map.tiles[leader_pos.col][leader_pos.row].occupant->should_die)
-            {
+            position ally_pos = FirstAlly();
+            if(ally_pos == position(-1, -1))
                 GameOver();
-            }
         }
 
         // REFACTOR: This could be so much simpler.
@@ -593,8 +592,9 @@ struct Level
 };
 
 // ================================= Menu ======================================
-Texture
-LoadTextureText(string text, SDL_Color color, int line_length);
+// CIRCULAR
+Texture LoadTextureText(string, SDL_Color, int, bool);
+
 struct Menu
 {
     int rows = 0;
@@ -607,7 +607,7 @@ struct Menu
     {
         for(string s : options_in)
         {
-            optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor, 0));
+            optionTextTextures.push_back(LoadTextureText(s.c_str(), black, 0, false));
             optionText.push_back(s);
             rows += 1;
         }
@@ -618,7 +618,7 @@ struct Menu
     AddOption(string s)
     {
         rows += 1;
-        optionTextTextures.push_back(LoadTextureText(s.c_str(), uiTextColor, 0));
+        optionTextTextures.push_back(LoadTextureText(s.c_str(), black, 0, false));
         optionText.push_back(s);
     }
 };

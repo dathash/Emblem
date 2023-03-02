@@ -42,10 +42,10 @@ GetEffectByName(const string &name)
 enum ClassType
 {
     CLASS_NONE,
-    CLASS_FIGHTER,
-    CLASS_RANGER,
-    CLASS_CASTER,
-    CLASS_HEALER,
+    CLASS_EARTH,
+    CLASS_WIND,
+    CLASS_FIRE,
+    CLASS_STORM,
     CLASS_UTILITY,
     CLASS_AI,
 };
@@ -55,10 +55,10 @@ GetClassString(ClassType type)
     switch(type)
     {
         case CLASS_NONE:     return "None";
-        case CLASS_FIGHTER:  return "Fighter";
-        case CLASS_RANGER:   return "Ranger";
-        case CLASS_CASTER:   return "Caster";
-        case CLASS_HEALER:   return "Healer";
+        case CLASS_EARTH:    return "Earth";
+        case CLASS_WIND:     return "Wind";
+        case CLASS_FIRE:     return "Fire";
+        case CLASS_STORM:    return "Storm";
         case CLASS_UTILITY:  return "Utility";
         case CLASS_AI:       return "AI";
         default:             return "";
@@ -74,22 +74,19 @@ enum EquipmentType
     EQUIP_SELF_TARGET,
     EQUIP_LEAP,
     EQUIP_LASER,
-    EQUIP_HEAL,
 };
 string
 GetEquipmentString(EquipmentType type)
 {
     switch(type)
     {
-        case EQUIP_NONE:      return "None";
-        case EQUIP_PUNCH:     return "Punch";
-        case EQUIP_LINE_SHOT: return "Line";
-        case EQUIP_ARTILLERY: return "Artillery";
+        case EQUIP_NONE:        return "None";
+        case EQUIP_PUNCH:       return "Punch";
+        case EQUIP_LINE_SHOT:   return "Line";
+        case EQUIP_ARTILLERY:   return "Artillery";
         case EQUIP_SELF_TARGET: return "Self";
-        case EQUIP_LEAP:      return "Leap";
-        case EQUIP_LASER:     return "Laser";
-        case EQUIP_HEAL:      return "Heal";
-        default:              return "";
+        case EQUIP_LEAP:        return "Leap";
+        case EQUIP_LASER:       return "Laser";
     }
 }
 
@@ -110,8 +107,8 @@ GetPushString(PushType type)
         case PUSH_NONE:     return "None";
         case PUSH_AWAY:     return "Away";
         case PUSH_TOWARDS:  return "Towards";
-        case PUSH_TOWARDS_AND_AWAY:  return "Towards + Away";
-        case PUSH_PERPENDICULAR:     return "Perpendicular";
+        case PUSH_TOWARDS_AND_AWAY:  return "T+A";
+        case PUSH_PERPENDICULAR:     return "Perp";
         case PUSH_ALL:      return "All";
         default:                return "";
     }
@@ -133,7 +130,6 @@ GetMovementString(MovementType type)
         case MOVEMENT_BACKONE:  return "Back one";
         case MOVEMENT_RAM:      return "Ram";
         case MOVEMENT_LEAP:     return "Leap";
-        default:                return "";
     }
 }
 

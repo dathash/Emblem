@@ -1,5 +1,5 @@
 COM	<name>	<team>	<hp>	<mov>	<fixed>	<prim>	<secnd>	<util>	<e1>	<e2>	<sprite>
-UNT	Guy	0	3	2	0	Sword	Shield	Potion	4	guy.png
+UNT	Guy	0	3	3	0	Sword	Shield	Potion	4	guy.png
 UNT	Butter	0	3	3	0	Fireball	 	Potion	0	butter.png
 UNT	Rome	0	3	4	0	Dart	 	WindRng	3	rome.png
 UNT	Suba	0	3	2	0	Tackle	Jolt	 	0	suba.png

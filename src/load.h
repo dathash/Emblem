@@ -13,13 +13,13 @@
 // Loads a Texture displaying the given text in the given color.
 // Now with wrapping, set by the line_length parameter
 Texture
-LoadTextureText(string text, SDL_Color color, int line_length)
+LoadTextureText(string text, SDL_Color color, int line_length, bool small)
 {
     SDL_Texture *texture = nullptr;
     SDL_Surface *surface = nullptr;
 
     SDL_assert(GlobalFont);
-    surface = TTF_RenderText_Solid_Wrapped(GlobalFont,
+    surface = TTF_RenderText_Solid_Wrapped((small ? GlobalFontSmall : GlobalFont),
                                            text.c_str(),
                                            color,
                                            (Uint32)line_length);
@@ -160,7 +160,10 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
             int col = stoi(tokens[1]);
             int row = stoi(tokens[2]);
 
-            level.AddCombatant(unitCopy, {col, row});
+            if(unitCopy->IsAlly())
+                level.to_warp.push_back(unitCopy);
+            else
+                level.AddCombatant(unitCopy, {col, row});
         }
         else if(type == "SPW")
         {

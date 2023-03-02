@@ -260,7 +260,12 @@ Simulate(Tilemap *map,
 
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
+
+        if(victim) // TODO: Maybe redundant?
+        {
+            SimulateDamage(victim, weapon.damage);
+            SimulateEffect(victim, weapon.effect);
+        }
 
     } break;
     case EQUIP_ARTILLERY:
@@ -272,7 +277,11 @@ Simulate(Tilemap *map,
                             source, subject, GetDirection(source, subject));
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
-        SimulateDamage(victim, weapon.damage);
+        if(victim)
+        {
+            SimulateDamage(victim, weapon.damage);
+            SimulateEffect(victim, weapon.effect);
+        }
     } break;
     case EQUIP_SELF_TARGET:
     {
@@ -282,24 +291,19 @@ Simulate(Tilemap *map,
     {
         position subject = destination;
 
+        // TODO: Is this right? Can you stomp on an enemy?
         Unit *victim = map->tiles[subject.col][subject.row].occupant;
         PerformMoveScenario(map, weapon.move, weapon.self_damage, 
                             source, subject, GetDirection(source, subject));
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
-        cout << "Damaging\n";
-        SimulateDamage(victim, weapon.damage);
+        if(victim)
+            SimulateDamage(victim, weapon.damage);
+
     } break;
     case EQUIP_LASER:
     {
         cout << "Unimplemented weapon type: " << weapon.type << "\n";
-    } break;
-    case EQUIP_HEAL:
-    {
-        position subject = destination;
-
-        Unit *victim = map->tiles[subject.col][subject.row].occupant;
-        SimulateHeal(victim, weapon.damage);
     } break;
     }
 }

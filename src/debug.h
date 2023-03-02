@@ -8,7 +8,7 @@
 #if DEV_MODE
 
 void
-DebugUI()
+DebugUI(const Cursor &cursor)
 {
     ImGuiWindowFlags flags = 0;
     flags |= ImGuiWindowFlags_NoBackground;
@@ -31,10 +31,11 @@ DebugUI()
         ImGui::Text("%s", GetInterfaceString(GlobalInterfaceState).c_str());
         ImGui::Text("%s", GetAIString(GlobalAIState).c_str());
         ImGui::Text("Speed 1/%d", GlobalSpeedMod);
+        ImGui::Text("%d %d", cursor.pos.col, cursor.pos.row);
     }
     ImGui::End();
     ImGui::PopFont();
 }
 
-#endif
+#endif // debug
 #endif

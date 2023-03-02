@@ -30,9 +30,10 @@
 
 #define PORTRAIT_SIZE 600
 #define SPRITE_SIZE 32
+#define SPRITE_SCALE 1.2f
 #define ATLAS_TILE_SIZE 16
 
-#define MENU_WIDTH 240
+#define MENU_WIDTH 250
 #define MENU_ROW_HEIGHT 50
 #define CONV_MENU_WIDTH 400
 
@@ -92,46 +93,40 @@ enum InterfaceState
     GAME_OVER,
     VICTORY,
 
-    GAME_MENU,
-    GAME_MENU_OPTIONS,
-    GAME_MENU_QUEUE,
-    GAME_MENU_UNDO,
+    //OPTIONS,
+
+    QUEUE,
+    UNDO,
 
     ENEMY_RANGE,
 
-    NEUTRAL_OVER_GROUND,
-    NEUTRAL_OVER_ENEMY,
-    NEUTRAL_OVER_UNIT,
-    NEUTRAL_OVER_DEACTIVATED_UNIT,
-
+    NEUTRAL,
     SELECTED,
 
     ATTACK_THINKING,
     ATTACK_TARGETING,
     ATTACK_RESOLUTION,
+
+    WARP,
 };
 string 
 GetInterfaceString(InterfaceState state)
 {
     switch(state)
     {
-    case NO_OP:                         return "No-Op";
-    case TITLE_SCREEN:                  return "Title screen";
-    case GAME_OVER:                     return "Game over";
-    case VICTORY:                       return "Victory";
-    case GAME_MENU:                     return "Game menu";
-    case GAME_MENU_OPTIONS:             return "Game menu options";
-    case GAME_MENU_QUEUE:               return "Game menu queue";
-    case GAME_MENU_UNDO:                return "Game menu undo";
-    case ENEMY_RANGE:                   return "Enemy range";
-    case NEUTRAL_OVER_GROUND:           return "Neutral over ground";
-    case NEUTRAL_OVER_ENEMY:            return "Neutral over enemy";
-    case NEUTRAL_OVER_UNIT:             return "Neutral over unit";
-    case NEUTRAL_OVER_DEACTIVATED_UNIT: return "Neutral over deactivated unit";
-    case SELECTED:                      return "Selected";
-    case ATTACK_THINKING:               return "Attack thinking";
-    case ATTACK_TARGETING:              return "Attack targeting";
-    case ATTACK_RESOLUTION:             return "Attack resolution";
+    case NO_OP:             return "No-Op";
+    case TITLE_SCREEN:      return "Title screen";
+    case GAME_OVER:         return "Game over";
+    case VICTORY:           return "Victory";
+    case QUEUE:             return "Queue";
+    case UNDO:              return "Undo";
+    case ENEMY_RANGE:       return "Enemy range";
+    case NEUTRAL:           return "Neutral";
+    case SELECTED:          return "Selected";
+    case ATTACK_THINKING:   return "Attack thinking";
+    case ATTACK_TARGETING:  return "Attack targeting";
+    case ATTACK_RESOLUTION: return "Attack resolution";
+    case WARP:              return "Warp";
 	}
 }
 
@@ -158,46 +153,40 @@ GetAIString(AIState state)
 }
 
 // ============================ color palette ==================================
-// Tile overlays
-const SDL_Color moveColor =         {100, 100, 180, 100};
-const SDL_Color pathColor =         {100, 250, 250, 100};
-const SDL_Color aiMoveColor =       {150, 0, 0, 100};
-const SDL_Color attackColor =       {250, 0, 0, 100};
-const SDL_Color healColor =         {0, 255, 0, 100};
-
-const SDL_Color exhaustedMod =      {100,   0, 100, 0};
-const SDL_Color readyMod =          {255, 255, 255, 0};
-
-const SDL_Color editorColor =       {255, 255, 0, 100};
-
-// UI
-const SDL_Color backgroundColor =   {226, 216, 107, 255};
-const SDL_Color uiColor =           {255, 224, 145, 255};
-const SDL_Color uiDarkColor =       {138, 110, 39, 255};
-const SDL_Color uiTitleColor =      {230, 144, 101, 255};
-const SDL_Color outlineColor =      {85, 70, 31, 255};
-const SDL_Color uiAltColor =        {60, 100, 30, 255};
-const SDL_Color enemyColor =        {150, 60, 30, 255};
-const SDL_Color uiTextColor =       {0, 0, 0, 255};
-const SDL_Color uiSelectorColor =   {119, 100, 55, 100};
-
-const SDL_Color healthBarColor =    {128, 136, 96, 255};
-
 // Palette Colors
-const SDL_Color black =             {0,   0,   0,   255};
-const SDL_Color white =             {255, 255, 255, 255};
-const SDL_Color red =               {205, 35,  67,  255};
-const SDL_Color darkRed =           {94,  1,   18,  255};
-const SDL_Color green =             {101, 204, 55,  255};
-const SDL_Color darkGreen =         {21, 85, 51, 255};
-const SDL_Color blue =              {42, 101, 205, 255};
-const SDL_Color darkBlue =          {22, 50, 125, 255};
-const SDL_Color purple =            {100, 20, 125, 255};
+const SDL_Color lightred =          {155, 26,  10,  255};
+const SDL_Color red =               {85, 15,   10,  255};
+const SDL_Color darkred =           {48, 15,   10,  255};
 
+const SDL_Color lightgreen =        {165, 140, 39,  255};
+const SDL_Color green =             {57, 87, 28,  255};
+const SDL_Color darkgreen =         {31, 36, 10, 255};
 
-const SDL_Color yellow =            {200, 200, 0, 255};
-const SDL_Color darkGray =          {100, 100, 100, 255};
-const SDL_Color accentBlue =        {106, 150, 250, 255};
-const SDL_Color cerulean =          {0, 128, 255, 255};
+const SDL_Color lightorange =       {239, 105, 47,  255};
+const SDL_Color orange =            {239, 58, 12,  255};
+const SDL_Color darkorange =        {54, 23, 12, 255};
+
+const SDL_Color lightblue =         {60, 159, 156, 255};
+const SDL_Color blue =              {39, 100, 104, 255};
+const SDL_Color darkblue =          {24, 63, 57, 255};
+
+const SDL_Color yellow =            {239, 172, 40, 255};
+
+const SDL_Color lightbrown =        {171, 92, 28, 255};
+const SDL_Color brown =             {114, 65, 19, 255};
+const SDL_Color darkbrown =         {69, 35, 13, 255};
+
+const SDL_Color lightbeige =        {239, 183, 117, 255};
+const SDL_Color beige =             {165, 98, 67, 255};
+const SDL_Color darkbeige =         {119, 52, 33, 255};
+
+const SDL_Color lightgray =         {146, 126, 106, 255};
+const SDL_Color gray =              {104, 76, 60, 255};
+const SDL_Color darkgray =          {57, 42, 28, 255};
+
+const SDL_Color white =             {239, 216, 161, 255};
+const SDL_Color black =             {42, 29, 13, 255};
+
+const int OverlayAlphaMod = 128;
 
 #endif

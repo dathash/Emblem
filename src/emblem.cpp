@@ -26,6 +26,7 @@ using namespace std;
 static SDL_Window *GlobalWindow = nullptr;
 static SDL_Renderer *GlobalRenderer = nullptr;
 static TTF_Font *GlobalFont = nullptr;
+static TTF_Font *GlobalFontSmall = nullptr;
 
 // IMGUI
 static ImFont *uiFontSmall;
@@ -207,6 +208,7 @@ int main(int argc, char *argv[])
 
         HandleEvents(&input, gamepad);
 
+
         // Update
         if(!GlobalEditorMode && 
            (!GlobalPaused || GlobalStep) &&
@@ -293,19 +295,19 @@ int main(int argc, char *argv[])
         */
 
         // Render
-        Render(level.map, level.spawner.rising, cursor, game_menu, resolution);
+        Render(level, level.spawner.rising, cursor, game_menu, resolution);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
-        RenderUI(&ui, cursor, level, GlobalPlayer);
+        RenderUI(&ui, cursor, level, GlobalPlayer, resolution);
 
 #if DEV_MODE
         if(GlobalEditorMode)
             EditorPass(&equipments, &units, party, &level, levels, &resolution);
         if(GlobalDebug)
-            DebugUI();
+            DebugUI(cursor);
 #endif
 
 		ImGui::EndFrame();

@@ -30,10 +30,7 @@ struct UI_State
     {
 		// Tile Info
         if(
-            GlobalInterfaceState == NEUTRAL_OVER_GROUND || 
-            GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
-            GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT ||
+            GlobalInterfaceState == NEUTRAL || 
             GlobalInterfaceState == SELECTED ||
             GlobalInterfaceState == ATTACK_THINKING ||
             GlobalInterfaceState == ATTACK_TARGETING
@@ -47,11 +44,7 @@ struct UI_State
         }
 
 		// Unit Blurb
-		if(
-            GlobalInterfaceState == NEUTRAL_OVER_ENEMY || 
-            GlobalInterfaceState == NEUTRAL_OVER_UNIT ||
-            GlobalInterfaceState == NEUTRAL_OVER_DEACTIVATED_UNIT
-            )
+		if(GlobalInterfaceState == NEUTRAL)
 		{
 			unit_blurb = true;
 		}
@@ -195,7 +188,7 @@ DisplayEffect(const Effect &effect)
 void 
 DisplayUnitBlurb(ImGuiWindowFlags wf, const Unit &unit)
 {
-    ImGui::SetNextWindowSize(ImVec2(250, 220));
+    ImGui::SetNextWindowSize(ImVec2(MENU_WIDTH, 220));
     ImGui::SetNextWindowPos(
             ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
                    160));
@@ -296,7 +289,7 @@ DisplayVictory(ImGuiWindowFlags wf)
 void
 DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
 {
-    ImGui::SetNextWindowSize(ImVec2(250, 140));
+    ImGui::SetNextWindowSize(ImVec2(MENU_WIDTH, 140));
     ImGui::SetNextWindowPos(
             ImVec2(X_OFFSET + TILE_SIZE * MAP_WIDTH + 10, 
                    10));
@@ -315,7 +308,7 @@ DisplayPlayerState(ImGuiWindowFlags wf, const Player &player)
 }
 
 void
-DisplayTurnQueue(ImGuiWindowFlags wf)
+DisplayTurnQueue(ImGuiWindowFlags wf, const Resolution &res)
 {
     ImGui::SetNextWindowSize(ImVec2(180, 400));
     ImGui::SetNextWindowPos(ImVec2(10, 10));
@@ -324,6 +317,14 @@ DisplayTurnQueue(ImGuiWindowFlags wf)
 	ImGui::PushFont(uiFontLarge);
     ImGui::Begin("Queue", NULL, wf);
     {
+        ImGui::PushFont(uiFontSmall);
+        for(int i = 0; i < res.incidents.size(); ++i)
+        {
+            const Incident &incident = res.incidents[res.incidents.size() - 1];
+            ImGui::Text("%s - %s", incident.unit->name.c_str(), 
+                                   GetIncidentString(incident.type).c_str());
+        }
+        ImGui::PopFont();
     }
     ImGui::End();
     ImGui::PopFont();
@@ -359,7 +360,8 @@ void
 RenderUI(UI_State *ui, 
          const Cursor &cursor, 
          const Level &level,
-         const Player &player
+         const Player &player,
+         const Resolution &resolution
         )
 {
     ui->Update();
@@ -371,9 +373,9 @@ RenderUI(UI_State *ui,
 	window_flags |= ImGuiWindowFlags_NoScrollbar;
 	window_flags |= ImGuiWindowFlags_NoResize;
 
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(uiColor));
-	ImGui::PushStyleColor(ImGuiCol_TitleBg, SdlToImColor(uiTitleColor));
-	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, SdlToImColor(uiTitleColor));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, SdlToImColor(lightbeige));
+	ImGui::PushStyleColor(ImGuiCol_TitleBg, SdlToImColor(brown));
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, SdlToImColor(brown));
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5, 0.5));
 
@@ -399,7 +401,7 @@ RenderUI(UI_State *ui,
     // USER MODE UI
 	if(ui->tile_info)
 		DisplayTileInfo(window_flags, level.map.tiles[cursor.pos.col][cursor.pos.row]);
-	if(ui->unit_blurb)
+	if(ui->unit_blurb && level.map.tiles[cursor.pos.col][cursor.pos.row].occupant)
 		DisplayUnitBlurb(window_flags, *level.map.tiles[cursor.pos.col][cursor.pos.row].occupant);
 	if(ui->unit_selected)
 		DisplayUnitBlurb(window_flags, *cursor.selected);
@@ -410,9 +412,9 @@ RenderUI(UI_State *ui,
     if(ui->victory)
         DisplayVictory(window_flags);
 
-    if(GlobalInterfaceState == GAME_MENU_QUEUE)
-        DisplayTurnQueue(window_flags);
-    if(GlobalInterfaceState == GAME_MENU_UNDO)
+    if(GlobalInterfaceState == QUEUE)
+        DisplayTurnQueue(window_flags, resolution);
+    if(GlobalInterfaceState == UNDO)
         DisplayUndoPrompt(window_flags, level.can_undo);
 
 	ImGui::PopStyleVar();

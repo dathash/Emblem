@@ -105,7 +105,7 @@ Line(const Tilemap &map, const position &origin, const direction &dir)
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
 Accessible(const Tilemap &map, position origin, 
-           int mov, bool sourceIsAlly)
+           int mov, bool is_ally, bool is_swift = false)
 {
     vector<position> accessible;
 
@@ -143,8 +143,11 @@ Accessible(const Tilemap &map, position origin,
             if(IsValid(new_pos))
             {
                 int newCost;
+
+                // Can't move through units not on your team.
                 if(map.tiles[new_pos.col][new_pos.row].occupant && 
-                   map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != sourceIsAlly)
+                   (map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != is_ally &&
+                    !is_swift))
                 {
                     newCost = 100;
                 }
@@ -254,7 +257,7 @@ PrintField(const vector<vector<position>> &field)
 // Also produces a Distance Field, which indicates distance at each point.
 // NOTE: Currently just prints out the distance field.
 vector<vector<direction>>
-GetField(const Tilemap &map, position origin, bool is_ally)
+GetField(const Tilemap &map, position origin, bool is_ally, bool is_swift)
 {
     vector<vector<direction>> field;
 	for(int col = 0; col < MAP_WIDTH; ++col)
@@ -301,8 +304,10 @@ GetField(const Tilemap &map, position origin, bool is_ally)
             {
                 int newCost = distances[current.col][current.row] + 1;
 
+                // Can't move through units who are not your ally!
                 if(map.tiles[new_pos.col][new_pos.row].occupant &&
-                   (map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != is_ally))
+                   (map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != is_ally &&
+                    !is_swift))
                 {
                     newCost = 100;
                 }
@@ -336,10 +341,11 @@ path
 GetPath(const Tilemap &map,
         position start,
         position destination,
-        bool is_ally)
+        bool is_ally,
+        bool is_swift = false)
 {
     path path_result;
-    vector<vector<position>> field = GetField(map, destination, is_ally);
+    vector<vector<position>> field = GetField(map, destination, is_ally, is_swift);
 
     position next = start;
     direction from = field[next.col][next.row];

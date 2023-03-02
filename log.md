@@ -132,21 +132,15 @@ Stone 2
 Create blockages on the map, with stones.
 
 # TODO
-Swift | move again after attack
+Level Menu
 
-Put environmental effects in the turn queue.
+Start level command
+End Level Command
 
-Sanding pass!!!
-
-Team Design implementation
-Playtesting
-
-Ten levels
-Objectives
-
+Finish warp mechanics (with unit storage overhaul)
+Random enemy spawns at the start of level
 
 Visualization of attacks.
-CHECK OUT HOW MATTHEW DID IT
 * Punch
 * Line shots
 * Ram (Line shot variant)
@@ -155,13 +149,18 @@ CHECK OUT HOW MATTHEW DID IT
 * Show Where the unit will end up by the end.
 * Show Damage outcome
 
+Sanding pass!!!
+
+Four more units
+Playtesting (for bugs and feel)
+
+Ten levels
+Objectives
+
 
 AI Attacks
 * Avoid other ai attacks (dangerous)
 * Avoid repeated behavior
-
-Random enemy spawns at the start of level
-Choose unit drop locations at start of level
 
 
 Animations
@@ -173,36 +172,29 @@ CHECK OUT HOW MATTHEW DID IT
 * Attacks
 * Surfacing
 
-"Inactive" instead of dead for player units. Make them into pushable objects
-that don't take more damage, but can be healed.
-
 Strategy Layer
 Experience points and pilot abilities
 Polish
 
-Ideas
-* Just pre-render numbers and draw them as bitmaps
-
-Gamepad again
+Gamepad fix and testing
 
 # Later
 Art
-15 Portraits (with 4 faces each) 
-30 Spritesheets
-Tilemaps (With five colorschemes) 
+8 Portraits
+8 Spritesheets
+5 Tilemaps
+Buildings
+8 Enemies
 
 Conversations
     Story nailed down
-    200 Conversations
+    50 Conversations
     20 Cutscenes
 
 POLISH
-    Different colored menus.
-    Pixel Squishing Fix
     Z-Sorting
 
     Mini headshots displayed in unit blurb 
 
     BUG | Paths are drawn without regard for walkable squares. EX: When choosing
     a square to place a unit, its path is drawn through an enemy.
-

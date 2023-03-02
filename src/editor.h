@@ -297,7 +297,7 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
             }
         }
 
-        RenderTileColor({editor_cursor.col, editor_cursor.row}, editorColor);
+        RenderTileColor({editor_cursor.col, editor_cursor.row}, yellow, OverlayAlphaMod);
     }
     ImGui::End();
 }

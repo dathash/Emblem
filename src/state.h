@@ -20,11 +20,11 @@ void GoToPlayerPhase(Level *level,
                      Cursor *cursor)
 {
     GlobalPhase = PHASE_PLAYER;
-    GlobalInterfaceState = NEUTRAL_OVER_UNIT;
+    GlobalInterfaceState = NEUTRAL;
     GlobalAIState = AI_NO_OP;
 
     cursor->selected = nullptr;
-    cursor->PlaceAt(level->Leader());
+    cursor->PlaceAt(level->FirstAlly());
 
     for(auto const &unit : level->combatants)
         unit->Activate();

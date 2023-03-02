@@ -62,6 +62,13 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                 GlobalStep = true;
             return;
         }
+
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_v)
+        {
+            GlobalInterfaceState = VICTORY;
+            return;
+        }
+
         if(Event.type == SDL_QUIT || (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_ESCAPE))
         {
             GlobalRunning = false;

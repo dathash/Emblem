@@ -38,7 +38,8 @@ Initialize()
     if(TTF_Init() == -1)
         return false;
     GlobalFont = TTF_OpenFont("../assets/fonts/bjg.ttf", 20);
-    if(!GlobalFont)
+    GlobalFontSmall = TTF_OpenFont("../assets/fonts/bjg.ttf", 10);
+    if(!GlobalFont || !GlobalFontSmall)
         return false;
 
     // IMG

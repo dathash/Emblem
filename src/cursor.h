@@ -24,7 +24,6 @@ struct Cursor
         sheet.Update();
     }
 
-
     void Reset() {
         selected = nullptr;
         targeting = {-1, -1};

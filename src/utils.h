@@ -218,18 +218,23 @@ IsValid(const position &pos)
 
 // returns true if a given point is in a vector.
 bool
-VectorContains(const position &pos_in, const vector<position> &vector_in)
+VectorContains(const position &pos, const vector<position> &vector_in)
 {
     for(const position &p : vector_in)
-        if(pos_in == p)
+        if(pos == p)
             return true;
     return false;
 }
 
-bool IsEdge(const position &pos_in)
+bool IsEdge(const position &pos)
 {
-    return (pos_in.col == 0 || pos_in.col == MAP_WIDTH - 1
-         || pos_in.row == 0 || pos_in.row == MAP_HEIGHT - 1);
+    return (pos.col == 0 || pos.col == MAP_WIDTH - 1
+         || pos.row == 0 || pos.row == MAP_HEIGHT - 1);
+}
+
+bool Warpable(const position &pos)
+{
+    return pos.row > 3 && !IsEdge(pos);
 }
 
 
