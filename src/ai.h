@@ -20,8 +20,9 @@ public:
         cursor->selected->initial_pos = cursor->pos;
 
         map->accessible.clear();
+        bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
         map->accessible = Accessible(*map, cursor->pos,
-                                     cursor->selected->movement,
+                                     (paralyzed ? 0 : cursor->selected->movement),
                                      cursor->selected->IsAlly());
 
         GlobalAIState = AI_SELECTED;

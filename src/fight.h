@@ -23,29 +23,27 @@ GetFirstTarget(const Tilemap &map,
     return {-1, -1};
 }
 
-void
-SimulateDamage(Unit *victim, int amount)
-{
-    if(!victim)
-        return;
+void SimulateDamage(Unit *victim, int amount) {
+    if(!victim) return;
+    if(amount == 0) return;
 
-    if(victim->ID() == hash<string>{}("House"))
-    {
+    if(victim->HasEffect(EFFECT_STONE)) {
+        cout << "1 Damage nullified by stone effect.\n";
+        amount -= 1;
+        victim->RemoveEffect(EFFECT_STONE);
+    }
+
+    if(victim->ID() == hash<string>{}("House")) {
         GlobalPlayer.Damage(amount);
     }
 
-    // NOTE: This is called when damage is zero when pushing a unit.
-    // Keep that in mind for visualization purposes.
-    cout << amount << " damage to " << victim->name << "\n";
-
     victim->Damage(amount);
+
+    cout << amount << " damage to " << victim->name << "\n";
 }
 
-void
-SimulateEffect(Unit *victim, EffectType type)
-{
-    if(!victim)
-    {
+void SimulateEffect(Unit *victim, EffectType type) {
+    if(!victim) {
         cout << "WARNING! SimulateEffect: No victim. Shouldn't get here.\n";
         return;
     }
@@ -244,7 +242,6 @@ Simulate(Tilemap *map,
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
 
-        cout << victims.size() << "\n";
         for(Unit *victim : victims)
         {
             SimulateDamage(victim, weapon.damage);
@@ -253,7 +250,7 @@ Simulate(Tilemap *map,
     } break;
     case EQUIP_LINE_SHOT:
     {
-        position subject = GetFirstTarget(*map, source, 
+        position subject = GetFirstTarget(*map, source,
                                           GetDirection(source, destination));
         Unit *victim = map->tiles[subject.col][subject.row].occupant;
         PerformMoveScenario(map, weapon.move, weapon.self_damage, 

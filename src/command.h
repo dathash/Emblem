@@ -75,8 +75,9 @@ public:
         if(cursor->selected->has_moved)
             return;
 
+        bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
         map->accessible = Accessible(*map, cursor->pos,
-                                     cursor->selected->movement,
+                                     (paralyzed ? 0 : cursor->selected->movement),
                                      cursor->selected->IsAlly());
     }
 
@@ -476,9 +477,10 @@ public:
     {
         cursor->selected = map->tiles[cursor->pos.col][cursor->pos.row].occupant;
 
+        bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
         map->accessible = Accessible(*map, cursor->pos,
-                                     cursor->selected->movement,
-                                     !cursor->selected->IsAlly());
+                                     (paralyzed ? 0 : cursor->selected->movement),
+                                     cursor->selected->IsAlly());
 
         GlobalInterfaceState = ENEMY_RANGE;
     }

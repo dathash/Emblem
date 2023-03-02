@@ -243,7 +243,6 @@ struct Unit
     // Damages a unit and resolves things involved with that process.
     // Returns the amount of damage actually done.
     int Damage(int amount) {
-        cout << amount << " Damage to " << name << "\n";
         if(GlobalGodMode && IsAlly()) return 0;
 
         int result = min(amount, health);
@@ -262,10 +261,20 @@ struct Unit
         effects.push_back({type});
     }
 
+    // Removes a given effect from the unit's list of temporary effects.
+    // Does not touch their permanent passive.
     void RemoveEffect(EffectType type) {
         effects.erase(remove_if(effects.begin(), effects.end(),
                 [type](const Effect &effect) { return effect.type == type; }),
                 effects.end());
+    }
+
+    // Returns true if the unit has the given effect, false otherwise.
+    bool HasEffect(EffectType type) {
+        for(const Effect &effect : effects)
+            if(effect.type == type)
+                return true;
+        return passive.type == type ? true : false;
     }
 
     void Deactivate() {
@@ -277,6 +286,7 @@ struct Unit
         has_moved = false;
         is_exhausted = false;
     }
+
 };
 
 
@@ -509,6 +519,7 @@ struct Level
             }
             else
             {
+                map.tiles[pos.col][pos.row].occupant->Damage(1); // For blocking a rising enemy
                 keep.push_back(pos);
             }
         }

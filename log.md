@@ -10,6 +10,9 @@ Plan
 Should placing a unit on a tile change the tile to neutral again? This seems
 reasonable from programming, but might not play as well.
 
+Should paralysis be nullified by being pushed, damaged, etc? Should a unit be
+able to break out of it just to move?
+
 ## Foundations
 What is appealing to me about tactics games?
     Permadeath sacrifices
@@ -77,7 +80,7 @@ stronger as it takes more hits.
 I really like the dark souls Ring system, and the 5e attunement system.
 Genealogy's items are pretty close too.
 
-# Team design
+## Team design
 Rome
 * 5 mov
 * 3 hp
@@ -87,13 +90,13 @@ Rome
   * Buff | Applies Swift
 
 
-Guy
+Guy | The Lithomancer
 * 2 movement
 * 4 hp
 * passive | stoneskin.
 * Abilities
-  * Shield | Apply Stone to a unit
-  * Brand | 1-2 range, solid damage.
+  * Sword | 1-2 range, solid damage.
+  * Shield | Apply Stone to a unit and pull them to Guy.
 
 Bata
 * 3 mov
@@ -113,19 +116,23 @@ Suba
 
 Fire 2
 Quick, up in your face, paladin with two blades.
+Glung
 
 Wind 2
 Grappler, can hold units in a whole line in place.
+Rabbit?
 
 Lightning 2
-* Chain through guys like lightning squad?
+Lion
+Paladin
+Smite with paralysis.
+Lightning Bolt.
 
 Stone 2
 Create blockages on the map, with stones.
+
 # TODO
-Paralyzed | Cannot move, only attack
 Swift | move again after attack
-Stone | 1 attack damage reduction
 
 Put environmental effects in the turn queue.
 

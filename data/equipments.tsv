@@ -1,18 +1,20 @@
 COM	<name>	<type>	<class>	<push>	<move>	<effec>	<dmg>	<p_dmg>	<s_dmg>	<min>	<max>
 WEA	Sword	1	1	1	0	0	2	0	0	1	1	
 WEA	Hammer	5	1	5	3	0	1	1	1	1	8	
-WEA	Smite	1	1	2	0	1	2	0	0	1	2
-WEA	Lance	2	1	1	2	0	2	0	1	0	0	
-WEA	Bow	2	2	1	0	0	1	0	0	0	0	
-WEA	Balista	2	2	1	1	0	2	0	1	0	0	
-WEA	Spark	3	3	5	0	0	1	1	0	2	8	
-WEA	Heal	0	0	0	0	0	1	1	1	0	0	
+WEA	Smite	1	1	2	0	1	2	0	0	1	2	
+WEA	Tackle	2	4	1	2	0	2	0	1	0	0	
+WEA	Dart	2	2	1	0	0	1	0	0	0	0	
+WEA	Jolt	2	2	0	0	2	0	0	0	0	0	
+WEA	Fireball	3	3	5	0	1	2	1	0	2	8	
+WEA	Heal	0	0	0	0	0	0	0	0	0	0	
 WEA	Potion	7	0	0	0	0	1	0	0	0	0	
-WEA	Shield	0	0	0	0	0	1	1	1	0	0	
+WEA	Shield	1	1	2	0	4	0	0	0	1	2	
 WEA	Helmet	0	0	0	0	0	1	1	1	0	0	
 WEA	WindRng	0	0	0	0	0	1	1	1	0	0	
 WEA	Claw	1	6	1	0	0	1	0	0	1	1	
 WEA	Claw II	1	6	0	0	0	1	0	0	2	2	
 WEA	Ram	2	6	1	2	0	2	0	0	1	8	
 WEA	Spit	2	6	0	0	0	1	0	0	0	0	
+WEA	Hurl	3	6	0	0	0	1	0	0	2	8	
+WEA	Gust	4	2	5	0	0	0	0	0	1	1	
 WEA	Hurl	3	6	0	0	0	1	0	0	2	8	

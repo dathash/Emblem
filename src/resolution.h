@@ -26,7 +26,8 @@ struct Incident
     IncidentType type = INCIDENT_ATTACK;
 
     void Resolve(Tilemap *map) {
-        Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
+        if(!unit->HasEffect(EFFECT_PARALYZED))
+            Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
     }
 };
 

@@ -28,51 +28,25 @@ void Audio(Level *level) {
     ImGui::End();
 }
 
-static uint8_t selectedIndex = 0;
+static uint8_t selected_unit_index = 0;
 void UnitEditor(vector<shared_ptr<Equip>> *equipments,
                 vector<shared_ptr<Unit>> *units)
 {
     ImGui::Begin("unit editor");
     {
-        /*
-        if(ImGui::Button("create"))
-        {
-            units->push_back(make_shared<Unit>(
-                string("DEFAULT_CHANGE"),
-                TEAM_ENV,
-                3,
-                3,
-                false,
-                nullptr,
-                nullptr,
-
-                Spritesheet(LoadTextureImage(SPRITES_PATH, string(DEFAULT_SHEET)), 32, ANIMATION_SPEED)
-            ));
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("destroy"))
-        {
-            units->erase(units->begin() + selectedIndex);
-            if(selectedIndex > 0)
-            {
-                --selectedIndex;
-            }
-        }
-        */
-
         for(int i = 0; i < units->size(); ++i)
         {
             char buffer[256];
             sprintf(buffer, "%d", i);
             if (ImGui::Button(buffer))
-                selectedIndex = i;
+                selected_unit_index = i;
             if(i % 7 || i == 0)
                 ImGui::SameLine();
         }
         ImGui::NewLine();
 
-        SDL_assert(selectedIndex < units->size());
-        Unit *selected = (*units)[selectedIndex].get();
+        SDL_assert(selected_unit_index < units->size());
+        Unit *selected = (*units)[selected_unit_index].get();
 
         ImGui::InputText("unit name", &(selected->name));
         ImGui::SliderInt("health", &selected->max_health, 1, 8);
@@ -81,72 +55,78 @@ void UnitEditor(vector<shared_ptr<Equip>> *equipments,
 
         ImGui::Text("Passive | %s", GetEffectString(selected->passive.type).c_str());
 
-        if(selected->primary)
-            ImGui::Text("Primary | %s", selected->primary->name.c_str());
-        if(selected->secondary)
-        {
-            ImGui::SameLine();
-            ImGui::Text("Secondary | %s", selected->secondary->name.c_str());
+        if(selected->primary) {
+            ImGui::Text("1 | %s", selected->primary->name.c_str());
         }
-        if(selected->utility)
-        {
+        if(selected->secondary) {
             ImGui::SameLine();
-            ImGui::Text("Utility | %s", selected->utility->name.c_str());
+            ImGui::Text("2 | %s", selected->secondary->name.c_str());
+        }
+        if(selected->utility) {
+            ImGui::SameLine();
+            ImGui::Text("U | %s", selected->utility->name.c_str());
         }
 
-        static int index = 0;
-        ImGui::SliderInt("index", &index, 0, 30);
-        if(index < equipments->size())
+        static int equip_index = 0;
+        ImGui::SliderInt("index", &equip_index, 0, 30);
+        if(ImGui::Button("Create"))
         {
-            ImGui::Text("%s", equipments->at(index)->name.c_str());
-            if(ImGui::Button("Primary"))
-            {
-                if(selected->primary) // TODO: Shouldn't have to do this. the pointer should be null, and you can call delete on nullptr.
-                    delete selected->primary;
-                selected->primary = new Equip(*equipments->at(index));
+            equipments->push_back(make_shared<Equip>(*equipments->back()));
+        }
+        if(equip_index < equipments->size())
+        {
+            if(ImGui::Button("P")) {
+                delete selected->primary;
+                selected->primary = new Equip(*equipments->at(equip_index));
             }
             ImGui::SameLine();
-            if(ImGui::Button("Secondary"))
-            {
-                if(selected->secondary)
-                    delete selected->secondary;
-                selected->secondary = new Equip(*equipments->at(index));
+            if(ImGui::Button("S")) {
+                delete selected->secondary;
+                selected->secondary = new Equip(*equipments->at(equip_index));
             }
             ImGui::SameLine();
-            if(ImGui::Button("Utility"))
+            if(ImGui::Button("U")) {
+                delete selected->utility;
+                selected->utility = new Equip(*equipments->at(equip_index));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Clear"))
             {
-                if(selected->utility)
-                    delete selected->utility;
-                selected->utility = new Equip(*equipments->at(index));
+                delete selected->primary;
+                selected->primary = nullptr;
+                delete selected->secondary;
+                selected->secondary = nullptr;
+                delete selected->utility;
+                selected->utility = nullptr;
             }
 
-            ImGui::InputText("equip name", &(equipments->at(index)->name));
+            ImGui::InputText("equip", &(equipments->at(equip_index)->name));
 
-            ImGui::SliderInt("t", (int *)&(equipments->at(index)->type), 0, 10);
+            ImGui::SliderInt("t", (int *)&(equipments->at(equip_index)->type), 0, 10);
             ImGui::SameLine();
-            ImGui::Text("%s", GetEquipmentString(equipments->at(index)->type).c_str());
+            ImGui::Text("%s", GetEquipmentString(equipments->at(equip_index)->type).c_str());
 
-            ImGui::SliderInt("c", (int *)&(equipments->at(index)->cls), 0, 10);
+            ImGui::SliderInt("c", (int *)&(equipments->at(equip_index)->cls), 0, 10);
             ImGui::SameLine();
-            ImGui::Text("%s", GetClassString(equipments->at(index)->cls).c_str());
+            ImGui::Text("%s", GetClassString(equipments->at(equip_index)->cls).c_str());
 
-            ImGui::SliderInt("p", (int *)&(equipments->at(index)->push), 0, 10);
+            ImGui::SliderInt("p", (int *)&(equipments->at(equip_index)->push), 0, 10);
             ImGui::SameLine();
-            ImGui::Text("%s", GetPushString(equipments->at(index)->push).c_str());
+            ImGui::Text("%s", GetPushString(equipments->at(equip_index)->push).c_str());
 
-            ImGui::SliderInt("m", (int *)&(equipments->at(index)->move), 0, 10);
+            ImGui::SliderInt("m", (int *)&(equipments->at(equip_index)->move), 0, 10);
             ImGui::SameLine();
-            ImGui::Text("%s", GetMovementString(equipments->at(index)->move).c_str());
+            ImGui::Text("%s", GetMovementString(equipments->at(equip_index)->move).c_str());
 
-            ImGui::SliderInt("e", (int *)&(equipments->at(index)->effect), 0, 10);
+            ImGui::SliderInt("e", (int *)&(equipments->at(equip_index)->effect), 0, 10);
             ImGui::SameLine();
-            ImGui::Text("%s", GetEffectString(equipments->at(index)->effect).c_str());
+            ImGui::Text("%s", GetEffectString(equipments->at(equip_index)->effect).c_str());
 
-            ImGui::SliderInt("damage", &(equipments->at(index)->damage), 0, 3);
-            ImGui::SliderInt("push damage", &(equipments->at(index)->push_damage), 0, 3);
-            ImGui::SliderInt("self damage", &(equipments->at(index)->self_damage), 0, 3);
-            ImGui::SliderInt("min range", &(equipments->at(index)->min_range), 0, 8);
-            ImGui::SliderInt("max range", &(equipments->at(index)->max_range), 0, 8);
+            ImGui::SliderInt("damage", &(equipments->at(equip_index)->damage), 0, 3);
+            ImGui::SliderInt("push damage", &(equipments->at(equip_index)->push_damage), 0, 3);
+            ImGui::SliderInt("self damage", &(equipments->at(equip_index)->self_damage), 0, 3);
+            ImGui::SliderInt("min range", &(equipments->at(equip_index)->min_range), 0, 8);
+            ImGui::SliderInt("max range", &(equipments->at(equip_index)->max_range), 0, 8);
         }
         else
         {
@@ -247,13 +227,11 @@ void LevelEditor(Level *level, const vector<shared_ptr<Unit>> &units)
         ImGui::Text("Units:");
         if(ImGui::Button("add"))
         {
-            if(hover_tile->occupant)
-            {
+            if(hover_tile->occupant) {
                 cout << "MISUSE: Cannot place unit there.\n";
             }
-            else
-            {
-                level->combatants.push_back(make_shared<Unit>(*units[selectedIndex]));
+            else {
+                level->combatants.push_back(make_shared<Unit>(*units[selected_unit_index]));
                 level->combatants.back()->pos.col = editor_cursor.col;
                 level->combatants.back()->pos.row = editor_cursor.row;
                 hover_tile->occupant = level->combatants.back().get();
