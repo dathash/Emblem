@@ -166,6 +166,9 @@ public:
         if(cursor->selected->has_moved)
             return;
 
+        if(cursor->selected->initial_pos == cursor->pos)
+            return;
+
         level->map.accessible.clear();
 
         position pos = cursor->pos;

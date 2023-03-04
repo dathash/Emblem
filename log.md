@@ -134,6 +134,9 @@ Create blockages on the map, with stones.
 # TODO
 Level Menu
 
+to fix the undo on the same square bug, just don't let a unit move to its own
+square.
+
 Start level command
 End Level Command
 
