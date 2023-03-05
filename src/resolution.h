@@ -32,6 +32,7 @@ Simulate(Tilemap *map,
 struct Incident
 {
     Unit *unit;
+    Equip *weapon;
     position offset;
     IncidentType type = INCIDENT_ATTACK;
 
@@ -41,7 +42,7 @@ struct Incident
             case INCIDENT_ATTACK:
             {
                 if(!unit->HasEffect(EFFECT_PARALYZED))
-                    Simulate(map, *unit->primary, unit->pos, unit->pos + offset);
+                    Simulate(map, *weapon, unit->pos, unit->pos + offset);
             } break;
             case INCIDENT_AFLAME:
             {

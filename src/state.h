@@ -32,9 +32,6 @@ void GoToPlayerPhase(Level *level,
     EmitEvent(END_TURN_EVENT);
 
     // set up backup for undo turn.
-    // TODO: we can move this out sometime.
-    // Thinking of like a "backup" struct that just
-    // stores absolute necessities in one place.
     *backup = Level(*level);
 
     res_backup->incidents = {};
@@ -42,7 +39,7 @@ void GoToPlayerPhase(Level *level,
     {
         Unit *old_ptr = incident.unit;
         Unit *new_ptr = backup->map.tiles[old_ptr->pos.col][old_ptr->pos.row].occupant;
-        res_backup->incidents.push_back({new_ptr, incident.offset, incident.type});
+        res_backup->incidents.push_back({new_ptr, incident.weapon, incident.offset, incident.type});
     }
     GlobalPlayer.backup_health = GlobalPlayer.health;
 }

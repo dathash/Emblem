@@ -37,6 +37,7 @@ int EvaluateLocation(const Unit &unit,
                      const position &pos, 
                      const Tilemap &map) {
     //if(map.tiles[pos.col][pos.row] is dangerous) return -10;
+
     if(IsEdge(pos)) return -5;
 
     if(unit.primary->type == EQUIP_PUNCH)
@@ -115,6 +116,11 @@ int Evaluate(const Unit &unit, const position &pos, const direction &dir,
         default: cout << "AI shouldn't have this kind of attack. " << unit.primary->type << "\n"; return 0;
     }
 }
+
+// Work that actually has to happen
+// Gather options at each square
+// Evaluate them all
+// Pick from the best
 
 struct Action
 {
@@ -207,35 +213,62 @@ GetChoicesArtillery(const Unit &unit, const Tilemap &map)
     return choices;
 }
 
+vector<Choice>
+GetChoicesLineShot(const Unit &unit, const Tilemap &map)
+{
+    vector<Choice> choices = {};
+    vector<direction> directions = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
+
+    for(const position &pos : map.accessible)
+    {
+        position target = GetFirstTarget(map, pos, directions[0]);
+        int value = Evaluate(unit, target, {0, 0}, map);
+        int best_value = value;
+        position best_target = target;
+
+        for(int i = 1; i <= 3; ++i)
+        {
+            target = GetFirstTarget(map, pos, directions[i]);
+            value = Evaluate(unit, target, {0, 0}, map);
+            if(value > best_value)
+            {
+                best_value = value;
+                best_target = target;
+            }
+        }
+
+        int location = EvaluateLocation(unit, pos, map);
+
+        if(location >= 0)
+        {
+            choices.push_back({{pos, best_target},
+                               best_value,
+                               location});
+        }
+    }
+    return choices;
+}
+
 Choice
 BestAction(const vector<Choice> &choices)
 {
     int best_action_score = 0;
-    int second_best_action_score = 0;
     vector<Choice> best_choices = {};
-    vector<Choice> second_best_choices = {};
     for(const Choice &choice : choices)
     {
         if(choice.action_score > best_action_score)
         {
-            second_best_action_score = best_action_score;
-            second_best_choices = best_choices;
-
             best_action_score = choice.action_score;
             best_choices = {choice};
         }
         else if(choice.action_score == best_action_score)
             best_choices.push_back(choice);
-        else if(choice.action_score == second_best_action_score)
-            second_best_choices.push_back(choice);
     }
 
     assert(best_choices.size());
 
     if(true)
         return best_choices[RandomInt(best_choices.size() - 1)];
-    else // Choose this sometimes on easy difficulties?
-        return second_best_choices[RandomInt(second_best_choices.size() - 1)];
 }
 
 Choice
@@ -263,6 +296,8 @@ Action GetAction(const Unit &unit, const Tilemap &map) {
     vector<Choice> choices = {};
     if(unit.primary->type == EQUIP_ARTILLERY)
         choices = GetChoicesArtillery(unit, map);
+    else if(unit.primary->type == EQUIP_LINE_SHOT)
+        choices = GetChoicesLineShot(unit, map);
     else
         choices = GetChoicesOrthogonal(unit, map);
     assert(choices.size());
@@ -299,7 +334,8 @@ public:
         if(action.attack != position(-1, -1))
         {
             assert(cursor->selected->primary);
-            resolution->incidents.push_back({cursor->selected, 
+            resolution->incidents.push_back({cursor->selected,
+                                             cursor->selected->primary,
                                              action.attack - cursor->selected->pos,
                                              INCIDENT_ATTACK});
             cursor->pos = action.attack;
@@ -312,7 +348,9 @@ public:
         if(cursor->selected->HasEffect(EFFECT_AFLAME))
         {
             resolution->incidents.insert(resolution->incidents.begin(), 
-                                         {cursor->selected, {0, 0}, INCIDENT_AFLAME});
+                                         {cursor->selected, 
+                                          cursor->selected->primary,
+                                          {0, 0}, INCIDENT_AFLAME});
         }
 
         cursor->selected->Deactivate();
@@ -339,7 +377,7 @@ struct AI
     void Plan(Cursor *cursor, Level *level, Resolution *resolution)
     {
         Unit *selected = nullptr;
-        // TODO: Find the next unit to have act, according to the queue.
+
         selected = FindNearest(level->map, {0, 0},
             [](const Unit &unit) -> bool
             { return unit.IsAI() && !unit.is_exhausted; }, false);

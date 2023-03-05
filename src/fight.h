@@ -11,8 +11,7 @@ GetFirstTarget(const Tilemap &map,
                const position &pos, const direction &dir)
 {
     vector<position> line = Line(map, pos, dir);
-    for(int i = 0; i < line.size(); ++i)
-    {
+    for(int i = 0; i < line.size(); ++i) {
         if(map.tiles[line[i].col][line[i].row].occupant)
             return line[i];
     }
@@ -61,8 +60,7 @@ SimulateHeal(Unit *victim, int amount)
     if(!victim)
         return;
 
-    if(victim->ID() == hash<string>{}("House"))
-    {
+    if(victim->ID() == hash<string>{}("House")) {
         GlobalPlayer.Heal(amount);
     }
 
@@ -252,11 +250,12 @@ Simulate(Tilemap *map,
     {
         position subject = GetFirstTarget(*map, source,
                                           GetDirection(source, destination));
+        if(!IsValid(subject)) return;
+
         Unit *victim = map->tiles[subject.col][subject.row].occupant;
         PerformMoveScenario(map, weapon.move, weapon.self_damage, 
                             source, subject, GetDirection(source, subject));
 
-        if(!IsValid(subject)) return;
 
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
@@ -282,6 +281,7 @@ Simulate(Tilemap *map,
             SimulateDamage(victim, weapon.damage);
             SimulateEffect(victim, weapon.effect);
         }
+
     } break;
     case EQUIP_SELF_TARGET:
     {
@@ -297,6 +297,7 @@ Simulate(Tilemap *map,
                             source, subject, GetDirection(source, subject));
         PerformPushScenario(map, weapon.push, weapon.push_damage, 
                             subject, GetDirection(source, subject));
+
         if(victim)
             SimulateDamage(victim, weapon.damage);
 

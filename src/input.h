@@ -202,7 +202,11 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     input->a = true;
                 else if(Event.jbutton.button == 1)
                     input->b = true;
-                else if(Event.jbutton.button == 11)
+                else if(Event.jbutton.button == 2)
+                    input->x = true;
+                else if(Event.jbutton.button == 3)
+                    input->y = true;
+                else if(Event.jbutton.button == 9)
                     input->l = true;
                 else if(Event.jbutton.button == 10)
                     input->r = true;
@@ -213,6 +217,10 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
                     input->a = false;
                 else if(Event.jbutton.button == 1)
                     input->b = false;
+                else if(Event.jbutton.button == 2)
+                    input->x = false;
+                else if(Event.jbutton.button == 3)
+                    input->y = false;
                 else if(Event.jbutton.button == 9)
                     input->l = false;
                 else if(Event.jbutton.button == 10)

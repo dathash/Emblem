@@ -13,9 +13,6 @@ int d100() {
 int d1() {
     return 1;
 }
-int d0() {
-    return 0;
-}
 // range: 01 to 04. (etc.)
 int d4() {
     return (rand() % 4) + 1;
@@ -97,19 +94,12 @@ struct Timer
     Uint32 end;
     bool paused = false;
 
-    Timer(int seconds)
-    {
+    Timer(int seconds) {
         last_frame = SDL_GetTicks();
         end = seconds * 1000;
     }
 
-    Timer()
-    {} // NOTE: This is c++ weirdness. I'm sure I could figure it out if I
-       // gave it a few minutes.
-
-    bool
-    Update()
-    {
+    bool Update() {
         if(paused)
             return false;
 
@@ -126,15 +116,11 @@ struct Timer
         return false;
     }
 
-    void
-    Pause()
-    {
+    void Pause() {
         paused = true;
     }
 
-    void
-    Start()
-    {
+    void Start() {
         paused = false;
         last_frame = SDL_GetTicks();
     }
@@ -314,14 +300,6 @@ PiecewiseColors(const SDL_Color &one, const SDL_Color &two, const SDL_Color &thr
 ImU32 SdlToImColor(const SDL_Color &in) {
     return IM_COL32(in.r, in.g, in.b, in.a);
 }
-
-/* TODO
-SDL_Color
-ImToSdlColor(ImU32 in)
-{
-    return {in.r, in.g, in.b, in.a};
-}
-*/
 
 // ======================== Easing Functions ===================================
 float Lerp(float a, float b, float amount) {

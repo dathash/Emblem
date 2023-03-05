@@ -1,9 +1,5 @@
 
-emblem
-log
-
-Plan
-> Build a fun little game!
+emblem log
 
 # Design
 ## Questions
@@ -131,17 +127,12 @@ Lightning Bolt.
 Stone 2
 Create blockages on the map, with stones.
 
+## Strategy Layer
+TODO
+
 # TODO
-Level Menu
-
-to fix the undo on the same square bug, just don't let a unit move to its own
-square.
-
-Start level command
-End Level Command
-
-Finish warp mechanics (with unit storage overhaul)
-Random enemy spawns at the start of level
+Refactoring
+ZERO BUGS
 
 Visualization of attacks.
 * Punch
@@ -153,6 +144,16 @@ Visualization of attacks.
 * Show Damage outcome
 
 Sanding pass!!!
+
+Finish warp mechanics (with unit storage overhaul)
+Random enemy spawns at the start of level
+
+Strat layer
+* Level Menu
+* Start level command
+* End Level Command
+* Selection
+
 
 Four more units
 Playtesting (for bugs and feel)
@@ -179,7 +180,9 @@ Strategy Layer
 Experience points and pilot abilities
 Polish
 
-Gamepad fix and testing
+Switch Queue button to a global input thing that just sets a flag so we can hold
+it.
+
 
 # Later
 Art

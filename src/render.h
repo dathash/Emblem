@@ -22,47 +22,56 @@ RenderTileColor(const position &pos, const SDL_Color &color, int alpha = 255)
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
+// Renders an attack on the map.
+// Eventually will visualize all the effects of an attack.
 void
 RenderAttack(const Tilemap &map,
              const Incident &attack,
              const SDL_Color &color = lightred,
              int alpha = 128)
 {
-    switch(attack.unit->primary->type)
+    const Equip &weapon = *attack.weapon;
+    switch(weapon.type)
     {
-        case EQUIP_NONE:
-        {
-            cout << "WARNING: RenderAttack has NONE attack type.\n";
-            RenderTileColor(attack.unit->pos + attack.offset, color, alpha);
-        } break;
         case EQUIP_PUNCH:
         {
             for(int i = 1; i <= attack.unit->primary->max_range; ++i)
+            {
                 RenderTileColor(attack.unit->pos + (attack.offset * i), color, alpha);
+            }
         } break;
         case EQUIP_LINE_SHOT:
         {
-            position result = GetFirstTarget(map, attack.unit->pos, attack.offset);
-            if(result != position(-1, -1))
-                RenderTileColor(result, color, alpha);
+            position target = GetFirstTarget(map, attack.unit->pos, GetDirection(attack.unit->pos, attack.unit->pos + attack.offset));
+            RenderTileColor(target, color, alpha);
         } break;
         case EQUIP_ARTILLERY:
         {
             RenderTileColor(attack.unit->pos + attack.offset, color, alpha);
         } break;
 
-        // Not likely...
-        case EQUIP_SELF_TARGET:
+        default: cout << "AI shouldn't have this kind of attack. " << attack.unit->primary->type << "\n";
+    }
+
+    switch(weapon.push)
+    {
+        default:
         {
-            cout << "NO VIS FOR SELF TARGET\n";
+            //cout << "No visualization of push yet.\n";
         } break;
-        case EQUIP_LEAP:
+    }
+    switch(weapon.move)
+    {
+        default:
         {
-            cout << "NO VIS FOR LEAP\n";
+            //cout << "No visualization of move yet.\n";
         } break;
-        case EQUIP_LASER:
+    }
+    switch(weapon.effect)
+    {
+        default:
         {
-            cout << "NO VIS FOR LASER\n";
+            //cout << "No visualization of effects yet.\n";
         } break;
     }
 }
@@ -310,6 +319,7 @@ Render(const Level &level,
     if(cursor.selected)
         RenderTileColor(cursor.selected->pos, green, OverlayAlphaMod);
 
+    // ========================== Attacking visualization ======================
     for(const Incident &incident : resolution.incidents)
     {
         if(incident.type == INCIDENT_ATTACK)
@@ -328,6 +338,12 @@ Render(const Level &level,
         {
             ; // TODO: Render Environment effects
         }
+    }
+
+    if(GlobalInterfaceState == ATTACK_TARGETING)
+    {
+        Incident vis = {cursor.selected, cursor.with, cursor.targeting - cursor.selected->pos, INCIDENT_ATTACK};
+        RenderAttack(level.map, vis, white, OverlayAlphaMod);
     }
 
 // ================================ ai visualization  ==========================

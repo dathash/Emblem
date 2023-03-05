@@ -13,7 +13,7 @@
 #define JOYSTICK_DEAD_ZONE 8000
 // TODO: Create a separate system for keyboard inputs
 //       OR Decide on one input system or the other.
-#define JOYSTICK_COOLDOWN_TIME 5 // Frames
+#define JOYSTICK_COOLDOWN_TIME 7 // Frames
 
 // defaults
 #define DEFAULT_MUSIC_VOLUME 0.0f

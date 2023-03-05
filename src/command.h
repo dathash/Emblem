@@ -59,19 +59,19 @@ public:
         if(cursor->selected->IsEnv()) return;
         else if(cursor->selected->IsAlly())
         {
-            cursor->selected->initial_pos = cursor->pos;
-
             map->accessible.clear();
-            if(cursor->selected->has_moved)
-                return;
+            if(!cursor->selected->has_moved)
+            {
+                cursor->selected->initial_pos = cursor->pos;
 
-            bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
-            int movement = (paralyzed ? 0 : cursor->selected->movement);
-            movement = (cursor->selected->HasEffect(EFFECT_SWIFT) ? movement + 2 : movement);
-            map->accessible = Accessible(*map, cursor->pos,
-                                         movement,
-                                         cursor->selected->IsAlly(),
-                                         cursor->selected->HasEffect(EFFECT_SWIFT));
+                bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
+                int movement = (paralyzed ? 0 : cursor->selected->movement);
+                movement = (cursor->selected->HasEffect(EFFECT_SWIFT) ? movement + 2 : movement);
+                map->accessible = Accessible(*map, cursor->pos,
+                                             movement,
+                                             cursor->selected->IsAlly(),
+                                             cursor->selected->HasEffect(EFFECT_SWIFT));
+            }
 
             GlobalInterfaceState = SELECTED;
             EmitEvent(PICK_UP_UNIT_EVENT);
@@ -161,8 +161,6 @@ public:
 
     virtual void Execute()
     {
-        // TODO: Undo doesn't work properly when your unit is placed on its source square.
-        // Sol'n: perhaps have placing unit on their source square be a no-op?
         if(cursor->selected->has_moved)
             return;
 
@@ -210,27 +208,33 @@ public:
 
     virtual void Execute()
     {
-        // TODO: We want this to be one at a time, so that none of the units land on eachother's prior square.
+        vector<shared_ptr<Unit>> to_undo = {};
+
         for(shared_ptr<Unit> unit : level->combatants)
         {
             if(unit->has_moved && !unit->is_exhausted)
             {
-                position goal = unit->initial_pos;
-                assert(!level->map.tiles[goal.col][goal.row].occupant);
-
+                to_undo.push_back(unit);
                 level->map.tiles[unit->pos.col][unit->pos.row].occupant = nullptr;
-                level->map.tiles[goal.col][goal.row].occupant = unit.get();
-
-                unit->pos = goal;
-                unit->initial_pos = {0, 0};
-                unit->has_moved = false;
             }
+        }
+
+        for(shared_ptr<Unit> unit : to_undo)
+        {
+            position goal = unit->initial_pos;
+            assert(!level->map.tiles[goal.col][goal.row].occupant);
+
+            level->map.tiles[goal.col][goal.row].occupant = unit.get();
+
+            unit->pos = goal;
+            unit->initial_pos = {0, 0};
+            unit->has_moved = false;
         }
 
         if(cursor->selected)
         {
             cursor->selected->sheet.ChangeTrack(TRACK_IDLE);
-            return;
+            cursor->selected = nullptr;
         }
 
         GlobalInterfaceState = NEUTRAL;
@@ -472,10 +476,9 @@ private:
 };
 
 // ======================= game menu commands =========================================
-class UndoCommand : public Command
+class InitiateUndoTurnCommand : public Command
 {
 public:
-
     virtual void Execute()
     { 
         GlobalInterfaceState = UNDO;
@@ -899,7 +902,7 @@ public:
                 BindA(make_shared<SelectUnitCommand>(cursor, &(level->map)));
                 BindB(make_shared<NullCommand>());
                 BindL(make_shared<UndoMovementsCommand>(level, cursor));
-                BindR(make_shared<UndoCommand>());
+                BindR(make_shared<InitiateUndoTurnCommand>());
                 BindX(make_shared<QueueCommand>());
                 BindY(make_shared<EndTurnCommand>(level));
             } break;
