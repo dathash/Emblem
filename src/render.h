@@ -435,19 +435,21 @@ RenderAttack(const Tilemap &map,
         case PUSH_AWAY:
         {
             Unit *pushed = map.tiles[target.col][target.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = target + dir;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = target + dir;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
@@ -456,19 +458,22 @@ RenderAttack(const Tilemap &map,
         case PUSH_TOWARDS:
         {
             Unit *pushed = map.tiles[target.col][target.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = target - dir;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed)
+                {
+                    // bonk check
+                    position push_result = target - dir;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
@@ -478,38 +483,42 @@ RenderAttack(const Tilemap &map,
         {
             position t1 = target + dir;
             Unit *pushed = map.tiles[t1.col][t1.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t1 + dir;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t1 + dir;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
 
             position t2 = target - dir;
             pushed = map.tiles[t2.col][t2.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t2 - dir;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t2 - dir;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
@@ -522,38 +531,42 @@ RenderAttack(const Tilemap &map,
 
             position t1 = target + perp;
             Unit *pushed = map.tiles[t1.col][t1.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t1 + perp;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t1 + perp;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
 
             position t2 = target - perp;
             pushed = map.tiles[t2.col][t2.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t2 - perp;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t2 - perp;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
@@ -563,38 +576,42 @@ RenderAttack(const Tilemap &map,
         {
             position t1 = target + dir;
             Unit *pushed = map.tiles[t1.col][t1.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t1 + dir;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t1 + dir;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
 
             position t2 = target - dir;
             pushed = map.tiles[t2.col][t2.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t2 - dir;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t2 - dir;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
@@ -604,38 +621,43 @@ RenderAttack(const Tilemap &map,
 
             position t3 = target + perp;
             pushed = map.tiles[t3.col][t3.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t3 + perp;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed) {
+                    // bonk check
+                    position push_result = t3 + perp;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }
 
             position t4 = target - perp;
             pushed = map.tiles[t4.col][t4.row].occupant;
-            if(pushed && !pushed->fixed) {
+            if(pushed) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
-                // bonk check
-                position push_result = t4 - perp;
-                if(IsValid(push_result)) {
-                    Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
-                    if(bonk) {
-                        AddDamage(tracker, pushed, 1);
-                        AddDamage(tracker, bonk, 1);
-                    }
-                    else {
-                        MoveUnit(tracker, pushed, push_result);
+                if(!pushed->fixed)
+                {
+                    // bonk check
+                    position push_result = t4 - perp;
+                    if(IsValid(push_result)) {
+                        Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+                        if(bonk) {
+                            AddDamage(tracker, pushed, 1);
+                            AddDamage(tracker, bonk, 1);
+                        }
+                        else {
+                            MoveUnit(tracker, pushed, push_result);
+                        }
                     }
                 }
             }

@@ -140,17 +140,17 @@ Sanding pass!!!
 Finish warp mechanics (with unit storage overhaul)
 Random enemy spawns at the start of level
 
-Strat layer
-* Level Menu
-* Start level command
-* End Level Command
-* Selection
-
 Four more units
 Playtesting (for bugs and feel)
 
 Ten levels
 Ten Random Objectives
+
+Strat layer
+* Level Menu
+* Start level command
+* End Level Command
+* Selection
 
 Trajectory visualization
   * Artillery

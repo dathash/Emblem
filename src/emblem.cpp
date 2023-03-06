@@ -176,6 +176,7 @@ int main(int argc, char *argv[])
                              string("l2.txt"), string("l3.txt"),
                              string("l4.txt"), string("l5.txt"),
                              string("l6.txt"), string("l7.txt"),
+                             string("l8.txt"), string("l9.txt"),
 							 };
     int level_index = 0;
     Level level = LoadLevel(levels[level_index], units, party);
