@@ -42,7 +42,7 @@ static bool GlobalPaused = false;
 static bool GlobalStep = false;
 static int GlobalSpeedMod = 1;
 static bool GlobalSpawning = true;
-static bool GlobalGodMode = true;
+static bool GlobalGodMode = false;
 
 static unsigned long long GlobalFrame = 0;
 
@@ -186,6 +186,19 @@ int main(int argc, char *argv[])
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
 		                      32, ANIMATION_SPEED));
 
+    Icons icons = Icons(
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("arrow.png")),
+                    32, ANIMATION_SPEED),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("aflame.png")),
+                    8, ANIMATION_SPEED),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("para.png")),
+                    8, ANIMATION_SPEED),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("swift.png")),
+                    8, ANIMATION_SPEED),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("stone.png")),
+                    8, ANIMATION_SPEED)
+        );
+
 	UI_State ui = {};
 
     Menu game_menu({"Queue", "Undo Turn", "Options", "End Turn"});
@@ -296,7 +309,7 @@ int main(int argc, char *argv[])
         */
 
         // Render
-        Render(level, level.spawner.rising, cursor, game_menu, resolution);
+        Render(level, level.spawner.rising, cursor, game_menu, resolution, icons);
 
         // IMGUI
 		ImGui_ImplSDLRenderer_NewFrame();

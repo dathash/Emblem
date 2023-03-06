@@ -31,6 +31,8 @@
 #define PORTRAIT_SIZE 600
 #define SPRITE_SIZE 32
 #define SPRITE_SCALE 1.2f
+#define VIS_SCALE 1.2f
+#define EFFECT_SCALE 3.0f
 #define ATLAS_TILE_SIZE 16
 
 #define MENU_WIDTH 250

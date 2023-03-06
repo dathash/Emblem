@@ -625,18 +625,23 @@ struct Menu
 };
 
 // =================================== Icons ===================================
+// A struct which contains spritesheets used in visualizing attacks.
 struct Icons
 {
+    Spritesheet arrow;
+
     Spritesheet aflame;
     Spritesheet para;
     Spritesheet swift;
     Spritesheet stone;
 
-    Icons(Spritesheet aflame_in,
+    Icons(Spritesheet arrow_in,
+          Spritesheet aflame_in,
           Spritesheet para_in,
           Spritesheet swift_in,
           Spritesheet stone_in)
-    : aflame(aflame_in),
+    : arrow(arrow_in),
+      aflame(aflame_in),
       para(para_in),
       swift(swift_in),
       stone(stone_in)

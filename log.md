@@ -135,8 +135,11 @@ BUG | Rogue Bata after you restart
 BUG | Restart level doesn't work at all.
 
 Visualization of attacks.
-* Effect
-* Show where the unit will end up by the end.
+* Arrows for movement/push
+* Trajectories
+  * Push
+  * Artillery
+  * Line shot
 
 Eventual architecture:
 * In resolution, we keep a bunch of incidents.
