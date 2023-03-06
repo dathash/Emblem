@@ -184,19 +184,27 @@ int main(int argc, char *argv[])
     Resolution res_backup;
 
     Cursor cursor(Spritesheet(LoadTextureImage(SPRITES_PATH, string("cursor.png")), 
-		                      32, ANIMATION_SPEED));
+		                      32));
 
     Icons icons = Icons(
         Spritesheet(LoadTextureImage(SPRITES_PATH, string("arrow.png")),
-                    32, ANIMATION_SPEED),
+                    32),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("dot.png")),
+                    32),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("redarrow.png")),
+                    32),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("rising.png")),
+                    32),
+        Spritesheet(LoadTextureImage(SPRITES_PATH, string("warning.png")),
+                    32),
         Spritesheet(LoadTextureImage(SPRITES_PATH, string("aflame.png")),
-                    8, ANIMATION_SPEED),
+                    8),
         Spritesheet(LoadTextureImage(SPRITES_PATH, string("para.png")),
-                    8, ANIMATION_SPEED),
+                    8),
         Spritesheet(LoadTextureImage(SPRITES_PATH, string("swift.png")),
-                    8, ANIMATION_SPEED),
+                    8),
         Spritesheet(LoadTextureImage(SPRITES_PATH, string("stone.png")),
-                    8, ANIMATION_SPEED)
+                    8)
         );
 
 	UI_State ui = {};

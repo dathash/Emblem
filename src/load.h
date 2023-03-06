@@ -229,7 +229,7 @@ LoadUnits(string filename_in, const vector<shared_ptr<Equip>> &equipments)
                     (EffectType)stoi(tokens[8]), // passive
 
                     Spritesheet(LoadTextureImage(SPRITES_PATH, tokens[9]), // sprite
-                                32, ANIMATION_SPEED)
+                                32)
                 ));
             }
         }

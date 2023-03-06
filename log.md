@@ -133,14 +133,28 @@ TODO
 # TODO
 BUG | Rogue Bata after you restart
 BUG | Restart level doesn't work at all.
+BUG | Shouldn't be able to undo movements once an attack has taken place.
 
-Visualization of attacks.
-* Arrows for movement/push
-* Trajectories
-  * Push
+Sanding pass!!!
+
+Finish warp mechanics (with unit storage overhaul)
+Random enemy spawns at the start of level
+
+Strat layer
+* Level Menu
+* Start level command
+* End Level Command
+* Selection
+
+Four more units
+Playtesting (for bugs and feel)
+
+Ten levels
+Ten Random Objectives
+
+Trajectory visualization
   * Artillery
-  * Line shot
-
+    display a unit's pushing arrow even if they won't move.
 Eventual architecture:
 * In resolution, we keep a bunch of incidents.
 * These incidents can be analyzed for their outcomes with a function call.
@@ -154,29 +168,10 @@ Eventual architecture:
 This way, we don't have to calculate the outcome twice, and keep the two logics
 in sync.
 
-Sanding pass!!!
-
-Finish warp mechanics (with unit storage overhaul)
-Random enemy spawns at the start of level
-
-
-Strat layer
-* Level Menu
-* Start level command
-* End Level Command
-* Selection
-
-
-Four more units
-Playtesting (for bugs and feel)
-
-Ten levels
-Ten Random Objectives
 
 AI Attacks
 * Avoid other ai attacks (dangerous)
 * Avoid repeated behavior
-
 
 Animations
 CHECK OUT HOW MATTHEW DID IT

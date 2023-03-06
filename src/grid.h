@@ -102,6 +102,23 @@ Line(const Tilemap &map, const position &origin, const direction &dir)
     return line;
 }
 
+// For use with line_shot mechs.
+position
+GetFirstTarget(const Tilemap &map, 
+               const position &pos, const direction &dir)
+{
+    vector<position> line = Line(map, pos, dir);
+    for(const position &pos : line) {
+        if(map.tiles[pos.col][pos.row].occupant)
+            return pos;
+    }
+
+    if(!line.empty())
+        return line.back();
+
+    return {-1, -1};
+}
+
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
 Accessible(const Tilemap &map, position origin, 

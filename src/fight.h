@@ -5,23 +5,6 @@
 #ifndef FIGHT_H
 #define FIGHT_H
 
-// For use with line_shot mechs.
-position
-GetFirstTarget(const Tilemap &map, 
-               const position &pos, const direction &dir)
-{
-    vector<position> line = Line(map, pos, dir);
-    for(int i = 0; i < line.size(); ++i) {
-        if(map.tiles[line[i].col][line[i].row].occupant)
-            return line[i];
-    }
-
-    if(!line.empty())
-        return line.back();
-
-    return {-1, -1};
-}
-
 void SimulateDamage(Unit *victim, int amount) {
     if(!victim) return;
     if(amount == 0) return;

@@ -69,7 +69,7 @@ struct Spritesheet
     int speed   = 1; // inverse. 1 is faster than 10.
     int counter = 0;
 
-    Spritesheet(Texture texture_in, int size_in, int speed_in)
+    Spritesheet(Texture texture_in, int size_in, int speed_in = ANIMATION_SPEED)
     : texture(texture_in),
       size(size_in),
       speed(speed_in)
@@ -630,17 +630,31 @@ struct Icons
 {
     Spritesheet arrow;
 
+    Spritesheet dot;
+    Spritesheet redarrow;
+
+    Spritesheet rising;
+    Spritesheet warning;
+
     Spritesheet aflame;
     Spritesheet para;
     Spritesheet swift;
     Spritesheet stone;
 
     Icons(Spritesheet arrow_in,
+          Spritesheet dot_in,
+          Spritesheet redarrow_in,
+          Spritesheet rising_in,
+          Spritesheet warning_in,
           Spritesheet aflame_in,
           Spritesheet para_in,
           Spritesheet swift_in,
           Spritesheet stone_in)
     : arrow(arrow_in),
+      dot(dot_in),
+      redarrow(redarrow_in),
+      rising(rising_in),
+      warning(warning_in),
       aflame(aflame_in),
       para(para_in),
       swift(swift_in),

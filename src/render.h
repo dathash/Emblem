@@ -22,6 +22,20 @@ RenderTileColor(const position &pos, const SDL_Color &color, int alpha = 255)
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
+// Renders a decal to the screen, given its game coords and spritesheet.
+void
+RenderTileDecal(const position &pos, const Spritesheet &sheet, double rotation = 0.0)
+{
+    SDL_Rect destination = {pos.col * TILE_SIZE + X_OFFSET,
+                            pos.row * TILE_SIZE + Y_OFFSET,
+                            TILE_SIZE, TILE_SIZE};
+    SDL_Rect source = {sheet.frame * sheet.size,
+                       sheet.track * sheet.size,
+                       sheet.size, sheet.size};
+    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdl_texture, &source, &destination,
+                     rotation, NULL, SDL_FLIP_NONE);
+}
+
 position
 ToScreenPosition(const position &map_pos, const position &offset = {0, 0})
 {
@@ -130,31 +144,66 @@ Orient(const direction &dir)
 SDL_RendererFlip
 OrientFlip(const direction &dir)
 {
-    if(dir == direction(0, 0)) return SDL_FLIP_NONE;
-    if(dir == direction(1, 0)) return SDL_FLIP_NONE;
-    if(dir == direction(-1, 0)) return SDL_FLIP_HORIZONTAL;
+    if(dir.col < 0 || dir.row < 0) return SDL_FLIP_HORIZONTAL; // (-1, 0) or (0, -1)
+    return SDL_FLIP_NONE;
 }
 
+// Renders a decal inbetween two squares with a direction.
+// Generally used for arrows.
 void
-RenderMoveArrow(const position &from, const position &to, const Icons &icons)
+RenderBetween(const position &from, const position &to, const Spritesheet &sheet)
 {
-    Spritesheet *sheet = &icons.arrow;
-
     direction dir = GetDirection(from, to);
 
     float mult = VIS_SCALE;
-    SDL_Rect destination = {(int)((from.col * TILE_SIZE + X_OFFSET) - ((TILE_SIZE * mult - TILE_SIZE) / 2)),
-                            (int)((from.row * TILE_SIZE + Y_OFFSET) - ((TILE_SIZE * mult - TILE_SIZE) / 2)),
+                                  // Base value                         Sizing offset (centering)              Arrow direction offset
+    SDL_Rect destination = {(int)((from.col * TILE_SIZE + X_OFFSET) - ((TILE_SIZE * mult - TILE_SIZE) / 2)) + (dir.col * TILE_SIZE / 2),
+                            (int)((from.row * TILE_SIZE + Y_OFFSET) - ((TILE_SIZE * mult - TILE_SIZE) / 2)) + (dir.row * TILE_SIZE / 2),
                             (int)(TILE_SIZE * mult), 
                             (int)(TILE_SIZE * mult)};
-    SDL_Rect source = {sheet->frame * sheet->size,
-                       sheet->track * sheet->size,
-                       sheet->size, sheet->size};
+    SDL_Rect source = {sheet.frame * sheet.size,
+                       sheet.track * sheet.size,
+                       sheet.size, sheet.size};
 
-    SDL_RenderCopyEx(GlobalRenderer, sheet->texture.sdl_texture, 
+    SDL_RenderCopyEx(GlobalRenderer, sheet.texture.sdl_texture, 
                      &source, &destination,
-                     0, NULL, 
-                     (const SDL_RendererFlip)flipped);
+                     Orient(dir),
+                     NULL, 
+                     OrientFlip(dir));
+}
+
+// Renders the red arrows which display what an attack will look like.
+void
+RenderAttackTrajectory(const Tilemap &map, EquipmentType type, const position &from, const position &to, const Icons &icons)
+{
+    direction dir = GetDirection(from, to);
+    switch(type)
+    {
+        case EQUIP_PUNCH:
+        {
+            RenderBetween(from, from + GetDirection(from, to), icons.redarrow);
+        } break;
+
+        case EQUIP_LINE_SHOT:
+        {
+            position target = GetFirstTarget(map, from, dir);
+            int dist = Distance(from, target);
+            for(int i = 1; i < dist; ++i) {
+                RenderTileDecal(from + (dir * i), icons.dot, Orient(dir));
+            }
+            RenderBetween(target - dir, target, icons.redarrow);
+        } break;
+
+        case EQUIP_ARTILLERY:
+        case EQUIP_LEAP:
+        {
+        } break;
+
+        default:
+        {
+            cout << "No visualization of trajectory yet!\n";
+        } break;
+    }
 }
 
 /*
@@ -239,7 +288,7 @@ RenderHealthBar(const position &p, int hp, int maxHp, int damage = 0)
     SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, yellow.a);
     SDL_RenderFillRect(GlobalRenderer, &health_rect);
 
-    float val = Lerp(0.0f, 1.0f, SmoothStop5(sin(GlobalFrame / HEALTH_FLASH_SPEED)));
+    float val = Lerp(0.0f, 1.0f, sin((GlobalFrame % 60 < 30 ? 60 - (float)(GlobalFrame % 60) : (float)(GlobalFrame % 60)) / 60.0f));
     SDL_SetRenderDrawColor(GlobalRenderer, darkgray.r, darkgray.g, darkgray.b, val * 255);
     SDL_RenderFillRect(GlobalRenderer, &damage_rect);
 
@@ -303,8 +352,7 @@ void MoveUnit(vector<UnitOutcome> &tracker, Unit *ptr, position pos)
 void
 RenderAttackZone(const Tilemap &map,
                  const Incident &attack,
-                 const SDL_Color &color = clear,
-                 int alpha = 128)
+                 const Spritesheet &sheet)
 {
     const Equip &weapon = *attack.weapon;
     position source = attack.unit->pos;
@@ -316,21 +364,20 @@ RenderAttackZone(const Tilemap &map,
         {
             for(int i = 1; i <= attack.unit->primary->max_range; ++i) {
                 position danger = source + (dir * i);
-                RenderTileColor(danger, color, alpha);
-                RenderTileText("warning", danger, true, {4, 30}, red);
+                RenderTileDecal(danger, sheet);
             }
         } break;
         case EQUIP_LINE_SHOT:
         {
             position danger = GetFirstTarget(map, source, dir);
-            RenderTileColor(danger, color, alpha);
-            RenderTileText("warning", danger, true, {4, 30}, red);
+            RenderTileDecal(danger, sheet);
         } break;
         case EQUIP_ARTILLERY:
         {
             position danger = target;
-            RenderTileColor(danger, color, alpha); // TODO: More than just one square of danger?
-            RenderTileText("warning", danger, true, {4, 30}, red);
+
+            // TODO: More than just one square of danger?
+            RenderTileDecal(danger, sheet);
         } break;
         default: cout << "AI shouldn't have this kind of attack. " << attack.weapon->type << "\n";
     }
@@ -623,8 +670,17 @@ RenderAttack(const Tilemap &map,
         {
             AddDamage(tracker, attack.unit, weapon.self_damage);
 
-            position move_result = GetFirstTarget(map, source, dir) - dir;
-            MoveUnit(tracker, attack.unit, move_result);
+            position hit = GetFirstTarget(map, source, dir);
+            if(map.tiles[hit.col][hit.row].occupant)
+            {
+                position move_result = hit - dir;
+                MoveUnit(tracker, attack.unit, move_result);
+            }
+            else
+            {
+                position move_result = hit;
+                MoveUnit(tracker, attack.unit, move_result);
+            }
 
             // NOTE: bonking with ram is not possible, I believe?
             // We don't treat the ram as bonking, just rolling right up to something.
@@ -647,16 +703,24 @@ RenderAttack(const Tilemap &map,
     // =========================================== Render Visuals ==============
     for(const UnitOutcome &outcome : tracker)
     {
-        SDL_SetTextureColorMod(outcome.unit->sheet.texture.sdl_texture, lightgray.r, lightgray.g, lightgray.b);
-        RenderSprite(outcome.end_pos, outcome.unit->sheet, outcome.unit->IsAlly());
+        if(outcome.end_pos != outcome.unit->pos) {
+            RenderBetween(outcome.unit->pos, outcome.end_pos, icons.arrow);
+
+            SDL_SetTextureColorMod(outcome.unit->sheet.texture.sdl_texture, lightgray.r, lightgray.g, lightgray.b);
+            RenderSprite(outcome.end_pos, outcome.unit->sheet, outcome.unit->IsAlly());
+
+            SDL_SetTextureColorMod(outcome.unit->sheet.texture.sdl_texture, 255, 255, 255);
+            RenderSprite(outcome.unit->pos, outcome.unit->sheet, outcome.unit->IsAlly());
+        }
+
 
         assert(IsValid(outcome.unit->pos));
         RenderHealthBar(outcome.unit->pos, outcome.unit->health, outcome.unit->max_health, outcome.damage);
 
+
         // Effects (optional)
         RenderEffectSprite(weapon.effect, target, icons);
     }
-
 }
 
 
@@ -668,7 +732,10 @@ RenderQueueOrder(const Tilemap &map,
     // NOTE: We pull attacks off the back of the queue.
     for(int i = 0; i < resolution.incidents.size(); ++i) {
         RenderTileText(to_string(i + 1),
-                       resolution.incidents[resolution.incidents.size() - 1 - i].unit->pos);
+                       resolution.incidents[resolution.incidents.size() - 1 - i].unit->pos,
+                       false,
+                       {30, 30},
+                       yellow);
     }
 }
 
@@ -701,8 +768,8 @@ Render(const Level &level,
     }
 
     for(const position& cell : rising) {
-        RenderTileColor(cell, lightorange, OverlayAlphaMod);
-        RenderTileText("rising", cell, true, {4, 30}, red);
+        RenderTileDecal(cell, icons.rising);
+        RenderTileText("rising", cell, true, {4, 30}, yellow);
     }
 
 // ================================= render selected or targeted =====================================
@@ -759,7 +826,7 @@ Render(const Level &level,
     {
         if(incident.type == INCIDENT_ATTACK)
         {
-            RenderAttackZone(level.map, incident, lightred, OverlayAlphaMod);
+            RenderAttackZone(level.map, incident, icons.warning);
         }
         else
         {
@@ -805,6 +872,12 @@ Render(const Level &level,
         }
     }
 
+    if(GlobalInterfaceState == SELECTED)
+        RenderHealthBar(cursor.selected->pos, cursor.selected->health, cursor.selected->max_health);
+
+    if(GlobalInterfaceState == ENEMY_RANGE)
+        RenderHealthBar(cursor.selected->pos, cursor.selected->health, cursor.selected->max_health);
+
 // ========================== Attacking visualization ======================
     for(const Incident &incident : resolution.incidents)
     {
@@ -815,6 +888,7 @@ Render(const Level &level,
             {
                 RenderAttack(level.map, incident, icons);
             }
+            RenderAttackTrajectory(level.map, incident.weapon->type, incident.unit->pos, incident.unit->pos + incident.offset, icons);
         }
         else
         {
@@ -826,6 +900,7 @@ Render(const Level &level,
     {
         Incident vis = {cursor.selected, cursor.with, cursor.targeting - cursor.selected->pos, INCIDENT_ATTACK};
         RenderAttack(level.map, vis, icons);
+        RenderAttackTrajectory(level.map, cursor.with->type, cursor.selected->pos, cursor.targeting, icons);
     }
 
 
