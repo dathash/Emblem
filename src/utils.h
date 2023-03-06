@@ -188,6 +188,9 @@ direction Normalized(const direction &dir_in) {
 direction GetDirection(const position &one, const position &two) {
     return Normalized(two - one);
 }
+direction GetPerpendicular(const direction &dir) {
+    return {dir.row, dir.col};
+}
 // Finds the distance from one position to another.
 int Distance(const position &one, const position &two) {
     return Length(two - one);

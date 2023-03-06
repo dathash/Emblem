@@ -131,22 +131,31 @@ Create blockages on the map, with stones.
 TODO
 
 # TODO
-Refactoring
-ZERO BUGS
+BUG | Rogue Bata after you restart
+BUG | Restart level doesn't work at all.
 
 Visualization of attacks.
-* Punch
-* Line shots
-* Ram (Line shot variant)
-* Artillery
-* Leap (Artillery variant)
-* Show Where the unit will end up by the end.
-* Show Damage outcome
+* Effect
+* Show where the unit will end up by the end.
+
+Eventual architecture:
+* In resolution, we keep a bunch of incidents.
+* These incidents can be analyzed for their outcomes with a function call.
+* This function is called when something changes, and we percolate the change
+  through the whole array.
+* We can display this outcome at any time, and animate it and resolve it.
+* Therefore, an incident has three functions:
+  * Re-calculate
+  * Display
+  * Animate + Resolve
+This way, we don't have to calculate the outcome twice, and keep the two logics
+in sync.
 
 Sanding pass!!!
 
 Finish warp mechanics (with unit storage overhaul)
 Random enemy spawns at the start of level
+
 
 Strat layer
 * Level Menu
@@ -159,8 +168,7 @@ Four more units
 Playtesting (for bugs and feel)
 
 Ten levels
-Objectives
-
+Ten Random Objectives
 
 AI Attacks
 * Avoid other ai attacks (dangerous)

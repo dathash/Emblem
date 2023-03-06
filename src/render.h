@@ -22,60 +22,6 @@ RenderTileColor(const position &pos, const SDL_Color &color, int alpha = 255)
     SDL_RenderDrawRect(GlobalRenderer, &tileRect);
 }
 
-// Renders an attack on the map.
-// Eventually will visualize all the effects of an attack.
-void
-RenderAttack(const Tilemap &map,
-             const Incident &attack,
-             const SDL_Color &color = lightred,
-             int alpha = 128)
-{
-    const Equip &weapon = *attack.weapon;
-    switch(weapon.type)
-    {
-        case EQUIP_PUNCH:
-        {
-            for(int i = 1; i <= attack.unit->primary->max_range; ++i)
-            {
-                RenderTileColor(attack.unit->pos + (attack.offset * i), color, alpha);
-            }
-        } break;
-        case EQUIP_LINE_SHOT:
-        {
-            position target = GetFirstTarget(map, attack.unit->pos, GetDirection(attack.unit->pos, attack.unit->pos + attack.offset));
-            RenderTileColor(target, color, alpha);
-        } break;
-        case EQUIP_ARTILLERY:
-        {
-            RenderTileColor(attack.unit->pos + attack.offset, color, alpha);
-        } break;
-
-        default: cout << "AI shouldn't have this kind of attack. " << attack.unit->primary->type << "\n";
-    }
-
-    switch(weapon.push)
-    {
-        default:
-        {
-            //cout << "No visualization of push yet.\n";
-        } break;
-    }
-    switch(weapon.move)
-    {
-        default:
-        {
-            //cout << "No visualization of move yet.\n";
-        } break;
-    }
-    switch(weapon.effect)
-    {
-        default:
-        {
-            //cout << "No visualization of effects yet.\n";
-        } break;
-    }
-}
-
 position
 ToScreenPosition(const position &map_pos, const position &offset = {0, 0})
 {
@@ -178,23 +124,13 @@ RenderTileText(string text, const position &pos,
     RenderText(text, screen_pos.col, screen_pos.row, small, color);
 }
 
-// Displays the turn order of enemies on the map.
-void
-RenderQueueOrder(const Tilemap &map, 
-                 const Resolution &resolution)
-{
-    // NOTE: We pull attacks off the back of the queue.
-    for(int i = 0; i < resolution.incidents.size(); ++i) {
-        RenderTileText(to_string(i + 1),
-                       resolution.incidents[resolution.incidents.size() - 1 - i].unit->pos);
-    }
-}
 
 // Renders a Health Bar (For use on map)
 void
-RenderHealthBarSmall(const position &p, int hp, int maxHp)
+RenderHealthBar(const position &p, int hp, int maxHp, int damage = 0)
 {
     float ratio = (float)hp / maxHp;
+    float damage_ratio = (float)damage / maxHp;
 
     int wide = (int)(TILE_SIZE * 0.8);
     int tall = (int)(TILE_SIZE * 0.1);
@@ -208,12 +144,21 @@ RenderHealthBarSmall(const position &p, int hp, int maxHp)
                          Y_OFFSET + p.row * TILE_SIZE + (TILE_SIZE - tall),
                          (int)(wide * ratio), tall
                         };
+    SDL_Rect damage_rect = {
+                         X_OFFSET + p.col * TILE_SIZE + (TILE_SIZE - wide) / 2 + (health_rect.w - (int)(wide * damage_ratio)),
+                         Y_OFFSET + p.row * TILE_SIZE + (TILE_SIZE - tall),
+                         (int)(wide * damage_ratio), tall
+                        };
 
     SDL_SetRenderDrawColor(GlobalRenderer, gray.r, gray.g, gray.b, gray.a);
     SDL_RenderFillRect(GlobalRenderer, &bar_rect);
 
     SDL_SetRenderDrawColor(GlobalRenderer, yellow.r, yellow.g, yellow.b, yellow.a);
     SDL_RenderFillRect(GlobalRenderer, &health_rect);
+
+    float val = Lerp(0.0f, 1.0f, SmoothStop5(sin(GlobalFrame / HEALTH_FLASH_SPEED)));
+    SDL_SetRenderDrawColor(GlobalRenderer, darkgray.r, darkgray.g, darkgray.b, val * 255);
+    SDL_RenderFillRect(GlobalRenderer, &damage_rect);
 
     for(int i = 0; i < maxHp; ++i)
     {
@@ -228,25 +173,353 @@ RenderHealthBarSmall(const position &p, int hp, int maxHp)
     }
 }
 
-// Renders a Health Bar (For Combat Animations)
-void
-RenderHealthBarCombat(const position &p, int hp, int maxHp)
+// Confusing struct which contains a unit's outcome from an incident.
+struct UnitOutcome
 {
-    float ratio = (float)hp / maxHp;
+    Unit *unit;
+    int damage;
+    position end_pos;
+};
 
-    SDL_Rect bar_rect = {p.col, p.row,
-                         200, 24};
-    SDL_Rect health_rect = {p.col, p.row,
-                            (int)(200 * ratio), 24};
+// Helper function to add damage to the pseudo-map structure known as a tracker.
+void AddDamage(vector<UnitOutcome> &tracker, Unit *ptr, int damage)
+{
+    for(UnitOutcome &outcome : tracker)
+    {
+        if(ptr == outcome.unit)
+        {
+            outcome.damage += damage;
+            return;
+        }
+    }
+    tracker.push_back({ptr, damage, ptr->pos});
+    return;
+}
 
-    SDL_SetRenderDrawColor(GlobalRenderer, darkgray.r, darkgray.g, darkgray.b, darkgray.a);
-    SDL_RenderFillRect(GlobalRenderer, &bar_rect);
+// Renders just the zones which an attack will affect.
+// TODO: Show push damage ranges, move stuff, etc.
+void
+RenderAttackZone(const Tilemap &map,
+                 const Incident &attack,
+                 const SDL_Color &color = clear,
+                 int alpha = 128)
+{
+    const Equip &weapon = *attack.weapon;
+    position source = attack.unit->pos;
+    position target = attack.unit->pos + attack.offset;
+    direction dir = GetDirection(source, target);
+    switch(weapon.type)
+    {
+        case EQUIP_PUNCH:
+        {
+            for(int i = 1; i <= attack.unit->primary->max_range; ++i) {
+                position danger = source + (dir * i);
+                RenderTileColor(danger, color, alpha);
+                RenderTileText("warning", danger, true, {4, 30}, red);
+            }
+        } break;
+        case EQUIP_LINE_SHOT:
+        {
+            position danger = GetFirstTarget(map, source, dir);
+            RenderTileColor(danger, color, alpha);
+            RenderTileText("warning", danger, true, {4, 30}, red);
+        } break;
+        case EQUIP_ARTILLERY:
+        {
+            position danger = target;
+            RenderTileColor(danger, color, alpha); // TODO: More than just one square of danger?
+            RenderTileText("warning", danger, true, {4, 30}, red);
+        } break;
+        default: cout << "AI shouldn't have this kind of attack. " << attack.weapon->type << "\n";
+    }
+}
 
-    SDL_SetRenderDrawColor(GlobalRenderer, green.r, green.g, green.b, green.a);
-    SDL_RenderFillRect(GlobalRenderer, &health_rect);
 
-    SDL_SetRenderDrawColor(GlobalRenderer, black.r, black.g, black.b, black.a);
-    SDL_RenderDrawRect(GlobalRenderer, &bar_rect);
+// Renders an attack's results on the map.
+void
+RenderAttack(const Tilemap &map,
+             const Incident &attack)
+{
+    // This is the main struct that does the tracking of what health bars will render at the end.
+    vector<UnitOutcome> tracker = {};
+
+    const Equip &weapon = *attack.weapon;
+    vector<position> damaging = {};
+    position source = attack.unit->pos;
+    position target = attack.unit->pos + attack.offset;
+    direction dir = GetDirection(source, target);
+
+
+    // ===================== plain damage stuff ======================
+    switch(weapon.type)
+    {
+        case EQUIP_PUNCH:
+        {
+            for(int i = 1; i <= attack.unit->primary->max_range; ++i) {
+                damaging.push_back(source + (dir * i));
+            }
+        } break;
+        case EQUIP_LINE_SHOT:
+        {
+            damaging.push_back(GetFirstTarget(map, source, dir));
+        } break;
+        case EQUIP_ARTILLERY:
+        {
+            damaging.push_back(target); // TODO: More than just one square of damage?
+        } break;
+
+        default: cout << "AI shouldn't have this kind of attack. " << attack.unit->primary->type << "\n";
+    }
+    for(const position &pos : damaging)
+    {
+        Unit *victim = map.tiles[pos.col][pos.row].occupant;
+        if(victim) {
+            AddDamage(tracker, victim, weapon.damage);
+        }
+    }
+
+    // ===================== push stuff ======================
+    switch(weapon.push)
+    {
+        case PUSH_AWAY:
+        {
+            Unit *pushed = map.tiles[target.col][target.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            position push_result = target + dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+        } break;
+        case PUSH_TOWARDS:
+        {
+            Unit *pushed = map.tiles[target.col][target.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            position push_result = target - dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+        } break;
+        case PUSH_TOWARDS_AND_AWAY:
+        {
+            position t1 = target + dir;
+            Unit *pushed = map.tiles[t1.col][t1.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            position push_result = t1 + dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+
+            position t2 = target - dir;
+            pushed = map.tiles[t2.col][t2.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            push_result = t2 - dir;
+            bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+        } break;
+
+        case PUSH_PERPENDICULAR:
+        {
+            direction perp = GetPerpendicular(dir);
+
+            position t1 = target + perp;
+            Unit *pushed = map.tiles[t1.col][t1.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            position push_result = t1 + perp;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+
+            position t2 = target - perp;
+            pushed = map.tiles[t2.col][t2.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            push_result = t2 - perp;
+            bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+        } break;
+
+        case PUSH_ALL:
+        {
+            position t1 = target + dir;
+            Unit *pushed = map.tiles[t1.col][t1.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            position push_result = t1 + dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+
+            position t2 = target - dir;
+            pushed = map.tiles[t2.col][t2.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            push_result = t2 - dir;
+            bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+
+            // perpendicular half
+            direction perp = GetPerpendicular(dir);
+
+            position t3 = target + perp;
+            pushed = map.tiles[t3.col][t3.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            push_result = t3 + perp;
+            bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+
+            position t4 = target - perp;
+            pushed = map.tiles[t4.col][t4.row].occupant;
+            if(pushed) {
+                AddDamage(tracker, pushed, weapon.push_damage);
+            }
+
+            // bonk check
+            push_result = t4 - perp;
+            bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk && pushed) {
+                AddDamage(tracker, pushed, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+        } break;
+
+        default:
+        {
+            //cout << "No visualization of push yet.\n";
+        } break;
+    }
+
+    // ===================== move stuff ======================
+    switch(weapon.move)
+    {
+        case MOVEMENT_BACKONE:
+        {
+            AddDamage(tracker, attack.unit, weapon.self_damage);
+
+            // bonk check
+            position push_result = source - dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk) {
+                AddDamage(tracker, attack.unit, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+        } break;
+        case MOVEMENT_RAM:
+        {
+            AddDamage(tracker, attack.unit, weapon.self_damage);
+
+            // NOTE: This is not possible, I believe?
+            // We don't treat the ram as bonking, just rolling right up to something.
+            // This might be the wrong abstraction, but for now we're chilling.
+            /*
+            // bonk check
+            position push_result = target - dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk) {
+                AddDamage(tracker, attack.unit, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+            */
+        } break;
+        case MOVEMENT_LEAP:
+        {
+            AddDamage(tracker, attack.unit, weapon.self_damage);
+
+            // Ditto above comment.
+            /*
+            // bonk check
+            position push_result = source - dir;
+            Unit *bonk = map.tiles[push_result.col][push_result.row].occupant;
+            if(bonk) {
+                AddDamage(tracker, attack.unit, 1);
+                AddDamage(tracker, bonk, 1);
+            }
+            */
+        } break;
+        default:
+        {
+            //cout << "No visualization of move yet.\n";
+        } break;
+    }
+    switch(weapon.effect)
+    {
+        default:
+        {
+            //cout << "No visualization of effects yet.\n";
+        } break;
+    }
+
+    for(const UnitOutcome &outcome : tracker)
+    {
+        RenderHealthBar(outcome.unit->pos, outcome.unit->health, outcome.unit->max_health, outcome.damage);
+        //RenderSprite();
+    }
+}
+
+// Displays the turn order of enemies on the map.
+void
+RenderQueueOrder(const Tilemap &map, 
+                 const Resolution &resolution)
+{
+    // NOTE: We pull attacks off the back of the queue.
+    for(int i = 0; i < resolution.incidents.size(); ++i) {
+        RenderTileText(to_string(i + 1),
+                       resolution.incidents[resolution.incidents.size() - 1 - i].unit->pos);
+    }
 }
 
 // Renders the scene from the given game state.
@@ -293,8 +566,10 @@ Render(const Level &level,
     if(GlobalInterfaceState == ENEMY_RANGE)
     {
         for(const position &cell : level.map.accessible)
-            RenderTileColor(cell, lightorange, OverlayAlphaMod);
+            RenderTileColor(cell, green, OverlayAlphaMod);
 
+        // Debug AI Decision-making system
+        /*
         vector<Choice> choices = GetChoicesOrthogonal(*cursor.selected, level.map);
         for(const Choice &choice : choices) {
             RenderTileText(to_string(choice.action_score), 
@@ -304,6 +579,7 @@ Render(const Level &level,
             RenderTileText(to_string(choice.location_score), 
                            choice.action.move, false, {35, 0}, green);
         }
+        */
     }
 
     if(GlobalInterfaceState == ATTACK_TARGETING ||
@@ -319,20 +595,19 @@ Render(const Level &level,
     if(cursor.selected)
         RenderTileColor(cursor.selected->pos, green, OverlayAlphaMod);
 
-    // ========================== Attacking visualization ======================
+// ================================ ai visualization  ==========================
+    if(GlobalAIState == AI_SELECTED)
+    {
+        for(const position &cell : level.map.accessible)
+            RenderTileColor(cell, lightorange, OverlayAlphaMod);
+    }
+
+// ========================== Attacking visualization I ========================
     for(const Incident &incident : resolution.incidents)
     {
         if(incident.type == INCIDENT_ATTACK)
         {
-            if(GlobalInterfaceState == ENEMY_RANGE &&
-               incident.unit->pos == cursor.selected->pos)
-            {
-                RenderAttack(level.map, incident, red, 240);
-            }
-            else
-            {
-                RenderAttack(level.map, incident, lightred, OverlayAlphaMod);
-            }
+            RenderAttackZone(level.map, incident, lightred, OverlayAlphaMod);
         }
         else
         {
@@ -340,18 +615,21 @@ Render(const Level &level,
         }
     }
 
-    if(GlobalInterfaceState == ATTACK_TARGETING)
+// ================================= render cursor ================================================
+    if(
+        GlobalInterfaceState == ENEMY_RANGE ||
+        GlobalInterfaceState == NEUTRAL ||
+        GlobalInterfaceState == SELECTED ||
+        GlobalInterfaceState == ATTACK_THINKING ||
+        GlobalInterfaceState == ATTACK_TARGETING ||
+        GlobalInterfaceState == WARP
+      )
     {
-        Incident vis = {cursor.selected, cursor.with, cursor.targeting - cursor.selected->pos, INCIDENT_ATTACK};
-        RenderAttack(level.map, vis, white, OverlayAlphaMod);
+        RenderSprite(cursor.pos, cursor.sheet);
     }
 
-// ================================ ai visualization  ==========================
-    if(GlobalAIState == AI_SELECTED)
-    {
-        for(const position &cell : level.map.accessible)
-            RenderTileColor(cell, lightorange, OverlayAlphaMod);
-    }
+
+
 
 // ================================= render sprites ============================
     for(int col = 0; col < MAP_WIDTH; ++col)
@@ -366,10 +644,34 @@ Render(const Level &level,
                 SetSpriteModifiers(tileToRender.occupant);
 
                 RenderSprite(screen_pos, tileToRender.occupant->sheet, tileToRender.occupant->IsAlly());
-                RenderHealthBarSmall(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
+                //RenderHealthBar(screen_pos, tileToRender.occupant->health, tileToRender.occupant->max_health);
             }
         }
     }
+
+// ========================== Attacking visualization ======================
+    for(const Incident &incident : resolution.incidents)
+    {
+        if(incident.type == INCIDENT_ATTACK)
+        {
+            if(GlobalInterfaceState == ENEMY_RANGE &&
+               incident.unit->pos == cursor.selected->pos)
+            {
+                RenderAttack(level.map, incident);
+            }
+        }
+        else
+        {
+            ; // TODO: Render Environment effects
+        }
+    }
+
+    if(GlobalInterfaceState == ATTACK_TARGETING)
+    {
+        Incident vis = {cursor.selected, cursor.with, cursor.targeting - cursor.selected->pos, INCIDENT_ATTACK};
+        RenderAttack(level.map, vis);
+    }
+
 
 // ========================================= warping ===========================
     if(GlobalInterfaceState == WARP)
@@ -385,19 +687,6 @@ Render(const Level &level,
 
         if(!level.to_warp.empty())
             RenderSprite(cursor.pos, level.to_warp.back()->sheet, true);
-    }
-
-// ================================= render cursor ================================================
-    if(
-        GlobalInterfaceState == ENEMY_RANGE ||
-        GlobalInterfaceState == NEUTRAL ||
-        GlobalInterfaceState == SELECTED ||
-        GlobalInterfaceState == ATTACK_THINKING ||
-        GlobalInterfaceState == ATTACK_TARGETING ||
-        GlobalInterfaceState == WARP
-      )
-    {
-        RenderSprite(cursor.pos, cursor.sheet);
     }
 
 // ==================================== queue ==================================

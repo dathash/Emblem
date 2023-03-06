@@ -40,6 +40,7 @@
 // animation
 #define ANIMATION_SPEED 10
 #define AI_ACTION_SPEED 15
+#define HEALTH_FLASH_SPEED 10.0f // how many frames it takes to do a full cycle
 
 // startup
 #define INITIAL_LEVEL "l0.txt"
@@ -186,6 +187,7 @@ const SDL_Color darkgray =          {57, 42, 28, 255};
 
 const SDL_Color white =             {239, 216, 161, 255};
 const SDL_Color black =             {42, 29, 13, 255};
+const SDL_Color clear =             {0, 0, 0, 0};
 
 const int OverlayAlphaMod = 128;
 

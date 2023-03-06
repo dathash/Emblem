@@ -134,7 +134,7 @@ struct Player
 
     void Heal(int amount) {
         health = clamp(health + amount, 0, max_health);
-        // TODO: grid defense
+        // CONSIDER: grid defense
     }
 };
 
@@ -244,6 +244,7 @@ struct Unit
     // Returns the amount of damage actually done.
     int Damage(int amount) {
         if(GlobalGodMode && IsAlly()) return 0;
+        if(GlobalGodMode && IsEnv()) return 0;
 
         int result = min(amount, health);
         health = clamp(health - amount, 0, max_health);
@@ -621,6 +622,25 @@ struct Menu
         optionTextTextures.push_back(LoadTextureText(s.c_str(), black, 0, false));
         optionText.push_back(s);
     }
+};
+
+// =================================== Icons ===================================
+struct Icons
+{
+    Spritesheet aflame;
+    Spritesheet para;
+    Spritesheet swift;
+    Spritesheet stone;
+
+    Icons(Spritesheet aflame_in,
+          Spritesheet para_in,
+          Spritesheet swift_in,
+          Spritesheet stone_in)
+    : aflame(aflame_in),
+      para(para_in),
+      swift(swift_in),
+      stone(stone_in)
+    {}
 };
 
 #endif

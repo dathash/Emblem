@@ -44,6 +44,9 @@ static int GlobalSpeedMod = 1;
 static bool GlobalSpawning = true;
 static bool GlobalGodMode = true;
 
+static unsigned long long GlobalFrame = 0;
+
+
 #include "constants.h"
 // State
 static Phase GlobalPhase = PHASE_PLAYER;
@@ -196,15 +199,13 @@ int main(int argc, char *argv[])
     GlobalInterfaceState = TITLE_SCREEN;
     GlobalAIState = AI_NO_OP;
 
-    unsigned long long frame = 0;
-
     GlobalRunning = true;
 // ========================= game loop =========================================
     while(GlobalRunning)
     {
-        ++frame;
-        if(frame > 900000000000000) // Just in case we overflow!
-            frame = 0;
+        ++GlobalFrame;
+        if(GlobalFrame > 900000000000000) // Just in case we overflow!
+            GlobalFrame = 0;
 
         HandleEvents(&input, gamepad);
 
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
         // Update
         if(!GlobalEditorMode && 
            (!GlobalPaused || GlobalStep) &&
-           !(frame % GlobalSpeedMod))
+           !(GlobalFrame % GlobalSpeedMod))
         {
             GlobalStep = false;
 

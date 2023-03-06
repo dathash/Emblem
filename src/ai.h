@@ -376,6 +376,7 @@ struct AI
     // Fills the command queue with the current plan.
     void Plan(Cursor *cursor, Level *level, Resolution *resolution)
     {
+        cursor->selected = nullptr;
         Unit *selected = nullptr;
 
         selected = FindNearest(level->map, {0, 0},
