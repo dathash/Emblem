@@ -26,6 +26,16 @@ HandleEvents(InputState *input, SDL_Joystick *gamepad)
             GlobalDebug = !GlobalDebug;
             return;
         }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_v)
+        {
+            Victory();
+            return;
+        }
+        if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_b)
+        {
+            GameOver();
+            return;
+        }
         if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_1)
         {
             GlobalSpeedMod = 1;

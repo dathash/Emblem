@@ -23,7 +23,7 @@ public:
         bool paralyzed = cursor->selected->HasEffect(EFFECT_PARALYZED);
         map->accessible = Accessible(*map, cursor->pos,
                                      (paralyzed ? 0 : cursor->selected->movement),
-                                     cursor->selected->IsAlly(),
+                                     cursor->selected->team,
                                      cursor->selected->HasEffect(EFFECT_SWIFT));
 
         GlobalAIState = AI_SELECTED;
@@ -43,7 +43,7 @@ int EvaluateLocation(const Unit &unit,
     if(unit.primary->type == EQUIP_PUNCH)
     {
         int distance = DistanceToNearest(map, pos,
-                [](const Unit &unit) -> bool { return unit.IsAlly() || unit.IsEnv(); }, 
+                [](const Unit &unit) -> bool { return unit.IsAlly() || unit.IsBuilding(); }, 
                 false);
         return 6 - distance;
     }
@@ -69,7 +69,8 @@ int Evaluate(const Unit &unit, const position &pos, const direction &dir,
                 switch(victim->team)
                 {
                     case TEAM_PLAYER:   value += POINTS_FOR_PLAYER_UNIT; break;
-                    case TEAM_ENV:      value += POINTS_FOR_BUILDING; break;
+                    case TEAM_ENV:      value += 0; break;
+                    case TEAM_BUILDING: value += POINTS_FOR_BUILDING; break;
                     case TEAM_AI:       value += POINTS_FOR_AI_UNIT; break;
                 }
             }
@@ -90,7 +91,8 @@ int Evaluate(const Unit &unit, const position &pos, const direction &dir,
                 switch(victim->team)
                 {
                     case TEAM_PLAYER:   return POINTS_FOR_PLAYER_UNIT;
-                    case TEAM_ENV:      return POINTS_FOR_BUILDING;
+                    case TEAM_ENV:      return 0;
+                    case TEAM_BUILDING: return POINTS_FOR_BUILDING;
                     case TEAM_AI:       return POINTS_FOR_AI_UNIT;
                 }
             }
@@ -108,7 +110,8 @@ int Evaluate(const Unit &unit, const position &pos, const direction &dir,
             switch(victim->team)
             {
                 case TEAM_PLAYER:   return POINTS_FOR_PLAYER_UNIT;
-                case TEAM_ENV:      return POINTS_FOR_BUILDING;
+                case TEAM_ENV:      return 0;
+                case TEAM_BUILDING: return POINTS_FOR_BUILDING;
                 case TEAM_AI:       return POINTS_FOR_AI_UNIT;
             }
             return 0;
@@ -300,7 +303,8 @@ Action GetAction(const Unit &unit, const Tilemap &map) {
         choices = GetChoicesLineShot(unit, map);
     else
         choices = GetChoicesOrthogonal(unit, map);
-    assert(choices.size());
+    if(choices.empty())
+        choices.push_back({{{unit.pos}, {-1, -1}}, 0, 0});
 
     Choice action_choice = BestAction(choices);
     if(action_choice.action_score != 0)

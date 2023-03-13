@@ -131,47 +131,21 @@ Create blockages on the map, with stones.
 TODO
 
 # TODO
-BUG | Rogue Bata after you restart
-BUG | Restart level doesn't work at all.
-BUG | Shouldn't be able to undo movements once an attack has taken place.
+Switch Queue button to a global input thing that just sets a flag so we can hold
+it.
+
+Objectives
+Selection of levels
 
 Sanding pass!!!
 
-Finish warp mechanics (with unit storage overhaul)
-Random enemy spawns at the start of level
+BUG | Restart level doesn't work at all.
 
-Four more units
-Playtesting (for bugs and feel)
-
-Ten levels
-Ten Random Objectives
-
-Strat layer
-* Level Menu
-* Start level command
-* End Level Command
-* Selection
+BUG | Swapping units on warp seems to double their animation speed? WTF?
 
 Trajectory visualization
   * Artillery
     display a unit's pushing arrow even if they won't move.
-Eventual architecture:
-* In resolution, we keep a bunch of incidents.
-* These incidents can be analyzed for their outcomes with a function call.
-* This function is called when something changes, and we percolate the change
-  through the whole array.
-* We can display this outcome at any time, and animate it and resolve it.
-* Therefore, an incident has three functions:
-  * Re-calculate
-  * Display
-  * Animate + Resolve
-This way, we don't have to calculate the outcome twice, and keep the two logics
-in sync.
-
-
-AI Attacks
-* Avoid other ai attacks (dangerous)
-* Avoid repeated behavior
 
 Animations
 CHECK OUT HOW MATTHEW DID IT
@@ -183,12 +157,10 @@ CHECK OUT HOW MATTHEW DID IT
 * Surfacing
 
 Strategy Layer
+Menu Shim
 Experience points and pilot abilities
+
 Polish
-
-Switch Queue button to a global input thing that just sets a flag so we can hold
-it.
-
 
 # Later
 Art
@@ -197,6 +169,8 @@ Art
 5 Tilemaps
 Buildings
 8 Enemies
+
+AI Attacks avoid other ai attacks (dangerous)
 
 Conversations
     Story nailed down

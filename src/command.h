@@ -69,7 +69,7 @@ public:
                 movement = (cursor->selected->HasEffect(EFFECT_SWIFT) ? movement + 2 : movement);
                 map->accessible = Accessible(*map, cursor->pos,
                                              movement,
-                                             cursor->selected->IsAlly(),
+                                             cursor->selected->team,
                                              cursor->selected->HasEffect(EFFECT_SWIFT));
             }
 
@@ -85,7 +85,7 @@ public:
             movement = (cursor->selected->HasEffect(EFFECT_SWIFT) ? movement + 2 : movement);
             map->accessible = Accessible(*map, cursor->pos,
                                          movement,
-                                         cursor->selected->IsAlly(),
+                                         cursor->selected->team,
                                          cursor->selected->HasEffect(EFFECT_SWIFT));
 
             GlobalInterfaceState = ENEMY_RANGE;
@@ -436,24 +436,30 @@ private:
 class AttackCommand : public Command
 {
 public:
-    AttackCommand(Tilemap *map_in, Cursor *cursor_in)
-    : map(map_in),
+    AttackCommand(Level *level_in, Cursor *cursor_in)
+    : level(level_in),
       cursor(cursor_in)
     {}
 
     virtual void Execute()
     {
-        Simulate(map, *cursor->with, cursor->selected->pos, cursor->targeting);
+        Simulate(&(level->map), *cursor->with, cursor->selected->pos, cursor->targeting);
         cursor->PlaceAt(cursor->selected->pos);
         cursor->selected->Deactivate();
         cursor->selected = nullptr;
         cursor->with = nullptr;
 
+        // Ensure units can't move back once there has been an attack.
+        for(shared_ptr<Unit> unit : level->combatants)
+        {
+            unit->initial_pos = unit->pos;
+        }
+
         GlobalInterfaceState = NEUTRAL;
     }
 
 private:
-    Tilemap *map;
+    Level *level;
     Cursor *cursor;
 };
 
@@ -630,9 +636,9 @@ public:
 
     virtual void Execute()
     {
-        const Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
         if(!Warpable(cursor->pos)) return;
 
+        const Unit *over = level->map.tiles[cursor->pos.col][cursor->pos.row].occupant;
         if(!over)
         {
             if(level->to_warp.empty()) return;
@@ -640,9 +646,13 @@ public:
             level->AddCombatant(level->to_warp.back(), cursor->pos);
             level->to_warp.pop_back();
         }
-        else
+        else if(over->IsAlly())
         {
-            cout << "TODO! Can't swap warp spots yet.\n";
+            shared_ptr<Unit> swap = GetUnitByName(level->combatants, over->name);
+            level->map.tiles[cursor->pos.col][cursor->pos.row].occupant = nullptr;
+            level->AddCombatant(level->to_warp.back(), cursor->pos);
+            level->to_warp.pop_back();
+            level->to_warp.push_back(swap);
         }
 
         return;
@@ -657,8 +667,9 @@ private:
 class ReadyCommand : public Command
 {
 public:
-    ReadyCommand(Level *level_in)
-    : level(level_in)
+    ReadyCommand(Level *level_in, Cursor *cursor_in)
+    : level(level_in),
+      cursor(cursor_in)
     {}
 
 
@@ -666,10 +677,12 @@ public:
     {
         if(level->to_warp.empty())
             GoToAIPhase();
+        cursor->selected = nullptr;
     }
 
 private: 
     Level *level;
+    Cursor *cursor;
 };
 
 // ============================== Input Handler ================================
@@ -939,7 +952,7 @@ public:
                 BindDown(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(0, 1)));
                 BindLeft(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(-1, 0)));
                 BindRight(make_shared<MoveAttackingCommand>(cursor, &(level->map), direction(1, 0)));
-                BindA(make_shared<AttackCommand>(&(level->map), cursor));
+                BindA(make_shared<AttackCommand>(level, cursor));
                 BindB(make_shared<StopActingCommand>(cursor));
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<SeekVictimsCommand>(cursor, level, cursor->selected->utility));
@@ -971,7 +984,7 @@ public:
                 BindL(make_shared<NullCommand>());
                 BindR(make_shared<NullCommand>());
                 BindX(make_shared<NullCommand>());
-                BindY(make_shared<ReadyCommand>(level));
+                BindY(make_shared<ReadyCommand>(level, cursor));
             } break;
         }
     }

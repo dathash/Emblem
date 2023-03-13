@@ -399,7 +399,6 @@ RenderAttack(const Tilemap &map,
     position target = attack.unit->pos + attack.offset;
     direction dir = GetDirection(source, target);
 
-
     // ===================== plain damage stuff ======================
     switch(weapon.type)
     {
@@ -416,7 +415,7 @@ RenderAttack(const Tilemap &map,
         } break;
         case EQUIP_ARTILLERY:
         {
-            damaging.push_back(target); // TODO: More than just one square of damage?
+            damaging.push_back(target);
         } break;
 
         default: cout << "AI shouldn't have this kind of attack. " << attack.unit->primary->type << "\n";
@@ -435,7 +434,7 @@ RenderAttack(const Tilemap &map,
         case PUSH_AWAY:
         {
             Unit *pushed = map.tiles[target.col][target.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(target)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -458,7 +457,7 @@ RenderAttack(const Tilemap &map,
         case PUSH_TOWARDS:
         {
             Unit *pushed = map.tiles[target.col][target.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(target)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed)
@@ -483,7 +482,7 @@ RenderAttack(const Tilemap &map,
         {
             position t1 = target + dir;
             Unit *pushed = map.tiles[t1.col][t1.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t1)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -504,7 +503,7 @@ RenderAttack(const Tilemap &map,
 
             position t2 = target - dir;
             pushed = map.tiles[t2.col][t2.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t2)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -531,7 +530,7 @@ RenderAttack(const Tilemap &map,
 
             position t1 = target + perp;
             Unit *pushed = map.tiles[t1.col][t1.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t1)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -552,7 +551,7 @@ RenderAttack(const Tilemap &map,
 
             position t2 = target - perp;
             pushed = map.tiles[t2.col][t2.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t2)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -576,7 +575,7 @@ RenderAttack(const Tilemap &map,
         {
             position t1 = target + dir;
             Unit *pushed = map.tiles[t1.col][t1.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t1)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -597,7 +596,7 @@ RenderAttack(const Tilemap &map,
 
             position t2 = target - dir;
             pushed = map.tiles[t2.col][t2.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t2)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -621,7 +620,7 @@ RenderAttack(const Tilemap &map,
 
             position t3 = target + perp;
             pushed = map.tiles[t3.col][t3.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t3)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed) {
@@ -642,7 +641,7 @@ RenderAttack(const Tilemap &map,
 
             position t4 = target - perp;
             pushed = map.tiles[t4.col][t4.row].occupant;
-            if(pushed) {
+            if(pushed && IsValid(t4)) {
                 AddDamage(tracker, pushed, weapon.push_damage);
 
                 if(!pushed->fixed)
@@ -734,7 +733,6 @@ RenderAttack(const Tilemap &map,
             SDL_SetTextureColorMod(outcome.unit->sheet.texture.sdl_texture, 255, 255, 255);
             RenderSprite(outcome.unit->pos, outcome.unit->sheet, outcome.unit->IsAlly());
         }
-
 
         assert(IsValid(outcome.unit->pos));
         RenderHealthBar(outcome.unit->pos, outcome.unit->health, outcome.unit->max_health, outcome.damage);

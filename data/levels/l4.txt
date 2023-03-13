@@ -14,17 +14,25 @@ MAP 0 0 0 0 0 0 0 0
 MAP 0 0 0 0 0 0 0 0 
 
 COM <name> <col> <row>
-UNT Butter 3 5 
-UNT House 6 6 
-UNT House 6 4 
-UNT House 2 6 
-UNT House 1 6 
-UNT House 1 4 
-UNT Rome 4 6 
-UNT Guy 5 6 
 UNT Fighter 2 1 
 UNT Thief 3 0 
 UNT Archer 3 1 
+UNT House 6 5 
+UNT House 5 5 
+UNT House 5 6 
+UNT House 6 6 
+UNT House 1 5 
+UNT House 1 6 
+UNT Rock 0 5 
+UNT Rock 0 6 
+UNT Rock 0 7 
+UNT Rock 1 7 
+UNT Rock 7 5 
+UNT Rock 7 6 
+UNT Rock 7 7 
+UNT Rock 6 7 
+UNT Rock 5 7 
+UNT House 3 7 
 
 SPW Fighter 
 SPW Soldier 

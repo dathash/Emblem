@@ -122,7 +122,7 @@ GetFirstTarget(const Tilemap &map,
 // returns a vector of positions representing accessible squares for a given unit.
 vector<position>
 Accessible(const Tilemap &map, position origin, 
-           int mov, bool is_ally, bool is_swift = false)
+           int mov, Team team, bool is_swift = false)
 {
     vector<position> accessible;
 
@@ -163,7 +163,7 @@ Accessible(const Tilemap &map, position origin,
 
                 // Can't move through units not on your team.
                 if(map.tiles[new_pos.col][new_pos.row].occupant && 
-                   (map.tiles[new_pos.col][new_pos.row].occupant->IsAlly() != is_ally &&
+                   (map.tiles[new_pos.col][new_pos.row].occupant->team != team &&
                     !is_swift))
                 {
                     newCost = 100;

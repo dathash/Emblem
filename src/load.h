@@ -138,22 +138,11 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         }
         else if(type == "UNT")
         {
-            // NOTE: We go through party first. If we have any matches, we plop those down.
-            // Otherwise, we'll grab them from the base units file.
             shared_ptr<Unit> unitCopy;
-            for(const shared_ptr<Unit> &unit : party)
+            for(const shared_ptr<Unit> &unit : units)
             {
                 if(hash<string>{}(tokens[0]) == unit->ID())
                     unitCopy = make_shared<Unit>(*unit);
-            }
-
-            if(!unitCopy)
-            {
-                for(const shared_ptr<Unit> &unit : units)
-                {
-                    if(hash<string>{}(tokens[0]) == unit->ID())
-                        unitCopy = make_shared<Unit>(*unit);
-                }
             }
 
             SDL_assert(unitCopy);
@@ -186,6 +175,12 @@ LoadLevel(string filename_in, const vector<shared_ptr<Unit>> &units,
         {
             cout << "Warning LoadLevel: Unhandled line type: " << type << "\n";
         }
+    }
+
+    for(shared_ptr<Unit> party_member : party)
+    {
+        party_member->is_exhausted = false;
+        level.to_warp.push_back(make_shared<Unit>(*party_member));
     }
 
 	return level;

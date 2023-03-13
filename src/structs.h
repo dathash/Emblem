@@ -144,6 +144,7 @@ enum Team
     TEAM_PLAYER,
     TEAM_AI,
     TEAM_ENV,
+    TEAM_BUILDING,
 };
 
 struct Unit
@@ -194,6 +195,10 @@ struct Unit
         return team == TEAM_ENV;
     }
 
+    bool IsBuilding() const {
+        return team == TEAM_BUILDING;
+    }
+
     void Update() {
         sheet.Update();
     }
@@ -207,7 +212,7 @@ struct Unit
          Equip *utility_in,
          EffectType effect_type_in,
          Spritesheet sheet_in
-         )
+        )
     : name(name_in),
       team(team_in),
       health(health_in),
@@ -291,12 +296,12 @@ struct Unit
 };
 
 
-Unit *
+shared_ptr<Unit>
 GetUnitByName(const vector<shared_ptr<Unit>> &units, const string &name)
 {
     for(shared_ptr<Unit> unit : units) {
         if(unit->ID() == hash<string>{}(name))
-            return unit.get();
+            return unit;
     }
     cout << "WARN GetUnitByName: No unit of that name: " << name << "\n";
     return nullptr;
@@ -370,7 +375,7 @@ position
 GetOpenSpace(const Tilemap &map, const vector<position> &mask, bool ai_side, bool avoid_edges = false) {
     vector<position> choices = {};
     for(int col = (avoid_edges ? 1 : 0); col < (avoid_edges ? MAP_WIDTH - 1 : MAP_WIDTH); ++col) {
-        for(int row = (ai_side ? 4 : (avoid_edges ? 1 : 0)); row < (avoid_edges ? MAP_HEIGHT - 1 : MAP_HEIGHT); ++row) {
+        for(int row = (avoid_edges ? 1 : 0); row < (ai_side ? 5 : (avoid_edges ? MAP_HEIGHT - 1 : MAP_HEIGHT)); ++row) {
             if(!map.tiles[col][row].occupant && !VectorContains({col, row}, mask))
                 choices.push_back({col, row});
         }
@@ -461,11 +466,6 @@ struct Level
             }
         }
 
-    }
-
-    void SpawnPhase() {
-        SpawnUnits();
-        SetRisingPoints(map);
     }
 
     vector<shared_ptr<Unit>> Queue()

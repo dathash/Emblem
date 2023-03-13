@@ -169,7 +169,14 @@ int main(int argc, char *argv[])
 // ================================== load =================================
     vector<shared_ptr<Equip>> equipments = LoadEquips(DATA_PATH + string(INITIAL_EQUIPS));
     vector<shared_ptr<Unit>> units = LoadUnits(DATA_PATH + string(INITIAL_UNITS), equipments);
-    vector<shared_ptr<Unit>> party = {};
+
+    // TODO: Make this not hard-coded.
+    vector<shared_ptr<Unit>> party = {
+                                      make_shared<Unit>(*GetUnitByName(units, "Butter")),
+                                      make_shared<Unit>(*GetUnitByName(units, "Rome")),
+                                      make_shared<Unit>(*GetUnitByName(units, "Guy")),
+                                     };
+
     vector<shared_ptr<Unit>> queue = {};
 
     vector<string> levels = {string("l0.txt"), string("l1.txt"),
@@ -177,7 +184,7 @@ int main(int argc, char *argv[])
                              string("l4.txt"), string("l5.txt"),
                              string("l6.txt"), string("l7.txt"),
                              string("l8.txt"), string("l9.txt"),
-							 };
+							};
     int level_index = 0;
     Level level = LoadLevel(levels[level_index], units, party);
 
@@ -247,6 +254,7 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_PLAYER:
             {
+                ai.commandQueue = {}; // NOTE: This is a stupid hack.
                 handler.Update(&input);
                 handler.UpdateCommands(&cursor, &level, backup, &resolution, res_backup, 
                                        units, party, levels, &game_menu);
@@ -265,6 +273,7 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
+                        level.SpawnUnits();
                         GoToAIPhase();
                         level.TickEffects(TEAM_AI);
                     }
@@ -272,8 +281,9 @@ int main(int argc, char *argv[])
             } break;
             case PHASE_SPAWNING:
             {
-                if(GlobalSpawning)
-                    level.SpawnPhase();
+                if(GlobalSpawning) {
+                    level.SetRisingPoints(level.map);
+                }
                 GoToPlayerPhase(&level, &backup, resolution, &res_backup, &cursor);
             } break;
             }
